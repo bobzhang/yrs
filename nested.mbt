@@ -2,6 +2,7 @@
 /// A CRDT value is either an immutable lib0 value or a live shared-type handle.
 pub(all) enum Out {
   Value(Any)
+  Subdoc(Doc)
   Array(ArrayRef)
   Map(MapRef)
   Text(Text)
@@ -27,6 +28,7 @@ fn Doc::shared_output(self : Doc, id : Id, kind : SharedKind) -> Out {
 pub fn Out::to_json(self : Out) -> Json {
   match self {
     Value(value) => value.to_json()
+    Subdoc(value) => { "guid": Json(value.guid()) }
     Array(value) => value.to_json()
     Map(value) => value.to_json()
     Text(value) => Json(value.get_string())

@@ -32,6 +32,7 @@ pub fn ArrayRef::to_array(self : ArrayRef) -> Array[Out] {
         Binary(b) => result.push(Value(Buffer(b)))
         Embed(value) => result.push(Value(value))
         Shared(kind) => result.push(self.doc.shared_output(item.id, kind))
+        Subdocument(child) => result.push(Subdoc(child))
         _ => ()
       }
     }
@@ -150,6 +151,7 @@ pub fn MapRef::get(self : MapRef, key : String) -> Out? {
     Binary(b) => Some(Value(Buffer(b)))
     Embed(value) => Some(Value(value))
     Shared(kind) => Some(self.doc.shared_output(item.id, kind))
+    Subdocument(child) => Some(Subdoc(child))
     _ => None
   }
 }

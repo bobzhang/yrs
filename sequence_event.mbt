@@ -112,6 +112,7 @@ fn Item::values(self : Item, doc : Doc) -> Array[Out] {
     Binary(bytes) => [Value(Buffer(bytes))]
     Embed(value) => [Value(value)]
     Shared(kind) => [doc.shared_output(self.id, kind)]
+    Subdocument(child) => [Subdoc(child)]
     _ => []
   }
 }

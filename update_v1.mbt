@@ -39,6 +39,7 @@ fn read_update(
         None
       }
       let content = match kind {
+        9 => Subdocument(reader.subdocument())
         5 => Embed(reader.json_value())
         6 => Format(reader.string(), reader.json_value())
         7 =>
@@ -183,6 +184,7 @@ fn Writer::raw_item(self : Writer, item : RawItem) -> Unit {
     Values(_) => 8
     Binary(_) => 3
     Shared(_) => 7
+    Subdocument(_) => 9
     Format(_, _) => 6
     Embed(_) => 5
     Deleted(_) => 1
@@ -221,6 +223,10 @@ fn Writer::raw_item(self : Writer, item : RawItem) -> Unit {
     }
   }
   match content {
+    Subdocument(child) => {
+      self.string(child.guid())
+      self.any(child.wire_options())
+    }
     Characters(s) => self.string(s)
     Binary(b) => self.buffer(b)
     Format(key, value) => {

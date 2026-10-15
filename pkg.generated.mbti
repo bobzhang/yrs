@@ -3,6 +3,7 @@ package "bobzhang/yrs"
 
 import {
   "moonbitlang/core/debug",
+  "moonbitlang/core/set",
 }
 
 // Values
@@ -75,6 +76,7 @@ pub struct ArrayRef {
   // private fields
 }
 pub fn ArrayRef::insert_array(Self, Int) -> Self
+pub fn ArrayRef::insert_doc(Self, Int, Doc) -> Doc
 pub fn ArrayRef::insert_map(Self, Int) -> MapRef
 pub fn ArrayRef::insert_range(Self, Int, Array[Any]) -> Unit
 pub fn ArrayRef::insert_text(Self, Int) -> Text
@@ -184,10 +186,13 @@ pub fn Delta::to_json(Self) -> Json
 pub struct Doc {
   // private fields
 }
-pub fn Doc::Doc(client_id~ : UInt64) -> Self
+pub fn Doc::Doc(client_id~ : UInt64, guid? : String, collection_id? : String, auto_load? : Bool, should_load? : Bool) -> Self
 pub fn Doc::apply_update_v1(Self, Bytes) -> Unit raise DecodeError
 pub fn Doc::apply_update_v2(Self, Bytes, max_items? : Int) -> Unit raise DecodeError
+pub fn Doc::auto_load(Self) -> Bool
 pub fn Doc::client_id(Self) -> UInt64
+pub fn Doc::collection_id(Self) -> String?
+pub fn Doc::destroy(Self) -> Unit
 pub fn Doc::encode_state_as_update_v1(Self, remote? : StateVector) -> Bytes
 pub fn Doc::encode_state_as_update_v2(Self, remote? : StateVector) -> Bytes raise DecodeError
 pub fn Doc::encode_state_from_snapshot_v1(Self, Snapshot) -> Bytes
@@ -196,18 +201,28 @@ pub fn Doc::get_or_insert_array(Self, String) -> ArrayRef
 pub fn Doc::get_or_insert_map(Self, String) -> MapRef
 pub fn Doc::get_or_insert_text(Self, String) -> Text
 pub fn Doc::get_or_insert_xml_fragment(Self, String) -> XmlFragment
+pub fn Doc::guid(Self) -> String
 pub fn Doc::has_missing_updates(Self) -> Bool
+pub fn Doc::load(Self) -> Unit
 pub fn Doc::observe_after_transaction(Self, String, (Transaction) -> Unit) -> Unit
 pub fn Doc::observe_before_observer_calls(Self, String, (Transaction) -> Unit) -> Unit
+pub fn Doc::observe_destroy(Self, String, (Self) -> Unit) -> Unit
+pub fn Doc::observe_subdocs(Self, String, (SubdocsEvent, Transaction) -> Unit) -> Unit
 pub fn Doc::observe_transaction_cleanup(Self, String, (Transaction) -> Unit) -> Unit
 pub fn Doc::observe_update_v1(Self, String, (Bytes, Transaction) -> Unit) -> Unit
 pub fn Doc::observe_update_v2(Self, String, (Bytes, Transaction) -> Unit) -> Unit
+pub fn Doc::parent_doc(Self) -> Self?
 pub fn Doc::pending_items(Self) -> Int
+pub fn Doc::should_load(Self) -> Bool
 pub fn Doc::snapshot(Self) -> Snapshot
 pub fn Doc::state_vector(Self) -> StateVector
+pub fn Doc::subdoc_guids(Self) -> @set.Set[String]
+pub fn Doc::subdocs(Self) -> Array[Self]
 pub fn[T] Doc::transact(Self, (Transaction) -> T raise, origin? : Bytes) -> T raise
 pub fn Doc::unobserve_after_transaction(Self, String) -> Bool
 pub fn Doc::unobserve_before_observer_calls(Self, String) -> Bool
+pub fn Doc::unobserve_destroy(Self, String) -> Bool
+pub fn Doc::unobserve_subdocs(Self, String) -> Bool
 pub fn Doc::unobserve_transaction_cleanup(Self, String) -> Bool
 pub fn Doc::unobserve_update_v1(Self, String) -> Bool
 pub fn Doc::unobserve_update_v2(Self, String) -> Bool
@@ -268,6 +283,7 @@ pub fn MapRef::entries(Self) -> Array[(String, Out)]
 pub fn MapRef::get(Self, String) -> Out?
 pub fn MapRef::insert(Self, String, Any) -> Unit
 pub fn MapRef::insert_array(Self, String) -> ArrayRef
+pub fn MapRef::insert_doc(Self, String, Doc) -> Doc
 pub fn MapRef::insert_map(Self, String) -> Self
 pub fn MapRef::insert_text(Self, String) -> Text
 pub fn MapRef::observe(Self, String, (MapEvent, Transaction) -> Unit) -> Unit
@@ -298,6 +314,7 @@ pub fn Offset::to_repr(Self) -> @debug.Repr
 
 pub(all) enum Out {
   Value(Any)
+  Subdoc(Doc)
   Array(ArrayRef)
   Map(MapRef)
   Text(Text)
@@ -364,6 +381,13 @@ pub fn StickyIndex::is_root(Self) -> Bool
 pub fn StickyIndex::not_equal(Self, Self) -> Bool
 pub fn StickyIndex::to_json(Self) -> Json
 pub fn StickyIndex::to_repr(Self) -> @debug.Repr
+
+pub struct SubdocsEvent {
+  // private fields
+}
+pub fn SubdocsEvent::added(Self) -> ReadOnlyArray[Doc]
+pub fn SubdocsEvent::loaded(Self) -> ReadOnlyArray[Doc]
+pub fn SubdocsEvent::removed(Self) -> ReadOnlyArray[Doc]
 
 pub(all) enum SyncMessage {
   SyncStep1(StateVector)

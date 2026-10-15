@@ -29,7 +29,7 @@ fn Doc::materialize_ranges(
 ///|
 fn Out::location(self : Out) -> (Doc, Parent)? {
   match self {
-    Value(_) => None
+    Value(_) | Subdoc(_) => None
     Array(v) => Some((v.doc, v.name))
     Map(v) => Some((v.doc, v.name))
     Text(v) => Some((v.doc, v.name))
@@ -432,7 +432,10 @@ fn[M] UndoManager::redo_item(
     item.parent_sub,
     left,
     right,
-    item.content,
+    match item.content {
+      Subdocument(child) => Subdocument(child.unloaded_copy())
+      content => content
+    },
   )
   item.redone = Some(id)
   doc.find(id)

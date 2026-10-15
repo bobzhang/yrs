@@ -20,6 +20,7 @@ priv enum Content {
   Values(ReadOnlyArray[Any])
   Binary(Bytes)
   Shared(SharedKind)
+  Subdocument(Doc)
   Format(String, Any)
   Embed(Any)
   Deleted(Int32)
@@ -31,7 +32,7 @@ fn Content::length(self : Content) -> Int32 {
   match self {
     Characters(s) => s.length()
     Values(values) => values.length()
-    Binary(_) | Shared(_) | Format(_, _) | Embed(_) => 1
+    Binary(_) | Shared(_) | Subdocument(_) | Format(_, _) | Embed(_) => 1
     Deleted(n) | Garbage(n) => n
   }
 }
@@ -64,7 +65,7 @@ fn Content::slice(self : Content, start : Int32, end : Int32) -> Content {
           Array::makei(end - start, fn(i) { values[start + i] })[:],
         ),
       )
-    Binary(_) | Shared(_) | Format(_, _) | Embed(_) => {
+    Binary(_) | Shared(_) | Subdocument(_) | Format(_, _) | Embed(_) => {
       guard start == 0 && end == 1 else { abort("binary item is indivisible") }
       self
     }
@@ -136,7 +137,17 @@ pub struct Doc {
   priv cleanup_observers : Map[String, (Transaction) -> Unit]
   priv update_v1_observers : Map[String, (Bytes, Transaction) -> Unit]
   priv update_v2_observers : Map[String, (Bytes, Transaction) -> Unit]
-  priv client : UInt64
+  priv mut client : UInt64
+  priv document_guid : String
+  priv mut collection : String?
+  priv auto_loading : Bool
+  priv mut loading : Bool
+  priv wire_gc : Bool
+  priv wire_encoding : Int32
+  priv mut owner : (Doc, Id)?
+  priv children_docs : Map[UInt64, Doc]
+  priv subdoc_observers : Map[String, (SubdocsEvent, Transaction) -> Unit]
+  priv destroy_observers : Map[String, (Doc) -> Unit]
   priv state : StateVector
   priv clients : Map[UInt64, Array[Item]]
   priv items : Map[Id, Item]
@@ -149,7 +160,26 @@ pub struct Doc {
 }
 
 ///|
-pub fn Doc::Doc(client_id~ : UInt64) -> Doc {
+pub fn Doc::Doc(
+  client_id~ : UInt64,
+  guid~ : String = "",
+  collection_id? : String,
+  auto_load~ : Bool = false,
+  should_load~ : Bool = true,
+) -> Doc {
+  make_doc(client_id, guid, collection_id, auto_load, should_load, false, 0)
+}
+
+///|
+fn make_doc(
+  client : UInt64,
+  guid : String,
+  collection : String?,
+  auto_load : Bool,
+  should_load : Bool,
+  wire_gc : Bool,
+  wire_encoding : Int32,
+) -> Doc {
   {
     identity: allocate_identity(),
     active_transaction: None,
@@ -165,7 +195,17 @@ pub fn Doc::Doc(client_id~ : UInt64) -> Doc {
     cleanup_observers: {},
     update_v1_observers: {},
     update_v2_observers: {},
-    client: client_id,
+    client,
+    document_guid: guid,
+    collection,
+    auto_loading: auto_load,
+    loading: should_load,
+    wire_gc,
+    wire_encoding,
+    owner: None,
+    children_docs: {},
+    subdoc_observers: {},
+    destroy_observers: {},
     state: StateVector(),
     clients: Map([]),
     items: Map([]),
@@ -473,6 +513,15 @@ fn Doc::integrate_missing(self : Doc, raw : RawItem) -> Bool {
     }
     None => self.clients[item.id.client] = [item]
   }
+  if item.content is Subdocument(child) {
+    child.owner = Some((self, item.id))
+    if self.active_transaction is Some(txn) {
+      txn.sub_added[child.identity] = child
+      if child.loading {
+        txn.sub_loaded[child.identity] = child
+      }
+    }
+  }
   if parent is Some(name) && parent_sub is Some(key) {
     if item.right is None {
       self.branch(name).values[key] = item.id
@@ -744,6 +793,14 @@ fn Doc::mark_deleted(self : Doc, item : Item) -> Unit {
       item.parent_sub is None &&
       self.active_transaction is Some(transaction) {
       transaction.sequences.add(parent)
+    }
+    if item.content is Subdocument(child) &&
+      self.active_transaction is Some(txn) {
+      if txn.sub_added.contains(child.identity) {
+        txn.sub_added.remove(child.identity)
+      } else {
+        txn.sub_removed[child.identity] = child
+      }
     }
     item.deleted = true
     if self.active_transaction is Some(transaction) {
