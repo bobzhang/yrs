@@ -195,7 +195,8 @@ pub fn Doc::unobserve_destroy(self : Doc, key : String) -> Bool {
 
 ///|
 fn Doc::commit_subdocuments(self : Doc, txn : Transaction) -> Unit {
-  if txn.sub_added.is_empty() &&
+  if !txn.sub_changed &&
+    txn.sub_added.is_empty() &&
     txn.sub_removed.is_empty() &&
     txn.sub_loaded.is_empty() {
     return
@@ -230,6 +231,13 @@ fn Doc::destroy_contents(self : Doc) -> Unit {
     child.destroy_contents()
   }
   self.children_docs.clear()
+  if self.owner is Some((parent, id)) &&
+    parent.items[id].content is Subdocument(current) &&
+    current.identity == self.identity {
+    let replacement = self.unloaded_copy()
+    replacement.owner = Some((parent, id))
+    parent.items[id].content = Subdocument(replacement)
+  }
   self.owner = None
   for (_, callback) in self.destroy_observers.to_array() {
     callback(self)

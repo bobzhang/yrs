@@ -432,10 +432,7 @@ fn[M] UndoManager::redo_item(
     item.parent_sub,
     left,
     right,
-    match item.content {
-      Subdocument(child) => Subdocument(child.unloaded_copy())
-      content => content
-    },
+    item.content,
   )
   item.redone = Some(id)
   doc.find(id)

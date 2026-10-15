@@ -74,3 +74,20 @@ restored identities can affect later conflict ordering. Do not interpret the
 single-author result as proof of full concurrent undo compatibility. Exact undo
 observer-event equivalence also remains unverified; the separate event oracle
 covers grouped and concurrent changes without independently generated undo.
+
+## Subdocument destruction leaves a stale registry handle
+
+`validation/fixtures/upstream-subdoc-destroy-registry.json` inserts child A,
+explicitly destroys it, then removes its parent map entry. Pinned Yrs leaves A
+in `ReadTxn::subdocs()` even though the map is empty. `Doc::destroy` registers
+the replacement in both the added and removed identity maps; the original
+registration survives. The MoonBit port removes the old identity and registers
+the replacement, so removing the slot leaves an empty registry. This is an
+intentional compatibility difference, not a passing exact-reference case.
+
+`validation/subdocs.py` compares the complete registry, child state and lifecycle
+events in 96 randomized histories without explicit destroy. A separate 32-history
+destroy matrix compares child state and lifecycle events, excluding only the
+reference registry. It independently requires the MoonBit registry to contain
+exactly the live map slots, including duplicate GUIDs. Parent wire replays are
+checked against both runtimes; child contents are replicated separately.

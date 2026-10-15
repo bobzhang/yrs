@@ -143,6 +143,23 @@ The full 641-scenario core interoperability suite passed again after block
 compaction and the map-head split correction. Unit regressions cover compaction,
 remote-edit preservation, repeated nested restoration, cursor tracking and
 multiple documents. Remaining major milestones are concurrent undo compatibility,
-subdocuments, document/offset options, remaining shared types and APIs, garbage
+document/offset options, remaining shared types and APIs, garbage
 collection, and performance/stress validation. A public release and repository
 completion claim are still pending those milestones.
+
+Subdocuments can be inserted into maps and arrays using `insert_doc`. Supply an
+explicit globally unique `guid` when creating a child. Parent updates carry the
+child's identity and options; exchange the child's updates separately to sync
+its content. `observe_subdocs` reports added, removed and loaded handles;
+`load`, `destroy`, `parent_doc`, `subdocs` and `subdoc_guids` expose the lifecycle.
+Children inherit the parent's client ID and, unless set, collection ID.
+
+`python3 validation/subdocs.py` compares 96 randomized three-replica histories
+against Rust in both wire formats: 30,336 snapshots, 17,104 lifecycle events and
+1,152 cross-runtime wire replay cases. Another 10,112 snapshots exercise explicit
+destroy/reload. That matrix excludes the reference's stale destroyed-handle
+registry while checking the port's live-registration invariant; see
+`validation/REFERENCE_LIMITATIONS.md`. Decoded GC/offset options are preserved on
+the wire, but actual garbage collection and UTF-8 offset operations remain
+outstanding. Subdocument data providers and globally unique GUID generation are
+host responsibilities.

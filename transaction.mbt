@@ -2,6 +2,7 @@
 /// A grouped mutation scope. Metadata and encoded updates become stable when
 /// the scope closes. Use Doc::transact to commit even when the action raises.
 pub struct Transaction {
+  priv mut sub_changed : Bool
   priv sub_added : Map[UInt64, Doc]
   priv sub_removed : Map[UInt64, Doc]
   priv sub_loaded : Map[UInt64, Doc]
@@ -133,6 +134,7 @@ fn Doc::begin_transaction(
     abort("document already has an active transaction")
   }
   let transaction : Transaction = {
+    sub_changed: false,
     sub_added: {},
     sub_removed: {},
     sub_loaded: {},

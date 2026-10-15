@@ -516,6 +516,7 @@ fn Doc::integrate_missing(self : Doc, raw : RawItem) -> Bool {
   if item.content is Subdocument(child) {
     child.owner = Some((self, item.id))
     if self.active_transaction is Some(txn) {
+      txn.sub_changed = true
       txn.sub_added[child.identity] = child
       if child.loading {
         txn.sub_loaded[child.identity] = child

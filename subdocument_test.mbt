@@ -72,8 +72,7 @@ test "subdocuments appear in array events and remote auto loads" {
   array.observe("delta", fn(e, _) {
     changes.push(Json(e.delta().iter().map(@yrs.Change::to_json).to_array()))
   })
-  array.insert_doc(0, @yrs.Doc(client_id=2UL, guid="auto", auto_load=true))
-  |> ignore
+  array.insert_doc(0, Doc(client_id=2UL, guid="auto", auto_load=true)) |> ignore
   assert_eq(changes[0].stringify(), "[{\"insert\":[{\"guid\":\"auto\"}]}]")
   let remote = @yrs.Doc(client_id=3UL)
   let loads : Array[String] = []
@@ -85,4 +84,49 @@ test "subdocuments appear in array events and remote auto loads" {
   remote.apply_update_v1(doc.encode_state_as_update_v1())
   assert_eq(loads, ["auto"])
   assert_eq(remote.subdocs()[0].client_id(), 3UL)
+}
+
+///|
+test "undo restores an unloaded subdocument and parent updates exclude child edits" {
+  let doc = @yrs.Doc(client_id=1UL)
+  let files = doc.get_or_insert_map("files")
+  let undo : @yrs.UndoManager[Unit] = UndoManager(clock=fn() { 100UL })
+  undo.expand_scope(Map(files))
+  let child = files.insert_doc("file", Doc(client_id=2UL, guid="persisted"))
+  child.get_or_insert_text("body").insert(0, "separately persisted")
+  let saved = child.encode_state_as_update_v1()
+  let parent_before = doc.state_vector()
+  child.get_or_insert_text("body").insert(0, "more ")
+  assert_eq(doc.state_vector().entries(), parent_before.entries())
+  undo.reset()
+  files.remove("file") |> ignore
+  assert_eq(doc.subdocs().length(), 0)
+  assert_true(undo.undo())
+  guard files.get("file") is Some(Subdoc(restored)) else {
+    abort("restored subdocument")
+  }
+  assert_false(restored.should_load())
+  assert_eq(restored.get_or_insert_text("body").get_string(), "")
+  restored.apply_update_v1(saved)
+  assert_eq(
+    restored.get_or_insert_text("body").get_string(),
+    "separately persisted",
+  )
+  assert_true(undo.redo())
+  assert_eq(doc.subdocs().length(), 0)
+}
+
+///|
+test "repeated subdocument unload does not retain obsolete registrations" {
+  let doc = @yrs.Doc(client_id=1UL)
+  let files = doc.get_or_insert_map("files")
+  files.insert_doc("file", Doc(client_id=2UL, guid="stable")) |> ignore
+  for _ in 0..<1000 {
+    guard files.get("file") is Some(Subdoc(child)) else { abort("subdocument") }
+    child.load()
+    child.destroy()
+    assert_eq(doc.subdocs().length(), 1)
+  }
+  files.remove("file") |> ignore
+  assert_eq(doc.subdocs().length(), 0)
 }

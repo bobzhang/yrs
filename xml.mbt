@@ -167,7 +167,7 @@ pub fn XmlText::get_string(self : XmlText) -> String {
 pub fn Out::to_string(self : Out) -> String {
   match self {
     Value(value) => value.to_string()
-    Subdoc(value) => value.guid()
+    Subdoc(value) => "Doc(id: \{value.client_id()}, guid: \{value.guid()})"
     Text(value) => value.get_string()
     XmlElement(value) => value.get_string()
     XmlFragment(value) => value.get_string()
