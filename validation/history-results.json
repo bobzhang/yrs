@@ -1,0 +1,18 @@
+{
+  "upstream": "ac339600c712642e556895426113c3f9c117de39",
+  "scenarios": 64,
+  "wire_versions": [
+    "v1",
+    "v2"
+  ],
+  "operation_snapshots": 15104,
+  "resolved_cursor_offsets": 847002,
+  "historical_reconstructions": 116976,
+  "cross_runtime_payloads": 12724,
+  "snapshot_oracle": "historical content captured at snapshot creation plus independent snapshot metadata decoding",
+  "reference_snapshot_encoder_regression": {
+    "reference_decode_error": "EndOfBuffer(89)",
+    "wire": "010301000401046e6f746501618401000162c4010002585900"
+  },
+  "status": "passed"
+}

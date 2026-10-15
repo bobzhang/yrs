@@ -21,7 +21,7 @@ fn read_update(
         clock += length
         continue
       }
-      let parent = if kind != 0 &&
+      let parent : Parent? = if kind != 0 &&
         kind != 10 &&
         origin is None &&
         right_origin is None {

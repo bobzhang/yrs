@@ -63,3 +63,21 @@ Rust Yrs: 33,024 operation snapshots (including presence metadata and observer
 events) and 768 cross-runtime awareness transfers. The wire codec also has fixed
 byte fixtures and malformed-packet tests. Presence observers are implemented;
 document transaction observers remain outstanding.
+
+Persistent positions: sequence `sticky_index` methods track item identities through
+concurrent insertion and deletion; `sticky_boundary` tracks a type's start/end.
+`StickyIndex` supports Yjs binary and cursor JSON interchange, including exact
+64-bit client IDs. `get_offset` resolves a position in another document replica.
+
+Historical states: `snapshot()` captures insert clocks and observed deletions.
+Snapshots support v1/v2 codecs and `encode_state_from_snapshot_v1/v2` reconstructs
+historical documents from retained content. Snapshot metadata is owned and cannot
+be changed through a returned state-vector handle. Remote garbage collection can
+still discard content needed for older snapshots.
+
+`python3 validation/history.py` checks 64 randomized histories in both wire formats:
+847,002 resolved cursor offsets, 116,976 historical reconstructions and 12,724
+cross-runtime payloads. Historical content is checked against Rust state captured
+at snapshot creation because of the pinned encoder defect documented in
+`validation/REFERENCE_LIMITATIONS.md`; snapshot metadata is independently decoded
+and compared in both runtimes. Undo/redone position tracking remains outstanding.

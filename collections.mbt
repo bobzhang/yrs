@@ -6,7 +6,7 @@ pub struct ArrayRef {
 
 ///|
 pub fn Doc::get_or_insert_array(self : Doc, name : String) -> ArrayRef {
-  let name = Root(name)
+  let name : Parent = Root(name)
   self.branch(name) |> ignore
   { doc: self, name, }
 }
@@ -117,7 +117,7 @@ pub struct MapRef {
 
 ///|
 pub fn Doc::get_or_insert_map(self : Doc, name : String) -> MapRef {
-  let name = Root(name)
+  let name : Parent = Root(name)
   self.branch(name) |> ignore
   { doc: self, name, }
 }

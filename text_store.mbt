@@ -515,7 +515,7 @@ pub struct Text {
 
 ///|
 pub fn Doc::get_or_insert_text(self : Doc, name : String) -> Text {
-  let name = Root(name)
+  let name : Parent = Root(name)
   self.branch(name) |> ignore
   { doc: self, name, }
 }

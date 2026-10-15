@@ -25,3 +25,25 @@ Rust attributes use hash maps. Their iteration order can change formatting-marke
 ## Sparse v2 encoding
 
 The pinned reference also panics in `transaction.rs:408` when merging its own pending v2 updates (`UnexpectedValue`). Its `BlockSlice::Skip` encoder writes the length through the v2 length column, while its update decoder reads skip lengths from the raw stream. The port uses the raw stream, matching the decoder and Yjs wire format. `validation/updates.py` currently records v1 relay/utility comparisons; the regular collection/rich-text suite still checks both v1 and v2. Sparse v2 is covered by MoonBit regression tests, with cross-runtime validation still outstanding.
+
+## Historical snapshot clipping
+
+The pinned snapshot encoder can emit a right-origin flag without the corresponding
+ID when clipping a compacted text block. Reproduction: insert `ab`, insert `X` at
+index 1, take a snapshot, then insert `Y` at index 2. Encoding the earlier snapshot
+produces `010301000401046e6f746501618401000162c4010002585900`, which Rust itself rejects
+with `EndOfBuffer(89)`. The relevant path is `ItemSlice::encode` in `slice.rs`:
+`item.info()` retains `HAS_RIGHT_ORIGIN`, but the ID is written only when
+`adjacent_right()` is true.
+
+Reproduce without modifying upstream:
+
+```sh
+cargo +1.97.1 run --release --locked --manifest-path validation/rust/Cargo.toml --bin history -- --reference-snapshot-regression
+```
+
+The history oracle captures actual Rust text at snapshot creation, then requires
+MoonBit to reconstruct that content after every subsequent operation. It compares
+snapshot state vectors and deletion ranges independently, exchanges snapshot and
+cursor encodings in both directions, and records this reference failure in the
+results. No historical reconstruction cases are excluded because of this defect.

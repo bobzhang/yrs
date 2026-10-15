@@ -73,8 +73,18 @@ pub fn ArrayRef::insert_range(Self, Int, Array[Any]) -> Unit
 pub fn ArrayRef::insert_text(Self, Int) -> Text
 pub fn ArrayRef::length(Self) -> Int
 pub fn ArrayRef::remove_range(Self, Int, Int) -> Unit
+pub fn ArrayRef::sticky_boundary(Self, assoc? : Assoc) -> StickyIndex
+pub fn ArrayRef::sticky_index(Self, Int, assoc? : Assoc) -> StickyIndex?
 pub fn ArrayRef::to_array(Self) -> Array[Out]
 pub fn ArrayRef::to_json(Self) -> Json
+
+pub(all) enum Assoc {
+  Before
+  After
+} derive(Eq, @debug.Debug)
+pub fn Assoc::equal(Self, Self) -> Bool
+pub fn Assoc::not_equal(Self, Self) -> Bool
+pub fn Assoc::to_repr(Self) -> @debug.Repr
 
 pub struct Awareness {
   // private fields
@@ -138,6 +148,14 @@ pub fn AwarenessUpdate::decode_v1(Bytes) -> Self raise DecodeError
 pub fn AwarenessUpdate::encode_v1(Self) -> Bytes
 pub fn AwarenessUpdate::entries(Self) -> Array[(UInt64, AwarenessEntry)]
 
+pub(all) enum BranchId {
+  Nested(Id)
+  Root(String)
+} derive(Eq, @debug.Debug)
+pub fn BranchId::equal(Self, Self) -> Bool
+pub fn BranchId::not_equal(Self, Self) -> Bool
+pub fn BranchId::to_repr(Self) -> @debug.Repr
+
 pub struct Doc {
   // private fields
 }
@@ -147,12 +165,15 @@ pub fn Doc::apply_update_v2(Self, Bytes, max_items? : Int) -> Unit raise DecodeE
 pub fn Doc::client_id(Self) -> UInt64
 pub fn Doc::encode_state_as_update_v1(Self, remote? : StateVector) -> Bytes
 pub fn Doc::encode_state_as_update_v2(Self, remote? : StateVector) -> Bytes raise DecodeError
+pub fn Doc::encode_state_from_snapshot_v1(Self, Snapshot) -> Bytes
+pub fn Doc::encode_state_from_snapshot_v2(Self, Snapshot) -> Bytes raise DecodeError
 pub fn Doc::get_or_insert_array(Self, String) -> ArrayRef
 pub fn Doc::get_or_insert_map(Self, String) -> MapRef
 pub fn Doc::get_or_insert_text(Self, String) -> Text
 pub fn Doc::get_or_insert_xml_fragment(Self, String) -> XmlFragment
 pub fn Doc::has_missing_updates(Self) -> Bool
 pub fn Doc::pending_items(Self) -> Int
+pub fn Doc::snapshot(Self) -> Snapshot
 pub fn Doc::state_vector(Self) -> StateVector
 
 pub(all) struct Id {
@@ -169,6 +190,15 @@ pub fn Id::op_gt(Self, Self) -> Bool
 pub fn Id::op_le(Self, Self) -> Bool
 pub fn Id::op_lt(Self, Self) -> Bool
 pub fn Id::to_repr(Self) -> @debug.Repr
+
+pub(all) enum IndexScope {
+  Relative(Id)
+  Nested(Id)
+  Root(String)
+} derive(Eq, @debug.Debug)
+pub fn IndexScope::equal(Self, Self) -> Bool
+pub fn IndexScope::not_equal(Self, Self) -> Bool
+pub fn IndexScope::to_repr(Self) -> @debug.Repr
 
 pub struct MapRef {
   // private fields
@@ -192,6 +222,15 @@ pub(all) enum Message {
 pub fn Message::decode_v1(Bytes) -> Self raise DecodeError
 pub fn Message::encode_v1(Self) -> Bytes
 
+pub(all) struct Offset {
+  branch : BranchId
+  index : Int
+  assoc : Assoc
+} derive(Eq, @debug.Debug)
+pub fn Offset::equal(Self, Self) -> Bool
+pub fn Offset::not_equal(Self, Self) -> Bool
+pub fn Offset::to_repr(Self) -> @debug.Repr
+
 pub(all) enum Out {
   Value(Any)
   Array(ArrayRef)
@@ -204,6 +243,18 @@ pub(all) enum Out {
 pub fn Out::to_json(Self) -> Json
 pub fn Out::to_string(Self) -> String
 
+pub struct Snapshot {
+  // private fields
+}
+pub fn Snapshot::Snapshot(state? : StateVector, deletions? : Array[(UInt64, UInt, UInt)]) -> Self
+pub fn Snapshot::decode_v1(Bytes) -> Self raise DecodeError
+pub fn Snapshot::decode_v2(Bytes) -> Self raise DecodeError
+pub fn Snapshot::deletions(Self) -> Array[(UInt64, UInt, UInt)]
+pub fn Snapshot::encode_v1(Self) -> Bytes
+pub fn Snapshot::encode_v2(Self) -> Bytes raise DecodeError
+pub fn Snapshot::is_visible(Self, Id) -> Bool
+pub fn Snapshot::state_vector(Self) -> StateVector
+
 pub struct StateVector {
   // private fields
 }
@@ -213,6 +264,24 @@ pub fn StateVector::encode_v1(Self) -> Bytes
 pub fn StateVector::entries(Self) -> Array[(UInt64, UInt)]
 pub fn StateVector::get(Self, UInt64) -> UInt
 pub fn StateVector::set_max(Self, UInt64, UInt) -> Unit
+
+pub(all) struct StickyIndex {
+  scope : IndexScope
+  assoc : Assoc
+} derive(Eq, @debug.Debug)
+pub fn StickyIndex::StickyIndex(scope~ : IndexScope, assoc? : Assoc) -> Self
+pub fn StickyIndex::decode_v1(Bytes) -> Self raise DecodeError
+pub fn StickyIndex::encode_v1(Self) -> Bytes
+pub fn StickyIndex::equal(Self, Self) -> Bool
+pub fn StickyIndex::from_json(Json) -> Self raise DecodeError
+pub fn StickyIndex::get_offset(Self, Doc) -> Offset?
+pub fn StickyIndex::id(Self) -> Id?
+pub fn StickyIndex::is_nested(Self) -> Bool
+pub fn StickyIndex::is_relative(Self) -> Bool
+pub fn StickyIndex::is_root(Self) -> Bool
+pub fn StickyIndex::not_equal(Self, Self) -> Bool
+pub fn StickyIndex::to_json(Self) -> Json
+pub fn StickyIndex::to_repr(Self) -> @debug.Repr
 
 pub(all) enum SyncMessage {
   SyncStep1(StateVector)
@@ -230,6 +299,8 @@ pub fn Text::insert_embed(Self, Int, Any, attributes? : Array[(String, Any)]) ->
 pub fn Text::insert_with_attributes(Self, Int, String, Array[(String, Any)]) -> Unit
 pub fn Text::length(Self) -> Int
 pub fn Text::remove_range(Self, Int, Int) -> Unit
+pub fn Text::sticky_boundary(Self, assoc? : Assoc) -> StickyIndex
+pub fn Text::sticky_index(Self, Int, assoc? : Assoc) -> StickyIndex?
 pub fn Text::to_delta(Self) -> Array[TextChunk]
 
 pub(all) struct TextChunk {
@@ -249,6 +320,8 @@ pub fn XmlElement::get_string(Self) -> String
 pub fn XmlElement::insert_attribute(Self, String, Any) -> Unit
 pub fn XmlElement::parent(Self) -> XmlNode?
 pub fn XmlElement::remove_attribute(Self, String) -> Unit
+pub fn XmlElement::sticky_boundary(Self, assoc? : Assoc) -> StickyIndex
+pub fn XmlElement::sticky_index(Self, Int, assoc? : Assoc) -> StickyIndex?
 pub fn XmlElement::tag(Self) -> String
 
 pub struct XmlFragment {
@@ -267,6 +340,8 @@ pub fn XmlFragment::length(Self) -> Int
 pub fn XmlFragment::parent(Self) -> XmlNode?
 pub fn XmlFragment::remove_attribute(Self, String) -> Unit
 pub fn XmlFragment::remove_range(Self, Int, Int) -> Unit
+pub fn XmlFragment::sticky_boundary(Self, assoc? : Assoc) -> StickyIndex
+pub fn XmlFragment::sticky_index(Self, Int, assoc? : Assoc) -> StickyIndex?
 
 pub(all) enum XmlNode {
   Element(XmlElement)
@@ -287,6 +362,8 @@ pub fn XmlText::get_string(Self) -> String
 pub fn XmlText::insert_attribute(Self, String, Any) -> Unit
 pub fn XmlText::parent(Self) -> XmlNode?
 pub fn XmlText::remove_attribute(Self, String) -> Unit
+pub fn XmlText::sticky_boundary(Self, assoc? : Assoc) -> StickyIndex
+pub fn XmlText::sticky_index(Self, Int, assoc? : Assoc) -> StickyIndex?
 
 // Type aliases
 

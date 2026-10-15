@@ -12,7 +12,7 @@ pub(all) enum Out {
 
 ///|
 fn Doc::shared_output(self : Doc, id : Id, kind : SharedKind) -> Out {
-  let name = Nested(id)
+  let name : Parent = Nested(id)
   match kind {
     SharedArray => Array({ doc: self, name, })
     SharedMap => Map({ doc: self, name, })
