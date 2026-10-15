@@ -65,6 +65,7 @@ fn run(input : String, v2 : Bool) -> String raise {
   let docs = Array::makei(3, fn(i) { @yrs.Doc(client_id=(i + 1).to_uint64()) })
   let texts = docs.map(fn(d) { d.get_or_insert_text("note") })
   let maps = docs.map(fn(d) { d.get_or_insert_map("settings") })
+  let arrays = docs.map(fn(d) { d.get_or_insert_array("items") })
   let events : Array[Json] = []
   let packets : Array[(Int32, Bool, Bytes)] = []
   for i, d in docs {
@@ -93,11 +94,40 @@ fn run(input : String, v2 : Bool) -> String raise {
       )
     })
   }
+  for i, text in texts {
+    text.observe("oracle", fn(event, _) {
+      events.push(
+        (
+          {
+            "doc": Json(i),
+            "phase": "text",
+            "delta": Json(
+              event.delta().iter().map(@yrs.Delta::to_json).to_array(),
+            ),
+          } : Json),
+      )
+    })
+  }
+  for i, array in arrays {
+    array.observe("oracle", fn(event, _) {
+      events.push(
+        (
+          {
+            "doc": Json(i),
+            "phase": "array",
+            "delta": Json(
+              event.delta().iter().map(@yrs.Change::to_json).to_array(),
+            ),
+          } : Json),
+      )
+    })
+  }
   let shadows = Array::makei(6, fn(i) {
     @yrs.Doc(client_id=(100 + i).to_uint64())
   })
   let shadow_texts = shadows.map(fn(d) { d.get_or_insert_text("note") })
   let shadow_maps = shadows.map(fn(d) { d.get_or_insert_map("settings") })
+  let shadow_arrays = shadows.map(fn(d) { d.get_or_insert_array("items") })
   let snapshots : Array[Json] = []
   for command in commands {
     events.clear()
@@ -151,6 +181,18 @@ fn run(input : String, v2 : Bool) -> String raise {
                   texts[x].format(pos, length, [("bold", Bool(args[3] is True))])
                 }
               }
+              "I" => {
+                guard args[2] is Array(values) else { abort("values") }
+                arrays[x].insert_range(
+                  integer(args[1]) % (arrays[x].length() + 1),
+                  values.map(fn(v) { Integer(integer(v).to_int64()) }),
+                )
+              }
+              "D" => {
+                let n = arrays[x].length()
+                let pos = integer(args[1]) % (n + 1)
+                arrays[x].remove_range(pos, integer(args[2]) % (n - pos + 1))
+              }
               "m" =>
                 maps[x].insert(
                   string(args[1]),
@@ -173,13 +215,19 @@ fn run(input : String, v2 : Bool) -> String raise {
       }
     }
     let current = Array::makei(3, fn(i) {
-      ({ "text": Json(texts[i].get_string()), "map": maps[i].to_json() } : Json)
+      (
+        {
+          "text": Json(texts[i].get_string()),
+          "map": maps[i].to_json(),
+          "array": arrays[i].to_json(),
+        } : Json)
     })
     let replay = Array::makei(6, fn(i) {
       (
         {
           "text": Json(shadow_texts[i].get_string()),
           "map": shadow_maps[i].to_json(),
+          "array": shadow_arrays[i].to_json(),
         } : Json)
     })
     snapshots.push(

@@ -110,6 +110,14 @@ priv struct Branch {
 pub struct Doc {
   priv mut active_transaction : Transaction?
   priv mut notifying_transaction : Bool
+  priv array_observers : Map[
+    Parent,
+    Map[String, (ArrayEvent, Transaction) -> Unit],
+  ]
+  priv text_observers : Map[
+    Parent,
+    Map[String, (TextEvent, Transaction) -> Unit],
+  ]
   priv map_observers : Map[Parent, Map[String, (MapEvent, Transaction) -> Unit]]
   priv before_observers : Map[String, (Transaction) -> Unit]
   priv after_observers : Map[String, (Transaction) -> Unit]
@@ -133,6 +141,8 @@ pub fn Doc::Doc(client_id~ : UInt64) -> Doc {
   {
     active_transaction: None,
     notifying_transaction: false,
+    array_observers: {},
+    text_observers: {},
     map_observers: {},
     before_observers: {},
     after_observers: {},
@@ -407,6 +417,9 @@ fn Doc::integrate_missing(self : Doc, raw : RawItem) -> Bool {
   }
   self.items[item.id] = item
   if self.active_transaction is Some(transaction) {
+    if parent is Some(name) && parent_sub is None {
+      transaction.sequences.add(name)
+    }
     transaction.added.push(
       (
         item.id.client,
@@ -700,6 +713,11 @@ fn Doc::mark_deleted(self : Doc, item : Item) -> Unit {
     }
     if item.parent is Some(parent) && item.parent_sub is Some(key) {
       self.touch_map(parent, key)
+    }
+    if item.parent is Some(parent) &&
+      item.parent_sub is None &&
+      self.active_transaction is Some(transaction) {
+      transaction.sequences.add(parent)
     }
     item.deleted = true
     if self.active_transaction is Some(transaction) {

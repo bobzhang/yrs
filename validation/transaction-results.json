@@ -1,13 +1,15 @@
 {
   "upstream": "ac339600c712642e556895426113c3f9c117de39",
-  "scenarios": 96,
+  "scenarios": 160,
   "wire_versions": [
     "v1",
     "v2"
   ],
-  "transaction_snapshots": 26496,
-  "lifecycle_event_comparisons": 116632,
-  "emitted_updates_replayed": 37144,
+  "transaction_snapshots": 44160,
+  "lifecycle_event_comparisons": 193988,
+  "emitted_updates_replayed": 61508,
   "map_event_comparisons": 10718,
+  "text_event_comparisons": 16782,
+  "array_event_comparisons": 12182,
   "status": "passed"
 }

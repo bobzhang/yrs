@@ -64,6 +64,12 @@ pub fn Any::to_json(Self) -> Json
 pub fn Any::to_repr(Self) -> @debug.Repr
 pub fn Any::to_string(Self) -> String
 
+pub struct ArrayEvent {
+  // private fields
+}
+pub fn ArrayEvent::delta(Self) -> ReadOnlyArray[Change]
+pub fn ArrayEvent::target(Self) -> ArrayRef
+
 pub struct ArrayRef {
   // private fields
 }
@@ -72,11 +78,13 @@ pub fn ArrayRef::insert_map(Self, Int) -> MapRef
 pub fn ArrayRef::insert_range(Self, Int, Array[Any]) -> Unit
 pub fn ArrayRef::insert_text(Self, Int) -> Text
 pub fn ArrayRef::length(Self) -> Int
+pub fn ArrayRef::observe(Self, String, (ArrayEvent, Transaction) -> Unit) -> Unit
 pub fn ArrayRef::remove_range(Self, Int, Int) -> Unit
 pub fn ArrayRef::sticky_boundary(Self, assoc? : Assoc) -> StickyIndex
 pub fn ArrayRef::sticky_index(Self, Int, assoc? : Assoc) -> StickyIndex?
 pub fn ArrayRef::to_array(Self) -> Array[Out]
 pub fn ArrayRef::to_json(Self) -> Json
+pub fn ArrayRef::unobserve(Self, String) -> Bool
 
 pub(all) enum Assoc {
   Before
@@ -155,6 +163,20 @@ pub(all) enum BranchId {
 pub fn BranchId::equal(Self, Self) -> Bool
 pub fn BranchId::not_equal(Self, Self) -> Bool
 pub fn BranchId::to_repr(Self) -> @debug.Repr
+
+pub(all) enum Change {
+  Added(ReadOnlyArray[Out])
+  Removed(Int)
+  Retain(Int)
+}
+pub fn Change::to_json(Self) -> Json
+
+pub(all) enum Delta {
+  Inserted(Out, ReadOnlyArray[(String, Any)])
+  Deleted(Int)
+  Retain(Int, ReadOnlyArray[(String, Any)])
+}
+pub fn Delta::to_json(Self) -> Json
 
 pub struct Doc {
   // private fields
@@ -325,16 +347,24 @@ pub fn Text::insert(Self, Int, String) -> Unit
 pub fn Text::insert_embed(Self, Int, Any, attributes? : Array[(String, Any)]) -> Unit
 pub fn Text::insert_with_attributes(Self, Int, String, Array[(String, Any)]) -> Unit
 pub fn Text::length(Self) -> Int
+pub fn Text::observe(Self, String, (TextEvent, Transaction) -> Unit) -> Unit
 pub fn Text::remove_range(Self, Int, Int) -> Unit
 pub fn Text::sticky_boundary(Self, assoc? : Assoc) -> StickyIndex
 pub fn Text::sticky_index(Self, Int, assoc? : Assoc) -> StickyIndex?
 pub fn Text::to_delta(Self) -> Array[TextChunk]
+pub fn Text::unobserve(Self, String) -> Bool
 
 pub(all) struct TextChunk {
   insert : Out
   attributes : ReadOnlyArray[(String, Any)]
 }
 pub fn TextChunk::to_json(Self) -> Json
+
+pub struct TextEvent {
+  // private fields
+}
+pub fn TextEvent::delta(Self) -> ReadOnlyArray[Delta]
+pub fn TextEvent::target(Self) -> Text
 
 pub struct Transaction {
   // private fields

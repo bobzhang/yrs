@@ -9,6 +9,7 @@ pub struct Transaction {
   priv mut is_local : Bool
   priv added : Array[(UInt64, UInt32, UInt32)]
   priv capture_update : Bool
+  priv sequences : Set[Parent]
   priv map_changes : Map[Parent, Map[String, (Id?, Out?)]]
   priv removed : Array[(UInt64, UInt32, UInt32)]
   priv mut encoded : Bytes?
@@ -135,6 +136,7 @@ fn Doc::begin_transaction(
     is_local: true,
     added: [],
     capture_update,
+    sequences: Set([]),
     map_changes: {},
     removed: [],
     encoded: None,
@@ -158,6 +160,7 @@ fn Doc::commit_transaction(self : Doc, transaction : Transaction) -> Unit {
       }
     }
   }
+  self.notify_sequences(transaction)
   self.notifying_transaction = false
   if self.collect_deletes {
     self.cleanup_formatting()
@@ -208,6 +211,8 @@ fn[T] Doc::with_mutation(self : Doc, action : () -> T) -> T {
   }
   let transaction = self.begin_transaction(
     None,
+    !self.text_observers.is_empty() ||
+    !self.array_observers.is_empty() ||
     !self.map_observers.is_empty() ||
     !self.before_observers.is_empty() ||
     !self.after_observers.is_empty() ||

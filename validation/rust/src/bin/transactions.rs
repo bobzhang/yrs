@@ -1,6 +1,6 @@
 use std::{io::{self,BufRead},sync::{Arc,Mutex}};
 use serde_json::{Value,json};
-use yrs::{Observable,Doc,Options,OffsetKind,Text,GetString,Map,ReadTxn,Transact,Update,TransactionMut};
+use yrs::{Array,Observable,Doc,Options,OffsetKind,Text,GetString,Map,ReadTxn,Transact,Update,TransactionMut};
 use yrs::updates::decoder::Decode;
 fn hex(b:&[u8])->String{b.iter().map(|b|format!("{b:02x}")).collect()}
 fn ranges(set:&yrs::IdSet)->Vec<(u64,u32,u32)>{let mut r=vec![];for (id,rs) in set.iter(){for range in rs.iter(){r.push((id.get(),range.start,range.end))}}r.sort();r}
@@ -15,6 +15,7 @@ fn main(){
   let commands:Vec<Value>=serde_json::from_str(&line.unwrap()).unwrap();
   let docs:Vec<_>=(1..=3).map(|id|{let mut o=Options::with_client_id(yrs::block::ClientID::new(id));o.skip_gc=true;o.offset_kind=OffsetKind::Utf16;Doc::with_options(o)}).collect();
   let texts:Vec<_>=docs.iter().map(|d|d.get_or_insert_text("note")).collect();let maps:Vec<_>=docs.iter().map(|d|d.get_or_insert_map("settings")).collect();
+  let arrays:Vec<_>=docs.iter().map(|d|d.get_or_insert_array("items")).collect();
   let events=Arc::new(Mutex::new(vec![]));let packets=Arc::new(Mutex::new(vec![]));let mut snapshots=vec![];
   for (i,d) in docs.iter().enumerate(){
    let log=events.clone();d.observe_before_observer_calls("oracle",move|tx|{log.lock().unwrap().push(meta(tx,i,"before"))}).unwrap();
@@ -38,9 +39,36 @@ fn main(){
     log.lock().unwrap().push(json!({"doc":i,"phase":"map","changes":changes}));
    });
   }
+  for (i,text) in texts.iter().enumerate(){
+   let log=events.clone();text.observe("oracle",move|tx,event|{
+    use yrs::types::{Delta,ToJson};
+    let delta:Vec<_>=event.delta(tx).iter().map(|op|{
+     let mut out=serde_json::Map::new();
+     let attrs=match op{
+      Delta::Inserted(value,attrs)=>{out.insert("insert".into(),serde_json::to_value(value.to_json(tx)).unwrap());attrs.as_ref()},
+      Delta::Deleted(n)=>{out.insert("delete".into(),json!(n));None},
+      Delta::Retain(n,attrs)=>{out.insert("retain".into(),json!(n));attrs.as_ref()}
+     };
+     if let Some(attrs)=attrs{if !attrs.is_empty(){out.insert("attributes".into(),serde_json::to_value(attrs).unwrap());}}
+     Value::Object(out)
+    }).collect();
+    log.lock().unwrap().push(json!({"doc":i,"phase":"text","delta":delta}));
+   });
+  }
+  for (i,array) in arrays.iter().enumerate(){
+   let log=events.clone();array.observe("oracle",move|tx,event|{
+    use yrs::types::{Change,ToJson};
+    let delta:Vec<_>=event.delta(tx).iter().map(|op|match op{
+      Change::Added(values)=>json!({"insert":values.iter().map(|v|v.to_json(tx)).collect::<Vec<_>>()}),
+      Change::Removed(n)=>json!({"delete":n}),Change::Retain(n)=>json!({"retain":n})
+    }).collect();
+    log.lock().unwrap().push(json!({"doc":i,"phase":"array","delta":delta}));
+   });
+  }
   let shadows:Vec<_>=(0..6).map(|i|{let mut o=Options::with_client_id(yrs::block::ClientID::new(100+i));o.skip_gc=true;Doc::with_options(o)}).collect();
   let shadow_texts:Vec<_>=shadows.iter().map(|d|d.get_or_insert_text("note")).collect();
   let shadow_maps:Vec<_>=shadows.iter().map(|d|d.get_or_insert_map("settings")).collect();
+  let shadow_arrays:Vec<_>=shadows.iter().map(|d|d.get_or_insert_array("items")).collect();
   for c in commands{
    events.lock().unwrap().clear();packets.lock().unwrap().clear();let x=c[1].as_u64().unwrap() as usize;
    if c[0]=="sync"{
@@ -51,6 +79,8 @@ fn main(){
      match op[0].as_str().unwrap(){
       "i"|"t"=>{let p=op[1].as_u64().unwrap() as u32%(texts[x].len(&tx)+1);if op[0]=="i"{texts[x].insert(&mut tx,p,op[2].as_str().unwrap())}else{let attrs=std::collections::HashMap::from([(Arc::from("bold"),yrs::Any::Bool(op[3].as_bool().unwrap()))]);texts[x].insert_with_attributes(&mut tx,p,op[2].as_str().unwrap(),attrs)}},
       "d"|"f"=>{let n=texts[x].len(&tx);let p=op[1].as_u64().unwrap() as u32%(n+1);let len=op[2].as_u64().unwrap() as u32%(n-p+1);if op[0]=="d"{texts[x].remove_range(&mut tx,p,len)}else{texts[x].format(&mut tx,p,len,std::collections::HashMap::from([(Arc::from("bold"),yrs::Any::Bool(op[3].as_bool().unwrap()))]))}},
+      "I"=>{let p=op[1].as_u64().unwrap() as u32%(arrays[x].len(&tx)+1);let values=op[2].as_array().unwrap().iter().map(|v|v.as_i64().unwrap()).collect::<Vec<_>>();arrays[x].insert_range(&mut tx,p,values);},
+      "D"=>{let n=arrays[x].len(&tx);let p=op[1].as_u64().unwrap() as u32%(n+1);let len=op[2].as_u64().unwrap() as u32%(n-p+1);arrays[x].remove_range(&mut tx,p,len);},
       "m"=>{maps[x].insert(&mut tx,op[1].as_str().unwrap(),op[2].as_i64().unwrap());},
       "M"=>{maps[x].remove(&mut tx,op[1].as_str().unwrap());},
       _=>panic!("operation")
@@ -59,8 +89,8 @@ fn main(){
    }
    for (i,v2,bytes) in packets.lock().unwrap().drain(..){let index=i*2+v2 as usize;shadows[index].transact_mut().apply_update(if v2{Update::decode_v2(&bytes)}else{Update::decode_v1(&bytes)}.unwrap()).unwrap();}
    use yrs::types::ToJson;
-   let current:Vec<_>=docs.iter().enumerate().map(|(i,d)|{let tx=d.transact();json!({"text":texts[i].get_string(&tx),"map":maps[i].to_json(&tx)})}).collect();
-   let replay:Vec<_>=shadows.iter().enumerate().map(|(i,d)|{let tx=d.transact();json!({"text":shadow_texts[i].get_string(&tx),"map":shadow_maps[i].to_json(&tx)})}).collect();
+   let current:Vec<_>=docs.iter().enumerate().map(|(i,d)|{let tx=d.transact();json!({"text":texts[i].get_string(&tx),"map":maps[i].to_json(&tx),"array":arrays[i].to_json(&tx)})}).collect();
+   let replay:Vec<_>=shadows.iter().enumerate().map(|(i,d)|{let tx=d.transact();json!({"text":shadow_texts[i].get_string(&tx),"map":shadow_maps[i].to_json(&tx),"array":shadow_arrays[i].to_json(&tx)})}).collect();
    snapshots.push(json!({"docs":current,"events":*events.lock().unwrap(),"replayed":replay}));
   }
   println!("{}",json!({"snapshots":snapshots}));

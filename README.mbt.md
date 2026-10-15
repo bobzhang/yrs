@@ -62,7 +62,7 @@ the default handler rejects unsupported custom tags.
 Rust Yrs: 33,024 operation snapshots (including presence metadata and observer
 events) and 768 cross-runtime awareness transfers. The wire codec also has fixed
 byte fixtures and malformed-packet tests. Presence observers are implemented;
-document transaction observers remain outstanding.
+document transaction and collection observers are described below.
 
 Persistent positions: sequence `sticky_index` methods track item identities through
 concurrent insertion and deletion; `sticky_boundary` tracks a type's start/end.
@@ -91,10 +91,14 @@ the edits already made. Observer callbacks can read their document. The after-tr
 append edits to the current commit; other observer phases reject mutations of
 the observed document.
 
-`python3 validation/transactions.py` compares 96 randomized grouped-edit histories
-in both wire formats with Rust: 26,496 transaction snapshots, 116,632 lifecycle
-events and 37,144 emitted updates replayed into independent replicas. This caught
-and fixed rich-text positioning before tombstones. Map entry observers now report transaction-level inserted, updated and removed
-values; 10,718 map events match Rust in the same randomized suite. Observers on
-newly created or deleted nested maps are suppressed, matching upstream. Sequence
-and deep observers and undo are still outstanding.
+`python3 validation/transactions.py` compares 160 randomized grouped-edit histories
+in both wire formats with Rust: 44,160 transaction snapshots, 193,988 lifecycle
+events and 61,508 emitted updates replayed into independent replicas. Map, text
+and array observers report transaction-level changes; 10,718 map events, 16,782
+rich-text events and 12,182 array events match Rust. The suite caught and fixed
+rich-text positioning before tombstones and formatting transitions in event
+deltas. Equivalent adjacent delta operations are consolidated for comparison;
+sibling collection-event order is unspecified upstream. Newly created or deleted
+nested types do not produce their own events. Deep observers and undo remain
+outstanding. The full 641-scenario interoperability suite also passed again after
+the transaction foundation landed.
