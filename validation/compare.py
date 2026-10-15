@@ -30,6 +30,25 @@ def main():
                     if x!=y: commands.append(['s',x,y])
         scenarios.append(commands)
     scenarios.append([['i',0,0,'A🌍中文\ufeffZ'],['s',0,1],['i',0,3,'!'],['i',1,7,'é'],['s',0,1],['s',1,0]])
+    for seed in range(128):
+        rng=random.Random(1000+seed)
+        commands=[]
+        for step in range(160):
+            kind=rng.choice(['I','I','D','m','m','M','s','q','r'])
+            x=rng.randrange(3)
+            value=rng.choice([None,True,False,-42,0,123,1.5,'Moon🌍',{'nested':[1,'two',None]},[1,2,3]])
+            if kind=='I': cmd=[kind,x,rng.randrange(999),[value]*rng.randrange(1,4)]
+            elif kind=='D': cmd=[kind,x,rng.randrange(999),rng.randrange(50)]
+            elif kind=='m': cmd=[kind,x,'key'+str(rng.randrange(5)),value]
+            elif kind=='M': cmd=[kind,x,'key'+str(rng.randrange(5))]
+            elif kind in ('s','q'): cmd=[kind,x,(x+rng.randrange(1,3))%3]
+            else: cmd=[kind,rng.randrange(999)]
+            commands.append(cmd)
+        for _ in range(3):
+            for x in range(3):
+                for y in range(3):
+                    if x!=y: commands.append(['s',x,y])
+        scenarios.append(commands)
     def execute(command, cases):
         inp=''.join(json.dumps(case,ensure_ascii=False)+'\n' for case in cases)
         return [json.loads(line) for line in run(command,input=inp,capture_output=True).stdout.splitlines()]

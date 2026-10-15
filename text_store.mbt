@@ -1,6 +1,8 @@
 ///|
 priv enum Content {
   Characters(String)
+  Values(ReadOnlyArray[Any])
+  Binary(Bytes)
   Deleted(Int32)
   Garbage(Int32)
 }
@@ -9,6 +11,8 @@ priv enum Content {
 fn Content::length(self : Content) -> Int32 {
   match self {
     Characters(s) => s.length()
+    Values(values) => values.length()
+    Binary(_) => 1
     Deleted(n) | Garbage(n) => n
   }
 }
@@ -35,6 +39,16 @@ fn utf16_slice(s : String, start : Int32, end : Int32) -> String {
 fn Content::slice(self : Content, start : Int32, end : Int32) -> Content {
   match self {
     Characters(s) => Characters(utf16_slice(s, start, end))
+    Values(values) =>
+      Values(
+        ReadOnlyArray::from_array(
+          Array::makei(end - start, fn(i) { values[start + i] })[:],
+        ),
+      )
+    Binary(_) => {
+      guard start == 0 && end == 1 else { abort("binary item is indivisible") }
+      self
+    }
     Deleted(_) => Deleted(end - start)
     Garbage(_) => Garbage(end - start)
   }
@@ -46,6 +60,7 @@ priv struct RawItem {
   origin : Id?
   right_origin : Id?
   parent : String?
+  parent_sub : String?
   content : Content
 }
 
@@ -55,6 +70,7 @@ priv struct Item {
   origin : Id?
   right_origin : Id?
   parent : String?
+  parent_sub : String?
   mut content : Content
   mut left : Id?
   mut right : Id?
@@ -64,6 +80,8 @@ priv struct Item {
 ///|
 priv struct Branch {
   mut head : Id?
+  heads : Map[String, Id]
+  values : Map[String, Id]
 }
 
 ///|
@@ -112,7 +130,7 @@ fn Doc::branch(self : Doc, name : String) -> Branch {
   match self.roots.get(name) {
     Some(b) => b
     None => {
-      let b : Branch = { head: None, }
+      let b : Branch = { head: None, heads: Map([]), values: Map([]), }
       self.roots[name] = b
       b
     }
@@ -151,6 +169,7 @@ fn Doc::split(self : Doc, item : Item, at : Int32) -> Item {
     origin: Some({ client: id.client, clock: id.clock - 1U, }),
     right_origin: item.right_origin,
     parent: item.parent,
+    parent_sub: item.parent_sub,
     content: item.content.slice(at, length),
     left: Some(item.id),
     right: item.right,
@@ -230,6 +249,14 @@ fn Doc::integrate(self : Doc, raw : RawItem) -> Bool {
         None => right.bind(fn(id) { self.items[id].parent })
       }
   }
+  let parent_sub = match left.bind(fn(id) { self.items[id].parent_sub }) {
+    Some(key) => Some(key)
+    None =>
+      match right.bind(fn(id) { self.items[id].parent_sub }) {
+        Some(key) => Some(key)
+        None => raw.parent_sub
+      }
+  }
   let mut content = raw.content
   if parent is None {
     content = Garbage(content.length())
@@ -239,6 +266,7 @@ fn Doc::integrate(self : Doc, raw : RawItem) -> Bool {
     origin: raw.origin,
     right_origin: raw.right_origin,
     parent,
+    parent_sub,
     content,
     left,
     right,
@@ -248,7 +276,7 @@ fn Doc::integrate(self : Doc, raw : RawItem) -> Bool {
     let branch = self.branch(name)
     let start = match left {
       Some(id) => self.items[id].right
-      None => branch.head
+      None => branch.first(parent_sub)
     }
     let conflict = match (left, right) {
       (None, Some(id)) => self.items[id].left is Some(_)
@@ -288,12 +316,12 @@ fn Doc::integrate(self : Doc, raw : RawItem) -> Bool {
     item.left = left
     item.right = match left {
       Some(id) => self.items[id].right
-      None => branch.head
+      None => branch.first(parent_sub)
     }
     if left is Some(id) {
       self.items[id].right = Some(item.id)
     } else {
-      branch.head = Some(item.id)
+      branch.set_first(parent_sub, item.id)
     }
     if item.right is Some(id) {
       self.items[id].left = Some(item.id)
@@ -303,6 +331,16 @@ fn Doc::integrate(self : Doc, raw : RawItem) -> Bool {
   match self.clients.get(item.id.client) {
     Some(entries) => entries.push(item)
     None => self.clients[item.id.client] = [item]
+  }
+  if parent is Some(name) && parent_sub is Some(key) {
+    if item.right is None {
+      self.branch(name).values[key] = item.id
+      if item.left is Some(id) {
+        self.mark_deleted(self.items[id])
+      }
+    } else {
+      self.mark_deleted(item)
+    }
   }
   self.state.set_max(item.id.client, end.to_uint())
   true
@@ -401,7 +439,16 @@ pub fn Text::get_string(self : Text) -> String {
 
 ///|
 pub fn Text::length(self : Text) -> Int32 {
-  self.get_string().length()
+  let mut length = 0
+  let mut cursor = self.doc.branch(self.name).head
+  while cursor is Some(id) {
+    let item = self.doc.items[id]
+    if !item.deleted {
+      length += item.content.length()
+    }
+    cursor = item.right
+  }
+  length
 }
 
 ///|
@@ -453,6 +500,7 @@ pub fn Text::insert(self : Text, index : Int32, value : String) -> Unit {
     origin,
     right_origin: right,
     parent: Some(self.name),
+    parent_sub: None,
     content: Characters(value),
   }
   guard self.doc.integrate(raw) else {
@@ -488,5 +536,33 @@ pub fn Text::remove_range(self : Text, index : Int32, length : Int32) -> Unit {
       remaining -= length
     }
     cursor = item.right
+  }
+}
+
+///|
+fn Branch::first(self : Branch, key : String?) -> Id? {
+  match key {
+    None => self.head
+    Some(key) => self.heads.get(key)
+  }
+}
+
+///|
+fn Branch::set_first(self : Branch, key : String?, id : Id) -> Unit {
+  match key {
+    None => self.head = Some(id)
+    Some(key) => self.heads[key] = id
+  }
+}
+
+///|
+fn Doc::mark_deleted(self : Doc, item : Item) -> Unit {
+  if !item.deleted {
+    item.deleted = true
+    self.add_delete(
+      item.id.client,
+      item.id.clock,
+      item.id.clock + item.content.length().reinterpret_as_uint(),
+    )
   }
 }

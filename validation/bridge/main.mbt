@@ -38,6 +38,8 @@ pub fn evaluate(input : String) -> String {
   guard parsed is Array(commands) else { abort("expected commands") }
   let docs = [@yrs.Doc(client_id=1UL), Doc(client_id=2UL), Doc(client_id=3UL)]
   let texts = docs.map(fn(d) { d.get_or_insert_text("note") })
+  let arrays = docs.map(fn(d) { d.get_or_insert_array("items") })
+  let maps = docs.map(fn(d) { d.get_or_insert_map("settings") })
   let queued : Array[(Int32, Bytes)] = []
   let snapshots : Array[Json] = []
   for command in commands {
@@ -54,6 +56,26 @@ pub fn evaluate(input : String) -> String {
         let n = texts[x].length()
         let pos = integer(args[2]) % (n + 1)
         texts[x].remove_range(pos, integer(args[3]) % (n - pos + 1))
+      }
+      "I" => {
+        guard args[3] is Array(values) else { abort("expected array") }
+        arrays[x].insert_range(
+          integer(args[2]) % (arrays[x].length() + 1),
+          values.map(@yrs.Any::from_json),
+        )
+      }
+      "D" => {
+        let n = arrays[x].length()
+        let pos = integer(args[2]) % (n + 1)
+        arrays[x].remove_range(pos, integer(args[3]) % (n - pos + 1))
+      }
+      "m" => {
+        guard args[2] is String(key) else { abort("expected key") }
+        maps[x].insert(key, @yrs.Any::from_json(args[3]))
+      }
+      "M" => {
+        guard args[2] is String(key) else { abort("expected key") }
+        maps[x].remove(key)
       }
       "s" | "q" => {
         let y = integer(args[2])
@@ -77,7 +99,22 @@ pub fn evaluate(input : String) -> String {
       }
       _ => abort("unknown command")
     }
-    snapshots.push(Json(texts.map(fn(t) { t.get_string() })))
+    snapshots.push(
+      Json(
+        Array::makei(3, fn(i) {
+          let map : Map[String, Json] = Map([])
+          for (key, value) in maps[i].entries() {
+            map[key] = value.to_json()
+          }
+          (
+            {
+              "text": Json(texts[i].get_string()),
+              "array": Json(arrays[i].to_array().map(@yrs.Any::to_json)),
+              "map": Json(map),
+            } : Json)
+        }),
+      ),
+    )
   }
   let updates = docs.map(fn(d) { hex(d.encode_state_as_update_v1()) })
   let states = docs.map(fn(d) {

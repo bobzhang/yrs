@@ -12,9 +12,6 @@ fn read_update(
       let info = reader.byte()
       let origin = if (info & 128) != 0 { Some(reader.id()) } else { None }
       let right_origin = if (info & 64) != 0 { Some(reader.id()) } else { None }
-      guard (info & 32) == 0 else {
-        raise InvalidData("map content is not implemented yet")
-      }
       let kind = info & 31
       let parent = if kind != 0 &&
         kind != 10 &&
@@ -27,7 +24,21 @@ fn read_update(
       } else {
         None
       }
+      let parent_sub = if parent is Some(_) && (info & 32) != 0 {
+        Some(reader.string())
+      } else {
+        None
+      }
       let content = match kind {
+        3 => Binary(reader.buffer())
+        8 => {
+          let values = []
+          let count = reader.count()
+          for _ in 0..<count {
+            values.push(reader.any())
+          }
+          Values(ReadOnlyArray::from_array(values[:]))
+        }
         4 => Characters(reader.string())
         0 | 1 | 10 => {
           let length = reader.clock()
@@ -52,6 +63,7 @@ fn read_update(
           origin,
           right_origin,
           parent,
+          parent_sub,
           content,
         })
       }
@@ -126,6 +138,8 @@ pub fn Doc::encode_state_as_update_v1(
       }
       let kind = match content {
         Characters(_) => 4
+        Values(_) => 8
+        Binary(_) => 3
         Deleted(_) => 1
         Garbage(_) => 0
       }
@@ -134,7 +148,8 @@ pub fn Doc::encode_state_as_update_v1(
       } else {
         kind |
         (if origin is Some(_) { 128 } else { 0 }) |
-        (if item.right_origin is Some(_) { 64 } else { 0 })
+        (if item.right_origin is Some(_) { 64 } else { 0 }) |
+        (if item.parent_sub is Some(_) { 32 } else { 0 })
       }
       writer.byte(info)
       if kind != 0 {
@@ -147,10 +162,20 @@ pub fn Doc::encode_state_as_update_v1(
         if origin is None && item.right_origin is None {
           writer.uint(1UL)
           writer.string(item.parent.unwrap())
+          if item.parent_sub is Some(key) {
+            writer.string(key)
+          }
         }
       }
       match content {
         Characters(s) => writer.string(s)
+        Binary(b) => writer.buffer(b)
+        Values(values) => {
+          writer.uint(values.length().to_uint64())
+          for value in values {
+            writer.any(value)
+          }
+        }
         Deleted(n) | Garbage(n) => writer.uint(n.to_uint64())
       }
     }

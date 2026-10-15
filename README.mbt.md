@@ -15,7 +15,7 @@ Every milestone needs real Rust interoperability tests, rather than only MoonBit
 
 ## Implemented and checked
 
-Collaborative plain text uses the upstream YATA conflict-ordering algorithm, UTF-16 clocks, state vectors, binary v1 updates, deletion ranges, duplicate suppression and pending dependency integration. Deleted content is retained. The initial Rust oracle covers 129 scenarios, 22,790 operation snapshots and 774 bidirectional document transfers.
+Collaborative plain text uses the upstream YATA conflict-ordering algorithm, UTF-16 clocks, state vectors, binary v1 updates, deletion ranges, duplicate suppression and pending dependency integration. Deleted content is retained. Shared arrays and maps use the same store, with immutable lib0 values (including binary, signed 64-bit integers, floating point, arrays and objects). The Rust oracle covers 257 scenarios, 45,574 operation snapshots and 1,542 bidirectional document transfers.
 
 ```mbt check
 ///|
@@ -35,6 +35,6 @@ test "two replicas exchange concurrent edits" {
 }
 ```
 
-Current limitations: only plain-text item content is implemented; unsupported content is rejected before applying an update. Binary v2, the remaining shared types and transaction/event APIs are still outstanding. The store currently favors straightforward correctness over upstream's block compaction and indexing optimizations. This is not a production release or a completed port.
+Current limitations: nested shared types and rich text are not yet implemented; unsupported content is rejected before applying an update. Binary v2, the remaining shared types and transaction/event APIs are still outstanding. The store currently favors straightforward correctness over upstream's block compaction and indexing optimizations. This is not a production release or a completed port.
 
 Run `moon test --target all` and `python3 validation/compare.py`. The oracle uses the installed Rust 1.97.1 toolchain and the exact reference checkout under `.repos/y-crdt`; its Cargo dependencies are locked. Clone `https://github.com/y-crdt/y-crdt.git` there and check out `ac339600c712642e556895426113c3f9c117de39` before running it.

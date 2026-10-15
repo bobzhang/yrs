@@ -14,6 +14,33 @@ pub suberror DecodeError {
 pub fn DecodeError::to_repr(Self) -> @debug.Repr
 
 // Types and methods
+pub(all) enum Any {
+  Undefined
+  Null
+  Bool(Bool)
+  Integer(Int64)
+  Float(Double)
+  String(String)
+  Array(ReadOnlyArray[Any])
+  Object(ReadOnlyArray[(String, Any)])
+  Buffer(Bytes)
+} derive(Eq, @debug.Debug)
+pub fn Any::decode(Bytes) -> Self raise DecodeError
+pub fn Any::encode(Self) -> Bytes
+pub fn Any::equal(Self, Self) -> Bool
+pub fn Any::from_json(Json) -> Self
+pub fn Any::not_equal(Self, Self) -> Bool
+pub fn Any::to_json(Self) -> Json
+pub fn Any::to_repr(Self) -> @debug.Repr
+
+pub struct ArrayRef {
+  // private fields
+}
+pub fn ArrayRef::insert_range(Self, Int, Array[Any]) -> Unit
+pub fn ArrayRef::length(Self) -> Int
+pub fn ArrayRef::remove_range(Self, Int, Int) -> Unit
+pub fn ArrayRef::to_array(Self) -> Array[Any]
+
 pub struct Doc {
   // private fields
 }
@@ -21,6 +48,8 @@ pub fn Doc::Doc(client_id~ : UInt64) -> Self
 pub fn Doc::apply_update_v1(Self, Bytes) -> Unit raise DecodeError
 pub fn Doc::client_id(Self) -> UInt64
 pub fn Doc::encode_state_as_update_v1(Self, remote? : StateVector) -> Bytes
+pub fn Doc::get_or_insert_array(Self, String) -> ArrayRef
+pub fn Doc::get_or_insert_map(Self, String) -> MapRef
 pub fn Doc::get_or_insert_text(Self, String) -> Text
 pub fn Doc::pending_items(Self) -> Int
 pub fn Doc::state_vector(Self) -> StateVector
@@ -39,6 +68,14 @@ pub fn Id::op_gt(Self, Self) -> Bool
 pub fn Id::op_le(Self, Self) -> Bool
 pub fn Id::op_lt(Self, Self) -> Bool
 pub fn Id::to_repr(Self) -> @debug.Repr
+
+pub struct MapRef {
+  // private fields
+}
+pub fn MapRef::entries(Self) -> Array[(String, Any)]
+pub fn MapRef::get(Self, String) -> Any?
+pub fn MapRef::insert(Self, String, Any) -> Unit
+pub fn MapRef::remove(Self, String) -> Unit
 
 pub struct StateVector {
   // private fields
