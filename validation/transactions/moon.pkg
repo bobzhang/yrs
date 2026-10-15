@@ -1,0 +1,7 @@
+import {
+  "bobzhang/yrs",
+  "moonbitlang/core/json",
+  "moonbitlang/core/encoding/utf8",
+}
+
+pkgtype(kind: "foreign_library")

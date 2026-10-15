@@ -119,24 +119,23 @@ pub fn Doc::apply_update_v1(
   bytes : Bytes,
 ) -> Unit raise DecodeError {
   let (items, deletions) = read_update({ bytes, offset: 0, })
-  self.collect_deletes = true
-  let retained = self.pending[:].to_owned()
-  self.pending.clear()
-  for raw in items {
-    self.pending.push(raw)
-  }
-  for (client, start, end) in deletions {
-    self.add_delete(client, start, end)
-  }
-  self.settle()
-  for raw in retained {
-    self.pending.push(raw)
-  }
-  self.settle()
-  self.cleanup_formatting()
-  self.collect_deletes = false
-  self.deleted_items.clear()
-  self.inserted_items.clear()
+  self.with_mutation(fn() {
+    self.active_transaction.unwrap().is_local = false
+    self.collect_deletes = true
+    let retained = self.pending[:].to_owned()
+    self.pending.clear()
+    for raw in items {
+      self.pending.push(raw)
+    }
+    for (client, start, end) in deletions {
+      self.add_delete(client, start, end)
+    }
+    self.settle()
+    for raw in retained {
+      self.pending.push(raw)
+    }
+    self.settle()
+  })
 }
 
 ///|

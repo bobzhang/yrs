@@ -81,3 +81,17 @@ cross-runtime payloads. Historical content is checked against Rust state capture
 at snapshot creation because of the pinned encoder defect documented in
 `validation/REFERENCE_LIMITATIONS.md`; snapshot metadata is independently decoded
 and compared in both runtimes. Undo/redone position tracking remains outstanding.
+
+Transactions: `doc.transact(action, origin=...)` groups edits into one commit.
+Existing mutation methods open an implicit transaction when needed. Document
+observers cover before-observer, after-transaction, cleanup and v1/v2 update
+phases. Transaction handles expose origin, locality, insertion/deletion ranges,
+and stable committed state vectors and updates. Raising from the action commits
+the edits already made. Observer callbacks can read their document; starting a
+mutation on that same document during observer delivery is rejected.
+
+`python3 validation/transactions.py` compares 96 randomized grouped-edit histories
+in both wire formats with Rust: 26,496 transaction snapshots, 116,632 lifecycle
+events and 37,144 emitted updates replayed into independent replicas. This caught
+and fixed rich-text positioning before tombstones. Collection-specific/deep
+observers and undo are still outstanding.

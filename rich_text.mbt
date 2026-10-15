@@ -22,16 +22,35 @@ fn update_attribute(
 
 ///|
 fn Text::rich_position(self : Text, index : Int32) -> RichPosition {
-  let (left, right) = self.position(index)
+  guard index >= 0 else { abort("negative text index") }
   let attrs : Map[String, Any] = Map([])
-  let mut cursor = self.doc.branch(self.name).head
-  while cursor != right && cursor is Some(id) {
+  let mut left = None
+  let mut right = self.doc.branch(self.name).head
+  let mut remaining = index
+  // Unlike plain insertion, rich-text positioning stops before tombstones
+  // once the requested visible offset has been reached (Yrs find_position).
+  while remaining > 0 && right is Some(id) {
     let item = self.doc.items[id]
-    if !item.deleted && item.content is Format(key, value) {
-      update_attribute(attrs, key, value)
+    if !item.deleted {
+      match item.content {
+        Format(key, value) => update_attribute(attrs, key, value)
+        _ => {
+          let length = item.content.visible_length()
+          if remaining < length {
+            let tail = self.doc.split(item, remaining)
+            left = Some(id)
+            right = Some(tail.id)
+            remaining = 0
+            break
+          }
+          remaining -= length
+        }
+      }
     }
-    cursor = item.right
+    left = right
+    right = item.right
   }
+  guard remaining == 0 else { abort("text index out of bounds") }
   { doc: self.doc, parent: self.name, left, right, attrs, }
 }
 
@@ -125,20 +144,22 @@ fn Text::insert_formatted(
   content : Content,
   attributes : Array[(String, Any)],
 ) -> Unit {
-  if content.length() == 0 {
-    return
-  }
-  let pos = self.rich_position(index)
-  let attrs = Map::from_array(attributes)
-  for key, _ in pos.attrs {
-    if !attrs.contains(key) {
-      attrs[key] = Null
+  self.doc.with_mutation(fn() {
+    if content.length() == 0 {
+      return
     }
-  }
-  pos.minimize(attrs)
-  let restore = pos.insert_attributes(attrs)
-  pos.insert(content)
-  pos.restore(restore)
+    let pos = self.rich_position(index)
+    let attrs = Map::from_array(attributes)
+    for key, _ in pos.attrs {
+      if !attrs.contains(key) {
+        attrs[key] = Null
+      }
+    }
+    pos.minimize(attrs)
+    let restore = pos.insert_attributes(attrs)
+    pos.insert(content)
+    pos.restore(restore)
+  })
 }
 
 ///|
@@ -168,44 +189,46 @@ pub fn Text::format(
   length : Int32,
   attributes : Array[(String, Any)],
 ) -> Unit {
-  guard length >= 0 else { abort("negative format length") }
-  let pos = self.rich_position(index)
-  let attrs = Map::from_array(attributes)
-  pos.minimize(attrs)
-  let restore = pos.insert_attributes(attrs)
-  let mut remaining = length
-  while pos.right is Some(id) {
-    let item = self.doc.items[id]
-    if !(remaining > 0 ||
-      (!restore.is_empty() && (item.deleted || item.content is Format(_, _)))) {
-      break
-    }
-    if !item.deleted {
-      match item.content {
-        Format(key, value) =>
-          if attrs.get(key) is Some(desired) {
-            if desired == value {
-              restore.remove(key)
-            } else {
-              restore[key] = value
+  self.doc.with_mutation(fn() {
+    guard length >= 0 else { abort("negative format length") }
+    let pos = self.rich_position(index)
+    let attrs = Map::from_array(attributes)
+    pos.minimize(attrs)
+    let restore = pos.insert_attributes(attrs)
+    let mut remaining = length
+    while pos.right is Some(id) {
+      let item = self.doc.items[id]
+      if !(remaining > 0 ||
+        (!restore.is_empty() && (item.deleted || item.content is Format(_, _)))) {
+        break
+      }
+      if !item.deleted {
+        match item.content {
+          Format(key, value) =>
+            if attrs.get(key) is Some(desired) {
+              if desired == value {
+                restore.remove(key)
+              } else {
+                restore[key] = value
+              }
+              self.doc.mark_deleted(item)
             }
-            self.doc.mark_deleted(item)
+          _ => {
+            let len = item.content.visible_length()
+            if remaining < len {
+              let tail = self.doc.split(item, remaining)
+              pos.left = Some(item.id)
+              pos.right = Some(tail.id)
+              break
+            }
+            remaining -= len
           }
-        _ => {
-          let len = item.content.visible_length()
-          if remaining < len {
-            let tail = self.doc.split(item, remaining)
-            pos.left = Some(item.id)
-            pos.right = Some(tail.id)
-            break
-          }
-          remaining -= len
         }
       }
+      pos.forward()
     }
-    pos.forward()
-  }
-  pos.restore(restore)
+    pos.restore(restore)
+  })
 }
 
 ///|

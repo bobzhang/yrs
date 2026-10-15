@@ -108,6 +108,13 @@ priv struct Branch {
 /// A document replica. Each independently edited replica must use a distinct
 /// client ID. This initial API uses Yjs UTF-16 positions and retains tombstones.
 pub struct Doc {
+  priv mut active_transaction : Transaction?
+  priv mut notifying_transaction : Bool
+  priv before_observers : Map[String, (Transaction) -> Unit]
+  priv after_observers : Map[String, (Transaction) -> Unit]
+  priv cleanup_observers : Map[String, (Transaction) -> Unit]
+  priv update_v1_observers : Map[String, (Bytes, Transaction) -> Unit]
+  priv update_v2_observers : Map[String, (Bytes, Transaction) -> Unit]
   priv client : UInt64
   priv state : StateVector
   priv clients : Map[UInt64, Array[Item]]
@@ -123,6 +130,13 @@ pub struct Doc {
 ///|
 pub fn Doc::Doc(client_id~ : UInt64) -> Doc {
   {
+    active_transaction: None,
+    notifying_transaction: false,
+    before_observers: {},
+    after_observers: {},
+    cleanup_observers: {},
+    update_v1_observers: {},
+    update_v2_observers: {},
     client: client_id,
     state: StateVector(),
     clients: Map([]),
@@ -387,6 +401,24 @@ fn Doc::integrate_missing(self : Doc, raw : RawItem) -> Bool {
     }
   }
   self.items[item.id] = item
+  if self.active_transaction is Some(transaction) {
+    transaction.added.push(
+      (
+        item.id.client,
+        item.id.clock,
+        item.id.clock + item.content.length().reinterpret_as_uint(),
+      ),
+    )
+    if item.deleted {
+      transaction.removed.push(
+        (
+          item.id.client,
+          item.id.clock,
+          item.id.clock + item.content.length().reinterpret_as_uint(),
+        ),
+      )
+    }
+  }
   match self.clients.get(item.id.client) {
     Some(entries) => {
       let mut index = entries.length()
@@ -576,62 +608,66 @@ fn Text::position(self : Text, index : Int32) -> (Id?, Id?) {
 
 ///|
 pub fn Text::insert(self : Text, index : Int32, value : String) -> Unit {
-  let (left, right) = self.position(index)
-  if value.is_empty() {
-    return
-  }
-  let clock = self.doc.next_clock(self.doc.client)
-  guard clock.to_uint64() + value.length().to_uint64() <= 0xffff_ffffUL else {
-    abort("document clock exhausted")
-  }
-  let origin = left.map(fn(id) {
-    let item = self.doc.items[id]
-    (
-      {
-        client: id.client,
-        clock: id.clock + item.content.length().reinterpret_as_uint() - 1U,
-      } : Id)
+  self.doc.with_mutation(fn() {
+    let (left, right) = self.position(index)
+    if value.is_empty() {
+      return
+    }
+    let clock = self.doc.next_clock(self.doc.client)
+    guard clock.to_uint64() + value.length().to_uint64() <= 0xffff_ffffUL else {
+      abort("document clock exhausted")
+    }
+    let origin = left.map(fn(id) {
+      let item = self.doc.items[id]
+      (
+        {
+          client: id.client,
+          clock: id.clock + item.content.length().reinterpret_as_uint() - 1U,
+        } : Id)
+    })
+    let raw : RawItem = {
+      id: { client: self.doc.client, clock, },
+      origin,
+      right_origin: right,
+      parent: Some(self.name),
+      parent_sub: None,
+      content: Characters(value),
+    }
+    guard self.doc.integrate(raw) else {
+      abort("local insert has missing dependency")
+    }
+    self.doc.settle()
   })
-  let raw : RawItem = {
-    id: { client: self.doc.client, clock, },
-    origin,
-    right_origin: right,
-    parent: Some(self.name),
-    parent_sub: None,
-    content: Characters(value),
-  }
-  guard self.doc.integrate(raw) else {
-    abort("local insert has missing dependency")
-  }
-  self.doc.settle()
 }
 
 ///|
 pub fn Text::remove_range(self : Text, index : Int32, length : Int32) -> Unit {
-  guard length >= 0 &&
-    index >= 0 &&
-    index <= self.length() &&
-    length <= self.length() - index else {
-    abort("text deletion out of bounds")
-  }
-  let pos = self.rich_position(index)
-  let start = pos.right
-  let start_attrs = Map::from_array(pos.attrs.to_array())
-  let mut remaining = length
-  while remaining > 0 && pos.right is Some(id) {
-    let item = self.doc.items[id]
-    if !item.deleted && item.content.visible_length() > 0 {
-      if remaining < item.content.visible_length() {
-        self.doc.split(item, remaining) |> ignore
-      }
-      remaining -= item.content.visible_length()
-      self.doc.mark_deleted(item)
+  self.doc.with_mutation(fn() {
+    guard length >= 0 &&
+      index >= 0 &&
+      index <= self.length() &&
+      length <= self.length() - index else {
+      abort("text deletion out of bounds")
     }
-    pos.forward()
-  }
-  if !start_attrs.is_empty() {
-    self.clean_format_gap(start, pos.right, start_attrs, pos.attrs)
-  }
+    let pos = self.rich_position(index)
+    let start = pos.right
+    let start_attrs = Map::from_array(pos.attrs.to_array())
+    let mut remaining = length
+    while remaining > 0 && pos.right is Some(id) {
+      let item = self.doc.items[id]
+      if !item.deleted && item.content.visible_length() > 0 {
+        if remaining < item.content.visible_length() {
+          self.doc.split(item, remaining) |> ignore
+        }
+        remaining -= item.content.visible_length()
+        self.doc.mark_deleted(item)
+      }
+      pos.forward()
+    }
+    if !start_attrs.is_empty() {
+      self.clean_format_gap(start, pos.right, start_attrs, pos.attrs)
+    }
+  })
 }
 
 ///|
@@ -658,6 +694,15 @@ fn Doc::mark_deleted(self : Doc, item : Item) -> Unit {
       continue
     }
     item.deleted = true
+    if self.active_transaction is Some(transaction) {
+      transaction.removed.push(
+        (
+          item.id.client,
+          item.id.clock,
+          item.id.clock + item.content.length().reinterpret_as_uint(),
+        ),
+      )
+    }
     if self.collect_deletes {
       self.deleted_items.push(item)
     }

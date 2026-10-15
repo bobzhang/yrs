@@ -49,33 +49,35 @@ fn Doc::insert_content(
   right : Id?,
   content : Content,
 ) -> Id {
-  let length = content.length()
-  guard length > 0 else { abort("empty item") }
-  let clock = self.next_clock(self.client)
-  guard clock.to_uint64() + length.to_uint64() <= 0xffff_ffffUL else {
-    abort("document clock exhausted")
-  }
-  let origin = left.map(fn(id) {
-    let item = self.items[id]
-    (
-      {
-        client: id.client,
-        clock: id.clock + item.content.length().reinterpret_as_uint() - 1U,
-      } : Id)
+  self.with_mutation(fn() {
+    let length = content.length()
+    guard length > 0 else { abort("empty item") }
+    let clock = self.next_clock(self.client)
+    guard clock.to_uint64() + length.to_uint64() <= 0xffff_ffffUL else {
+      abort("document clock exhausted")
+    }
+    let origin = left.map(fn(id) {
+      let item = self.items[id]
+      (
+        {
+          client: id.client,
+          clock: id.clock + item.content.length().reinterpret_as_uint() - 1U,
+        } : Id)
+    })
+    let raw : RawItem = {
+      id: { client: self.client, clock, },
+      origin,
+      right_origin: right,
+      parent: Some(name),
+      parent_sub: key,
+      content,
+    }
+    guard self.integrate(raw) else {
+      abort("local insert has missing dependency")
+    }
+    self.settle()
+    raw.id
   })
-  let raw : RawItem = {
-    id: { client: self.client, clock, },
-    origin,
-    right_origin: right,
-    parent: Some(name),
-    parent_sub: key,
-    content,
-  }
-  guard self.integrate(raw) else {
-    abort("local insert has missing dependency")
-  }
-  self.settle()
-  raw.id
 }
 
 ///|
@@ -154,9 +156,11 @@ pub fn MapRef::get(self : MapRef, key : String) -> Out? {
 
 ///|
 pub fn MapRef::remove(self : MapRef, key : String) -> Unit {
-  if self.doc.branch(self.name).values.get(key) is Some(id) {
-    self.doc.mark_deleted(self.doc.items[id])
-  }
+  self.doc.with_mutation(fn() {
+    if self.doc.branch(self.name).values.get(key) is Some(id) {
+      self.doc.mark_deleted(self.doc.items[id])
+    }
+  })
 }
 
 ///|

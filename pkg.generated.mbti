@@ -172,9 +172,20 @@ pub fn Doc::get_or_insert_map(Self, String) -> MapRef
 pub fn Doc::get_or_insert_text(Self, String) -> Text
 pub fn Doc::get_or_insert_xml_fragment(Self, String) -> XmlFragment
 pub fn Doc::has_missing_updates(Self) -> Bool
+pub fn Doc::observe_after_transaction(Self, String, (Transaction) -> Unit) -> Unit
+pub fn Doc::observe_before_observer_calls(Self, String, (Transaction) -> Unit) -> Unit
+pub fn Doc::observe_transaction_cleanup(Self, String, (Transaction) -> Unit) -> Unit
+pub fn Doc::observe_update_v1(Self, String, (Bytes, Transaction) -> Unit) -> Unit
+pub fn Doc::observe_update_v2(Self, String, (Bytes, Transaction) -> Unit) -> Unit
 pub fn Doc::pending_items(Self) -> Int
 pub fn Doc::snapshot(Self) -> Snapshot
 pub fn Doc::state_vector(Self) -> StateVector
+pub fn[T] Doc::transact(Self, (Transaction) -> T raise, origin? : Bytes) -> T raise
+pub fn Doc::unobserve_after_transaction(Self, String) -> Bool
+pub fn Doc::unobserve_before_observer_calls(Self, String) -> Bool
+pub fn Doc::unobserve_transaction_cleanup(Self, String) -> Bool
+pub fn Doc::unobserve_update_v1(Self, String) -> Bool
+pub fn Doc::unobserve_update_v2(Self, String) -> Bool
 
 pub(all) struct Id {
   client : UInt64
@@ -308,6 +319,19 @@ pub(all) struct TextChunk {
   attributes : ReadOnlyArray[(String, Any)]
 }
 pub fn TextChunk::to_json(Self) -> Json
+
+pub struct Transaction {
+  // private fields
+}
+pub fn Transaction::after_state(Self) -> StateVector
+pub fn Transaction::before_state(Self) -> StateVector
+pub fn Transaction::deletions(Self) -> Array[(UInt64, UInt, UInt)]
+pub fn Transaction::doc(Self) -> Doc
+pub fn Transaction::encode_update_v1(Self) -> Bytes
+pub fn Transaction::encode_update_v2(Self) -> Bytes raise DecodeError
+pub fn Transaction::insertions(Self) -> Array[(UInt64, UInt, UInt)]
+pub fn Transaction::is_local(Self) -> Bool
+pub fn Transaction::origin(Self) -> Bytes?
 
 pub struct XmlElement {
   // private fields
