@@ -21,6 +21,7 @@ pub fn EntryChange::to_json(self : EntryChange) -> Json {
 
 ///|
 pub struct MapEvent {
+  priv route : ReadOnlyArray[PathSegment]
   priv map : MapRef
   priv changes : ReadOnlyArray[(String, EntryChange)]
 }
@@ -131,7 +132,11 @@ fn Transaction::map_events(self : Transaction) -> Array[MapEvent] {
       }
     }
     changes.sort_by(fn(a, b) { a.0.compare(b.0) })
-    events.push({ map, changes: ReadOnlyArray::from_array(changes[:]), })
+    events.push({
+      route: [],
+      map,
+      changes: ReadOnlyArray::from_array(changes[:]),
+    })
   }
   events
 }

@@ -98,6 +98,7 @@ priv struct Item {
 
 ///|
 priv struct Branch {
+  mut kind : SharedKind?
   mut head : Id?
   heads : Map[String, Id]
   values : Map[String, Id]
@@ -110,6 +111,15 @@ priv struct Branch {
 pub struct Doc {
   priv mut active_transaction : Transaction?
   priv mut notifying_transaction : Bool
+  priv deep_observers : Map[
+    Parent,
+    Map[String, (ReadOnlyArray[Event], Transaction) -> Unit],
+  ]
+  priv xml_observers : Map[Parent, Map[String, (XmlEvent, Transaction) -> Unit]]
+  priv xml_text_observers : Map[
+    Parent,
+    Map[String, (XmlTextEvent, Transaction) -> Unit],
+  ]
   priv array_observers : Map[
     Parent,
     Map[String, (ArrayEvent, Transaction) -> Unit],
@@ -141,6 +151,9 @@ pub fn Doc::Doc(client_id~ : UInt64) -> Doc {
   {
     active_transaction: None,
     notifying_transaction: false,
+    deep_observers: {},
+    xml_observers: {},
+    xml_text_observers: {},
     array_observers: {},
     text_observers: {},
     map_observers: {},
@@ -183,6 +196,7 @@ fn Doc::branch(self : Doc, name : Parent) -> Branch {
     Some(b) => b
     None => {
       let b : Branch = {
+        kind: None,
         head: None,
         heads: Map([]),
         values: Map([]),
@@ -566,7 +580,7 @@ pub struct Text {
 ///|
 pub fn Doc::get_or_insert_text(self : Doc, name : String) -> Text {
   let name : Parent = Root(name)
-  self.branch(name) |> ignore
+  self.register_kind(name, SharedText)
   { doc: self, name, }
 }
 

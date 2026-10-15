@@ -51,6 +51,7 @@ pub fn Delta::to_json(self : Delta) -> Json {
 
 ///|
 pub struct TextEvent {
+  priv route : ReadOnlyArray[PathSegment]
   priv text : Text
   priv changes : ReadOnlyArray[Delta]
 }
@@ -67,6 +68,7 @@ pub fn TextEvent::delta(self : TextEvent) -> ReadOnlyArray[Delta] {
 
 ///|
 pub struct ArrayEvent {
+  priv route : ReadOnlyArray[PathSegment]
   priv array : ArrayRef
   priv changes : ReadOnlyArray[Change]
 }
@@ -292,33 +294,6 @@ fn Transaction::text_delta(
     result.pop() |> ignore
   }
   ReadOnlyArray::from_array(result[:])
-}
-
-///|
-fn Doc::notify_sequences(self : Doc, transaction : Transaction) -> Unit {
-  for parent in transaction.sequences {
-    if !transaction.observable(parent) {
-      continue
-    }
-    if self.array_observers.get(parent) is Some(observers) {
-      let event : ArrayEvent = {
-        array: { doc: self, name: parent, },
-        changes: transaction.array_delta(parent),
-      }
-      for (_, callback) in observers.to_array() {
-        callback(event, transaction)
-      }
-    }
-    if self.text_observers.get(parent) is Some(observers) {
-      let event : TextEvent = {
-        text: { doc: self, name: parent, },
-        changes: transaction.text_delta(parent),
-      }
-      for (_, callback) in observers.to_array() {
-        callback(event, transaction)
-      }
-    }
-  }
 }
 
 ///|

@@ -39,7 +39,7 @@ Rich text supports attributed insertion, formatting, JSON embeds and formatted d
 
 XML fragments, elements, attributes, formatted XML text and parent navigation now share the CRDT store. A further 128 randomized XML histories pass in v1/v2 with Rust GC both enabled and disabled (91,136 operation snapshots and 3,072 cross-runtime document transfers). XML insertion preserves upstream tombstone boundary choices.
 
-Current limitations: unsupported content is rejected before applying an update. The remaining shared types and transaction/event APIs are still outstanding. The store currently favors straightforward correctness over upstream's block compaction and indexing optimizations. This is not a production release or a completed port.
+Current limitations: unsupported content is rejected before applying an update. The remaining shared types, undo and some transaction/event APIs are still outstanding. The store currently favors straightforward correctness over upstream's block compaction and indexing optimizations. This is not a production release or a completed port.
 
 Run `moon test --target all` and `python3 validation/compare.py`. The oracle uses the installed Rust 1.97.1 toolchain and the exact reference checkout under `.repos/y-crdt`; its Cargo dependencies are locked. Clone `https://github.com/y-crdt/y-crdt.git` there and check out `ac339600c712642e556895426113c3f9c117de39` before running it.
 
@@ -99,6 +99,19 @@ rich-text events and 12,182 array events match Rust. The suite caught and fixed
 rich-text positioning before tombstones and formatting transitions in event
 deltas. Equivalent adjacent delta operations are consolidated for comparison;
 sibling collection-event order is unspecified upstream. Newly created or deleted
-nested types do not produce their own events. Deep observers and undo remain
-outstanding. The full 641-scenario interoperability suite also passed again after
+nested types do not produce their own events. Undo remains outstanding. The full 641-scenario interoperability suite also passed again after
 the transaction foundation landed.
+
+Deep observation: every shared collection supports `observe_deep` and
+`unobserve_deep`. Batches contain typed `Event` values, sorted by path depth;
+`path()` is relative to the subscribed collection and uses final sequence indexes.
+Event paths and deltas remain owned after the callback. XML element/fragment and
+XML text observers combine attribute changes with child or rich-text deltas.
+Imported root types acquire their event kind when a typed root handle is obtained.
+
+`python3 validation/events.py` checks 96 randomized nested/XML histories in both
+wire formats: 32,256 transaction snapshots, 55,344 notification batches and 71,910
+deep events. It covers grouped changes, shifted paths, parent replacement,
+deleted/new descendant suppression and concurrent remote updates. Events of equal
+path depth and independent subscription batches have unspecified upstream order;
+the oracle compares their contents after sorting, while checking depth order.

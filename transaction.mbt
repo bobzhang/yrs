@@ -153,14 +153,7 @@ fn Doc::commit_transaction(self : Doc, transaction : Transaction) -> Unit {
   for (_, callback) in self.before_observers.to_array() {
     callback(transaction)
   }
-  for event in transaction.map_events() {
-    if self.map_observers.get(event.map.name) is Some(observers) {
-      for (_, callback) in observers.to_array() {
-        callback(event, transaction)
-      }
-    }
-  }
-  self.notify_sequences(transaction)
+  self.notify_collections(transaction)
   self.notifying_transaction = false
   if self.collect_deletes {
     self.cleanup_formatting()
@@ -211,6 +204,9 @@ fn[T] Doc::with_mutation(self : Doc, action : () -> T) -> T {
   }
   let transaction = self.begin_transaction(
     None,
+    !self.deep_observers.is_empty() ||
+    !self.xml_observers.is_empty() ||
+    !self.xml_text_observers.is_empty() ||
     !self.text_observers.is_empty() ||
     !self.array_observers.is_empty() ||
     !self.map_observers.is_empty() ||

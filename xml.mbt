@@ -40,7 +40,7 @@ pub fn Doc::get_or_insert_xml_fragment(
   name : String,
 ) -> XmlFragment {
   let name : Parent = Root(name)
-  self.branch(name) |> ignore
+  self.register_kind(name, SharedXmlFragment)
   { doc: self, name, }
 }
 

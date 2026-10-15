@@ -68,6 +68,7 @@ pub struct ArrayEvent {
   // private fields
 }
 pub fn ArrayEvent::delta(Self) -> ReadOnlyArray[Change]
+pub fn ArrayEvent::path(Self) -> ReadOnlyArray[PathSegment]
 pub fn ArrayEvent::target(Self) -> ArrayRef
 
 pub struct ArrayRef {
@@ -79,12 +80,14 @@ pub fn ArrayRef::insert_range(Self, Int, Array[Any]) -> Unit
 pub fn ArrayRef::insert_text(Self, Int) -> Text
 pub fn ArrayRef::length(Self) -> Int
 pub fn ArrayRef::observe(Self, String, (ArrayEvent, Transaction) -> Unit) -> Unit
+pub fn ArrayRef::observe_deep(Self, String, (ReadOnlyArray[Event], Transaction) -> Unit) -> Unit
 pub fn ArrayRef::remove_range(Self, Int, Int) -> Unit
 pub fn ArrayRef::sticky_boundary(Self, assoc? : Assoc) -> StickyIndex
 pub fn ArrayRef::sticky_index(Self, Int, assoc? : Assoc) -> StickyIndex?
 pub fn ArrayRef::to_array(Self) -> Array[Out]
 pub fn ArrayRef::to_json(Self) -> Json
 pub fn ArrayRef::unobserve(Self, String) -> Bool
+pub fn ArrayRef::unobserve_deep(Self, String) -> Bool
 
 pub(all) enum Assoc {
   Before
@@ -216,6 +219,16 @@ pub(all) enum EntryChange {
 }
 pub fn EntryChange::to_json(Self) -> Json
 
+pub(all) enum Event {
+  Text(TextEvent)
+  Array(ArrayEvent)
+  Map(MapEvent)
+  XmlFragment(XmlEvent)
+  XmlText(XmlTextEvent)
+}
+pub fn Event::path(Self) -> ReadOnlyArray[PathSegment]
+pub fn Event::target(Self) -> Out
+
 pub(all) struct Id {
   client : UInt64
   clock : UInt
@@ -244,6 +257,7 @@ pub struct MapEvent {
   // private fields
 }
 pub fn MapEvent::keys(Self) -> Map[String, EntryChange]
+pub fn MapEvent::path(Self) -> ReadOnlyArray[PathSegment]
 pub fn MapEvent::target(Self) -> MapRef
 pub fn MapEvent::to_json(Self) -> Json
 
@@ -257,9 +271,11 @@ pub fn MapRef::insert_array(Self, String) -> ArrayRef
 pub fn MapRef::insert_map(Self, String) -> Self
 pub fn MapRef::insert_text(Self, String) -> Text
 pub fn MapRef::observe(Self, String, (MapEvent, Transaction) -> Unit) -> Unit
+pub fn MapRef::observe_deep(Self, String, (ReadOnlyArray[Event], Transaction) -> Unit) -> Unit
 pub fn MapRef::remove(Self, String) -> Unit
 pub fn MapRef::to_json(Self) -> Json
 pub fn MapRef::unobserve(Self, String) -> Bool
+pub fn MapRef::unobserve_deep(Self, String) -> Bool
 
 pub(all) enum Message {
   Sync(SyncMessage)
@@ -291,6 +307,15 @@ pub(all) enum Out {
 }
 pub fn Out::to_json(Self) -> Json
 pub fn Out::to_string(Self) -> String
+
+pub(all) enum PathSegment {
+  Key(String)
+  Index(UInt)
+} derive(Eq, @debug.Debug)
+pub fn PathSegment::equal(Self, Self) -> Bool
+pub fn PathSegment::not_equal(Self, Self) -> Bool
+pub fn PathSegment::to_json(Self) -> Json
+pub fn PathSegment::to_repr(Self) -> @debug.Repr
 
 pub struct Snapshot {
   // private fields
@@ -348,11 +373,13 @@ pub fn Text::insert_embed(Self, Int, Any, attributes? : Array[(String, Any)]) ->
 pub fn Text::insert_with_attributes(Self, Int, String, Array[(String, Any)]) -> Unit
 pub fn Text::length(Self) -> Int
 pub fn Text::observe(Self, String, (TextEvent, Transaction) -> Unit) -> Unit
+pub fn Text::observe_deep(Self, String, (ReadOnlyArray[Event], Transaction) -> Unit) -> Unit
 pub fn Text::remove_range(Self, Int, Int) -> Unit
 pub fn Text::sticky_boundary(Self, assoc? : Assoc) -> StickyIndex
 pub fn Text::sticky_index(Self, Int, assoc? : Assoc) -> StickyIndex?
 pub fn Text::to_delta(Self) -> Array[TextChunk]
 pub fn Text::unobserve(Self, String) -> Bool
+pub fn Text::unobserve_deep(Self, String) -> Bool
 
 pub(all) struct TextChunk {
   insert : Out
@@ -364,6 +391,7 @@ pub struct TextEvent {
   // private fields
 }
 pub fn TextEvent::delta(Self) -> ReadOnlyArray[Delta]
+pub fn TextEvent::path(Self) -> ReadOnlyArray[PathSegment]
 pub fn TextEvent::target(Self) -> Text
 
 pub struct Transaction {
@@ -388,11 +416,24 @@ pub fn XmlElement::attributes(Self) -> Array[(String, Out)]
 pub fn XmlElement::get_attribute(Self, String) -> Out?
 pub fn XmlElement::get_string(Self) -> String
 pub fn XmlElement::insert_attribute(Self, String, Any) -> Unit
+pub fn XmlElement::observe(Self, String, (XmlEvent, Transaction) -> Unit) -> Unit
+pub fn XmlElement::observe_deep(Self, String, (ReadOnlyArray[Event], Transaction) -> Unit) -> Unit
 pub fn XmlElement::parent(Self) -> XmlNode?
 pub fn XmlElement::remove_attribute(Self, String) -> Unit
 pub fn XmlElement::sticky_boundary(Self, assoc? : Assoc) -> StickyIndex
 pub fn XmlElement::sticky_index(Self, Int, assoc? : Assoc) -> StickyIndex?
 pub fn XmlElement::tag(Self) -> String
+pub fn XmlElement::unobserve(Self, String) -> Bool
+pub fn XmlElement::unobserve_deep(Self, String) -> Bool
+
+pub struct XmlEvent {
+  // private fields
+}
+pub fn XmlEvent::children_changed(Self) -> Bool
+pub fn XmlEvent::delta(Self) -> ReadOnlyArray[Change]
+pub fn XmlEvent::keys(Self) -> Map[String, EntryChange]
+pub fn XmlEvent::path(Self) -> ReadOnlyArray[PathSegment]
+pub fn XmlEvent::target(Self) -> XmlNode
 
 pub struct XmlFragment {
   // private fields
@@ -407,11 +448,15 @@ pub fn XmlFragment::insert_element(Self, Int, String) -> XmlElement
 pub fn XmlFragment::insert_fragment(Self, Int) -> Self
 pub fn XmlFragment::insert_text(Self, Int) -> XmlText
 pub fn XmlFragment::length(Self) -> Int
+pub fn XmlFragment::observe(Self, String, (XmlEvent, Transaction) -> Unit) -> Unit
+pub fn XmlFragment::observe_deep(Self, String, (ReadOnlyArray[Event], Transaction) -> Unit) -> Unit
 pub fn XmlFragment::parent(Self) -> XmlNode?
 pub fn XmlFragment::remove_attribute(Self, String) -> Unit
 pub fn XmlFragment::remove_range(Self, Int, Int) -> Unit
 pub fn XmlFragment::sticky_boundary(Self, assoc? : Assoc) -> StickyIndex
 pub fn XmlFragment::sticky_index(Self, Int, assoc? : Assoc) -> StickyIndex?
+pub fn XmlFragment::unobserve(Self, String) -> Bool
+pub fn XmlFragment::unobserve_deep(Self, String) -> Bool
 
 pub(all) enum XmlNode {
   Element(XmlElement)
@@ -430,10 +475,22 @@ pub fn XmlText::attributes(Self) -> Array[(String, Out)]
 pub fn XmlText::get_attribute(Self, String) -> Out?
 pub fn XmlText::get_string(Self) -> String
 pub fn XmlText::insert_attribute(Self, String, Any) -> Unit
+pub fn XmlText::observe(Self, String, (XmlTextEvent, Transaction) -> Unit) -> Unit
+pub fn XmlText::observe_deep(Self, String, (ReadOnlyArray[Event], Transaction) -> Unit) -> Unit
 pub fn XmlText::parent(Self) -> XmlNode?
 pub fn XmlText::remove_attribute(Self, String) -> Unit
 pub fn XmlText::sticky_boundary(Self, assoc? : Assoc) -> StickyIndex
 pub fn XmlText::sticky_index(Self, Int, assoc? : Assoc) -> StickyIndex?
+pub fn XmlText::unobserve(Self, String) -> Bool
+pub fn XmlText::unobserve_deep(Self, String) -> Bool
+
+pub struct XmlTextEvent {
+  // private fields
+}
+pub fn XmlTextEvent::delta(Self) -> ReadOnlyArray[Delta]
+pub fn XmlTextEvent::keys(Self) -> Map[String, EntryChange]
+pub fn XmlTextEvent::path(Self) -> ReadOnlyArray[PathSegment]
+pub fn XmlTextEvent::target(Self) -> XmlText
 
 // Type aliases
 
