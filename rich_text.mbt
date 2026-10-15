@@ -35,9 +35,12 @@ fn Text::rich_position(self : Text, index : Int32) -> RichPosition {
       match item.content {
         Format(key, value) => update_attribute(attrs, key, value)
         _ => {
-          let length = item.content.visible_length()
+          let length = item.content.offset_length(self.doc)
           if remaining < length {
-            let tail = self.doc.split(item, remaining)
+            let tail = self.doc.split(
+              item,
+              item.content.block_offset(remaining, self.doc),
+            )
             left = Some(id)
             right = Some(tail.id)
             remaining = 0
@@ -214,9 +217,12 @@ pub fn Text::format(
               self.doc.mark_deleted(item)
             }
           _ => {
-            let len = item.content.visible_length()
+            let len = item.content.offset_length(self.doc)
             if remaining < len {
-              let tail = self.doc.split(item, remaining)
+              let tail = self.doc.split(
+                item,
+                item.content.block_offset(remaining, self.doc),
+              )
               pos.left = Some(item.id)
               pos.right = Some(tail.id)
               break

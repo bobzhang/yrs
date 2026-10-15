@@ -134,8 +134,8 @@ fn Doc::sticky_index(
   let mut last = None
   while cursor is Some(id) {
     let item = self.items[id]
-    if !item.deleted && item.content.visible_length() > 0 {
-      if remaining < item.content.visible_length() {
+    if !item.deleted && item.content.offset_length(self) > 0 {
+      if remaining < item.content.offset_length(self) {
         return Some({
           scope: Relative({
             client: id.client,
@@ -144,7 +144,7 @@ fn Doc::sticky_index(
           assoc,
         })
       }
-      remaining -= item.content.visible_length()
+      remaining -= item.content.offset_length(self)
     }
     last = Some(item)
     cursor = item.right
@@ -183,7 +183,7 @@ pub fn StickyIndex::get_offset(self : StickyIndex, doc : Doc) -> Offset? {
       }
       let mut index = 0
       if !deleted_parent {
-        if !item.deleted && item.content.visible_length() > 0 {
+        if !item.deleted && item.content.offset_length(doc) > 0 {
           index = (id.clock - item.id.clock).reinterpret_as_int() +
             (if self.assoc == Before { 1 } else { 0 })
         }
@@ -191,7 +191,7 @@ pub fn StickyIndex::get_offset(self : StickyIndex, doc : Doc) -> Offset? {
         while left is Some(id) {
           let previous = doc.items[id]
           if !previous.deleted {
-            index += previous.content.visible_length()
+            index += previous.content.offset_length(doc)
           }
           left = previous.left
         }

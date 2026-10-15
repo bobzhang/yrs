@@ -144,15 +144,15 @@ fn Transaction::array_delta(
   }
   while cursor is Some(id) {
     let item = self.document.items[id]
-    if item.content.visible_length() > 0 {
+    if item.content.offset_length(self.document) > 0 {
       if item.deleted {
         if !self.has_added(id) && self.has_deleted(id) {
-          push(Removed(item.content.visible_length()))
+          push(Removed(item.content.offset_length(self.document)))
         }
       } else if self.has_added(id) {
         push(Added(ReadOnlyArray::from_array(item.values(self.document)[:])))
       } else {
-        push(Retain(item.content.visible_length()))
+        push(Retain(item.content.offset_length(self.document)))
       }
     }
     cursor = item.right
@@ -220,13 +220,13 @@ fn Transaction::text_delta(
             flush()
             action = 3
           }
-          count += item.content.visible_length()
+          count += item.content.offset_length(self.document)
         } else if !item.deleted {
           if action != 2 {
             flush()
             action = 2
           }
-          count += item.content.visible_length()
+          count += item.content.offset_length(self.document)
         }
       Embed(_) | Shared(_) =>
         if added {

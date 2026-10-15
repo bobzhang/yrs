@@ -113,7 +113,7 @@ fn Doc::event_path(
       while cursor is Some(other) && other != id {
         let child = self.items[other]
         if !child.deleted {
-          index += child.content.visible_length().reinterpret_as_uint()
+          index += child.content.offset_length(self).reinterpret_as_uint()
         }
         cursor = child.right
       }

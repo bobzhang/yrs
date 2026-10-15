@@ -166,8 +166,21 @@ pub fn Doc::Doc(
   collection_id? : String,
   auto_load~ : Bool = false,
   should_load~ : Bool = true,
+  offset_kind~ : OffsetKind = Utf16,
 ) -> Doc {
-  make_doc(client_id, guid, collection_id, auto_load, should_load, false, 0)
+  make_doc(
+    client_id,
+    guid,
+    collection_id,
+    auto_load,
+    should_load,
+    false,
+    if offset_kind == Bytes {
+      1
+    } else {
+      0
+    },
+  )
 }
 
 ///|
@@ -667,7 +680,7 @@ pub fn Text::length(self : Text) -> Int32 {
   while cursor is Some(id) {
     let item = self.doc.items[id]
     if !item.deleted {
-      length += item.content.visible_length()
+      length += item.content.offset_length(self.doc)
     }
     cursor = item.right
   }
@@ -686,9 +699,12 @@ fn Text::position(self : Text, index : Int32) -> (Id?, Id?) {
       if remaining == 0 {
         return (left, cursor)
       }
-      let len = item.content.visible_length()
+      let len = item.content.offset_length(self.doc)
       if remaining < len {
-        let tail = self.doc.split(item, remaining)
+        let tail = self.doc.split(
+          item,
+          item.content.block_offset(remaining, self.doc),
+        )
         return (Some(item.id), Some(tail.id))
       }
       remaining -= len
@@ -749,11 +765,12 @@ pub fn Text::remove_range(self : Text, index : Int32, length : Int32) -> Unit {
     let mut remaining = length
     while remaining > 0 && pos.right is Some(id) {
       let item = self.doc.items[id]
-      if !item.deleted && item.content.visible_length() > 0 {
-        if remaining < item.content.visible_length() {
-          self.doc.split(item, remaining) |> ignore
+      if !item.deleted && item.content.offset_length(self.doc) > 0 {
+        if remaining < item.content.offset_length(self.doc) {
+          self.doc.split(item, item.content.block_offset(remaining, self.doc))
+          |> ignore
         }
-        remaining -= item.content.visible_length()
+        remaining -= item.content.offset_length(self.doc)
         self.doc.mark_deleted(item)
       }
       pos.forward()

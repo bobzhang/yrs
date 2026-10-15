@@ -1,0 +1,15 @@
+// Generated using `moon info`, DON'T EDIT IT
+package "bobzhang/yrs/validation/offsets"
+
+// Values
+pub fn evaluate(String) -> String
+
+pub fn evaluate_v2(String) -> String
+
+// Errors
+
+// Types and methods
+
+// Type aliases
+
+// Traits

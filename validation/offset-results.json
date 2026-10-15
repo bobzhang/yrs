@@ -1,0 +1,17 @@
+{
+  "upstream": "ac339600c712642e556895426113c3f9c117de39",
+  "scenarios": 96,
+  "offset_modes": [
+    "bytes",
+    "utf16",
+    "bytes"
+  ],
+  "wire_versions": [
+    "v1",
+    "v2"
+  ],
+  "transaction_snapshots": 34176,
+  "text_events": 27770,
+  "wire_replay_cases": 1152,
+  "status": "passed"
+}

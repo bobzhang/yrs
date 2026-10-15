@@ -160,6 +160,16 @@ against Rust in both wire formats: 30,336 snapshots, 17,104 lifecycle events and
 destroy/reload. That matrix excludes the reference's stale destroyed-handle
 registry while checking the port's live-registration invariant; see
 `validation/REFERENCE_LIMITATIONS.md`. Decoded GC/offset options are preserved on
-the wire, but actual garbage collection and UTF-8 offset operations remain
-outstanding. Subdocument data providers and globally unique GUID generation are
+the wire; actual garbage collection remains outstanding. Subdocument data providers and globally unique GUID generation are
 host responsibilities.
+
+
+`Doc(client_id=..., offset_kind=Bytes)` supports UTF-8 byte offsets for text
+editing and events. The default remains `Utf16` for Yjs interoperability;
+replicas may use different offset modes while exchanging identical updates.
+Insert, remove and format offsets in byte mode must fall on Unicode character
+boundaries. CRDT state-vector clocks always remain UTF-16 code units.
+`python3 validation/offsets.py` validates 96 randomized mixed-mode histories,
+34,176 snapshots, 27,770 text events and 1,152 wire replay cases across v1/v2.
+These cover Chinese, astral characters, combining accents and ZWJ emoji. This
+matrix does not yet establish Unicode sticky-position parity.

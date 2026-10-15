@@ -186,7 +186,7 @@ pub fn Delta::to_json(Self) -> Json
 pub struct Doc {
   // private fields
 }
-pub fn Doc::Doc(client_id~ : UInt64, guid? : String, collection_id? : String, auto_load? : Bool, should_load? : Bool) -> Self
+pub fn Doc::Doc(client_id~ : UInt64, guid? : String, collection_id? : String, auto_load? : Bool, should_load? : Bool, offset_kind? : OffsetKind) -> Self
 pub fn Doc::apply_update_v1(Self, Bytes) -> Unit raise DecodeError
 pub fn Doc::apply_update_v2(Self, Bytes, max_items? : Int) -> Unit raise DecodeError
 pub fn Doc::auto_load(Self) -> Bool
@@ -211,6 +211,7 @@ pub fn Doc::observe_subdocs(Self, String, (SubdocsEvent, Transaction) -> Unit) -
 pub fn Doc::observe_transaction_cleanup(Self, String, (Transaction) -> Unit) -> Unit
 pub fn Doc::observe_update_v1(Self, String, (Bytes, Transaction) -> Unit) -> Unit
 pub fn Doc::observe_update_v2(Self, String, (Bytes, Transaction) -> Unit) -> Unit
+pub fn Doc::offset_kind(Self) -> OffsetKind
 pub fn Doc::parent_doc(Self) -> Self?
 pub fn Doc::pending_items(Self) -> Int
 pub fn Doc::should_load(Self) -> Bool
@@ -311,6 +312,14 @@ pub(all) struct Offset {
 pub fn Offset::equal(Self, Self) -> Bool
 pub fn Offset::not_equal(Self, Self) -> Bool
 pub fn Offset::to_repr(Self) -> @debug.Repr
+
+pub(all) enum OffsetKind {
+  Utf16
+  Bytes
+} derive(Eq, @debug.Debug)
+pub fn OffsetKind::equal(Self, Self) -> Bool
+pub fn OffsetKind::not_equal(Self, Self) -> Bool
+pub fn OffsetKind::to_repr(Self) -> @debug.Repr
 
 pub(all) enum Out {
   Value(Any)
