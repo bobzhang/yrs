@@ -47,3 +47,30 @@ MoonBit to reconstruct that content after every subsequent operation. It compare
 snapshot state vectors and deletion ranges independently, exchanges snapshot and
 cursor encodings in both directions, and records this reference failure in the
 results. No historical reconstruction cases are excluded because of this defect.
+
+## Undo restoration order
+
+The unchanged pinned Rust implementation restores an unordered set of items.
+Fresh processes can therefore produce different item identities and, in some
+histories, different rendered results. This is not a reason to accept an arbitrary
+port result: the undo oracle requires a fresh Rust run to match the complete
+MoonBit history prefix (up to 64 attempts). Every accepted alternative is logged
+in `undo-results.json`.
+
+Reproduce with the `undo` reference binary and either fixture:
+
+- `fixtures/upstream-undo-map-order.json`: the same final map entry was observed
+  as both 24 and 81 in separate runs.
+- `fixtures/upstream-undo-xml-nondeterminism.json`: after repeated XML undo and
+  restoration, the final map-only edit was observed to leave the XML text as
+  `hello` or shorten it to `h`. The occurrence depends on restoration order;
+  repeat the fixture across fresh processes. The harness does not modify the
+  upstream checkout or its hashing implementation.
+
+The default undo comparison uses a single editing author with synchronization to
+followers and explicit bidirectional binary transfers. Multiple independent undo
+authors are an additional, currently failing compatibility configuration; their
+restored identities can affect later conflict ordering. Do not interpret the
+single-author result as proof of full concurrent undo compatibility. Exact undo
+observer-event equivalence also remains unverified; the separate event oracle
+covers grouped and concurrent changes without independently generated undo.

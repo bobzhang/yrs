@@ -329,6 +329,14 @@ pub fn Snapshot::encode_v2(Self) -> Bytes raise DecodeError
 pub fn Snapshot::is_visible(Self, Id) -> Bool
 pub fn Snapshot::state_vector(Self) -> StateVector
 
+pub struct StackItem[M] {
+  mut meta : M
+  // private fields
+}
+pub fn[M] StackItem::deletions(Self[M]) -> Array[(UInt64, UInt, UInt)]
+pub fn[M] StackItem::doc(Self[M]) -> Doc
+pub fn[M] StackItem::insertions(Self[M]) -> Array[(UInt64, UInt, UInt)]
+
 pub struct StateVector {
   // private fields
 }
@@ -406,6 +414,51 @@ pub fn Transaction::encode_update_v2(Self) -> Bytes raise DecodeError
 pub fn Transaction::insertions(Self) -> Array[(UInt64, UInt, UInt)]
 pub fn Transaction::is_local(Self) -> Bool
 pub fn Transaction::origin(Self) -> Bytes?
+
+pub struct UndoEvent[M] {
+  mut meta : M
+  // private fields
+}
+pub fn[M] UndoEvent::kind(Self[M]) -> UndoEventKind
+pub fn[M] UndoEvent::origin(Self[M]) -> Bytes?
+pub fn[M] UndoEvent::set_meta(Self[M], M) -> Unit
+
+pub(all) enum UndoEventKind {
+  Undo
+  Redo
+} derive(Eq, @debug.Debug)
+pub fn UndoEventKind::equal(Self, Self) -> Bool
+pub fn UndoEventKind::not_equal(Self, Self) -> Bool
+pub fn UndoEventKind::to_repr(Self) -> @debug.Repr
+
+pub struct UndoManager[M] {
+  // private fields
+}
+pub fn[M : Default] UndoManager::UndoManager(clock~ : () -> UInt64, capture_timeout_millis? : UInt64, tracked_origins? : Array[Bytes], capture_transaction? : (Transaction) -> Bool) -> Self[M]
+pub fn[M] UndoManager::as_origin(Self[M]) -> Bytes
+pub fn[M] UndoManager::can_redo(Self[M]) -> Bool
+pub fn[M] UndoManager::can_undo(Self[M]) -> Bool
+pub fn[M] UndoManager::clear_all(Self[M]) -> Unit
+pub fn[M] UndoManager::clear_redo(Self[M]) -> Unit
+pub fn[M] UndoManager::clear_undo(Self[M]) -> Unit
+pub fn[M] UndoManager::destroy(Self[M]) -> Unit
+pub fn[M] UndoManager::docs(Self[M]) -> Array[Doc]
+pub fn[M] UndoManager::exclude_origin(Self[M], Bytes) -> Unit
+pub fn[M] UndoManager::expand_scope(Self[M], Out) -> Unit
+pub fn[M] UndoManager::include_origin(Self[M], Bytes) -> Unit
+pub fn[M] UndoManager::observe_item_added(Self[M], String, (UndoEvent[M], Transaction) -> Unit) -> Unit
+pub fn[M] UndoManager::observe_item_popped(Self[M], String, (UndoEvent[M], Transaction) -> Unit) -> Unit
+pub fn[M] UndoManager::observe_item_updated(Self[M], String, (UndoEvent[M], Transaction) -> Unit) -> Unit
+pub fn[M] UndoManager::observe_stack_cleared(Self[M], String, (Bool, Bool) -> Unit) -> Unit
+pub fn[M] UndoManager::redo(Self[M]) -> Bool
+pub fn[M] UndoManager::redo_stack(Self[M]) -> ReadOnlyArray[StackItem[M]]
+pub fn[M] UndoManager::reset(Self[M]) -> Unit
+pub fn[M] UndoManager::undo(Self[M]) -> Bool
+pub fn[M] UndoManager::undo_stack(Self[M]) -> ReadOnlyArray[StackItem[M]]
+pub fn[M] UndoManager::unobserve_item_added(Self[M], String) -> Bool
+pub fn[M] UndoManager::unobserve_item_popped(Self[M], String) -> Bool
+pub fn[M] UndoManager::unobserve_item_updated(Self[M], String) -> Bool
+pub fn[M] UndoManager::unobserve_stack_cleared(Self[M], String) -> Bool
 
 pub struct XmlElement {
   // private fields

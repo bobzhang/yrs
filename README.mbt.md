@@ -39,7 +39,7 @@ Rich text supports attributed insertion, formatting, JSON embeds and formatted d
 
 XML fragments, elements, attributes, formatted XML text and parent navigation now share the CRDT store. A further 128 randomized XML histories pass in v1/v2 with Rust GC both enabled and disabled (91,136 operation snapshots and 3,072 cross-runtime document transfers). XML insertion preserves upstream tombstone boundary choices.
 
-Current limitations: unsupported content is rejected before applying an update. The remaining shared types, undo and some transaction/event APIs are still outstanding. The store currently favors straightforward correctness over upstream's block compaction and indexing optimizations. This is not a production release or a completed port.
+Current limitations: unsupported content is rejected before applying an update. The remaining shared types, undo and some transaction/event APIs are still outstanding. Adjacent CRDT blocks are compacted; upstream garbage collection and indexing work remain. This is not a production release or a completed port.
 
 Run `moon test --target all` and `python3 validation/compare.py`. The oracle uses the installed Rust 1.97.1 toolchain and the exact reference checkout under `.repos/y-crdt`; its Cargo dependencies are locked. Clone `https://github.com/y-crdt/y-crdt.git` there and check out `ac339600c712642e556895426113c3f9c117de39` before running it.
 
@@ -80,7 +80,7 @@ still discard content needed for older snapshots.
 cross-runtime payloads. Historical content is checked against Rust state captured
 at snapshot creation because of the pinned encoder defect documented in
 `validation/REFERENCE_LIMITATIONS.md`; snapshot metadata is independently decoded
-and compared in both runtimes. Undo/redone position tracking remains outstanding.
+and compared in both runtimes. Persistent positions now follow local undo/restoration identities.
 
 Transactions: `doc.transact(action, origin=...)` groups edits into one commit.
 Existing mutation methods open an implicit transaction when needed. Document
@@ -99,7 +99,7 @@ rich-text events and 12,182 array events match Rust. The suite caught and fixed
 rich-text positioning before tombstones and formatting transitions in event
 deltas. Equivalent adjacent delta operations are consolidated for comparison;
 sibling collection-event order is unspecified upstream. Newly created or deleted
-nested types do not produce their own events. Undo remains outstanding. The full 641-scenario interoperability suite also passed again after
+nested types do not produce their own events. Undo validation and its current limits are described below. The full 641-scenario interoperability suite also passed again after
 the transaction foundation landed.
 
 Deep observation: every shared collection supports `observe_deep` and
@@ -115,3 +115,34 @@ deep events. It covers grouped changes, shifted paths, parent replacement,
 deleted/new descendant suppression and concurrent remote updates. Events of equal
 path depth and independent subscription batches have unspecified upstream order;
 the oracle compares their contents after sorting, while checking depth order.
+
+Selective undo: `UndoManager[M](clock=...)` tracks scoped collections across
+transactions and documents. Use `expand_scope` with a shared `Out` handle, then
+`undo`, `redo`, `reset`, origin filters and stack-clearing methods. Metadata has a
+`Default` value and can be changed by stack observers. Restored content receives
+new CRDT identities; persistent positions follow local restoration chains.
+
+`python3 validation/undo.py` validates one editing replica with remote followers:
+96 randomized histories, 34,176 transaction snapshots across v1/v2, and 1,152
+bidirectional Rust/MoonBit full-state transfers. It compares rendered structures,
+rich-text attributes, stack depths and undo/redo return values. Rust's unordered
+restoration can produce several outcomes; each accepted alternative must match
+an entire MoonBit history prefix in a fresh reference run. These runs are
+recorded in `validation/undo-results.json`. No mismatching history is silently
+excluded. Exact observer events during independently generated undo histories
+are outside this comparison.
+
+**Undo is not fully compatible yet.** `YRS_UNDO_CONCURRENT=1 python3
+validation/undo.py` exercises multiple independently editing/undoing replicas;
+this currently finds differences in concurrent restoration histories. A retained
+case is `validation/fixtures/undo-concurrent-identity-history.json`. Initial
+stack import/export and the rest of the upstream undo event surface also remain.
+See `validation/REFERENCE_LIMITATIONS.md` for reference nondeterminism evidence.
+
+The full 641-scenario core interoperability suite passed again after block
+compaction and the map-head split correction. Unit regressions cover compaction,
+remote-edit preservation, repeated nested restoration, cursor tracking and
+multiple documents. Remaining major milestones are concurrent undo compatibility,
+subdocuments, document/offset options, remaining shared types and APIs, garbage
+collection, and performance/stress validation. A public release and repository
+completion claim are still pending those milestones.
