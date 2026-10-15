@@ -134,7 +134,7 @@ def main():
       for gc in gc_modes:
         print(f'checking {version} gc={gc}',file=sys.stderr,flush=True)
         rust_cmd=base_rust+[version]+(['--gc'] if gc else [])
-        moon_cmd=base_moon+[version]
+        moon_cmd=base_moon+[version]+(['--gc'] if gc else [])
         rust=execute(rust_cmd,scenarios)
         moon=execute(moon_cmd,scenarios)
         assert len(rust)==len(moon)==len(scenarios)
@@ -179,7 +179,7 @@ def main():
             for seed,(original,actual) in enumerate(zip(source,received)):
                 assert canonical_snapshot(original['snapshots'][-1])==canonical_snapshot(actual['snapshots'][-1]),f'cross-runtime update differs seed={seed}'
                 assert [[[str(c),n] for c,n in state] for state in original['states']]==[[[str(c),n] for c,n in state] for state in actual['states']]
-    result={'upstream':'ac339600c712642e556895426113c3f9c117de39','scenarios':len(scenarios),'wire_versions':versions,'rust_gc_modes':gc_modes,'checks':checks,'cross_runtime_documents':len(scenarios)*6*len(versions)*len(gc_modes),'status':'passed'}
+    result={'upstream':'ac339600c712642e556895426113c3f9c117de39','scenarios':len(scenarios),'wire_versions':versions,'rust_gc_modes':gc_modes,'moonbit_gc_modes':gc_modes,'checks':checks,'cross_runtime_documents':len(scenarios)*6*len(versions)*len(gc_modes),'status':'passed'}
     if not any(name.startswith('YRS_') for name in os.environ): (ROOT/'validation/results.json').write_text(json.dumps(result,indent=2)+'\n')
     print(json.dumps(result))
 if __name__=='__main__': main()

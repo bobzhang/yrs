@@ -186,7 +186,7 @@ pub fn Delta::to_json(Self) -> Json
 pub struct Doc {
   // private fields
 }
-pub fn Doc::Doc(client_id~ : UInt64, guid? : String, collection_id? : String, auto_load? : Bool, should_load? : Bool, offset_kind? : OffsetKind) -> Self
+pub fn Doc::Doc(client_id~ : UInt64, guid? : String, collection_id? : String, auto_load? : Bool, should_load? : Bool, offset_kind? : OffsetKind, skip_gc? : Bool) -> Self
 pub fn Doc::apply_update_v1(Self, Bytes) -> Unit raise DecodeError
 pub fn Doc::apply_update_v2(Self, Bytes, max_items? : Int) -> Unit raise DecodeError
 pub fn Doc::auto_load(Self) -> Bool
@@ -195,8 +195,9 @@ pub fn Doc::collection_id(Self) -> String?
 pub fn Doc::destroy(Self) -> Unit
 pub fn Doc::encode_state_as_update_v1(Self, remote? : StateVector) -> Bytes
 pub fn Doc::encode_state_as_update_v2(Self, remote? : StateVector) -> Bytes raise DecodeError
-pub fn Doc::encode_state_from_snapshot_v1(Self, Snapshot) -> Bytes
+pub fn Doc::encode_state_from_snapshot_v1(Self, Snapshot) -> Bytes raise DecodeError
 pub fn Doc::encode_state_from_snapshot_v2(Self, Snapshot) -> Bytes raise DecodeError
+pub fn Doc::gc(Self) -> Unit
 pub fn Doc::get_or_insert_array(Self, String) -> ArrayRef
 pub fn Doc::get_or_insert_map(Self, String) -> MapRef
 pub fn Doc::get_or_insert_text(Self, String) -> Text
@@ -215,6 +216,7 @@ pub fn Doc::offset_kind(Self) -> OffsetKind
 pub fn Doc::parent_doc(Self) -> Self?
 pub fn Doc::pending_items(Self) -> Int
 pub fn Doc::should_load(Self) -> Bool
+pub fn Doc::skip_gc(Self) -> Bool
 pub fn Doc::snapshot(Self) -> Snapshot
 pub fn Doc::state_vector(Self) -> StateVector
 pub fn Doc::subdoc_guids(Self) -> @set.Set[String]
@@ -444,6 +446,7 @@ pub fn Transaction::deletions(Self) -> Array[(UInt64, UInt, UInt)]
 pub fn Transaction::doc(Self) -> Doc
 pub fn Transaction::encode_update_v1(Self) -> Bytes
 pub fn Transaction::encode_update_v2(Self) -> Bytes raise DecodeError
+pub fn Transaction::gc(Self) -> Unit
 pub fn Transaction::insertions(Self) -> Array[(UInt64, UInt, UInt)]
 pub fn Transaction::is_local(Self) -> Bool
 pub fn Transaction::origin(Self) -> Bytes?

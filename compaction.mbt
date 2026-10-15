@@ -42,6 +42,7 @@ fn Doc::compact(self : Doc, transaction : Transaction) -> Unit {
         a.parent == b.parent &&
         a.parent_sub == b.parent_sub &&
         a.content.joined(b.content) is Some(content) {
+        a.keep = a.keep || b.keep
         a.content = content
         a.right = b.right
         if b.right is Some(right) {

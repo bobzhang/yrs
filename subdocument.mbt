@@ -252,6 +252,7 @@ fn Doc::destroy_contents(self : Doc) -> Unit {
   self.map_observers.clear()
   self.before_observers.clear()
   self.after_observers.clear()
+  self.undo_retention.clear()
   self.cleanup_observers.clear()
   self.update_v1_observers.clear()
   self.update_v2_observers.clear()

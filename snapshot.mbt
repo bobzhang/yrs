@@ -151,7 +151,10 @@ pub fn Snapshot::decode_v2(bytes : Bytes) -> Snapshot raise DecodeError {
 pub fn Doc::encode_state_from_snapshot_v1(
   self : Doc,
   snapshot : Snapshot,
-) -> Bytes {
+) -> Bytes raise DecodeError {
+  guard self.skip_gc() else {
+    raise InvalidData("snapshot encoding requires skip_gc=true")
+  }
   let items = []
   for client, blocks in self.clients {
     let end = snapshot.state.get(client).min(self.state.get(client))

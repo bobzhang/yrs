@@ -160,6 +160,7 @@ pub fn[M] UndoManager::expand_scope(
     scope.add(parent) |> ignore
   } else {
     self.scopes[doc.identity] = (doc, Set::from_array([parent]))
+    doc.undo_retention[self.key] = fn() { self.retained_ranges(doc) }
     doc.observe_after_transaction(self.key, fn(transaction) {
       self.capture(transaction)
     })
@@ -225,6 +226,7 @@ pub fn[M] UndoManager::redo_stack(
 pub fn[M] UndoManager::destroy(self : UndoManager[M]) -> Unit {
   for (doc, _) in self.scopes.values() {
     doc.unobserve_after_transaction(self.key) |> ignore
+    doc.undo_retention.remove(self.key)
   }
   self.scopes.clear()
   self.clear_all()
@@ -632,4 +634,39 @@ pub fn[M] UndoManager::unobserve_stack_cleared(
 ///|
 pub fn[M] UndoEvent::set_meta(self : UndoEvent[M], meta : M) -> Unit {
   self.meta = meta
+}
+
+///|
+fn[M] UndoManager::retained_ranges(
+  self : UndoManager[M],
+  doc : Doc,
+) -> Array[(UInt64, UInt32, UInt32)] {
+  let ranges = []
+  for entry in self.undo_items + self.redo_items {
+    if entry.document.identity == doc.identity {
+      for range in entry.inserted + entry.deleted {
+        ranges.push(range)
+      }
+    }
+  }
+  let scoped = []
+  for (client, start, end) in Snapshot(deletions=ranges).deletions() {
+    for item in doc.clients.get(client).unwrap_or([]) {
+      if item.id.clock >= end {
+        break
+      }
+      if item.id.clock + item.content.length().reinterpret_as_uint() > start &&
+        item.parent is Some(parent) &&
+        self.in_scope(doc, parent) {
+        scoped.push(
+          (
+            client,
+            item.id.clock,
+            item.id.clock + item.content.length().reinterpret_as_uint(),
+          ),
+        )
+      }
+    }
+  }
+  scoped
 }

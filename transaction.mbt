@@ -176,6 +176,9 @@ fn Doc::commit_transaction(self : Doc, transaction : Transaction) -> Unit {
   for (_, callback) in self.after_observers.to_array() {
     callback(transaction)
   }
+  if self.wire_gc {
+    self.collect_garbage(transaction.removed)
+  }
   self.compact(transaction)
   if transaction.capture_update {
     transaction.before_state() |> ignore

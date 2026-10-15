@@ -4,7 +4,11 @@ package "bobzhang/yrs/validation/bridge"
 // Values
 pub fn evaluate(String) -> String
 
+pub fn evaluate_gc(String) -> String
+
 pub fn evaluate_v2(String) -> String
+
+pub fn evaluate_v2_gc(String) -> String
 
 pub fn utilities(String) -> String
 

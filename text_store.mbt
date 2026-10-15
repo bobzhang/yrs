@@ -96,6 +96,7 @@ priv struct Item {
   mut right : Id?
   mut redone : Id?
   mut deleted : Bool
+  mut keep : Bool
 }
 
 ///|
@@ -146,6 +147,7 @@ pub struct Doc {
   priv wire_encoding : Int32
   priv mut owner : (Doc, Id)?
   priv children_docs : Map[UInt64, Doc]
+  priv undo_retention : Map[String, () -> Array[(UInt64, UInt32, UInt32)]]
   priv subdoc_observers : Map[String, (SubdocsEvent, Transaction) -> Unit]
   priv destroy_observers : Map[String, (Doc) -> Unit]
   priv state : StateVector
@@ -167,6 +169,7 @@ pub fn Doc::Doc(
   auto_load~ : Bool = false,
   should_load~ : Bool = true,
   offset_kind~ : OffsetKind = Utf16,
+  skip_gc~ : Bool = true,
 ) -> Doc {
   make_doc(
     client_id,
@@ -174,7 +177,7 @@ pub fn Doc::Doc(
     collection_id,
     auto_load,
     should_load,
-    false,
+    !skip_gc,
     if offset_kind == Bytes {
       1
     } else {
@@ -217,6 +220,7 @@ fn make_doc(
     wire_encoding,
     owner: None,
     children_docs: {},
+    undo_retention: {},
     subdoc_observers: {},
     destroy_observers: {},
     state: StateVector(),
@@ -307,6 +311,7 @@ fn Doc::split(self : Doc, item : Item, at : Int32) -> Item {
       ({ client: id.client, clock: id.clock + at.reinterpret_as_uint(), } : Id)
     }),
     deleted: item.deleted,
+    keep: item.keep,
   }
   if item.right is Some(right) {
     self.items[right].left = Some(id)
@@ -431,6 +436,7 @@ fn Doc::integrate_missing(self : Doc, raw : RawItem) -> Bool {
     left,
     right,
     redone: None,
+    keep: false,
     deleted: content is (Deleted(_) | Garbage(_)),
   }
   if parent is Some(name) && parent_sub is Some(key) {

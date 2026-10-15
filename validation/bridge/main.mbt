@@ -57,10 +57,14 @@ fn xml_snapshot(node : @yrs.XmlNode) -> Json {
 }
 
 ///|
-fn evaluate_mode(input : String, v2 : Bool) -> String raise {
+fn evaluate_mode(input : String, v2 : Bool, gc~ : Bool = false) -> String raise {
   let parsed = @json.parse(input)
   guard parsed is Array(commands) else { abort("expected commands") }
-  let docs = [@yrs.Doc(client_id=1UL), Doc(client_id=2UL), Doc(client_id=3UL)]
+  let docs = [
+    @yrs.Doc(client_id=1UL, skip_gc=!gc),
+    Doc(client_id=2UL, skip_gc=!gc),
+    Doc(client_id=3UL, skip_gc=!gc),
+  ]
   let texts = docs.map(fn(d) { d.get_or_insert_text("note") })
   let arrays = docs.map(fn(d) { d.get_or_insert_array("items") })
   let maps = docs.map(fn(d) { d.get_or_insert_map("settings") })
@@ -366,6 +370,22 @@ pub fn utilities(input : String) -> String {
 pub fn utilities_v2(input : String) -> String {
   utilities_mode(input, true) catch {
     @yrs.InvalidData(message) => ({ "error": Json(message) } : Json).stringify()
+    err => ({ "error": Json(err.to_string()) } : Json).stringify()
+  }
+}
+
+///|
+#export_name("evaluate_gc")
+pub fn evaluate_gc(input : String) -> String {
+  evaluate_mode(input, false, gc=true) catch {
+    err => ({ "error": Json(err.to_string()) } : Json).stringify()
+  }
+}
+
+///|
+#export_name("evaluate_v2_gc")
+pub fn evaluate_v2_gc(input : String) -> String {
+  evaluate_mode(input, true, gc=true) catch {
     err => ({ "error": Json(err.to_string()) } : Json).stringify()
   }
 }
