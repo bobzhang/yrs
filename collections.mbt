@@ -1,11 +1,12 @@
 ///|
 pub struct ArrayRef {
   priv doc : Doc
-  priv name : String
+  priv name : Parent
 }
 
 ///|
 pub fn Doc::get_or_insert_array(self : Doc, name : String) -> ArrayRef {
+  let name = Root(name)
   self.branch(name) |> ignore
   { doc: self, name, }
 }
@@ -17,7 +18,7 @@ pub fn ArrayRef::length(self : ArrayRef) -> Int32 {
 }
 
 ///|
-pub fn ArrayRef::to_array(self : ArrayRef) -> Array[Any] {
+pub fn ArrayRef::to_array(self : ArrayRef) -> Array[Out] {
   let result = []
   let mut cursor = self.doc.branch(self.name).head
   while cursor is Some(id) {
@@ -26,9 +27,10 @@ pub fn ArrayRef::to_array(self : ArrayRef) -> Array[Any] {
       match item.content {
         Values(values) =>
           for value in values {
-            result.push(value)
+            result.push(Value(value))
           }
-        Binary(b) => result.push(Buffer(b))
+        Binary(b) => result.push(Value(Buffer(b)))
+        Shared(kind) => result.push(self.doc.shared_output(item.id, kind))
         _ => ()
       }
     }
@@ -40,16 +42,14 @@ pub fn ArrayRef::to_array(self : ArrayRef) -> Array[Any] {
 ///|
 fn Doc::insert_content(
   self : Doc,
-  name : String,
+  name : Parent,
   key : String?,
   left : Id?,
   right : Id?,
   content : Content,
-) -> Unit {
+) -> Id {
   let length = content.length()
-  if length == 0 {
-    return
-  }
+  guard length > 0 else { abort("empty item") }
   let clock = self.state.get(self.client)
   guard clock.to_uint64() + length.to_uint64() <= 0xffff_ffffUL else {
     abort("document clock exhausted")
@@ -74,6 +74,7 @@ fn Doc::insert_content(
     abort("local insert has missing dependency")
   }
   self.settle()
+  raw.id
 }
 
 ///|
@@ -84,6 +85,9 @@ pub fn ArrayRef::insert_range(
 ) -> Unit {
   let sequence : Text = { doc: self.doc, name: self.name, }
   let (left, right) = sequence.position(index)
+  if values.is_empty() {
+    return
+  }
   self.doc.insert_content(
     self.name,
     None,
@@ -91,6 +95,7 @@ pub fn ArrayRef::insert_range(
     right,
     Values(ReadOnlyArray::from_array(values[:])),
   )
+  |> ignore
 }
 
 ///|
@@ -106,11 +111,12 @@ pub fn ArrayRef::remove_range(
 ///|
 pub struct MapRef {
   priv doc : Doc
-  priv name : String
+  priv name : Parent
 }
 
 ///|
 pub fn Doc::get_or_insert_map(self : Doc, name : String) -> MapRef {
+  let name = Root(name)
   self.branch(name) |> ignore
   { doc: self, name, }
 }
@@ -124,10 +130,11 @@ pub fn MapRef::insert(self : MapRef, key : String, value : Any) -> Unit {
     None,
     Values([value]),
   )
+  |> ignore
 }
 
 ///|
-pub fn MapRef::get(self : MapRef, key : String) -> Any? {
+pub fn MapRef::get(self : MapRef, key : String) -> Out? {
   guard self.doc.branch(self.name).values.get(key) is Some(id) else {
     return None
   }
@@ -136,8 +143,9 @@ pub fn MapRef::get(self : MapRef, key : String) -> Any? {
     return None
   }
   match item.content {
-    Values(values) => Some(values[values.length() - 1])
-    Binary(b) => Some(Buffer(b))
+    Values(values) => Some(Value(values[values.length() - 1]))
+    Binary(b) => Some(Value(Buffer(b)))
+    Shared(kind) => Some(self.doc.shared_output(item.id, kind))
     _ => None
   }
 }
@@ -150,7 +158,7 @@ pub fn MapRef::remove(self : MapRef, key : String) -> Unit {
 }
 
 ///|
-pub fn MapRef::entries(self : MapRef) -> Array[(String, Any)] {
+pub fn MapRef::entries(self : MapRef) -> Array[(String, Out)] {
   let entries = []
   for key, _ in self.doc.branch(self.name).values {
     if self.get(key) is Some(value) {

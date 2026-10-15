@@ -1,8 +1,22 @@
 ///|
+priv enum Parent {
+  Root(String)
+  Nested(Id)
+} derive(Eq, Hash)
+
+///|
+priv enum SharedKind {
+  SharedArray
+  SharedMap
+  SharedText
+}
+
+///|
 priv enum Content {
   Characters(String)
   Values(ReadOnlyArray[Any])
   Binary(Bytes)
+  Shared(SharedKind)
   Deleted(Int32)
   Garbage(Int32)
 }
@@ -12,7 +26,7 @@ fn Content::length(self : Content) -> Int32 {
   match self {
     Characters(s) => s.length()
     Values(values) => values.length()
-    Binary(_) => 1
+    Binary(_) | Shared(_) => 1
     Deleted(n) | Garbage(n) => n
   }
 }
@@ -45,7 +59,7 @@ fn Content::slice(self : Content, start : Int32, end : Int32) -> Content {
           Array::makei(end - start, fn(i) { values[start + i] })[:],
         ),
       )
-    Binary(_) => {
+    Binary(_) | Shared(_) => {
       guard start == 0 && end == 1 else { abort("binary item is indivisible") }
       self
     }
@@ -59,7 +73,7 @@ priv struct RawItem {
   id : Id
   origin : Id?
   right_origin : Id?
-  parent : String?
+  parent : Parent?
   parent_sub : String?
   content : Content
 }
@@ -69,7 +83,7 @@ priv struct Item {
   id : Id
   origin : Id?
   right_origin : Id?
-  parent : String?
+  parent : Parent?
   parent_sub : String?
   mut content : Content
   mut left : Id?
@@ -92,7 +106,7 @@ pub struct Doc {
   priv state : StateVector
   priv clients : Map[UInt64, Array[Item]]
   priv items : Map[Id, Item]
-  priv roots : Map[String, Branch]
+  priv roots : Map[Parent, Branch]
   priv pending : Array[RawItem]
   priv deletes : Map[UInt64, Array[(UInt32, UInt32)]]
 }
@@ -126,7 +140,7 @@ pub fn Doc::pending_items(self : Doc) -> Int32 {
 }
 
 ///|
-fn Doc::branch(self : Doc, name : String) -> Branch {
+fn Doc::branch(self : Doc, name : Parent) -> Branch {
   match self.roots.get(name) {
     Some(b) => b
     None => {
@@ -234,6 +248,9 @@ fn Doc::integrate(self : Doc, raw : RawItem) -> Bool {
       content: raw.content.slice(offset, raw.content.length()),
     }
   }
+  if raw.parent is Some(Nested(id)) && self.find(id) is None {
+    return false
+  }
   for dep in [raw.origin, raw.right_origin] {
     if dep is Some(id) && self.find(id) is None {
       return false
@@ -241,13 +258,19 @@ fn Doc::integrate(self : Doc, raw : RawItem) -> Bool {
   }
   let mut left = raw.origin.map(fn(id) { self.clean_end(id).id })
   let right = raw.right_origin.map(fn(id) { self.clean_start(id).id })
-  let parent = match raw.parent {
+  let mut parent = match raw.parent {
     Some(name) => Some(name)
     None =>
       match left {
         Some(id) => self.items[id].parent
         None => right.bind(fn(id) { self.items[id].parent })
       }
+  }
+  if parent is Some(Nested(id)) {
+    let owner = self.find(id).unwrap()
+    if !(owner.content is Shared(_)) {
+      parent = None
+    }
   }
   let parent_sub = match left.bind(fn(id) { self.items[id].parent_sub }) {
     Some(key) => Some(key)
@@ -342,6 +365,9 @@ fn Doc::integrate(self : Doc, raw : RawItem) -> Bool {
       self.mark_deleted(item)
     }
   }
+  if parent is Some(Nested(id)) && self.find(id).unwrap().deleted {
+    self.mark_deleted(item)
+  }
   self.state.set_max(item.id.client, end.to_uint())
   true
 }
@@ -366,7 +392,7 @@ fn Doc::settle(self : Doc) -> Unit {
       break
     }
   }
-  for client, ranges in self.deletes {
+  for (client, ranges) in self.deletes.to_array() {
     for (start, end) in ranges {
       let mut clock = start
       while clock < end {
@@ -380,7 +406,7 @@ fn Doc::settle(self : Doc) -> Unit {
         if item.content.length().reinterpret_as_uint() > remaining {
           self.split(item, remaining.reinterpret_as_int()) |> ignore
         }
-        item.deleted = true
+        self.mark_deleted(item)
         clock += item.content.length().reinterpret_as_uint()
       }
     }
@@ -397,7 +423,10 @@ fn Doc::add_delete(
   if start == end {
     return
   }
-  let ranges = self.deletes.get(client).unwrap_or([])
+  let ranges = self.deletes
+    .get(client)
+    .map(fn(ranges) { ranges[:].to_owned() })
+    .unwrap_or([])
   ranges.push((start, end))
   ranges.sort_by(fn(a, b) { a.0.compare(b.0) })
   let merged : Array[(UInt32, UInt32)] = []
@@ -414,11 +443,12 @@ fn Doc::add_delete(
 ///|
 pub struct Text {
   priv doc : Doc
-  priv name : String
+  priv name : Parent
 }
 
 ///|
 pub fn Doc::get_or_insert_text(self : Doc, name : String) -> Text {
+  let name = Root(name)
   self.branch(name) |> ignore
   { doc: self, name, }
 }
@@ -532,7 +562,7 @@ pub fn Text::remove_range(self : Text, index : Int32, length : Int32) -> Unit {
         id.clock,
         id.clock + length.reinterpret_as_uint(),
       )
-      item.deleted = true
+      self.doc.mark_deleted(item)
       remaining -= length
     }
     cursor = item.right
@@ -557,12 +587,31 @@ fn Branch::set_first(self : Branch, key : String?, id : Id) -> Unit {
 
 ///|
 fn Doc::mark_deleted(self : Doc, item : Item) -> Unit {
-  if !item.deleted {
+  let work = [item]
+  while work.pop() is Some(item) {
+    if item.deleted {
+      continue
+    }
     item.deleted = true
     self.add_delete(
       item.id.client,
       item.id.clock,
       item.id.clock + item.content.length().reinterpret_as_uint(),
     )
+    if item.content is Shared(_) &&
+      self.roots.get(Nested(item.id)) is Some(branch) {
+      let starts = branch.heads.values().to_array()
+      if branch.head is Some(id) {
+        starts.push(id)
+      }
+      for start in starts {
+        let mut cursor = Some(start)
+        while cursor is Some(id) {
+          let child = self.items[id]
+          work.push(child)
+          cursor = child.right
+        }
+      }
+    }
   }
 }

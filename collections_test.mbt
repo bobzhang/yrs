@@ -10,8 +10,8 @@ test "arrays split value runs and exchange concurrent updates" {
   y.remove_range(0, 2)
   a.apply_update_v1(b.encode_state_as_update_v1())
   b.apply_update_v1(a.encode_state_as_update_v1())
-  assert_eq(x.to_array(), [String("moon"), Integer(3L)])
-  assert_eq(x.to_array(), y.to_array())
+  assert_eq(x.to_json(), Json::array([Json("moon"), Json(3)]))
+  assert_eq(x.to_json(), y.to_json())
 }
 
 ///|
@@ -24,12 +24,12 @@ test "concurrent maps converge and deletion does not revive overwritten values" 
   y.insert("theme", String("dark"))
   a.apply_update_v1(b.encode_state_as_update_v1())
   b.apply_update_v1(a.encode_state_as_update_v1())
-  assert_eq(x.get("theme"), Some(String("dark")))
-  assert_eq(x.entries(), y.entries())
+  assert_eq(x.get("theme").unwrap().to_json(), Json("dark"))
+  assert_eq(x.to_json(), y.to_json())
   x.remove("theme")
   b.apply_update_v1(a.encode_state_as_update_v1())
-  assert_eq(y.get("theme"), None)
+  assert_true(y.get("theme") is None)
   y.insert("theme", String("blue"))
   a.apply_update_v1(b.encode_state_as_update_v1())
-  assert_eq(x.get("theme"), Some(String("blue")))
+  assert_eq(x.get("theme").unwrap().to_json(), Json("blue"))
 }

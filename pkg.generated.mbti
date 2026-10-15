@@ -36,10 +36,14 @@ pub fn Any::to_repr(Self) -> @debug.Repr
 pub struct ArrayRef {
   // private fields
 }
+pub fn ArrayRef::insert_array(Self, Int) -> Self
+pub fn ArrayRef::insert_map(Self, Int) -> MapRef
 pub fn ArrayRef::insert_range(Self, Int, Array[Any]) -> Unit
+pub fn ArrayRef::insert_text(Self, Int) -> Text
 pub fn ArrayRef::length(Self) -> Int
 pub fn ArrayRef::remove_range(Self, Int, Int) -> Unit
-pub fn ArrayRef::to_array(Self) -> Array[Any]
+pub fn ArrayRef::to_array(Self) -> Array[Out]
+pub fn ArrayRef::to_json(Self) -> Json
 
 pub struct Doc {
   // private fields
@@ -72,10 +76,22 @@ pub fn Id::to_repr(Self) -> @debug.Repr
 pub struct MapRef {
   // private fields
 }
-pub fn MapRef::entries(Self) -> Array[(String, Any)]
-pub fn MapRef::get(Self, String) -> Any?
+pub fn MapRef::entries(Self) -> Array[(String, Out)]
+pub fn MapRef::get(Self, String) -> Out?
 pub fn MapRef::insert(Self, String, Any) -> Unit
+pub fn MapRef::insert_array(Self, String) -> ArrayRef
+pub fn MapRef::insert_map(Self, String) -> Self
+pub fn MapRef::insert_text(Self, String) -> Text
 pub fn MapRef::remove(Self, String) -> Unit
+pub fn MapRef::to_json(Self) -> Json
+
+pub(all) enum Out {
+  Value(Any)
+  Array(ArrayRef)
+  Map(MapRef)
+  Text(Text)
+}
+pub fn Out::to_json(Self) -> Json
 
 pub struct StateVector {
   // private fields

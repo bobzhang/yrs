@@ -49,6 +49,24 @@ def main():
                 for y in range(3):
                     if x!=y: commands.append(['s',x,y])
         scenarios.append(commands)
+    for seed in range(128):
+        rng=random.Random(2000+seed)
+        commands=[]
+        for step in range(160):
+            kind=rng.choice(['n','e','e','M','s','q','r'])
+            x=rng.randrange(3)
+            key='key'+str(rng.randrange(3))
+            if kind=='n': cmd=[kind,x,key,'title']
+            elif kind=='e': cmd=[kind,x,key,rng.randrange(999)]
+            elif kind=='M': cmd=[kind,x,key]
+            elif kind in ('s','q'): cmd=[kind,x,(x+rng.randrange(1,3))%3]
+            else: cmd=[kind,rng.randrange(999)]
+            commands.append(cmd)
+        for _ in range(3):
+            for x in range(3):
+                for y in range(3):
+                    if x!=y: commands.append(['s',x,y])
+        scenarios.append(commands)
     def execute(command, cases):
         inp=''.join(json.dumps(case,ensure_ascii=False)+'\n' for case in cases)
         return [json.loads(line) for line in run(command,input=inp,capture_output=True).stdout.splitlines()]

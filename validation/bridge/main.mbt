@@ -57,6 +57,30 @@ pub fn evaluate(input : String) -> String {
         let pos = integer(args[2]) % (n + 1)
         texts[x].remove_range(pos, integer(args[3]) % (n - pos + 1))
       }
+      "n" => {
+        guard args[2] is String(key) && args[3] is String(title) else {
+          abort("bad nested command")
+        }
+        let inner = maps[x].insert_map(key)
+        inner.insert_text("title").insert(0, title)
+        inner.insert_array("list").insert_map(0).insert("done", Bool(false))
+      }
+      "e" => {
+        guard args[2] is String(key) else { abort("bad nested command") }
+        if maps[x].get(key) is Some(Map(inner)) {
+          if inner.get("title") is Some(Text(text)) {
+            text.insert(integer(args[3]) % (text.length() + 1), "!")
+          }
+          if inner.get("list") is Some(Array(list)) {
+            if list.to_array().get(0) is Some(Map(row)) {
+              row.insert("done", Bool(true))
+            }
+            list.insert_range(list.length(), [
+              Integer(integer(args[3]).to_int64()),
+            ])
+          }
+        }
+      }
       "I" => {
         guard args[3] is Array(values) else { abort("expected array") }
         arrays[x].insert_range(
@@ -109,7 +133,7 @@ pub fn evaluate(input : String) -> String {
           (
             {
               "text": Json(texts[i].get_string()),
-              "array": Json(arrays[i].to_array().map(@yrs.Any::to_json)),
+              "array": Json(arrays[i].to_array().map(@yrs.Out::to_json)),
               "map": Json(map),
             } : Json)
         }),

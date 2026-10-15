@@ -17,10 +17,11 @@ fn read_update(
         kind != 10 &&
         origin is None &&
         right_origin is None {
-        guard reader.uint() == 1UL else {
-          raise InvalidData("nested shared types are not implemented yet")
+        match reader.uint() {
+          1UL => Some(Root(reader.string()))
+          0UL => Some(Nested(reader.id()))
+          _ => raise InvalidData("invalid parent discriminator")
         }
-        Some(reader.string())
       } else {
         None
       }
@@ -30,6 +31,15 @@ fn read_update(
         None
       }
       let content = match kind {
+        7 =>
+          Shared(
+            match reader.byte() {
+              0 => SharedArray
+              1 => SharedMap
+              2 => SharedText
+              _ => raise InvalidData("unsupported shared type")
+            },
+          )
         3 => Binary(reader.buffer())
         8 => {
           let values = []
@@ -140,6 +150,7 @@ pub fn Doc::encode_state_as_update_v1(
         Characters(_) => 4
         Values(_) => 8
         Binary(_) => 3
+        Shared(_) => 7
         Deleted(_) => 1
         Garbage(_) => 0
       }
@@ -160,8 +171,16 @@ pub fn Doc::encode_state_as_update_v1(
           writer.id(id)
         }
         if origin is None && item.right_origin is None {
-          writer.uint(1UL)
-          writer.string(item.parent.unwrap())
+          match item.parent.unwrap() {
+            Root(name) => {
+              writer.uint(1UL)
+              writer.string(name)
+            }
+            Nested(id) => {
+              writer.uint(0UL)
+              writer.id(id)
+            }
+          }
           if item.parent_sub is Some(key) {
             writer.string(key)
           }
@@ -170,6 +189,14 @@ pub fn Doc::encode_state_as_update_v1(
       match content {
         Characters(s) => writer.string(s)
         Binary(b) => writer.buffer(b)
+        Shared(kind) =>
+          writer.byte(
+            match kind {
+              SharedArray => 0
+              SharedMap => 1
+              SharedText => 2
+            },
+          )
         Values(values) => {
           writer.uint(values.length().to_uint64())
           for value in values {

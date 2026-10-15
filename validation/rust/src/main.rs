@@ -22,6 +22,27 @@ fn main() {
    match kind {
     "i" => { let mut txn=docs[x].transact_mut(); let n=texts[x].len(&txn); let pos=a[2].as_u64().unwrap() as u32 % (n+1); texts[x].insert(&mut txn,pos,a[3].as_str().unwrap()); }
     "d" => { let mut txn=docs[x].transact_mut(); let n=texts[x].len(&txn); let pos=a[2].as_u64().unwrap() as u32 % (n+1); let len=a[3].as_u64().unwrap() as u32 % (n-pos+1); texts[x].remove_range(&mut txn,pos,len); }
+    "n" => {
+      let mut txn=docs[x].transact_mut();
+      let inner=maps[x].insert(&mut txn,a[2].as_str().unwrap(),yrs::MapPrelim::default());
+      inner.insert(&mut txn,"title",yrs::TextPrelim::new(a[3].as_str().unwrap()));
+      let list=inner.insert(&mut txn,"list",yrs::ArrayPrelim::default());
+      let row=list.insert(&mut txn,0,yrs::MapPrelim::default());
+      row.insert(&mut txn,"done",false);
+    }
+    "e" => {
+      let mut txn=docs[x].transact_mut();
+      if let Some(yrs::Out::YMap(inner))=maps[x].get(&txn,a[2].as_str().unwrap()) {
+        if let Some(yrs::Out::YText(text))=inner.get(&txn,"title") {
+          let pos=a[3].as_u64().unwrap() as u32 % (text.len(&txn)+1);
+          text.insert(&mut txn,pos,"!");
+        }
+        if let Some(yrs::Out::YArray(list))=inner.get(&txn,"list") {
+          if let Some(yrs::Out::YMap(row))=list.get(&txn,0) { row.insert(&mut txn,"done",true); }
+          let len=list.len(&txn); list.insert(&mut txn,len,a[3].as_u64().unwrap() as i64);
+        }
+      }
+    }
     "I" => { let mut txn=docs[x].transact_mut(); let n=arrays[x].len(&txn); let pos=a[2].as_u64().unwrap() as u32 % (n+1); let values: Vec<yrs::Any>=a[3].as_array().unwrap().iter().map(|v| serde_json::from_value(v.clone()).unwrap()).collect(); arrays[x].insert_range(&mut txn,pos,values); }
     "D" => { let mut txn=docs[x].transact_mut(); let n=arrays[x].len(&txn); let pos=a[2].as_u64().unwrap() as u32 % (n+1); let len=a[3].as_u64().unwrap() as u32 % (n-pos+1); arrays[x].remove_range(&mut txn,pos,len); }
     "m" => { let value: yrs::Any=serde_json::from_value(a[3].clone()).unwrap(); maps[x].insert(&mut docs[x].transact_mut(),a[2].as_str().unwrap(),value); }
