@@ -15,7 +15,7 @@ Every milestone needs real Rust interoperability tests, rather than only MoonBit
 
 ## Implemented and checked
 
-Collaborative plain text uses the upstream YATA conflict-ordering algorithm, UTF-16 clocks, state vectors, binary v1 and v2 updates, deletion ranges, duplicate suppression and pending dependency integration. Deleted content is retained. Shared arrays and maps use the same store, with immutable lib0 values (including binary, signed 64-bit integers, floating point, arrays and objects). The Rust oracle covers 385 scenarios in four wire-version/GC configurations, 273,432 operation snapshots and 9,240 bidirectional document transfers, including nested maps/arrays/text, parent replacement and concurrent child edits.
+Collaborative plain text uses the upstream YATA conflict-ordering algorithm, UTF-16 clocks, state vectors, binary v1 and v2 updates, deletion ranges, duplicate suppression and pending dependency integration. Deleted content is retained. Shared arrays and maps use the same store, with immutable lib0 values (including binary, signed 64-bit integers, floating point, arrays and objects). The Rust oracle covers 513 scenarios in four wire-version/GC configurations: 273,432 independent operation comparisons, 546,816 binary replay snapshots, 109,400 local rich-text operations from identical starting states and 12,312 bidirectional document transfers. These include nested maps/arrays/text, parent replacement, concurrent child edits and rich text.
 
 ```mbt check
 ///|
