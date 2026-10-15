@@ -47,6 +47,9 @@ fn read_update(
               0 => SharedArray
               1 => SharedMap
               2 => SharedText
+              3 => SharedXmlElement(reader.string())
+              4 => SharedXmlFragment
+              6 => SharedXmlText
               _ => raise InvalidData("unsupported shared type")
             },
           )
@@ -227,13 +230,17 @@ fn Writer::raw_item(self : Writer, item : RawItem) -> Unit {
     }
     Embed(value) => self.string(value.to_json().stringify())
     Shared(kind) =>
-      self.byte(
-        match kind {
-          SharedArray => 0
-          SharedMap => 1
-          SharedText => 2
-        },
-      )
+      match kind {
+        SharedArray => self.byte(0)
+        SharedMap => self.byte(1)
+        SharedText => self.byte(2)
+        SharedXmlElement(tag) => {
+          self.byte(3)
+          self.string(tag)
+        }
+        SharedXmlFragment => self.byte(4)
+        SharedXmlText => self.byte(6)
+      }
     Values(values) => {
       self.uint(values.length().to_uint64())
       for value in values {

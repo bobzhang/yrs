@@ -32,6 +32,31 @@ fn unhex(s : String) -> Bytes {
 }
 
 ///|
+fn xml_snapshot(node : @yrs.XmlNode) -> Json {
+  match node {
+    Element(node) => {
+      let attrs : Map[String, Json] = Map([])
+      for (key, value) in node.attributes() {
+        attrs[key] = value.to_json()
+      }
+      {
+        "tag": Json(node.tag()),
+        "attributes": Json(attrs),
+        "children": Json(node.as_fragment().children().map(xml_snapshot)),
+      }
+    }
+    Fragment(node) => { "children": Json(node.children().map(xml_snapshot)) }
+    Text(node) => {
+      let attrs : Map[String, Json] = Map([])
+      for (key, value) in node.attributes() {
+        attrs[key] = value.to_json()
+      }
+      { "text": Json(node.get_string()), "attributes": Json(attrs) }
+    }
+  }
+}
+
+///|
 fn evaluate_mode(input : String, v2 : Bool) -> String raise {
   let parsed = @json.parse(input)
   guard parsed is Array(commands) else { abort("expected commands") }
@@ -39,6 +64,7 @@ fn evaluate_mode(input : String, v2 : Bool) -> String raise {
   let texts = docs.map(fn(d) { d.get_or_insert_text("note") })
   let arrays = docs.map(fn(d) { d.get_or_insert_array("items") })
   let maps = docs.map(fn(d) { d.get_or_insert_map("settings") })
+  let xmls = docs.map(fn(d) { d.get_or_insert_xml_fragment("article") })
   let queued : Array[(Int32, Bytes)] = []
   let snapshots : Array[Json] = []
   let mut trace = false
@@ -90,6 +116,34 @@ fn evaluate_mode(input : String, v2 : Bool) -> String raise {
             @yrs.Any::from_json(args[3]),
             attributes=attrs,
           )
+        }
+      }
+      "x" => {
+        guard args[3] is String(tag) && args[4] is String(value) else {
+          abort("invalid XML insert")
+        }
+        let node = xmls[x].insert_element(
+          integer(args[2]) % (xmls[x].length() + 1),
+          tag,
+        )
+        node.insert_attribute("class", String("entry"))
+        node.as_fragment().insert_text(0).as_text().insert(0, value)
+      }
+      "X" => {
+        let n = xmls[x].length()
+        let pos = integer(args[2]) % (n + 1)
+        xmls[x].remove_range(pos, integer(args[3]) % (n - pos + 1))
+      }
+      "z" => {
+        guard args[3] is String(value) else { abort("invalid XML attribute") }
+        let children = xmls[x].children()
+        if !children.is_empty() &&
+          children[integer(args[2]) % children.length()] is Element(node) {
+          node.insert_attribute("class", String(value))
+          if node.as_fragment().children().get(0) is Some(Text(node)) {
+            let text = node.as_text()
+            text.insert(integer(args[2]) % (text.length() + 1), "!")
+          }
         }
       }
       "n" => {
@@ -210,6 +264,7 @@ fn evaluate_mode(input : String, v2 : Bool) -> String raise {
               "delta": Json(texts[i].to_delta().map(@yrs.TextChunk::to_json)),
               "array": Json(arrays[i].to_array().map(@yrs.Out::to_json)),
               "map": Json(map),
+              "xml": Json(xmls[i].children().map(xml_snapshot)),
             } : Json)
         }),
       ),

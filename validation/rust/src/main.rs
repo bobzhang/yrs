@@ -1,11 +1,24 @@
 use std::io::{self, BufRead};
 use yrs::{Doc, Text, GetString, ReadTxn, Transact, Options, OffsetKind, Update};
 use yrs::updates::decoder::Decode;
-use yrs::{Array, Map};
+use yrs::{Array, Map, Xml, XmlFragment};
 use yrs::types::ToJson;
 use serde_json::{Value, json};
 fn hex(b: &[u8]) -> String { b.iter().map(|b| format!("{b:02x}")).collect() }
 fn unhex(s: &str) -> Vec<u8> { (0..s.len()).step_by(2).map(|i| u8::from_str_radix(&s[i..i+2],16).unwrap()).collect() }
+fn xml_snapshot(node: yrs::XmlOut, txn: &yrs::Transaction) -> Value {
+ match node {
+  yrs::XmlOut::Element(e) => {
+   let attrs:serde_json::Map<String,Value>=e.attributes(txn).map(|(k,v)|(k.to_string(),serde_json::to_value(v.to_json(txn)).unwrap())).collect();
+   json!({"tag":e.tag().as_ref(),"attributes":attrs,"children":e.children(txn).map(|c|xml_snapshot(c,txn)).collect::<Vec<_>>()})
+  }
+  yrs::XmlOut::Fragment(f) => json!({"children":f.children(txn).map(|c|xml_snapshot(c,txn)).collect::<Vec<_>>()}),
+  yrs::XmlOut::Text(t) => {
+   let attrs:serde_json::Map<String,Value>=t.attributes(txn).map(|(k,v)|(k.to_string(),serde_json::to_value(v.to_json(txn)).unwrap())).collect();
+   json!({"text":t.get_string(txn),"attributes":attrs})
+  }
+ }
+}
 fn main() {
  let v2=std::env::args().any(|s|s=="v2");
  let utilities=std::env::args().any(|s|s=="utilities");
@@ -29,6 +42,7 @@ fn main() {
   let texts: Vec<_> = docs.iter().map(|d| d.get_or_insert_text("note")).collect();
   let arrays: Vec<_> = docs.iter().map(|d| d.get_or_insert_array("items")).collect();
   let maps: Vec<_> = docs.iter().map(|d| d.get_or_insert_map("settings")).collect();
+  let xmls:Vec<_>=docs.iter().map(|d|d.get_or_insert_xml_fragment("article")).collect();
   let mut queued: Vec<(usize,Vec<u8>)> = vec![];
   let mut snapshots=vec![];
   let mut trace=false;
@@ -54,6 +68,29 @@ fn main() {
       if kind=="f" { let len=a[3].as_u64().unwrap() as u32 % (n-pos+1); texts[x].format(&mut txn,pos,len,attrs); }
       else if kind=="t" { texts[x].insert_with_attributes(&mut txn,pos,a[3].as_str().unwrap(),attrs); }
       else { let value: yrs::Any=serde_json::from_value(a[3].clone()).unwrap(); texts[x].insert_embed_with_attributes(&mut txn,pos,value,attrs); }
+    }
+    "x" => {
+     let mut txn=docs[x].transact_mut(); let pos=a[2].as_u64().unwrap() as u32 % (xmls[x].len(&txn)+1);
+     let node=xmls[x].insert(&mut txn,pos,yrs::XmlElementPrelim::empty(a[3].as_str().unwrap()));
+     node.insert_attribute(&mut txn,"class","entry");
+     node.insert(&mut txn,0,yrs::XmlTextPrelim::new(a[4].as_str().unwrap()));
+    }
+    "X" => {
+     let mut txn=docs[x].transact_mut();let n=xmls[x].len(&txn);let pos=a[2].as_u64().unwrap() as u32 % (n+1);
+     xmls[x].remove_range(&mut txn,pos,a[3].as_u64().unwrap() as u32 % (n-pos+1));
+    }
+    "z" => {
+     let mut txn=docs[x].transact_mut();let n=xmls[x].len(&txn);
+     if n>0 {
+      let pos=a[2].as_u64().unwrap() as usize % n as usize;
+      if let Some(yrs::XmlOut::Element(node))=xmls[x].children(&txn).nth(pos) {
+       node.insert_attribute(&mut txn,"class",a[3].as_str().unwrap());
+       if let Some(yrs::XmlOut::Text(text))=node.children(&txn).next() {
+        let pos=a[2].as_u64().unwrap() as u32 % (text.len(&txn)+1);
+        text.insert(&mut txn,pos,"!");
+       }
+      }
+     }
     }
     "n" => {
       let mut txn=docs[x].transact_mut();
@@ -95,7 +132,7 @@ fn main() {
    }
    snapshots.push((0..3).map(|i| {let txn=docs[i].transact(); {
  let delta=texts[i].diff(&txn, |_| ()).into_iter().map(|c| { let mut v=json!({"insert":c.insert.to_json(&txn)}); if let Some(attrs)=c.attributes { v["attributes"]=serde_json::to_value(attrs).unwrap(); } v }).collect::<Vec<_>>();
- json!({"text":texts[i].get_string(&txn),"delta":delta,"array":arrays[i].to_json(&txn),"map":maps[i].to_json(&txn)})
+ json!({"text":texts[i].get_string(&txn),"delta":delta,"array":arrays[i].to_json(&txn),"map":maps[i].to_json(&txn),"xml":xmls[i].children(&txn).map(|n|xml_snapshot(n,&txn)).collect::<Vec<_>>()})
  }}).collect::<Vec<_>>());
   }
   let updates=docs.iter().map(|d|hex(&if v2 { d.transact().encode_state_as_update_v2(&Default::default()) } else { d.transact().encode_state_as_update_v1(&Default::default()) })).collect::<Vec<_>>();

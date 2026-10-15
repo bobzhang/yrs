@@ -100,6 +100,19 @@ def main():
                 for y in range(3):
                     if x!=y: commands.append(['s',x,y])
         scenarios.append([["trace",0]]+commands)
+    for seed in range(128):
+        rng=random.Random(7000+seed);commands=[]
+        for _ in range(160):
+            kind=rng.choice(['x','x','X','z','z','s','q','r']);x=rng.randrange(3)
+            if kind=='x':cmd=[kind,x,rng.randrange(999),rng.choice(['p','section','h1']),rng.choice(['Moon','hello','tree'])]
+            elif kind=='X':cmd=[kind,x,rng.randrange(999),rng.randrange(40)]
+            elif kind=='z':cmd=[kind,x,rng.randrange(999),rng.choice(['entry','active','selected'])]
+            elif kind in ('s','q'):cmd=[kind,x,(x+rng.randrange(1,3))%3]
+            else:cmd=[kind,rng.randrange(999)]
+            commands.append(cmd)
+        for _ in range(3):
+            commands.extend(['s',x,y] for x in range(3) for y in range(3) if x!=y)
+        scenarios.append(commands)
     start=int(os.environ.get('YRS_CASE_START','0'))
     scenarios=scenarios[start:]
     def execute(command, cases):

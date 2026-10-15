@@ -5,6 +5,9 @@ pub(all) enum Out {
   Array(ArrayRef)
   Map(MapRef)
   Text(Text)
+  XmlElement(XmlElement)
+  XmlFragment(XmlFragment)
+  XmlText(XmlText)
 }
 
 ///|
@@ -14,6 +17,9 @@ fn Doc::shared_output(self : Doc, id : Id, kind : SharedKind) -> Out {
     SharedArray => Array({ doc: self, name, })
     SharedMap => Map({ doc: self, name, })
     SharedText => Text({ doc: self, name, })
+    SharedXmlElement(tag) => XmlElement({ doc: self, name, tag, })
+    SharedXmlFragment => XmlFragment({ doc: self, name, })
+    SharedXmlText => XmlText({ doc: self, name, })
   }
 }
 
@@ -24,6 +30,9 @@ pub fn Out::to_json(self : Out) -> Json {
     Array(value) => value.to_json()
     Map(value) => value.to_json()
     Text(value) => Json(value.get_string())
+    XmlElement(value) => Json(value.get_string())
+    XmlFragment(value) => Json(value.get_string())
+    XmlText(value) => Json(value.get_string())
   }
 }
 

@@ -9,6 +9,9 @@ priv enum SharedKind {
   SharedArray
   SharedMap
   SharedText
+  SharedXmlElement(String)
+  SharedXmlFragment
+  SharedXmlText
 }
 
 ///|

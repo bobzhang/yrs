@@ -47,6 +47,7 @@ pub fn Any::from_json(Json) -> Self
 pub fn Any::not_equal(Self, Self) -> Bool
 pub fn Any::to_json(Self) -> Json
 pub fn Any::to_repr(Self) -> @debug.Repr
+pub fn Any::to_string(Self) -> String
 
 pub struct ArrayRef {
   // private fields
@@ -72,6 +73,7 @@ pub fn Doc::encode_state_as_update_v2(Self, remote? : StateVector) -> Bytes rais
 pub fn Doc::get_or_insert_array(Self, String) -> ArrayRef
 pub fn Doc::get_or_insert_map(Self, String) -> MapRef
 pub fn Doc::get_or_insert_text(Self, String) -> Text
+pub fn Doc::get_or_insert_xml_fragment(Self, String) -> XmlFragment
 pub fn Doc::has_missing_updates(Self) -> Bool
 pub fn Doc::pending_items(Self) -> Int
 pub fn Doc::state_vector(Self) -> StateVector
@@ -108,8 +110,12 @@ pub(all) enum Out {
   Array(ArrayRef)
   Map(MapRef)
   Text(Text)
+  XmlElement(XmlElement)
+  XmlFragment(XmlFragment)
+  XmlText(XmlText)
 }
 pub fn Out::to_json(Self) -> Json
+pub fn Out::to_string(Self) -> String
 
 pub struct StateVector {
   // private fields
@@ -138,6 +144,56 @@ pub(all) struct TextChunk {
   attributes : ReadOnlyArray[(String, Any)]
 }
 pub fn TextChunk::to_json(Self) -> Json
+
+pub struct XmlElement {
+  // private fields
+}
+pub fn XmlElement::as_fragment(Self) -> XmlFragment
+pub fn XmlElement::as_map(Self) -> MapRef
+pub fn XmlElement::attributes(Self) -> Array[(String, Out)]
+pub fn XmlElement::get_attribute(Self, String) -> Out?
+pub fn XmlElement::get_string(Self) -> String
+pub fn XmlElement::insert_attribute(Self, String, Any) -> Unit
+pub fn XmlElement::parent(Self) -> XmlNode?
+pub fn XmlElement::remove_attribute(Self, String) -> Unit
+pub fn XmlElement::tag(Self) -> String
+
+pub struct XmlFragment {
+  // private fields
+}
+pub fn XmlFragment::as_map(Self) -> MapRef
+pub fn XmlFragment::attributes(Self) -> Array[(String, Out)]
+pub fn XmlFragment::children(Self) -> Array[XmlNode]
+pub fn XmlFragment::get_attribute(Self, String) -> Out?
+pub fn XmlFragment::get_string(Self) -> String
+pub fn XmlFragment::insert_attribute(Self, String, Any) -> Unit
+pub fn XmlFragment::insert_element(Self, Int, String) -> XmlElement
+pub fn XmlFragment::insert_fragment(Self, Int) -> Self
+pub fn XmlFragment::insert_text(Self, Int) -> XmlText
+pub fn XmlFragment::length(Self) -> Int
+pub fn XmlFragment::parent(Self) -> XmlNode?
+pub fn XmlFragment::remove_attribute(Self, String) -> Unit
+pub fn XmlFragment::remove_range(Self, Int, Int) -> Unit
+
+pub(all) enum XmlNode {
+  Element(XmlElement)
+  Fragment(XmlFragment)
+  Text(XmlText)
+}
+pub fn XmlNode::get_string(Self) -> String
+pub fn XmlNode::parent(Self) -> Self?
+
+pub struct XmlText {
+  // private fields
+}
+pub fn XmlText::as_map(Self) -> MapRef
+pub fn XmlText::as_text(Self) -> Text
+pub fn XmlText::attributes(Self) -> Array[(String, Out)]
+pub fn XmlText::get_attribute(Self, String) -> Out?
+pub fn XmlText::get_string(Self) -> String
+pub fn XmlText::insert_attribute(Self, String, Any) -> Unit
+pub fn XmlText::parent(Self) -> XmlNode?
+pub fn XmlText::remove_attribute(Self, String) -> Unit
 
 // Type aliases
 
