@@ -1,0 +1,63 @@
+// Generated using `moon info`, DON'T EDIT IT
+package "bobzhang/yrs"
+
+import {
+  "moonbitlang/core/debug",
+}
+
+// Values
+
+// Errors
+pub suberror DecodeError {
+  InvalidData(String)
+} derive(@debug.Debug)
+pub fn DecodeError::to_repr(Self) -> @debug.Repr
+
+// Types and methods
+pub struct Doc {
+  // private fields
+}
+pub fn Doc::Doc(client_id~ : UInt64) -> Self
+pub fn Doc::apply_update_v1(Self, Bytes) -> Unit raise DecodeError
+pub fn Doc::client_id(Self) -> UInt64
+pub fn Doc::encode_state_as_update_v1(Self, remote? : StateVector) -> Bytes
+pub fn Doc::get_or_insert_text(Self, String) -> Text
+pub fn Doc::pending_items(Self) -> Int
+pub fn Doc::state_vector(Self) -> StateVector
+
+pub(all) struct Id {
+  client : UInt64
+  clock : UInt
+} derive(Compare, Eq, Hash, @debug.Debug)
+pub fn Id::compare(Self, Self) -> Int
+pub fn Id::equal(Self, Self) -> Bool
+pub fn Id::hash(Self) -> Int
+pub fn Id::hash_combine(Self, Hasher) -> Unit
+pub fn Id::not_equal(Self, Self) -> Bool
+pub fn Id::op_ge(Self, Self) -> Bool
+pub fn Id::op_gt(Self, Self) -> Bool
+pub fn Id::op_le(Self, Self) -> Bool
+pub fn Id::op_lt(Self, Self) -> Bool
+pub fn Id::to_repr(Self) -> @debug.Repr
+
+pub struct StateVector {
+  // private fields
+}
+pub fn StateVector::StateVector(entries? : Array[(UInt64, UInt)]) -> Self
+pub fn StateVector::decode_v1(Bytes) -> Self raise DecodeError
+pub fn StateVector::encode_v1(Self) -> Bytes
+pub fn StateVector::entries(Self) -> Array[(UInt64, UInt)]
+pub fn StateVector::get(Self, UInt64) -> UInt
+pub fn StateVector::set_max(Self, UInt64, UInt) -> Unit
+
+pub struct Text {
+  // private fields
+}
+pub fn Text::get_string(Self) -> String
+pub fn Text::insert(Self, Int, String) -> Unit
+pub fn Text::length(Self) -> Int
+pub fn Text::remove_range(Self, Int, Int) -> Unit
+
+// Type aliases
+
+// Traits

@@ -1,0 +1,492 @@
+///|
+priv enum Content {
+  Characters(String)
+  Deleted(Int32)
+  Garbage(Int32)
+}
+
+///|
+fn Content::length(self : Content) -> Int32 {
+  match self {
+    Characters(s) => s.length()
+    Deleted(n) | Garbage(n) => n
+  }
+}
+
+///|
+// Yjs indexes text by UTF-16 code units. Splitting a surrogate pair replaces
+// the orphaned halves with U+FFFD, while preserving their two logical clocks.
+fn utf16_slice(s : String, start : Int32, end : Int32) -> String {
+  let out = StringBuilder()
+  let mut offset = 0
+  for c in s {
+    let size = if c.to_int() > 0xffff { 2 } else { 1 }
+    if offset >= start && offset + size <= end {
+      out.write_char(c)
+    } else if offset < end && offset + size > start {
+      out.write_char('\ufffd')
+    }
+    offset += size
+  }
+  out.to_string()
+}
+
+///|
+fn Content::slice(self : Content, start : Int32, end : Int32) -> Content {
+  match self {
+    Characters(s) => Characters(utf16_slice(s, start, end))
+    Deleted(_) => Deleted(end - start)
+    Garbage(_) => Garbage(end - start)
+  }
+}
+
+///|
+priv struct RawItem {
+  id : Id
+  origin : Id?
+  right_origin : Id?
+  parent : String?
+  content : Content
+}
+
+///|
+priv struct Item {
+  id : Id
+  origin : Id?
+  right_origin : Id?
+  parent : String?
+  mut content : Content
+  mut left : Id?
+  mut right : Id?
+  mut deleted : Bool
+}
+
+///|
+priv struct Branch {
+  mut head : Id?
+}
+
+///|
+/// A document replica. Each independently edited replica must use a distinct
+/// client ID. This initial API uses Yjs UTF-16 positions and retains tombstones.
+pub struct Doc {
+  priv client : UInt64
+  priv state : StateVector
+  priv clients : Map[UInt64, Array[Item]]
+  priv items : Map[Id, Item]
+  priv roots : Map[String, Branch]
+  priv pending : Array[RawItem]
+  priv deletes : Map[UInt64, Array[(UInt32, UInt32)]]
+}
+
+///|
+pub fn Doc::Doc(client_id~ : UInt64) -> Doc {
+  {
+    client: client_id,
+    state: StateVector(),
+    clients: Map([]),
+    items: Map([]),
+    roots: Map([]),
+    pending: [],
+    deletes: Map([]),
+  }
+}
+
+///|
+pub fn Doc::client_id(self : Doc) -> UInt64 {
+  self.client
+}
+
+///|
+pub fn Doc::state_vector(self : Doc) -> StateVector {
+  StateVector(entries=self.state.entries())
+}
+
+///|
+pub fn Doc::pending_items(self : Doc) -> Int32 {
+  self.pending.length()
+}
+
+///|
+fn Doc::branch(self : Doc, name : String) -> Branch {
+  match self.roots.get(name) {
+    Some(b) => b
+    None => {
+      let b : Branch = { head: None, }
+      self.roots[name] = b
+      b
+    }
+  }
+}
+
+///|
+fn Doc::find(self : Doc, id : Id) -> Item? {
+  guard self.clients.get(id.client) is Some(items) else { return None }
+  for lo = 0, hi = items.length(); lo < hi; {
+    let mid = lo + (hi - lo) / 2
+    let item = items[mid]
+    if id.clock < item.id.clock {
+      continue lo, mid
+    } else if id.clock - item.id.clock >=
+      item.content.length().reinterpret_as_uint() {
+      continue mid + 1, hi
+    } else {
+      return Some(item)
+    }
+  } nobreak {
+    None
+  }
+}
+
+///|
+fn Doc::split(self : Doc, item : Item, at : Int32) -> Item {
+  let length = item.content.length()
+  guard at > 0 && at < length else { abort("invalid item split") }
+  let id : Id = {
+    client: item.id.client,
+    clock: item.id.clock + at.reinterpret_as_uint(),
+  }
+  let tail : Item = {
+    id,
+    origin: Some({ client: id.client, clock: id.clock - 1U, }),
+    right_origin: item.right_origin,
+    parent: item.parent,
+    content: item.content.slice(at, length),
+    left: Some(item.id),
+    right: item.right,
+    deleted: item.deleted,
+  }
+  if item.right is Some(right) {
+    self.items[right].left = Some(id)
+  }
+  item.content = item.content.slice(0, at)
+  item.right = Some(id)
+  let entries = self.clients[item.id.client]
+  let index = for i = 0; i < entries.length(); i = i + 1 {
+    if entries[i].id == item.id {
+      break i
+    }
+  } nobreak {
+    abort("missing split item")
+  }
+  entries.insert(index + 1, tail)
+  self.items[id] = tail
+  tail
+}
+
+///|
+fn Doc::clean_start(self : Doc, id : Id) -> Item {
+  let item = self.find(id).unwrap()
+  if item.id.clock == id.clock {
+    item
+  } else {
+    self.split(item, (id.clock - item.id.clock).reinterpret_as_int())
+  }
+}
+
+///|
+fn Doc::clean_end(self : Doc, id : Id) -> Item {
+  let item = self.find(id).unwrap()
+  let offset = (id.clock - item.id.clock).reinterpret_as_int() + 1
+  if offset < item.content.length() {
+    self.split(item, offset) |> ignore
+  }
+  item
+}
+
+///|
+fn Doc::integrate(self : Doc, raw : RawItem) -> Bool {
+  let known = self.state.get(raw.id.client)
+  if raw.id.clock > known {
+    return false
+  }
+  let end = raw.id.clock.to_uint64() + raw.content.length().to_uint64()
+  if end <= known.to_uint64() {
+    return true
+  }
+  let offset = (known - raw.id.clock).reinterpret_as_int()
+  let raw = if offset == 0 {
+    raw
+  } else {
+    {
+      ..raw,
+      id: { client: raw.id.client, clock: known, },
+      origin: Some({ client: raw.id.client, clock: known - 1U, }),
+      content: raw.content.slice(offset, raw.content.length()),
+    }
+  }
+  for dep in [raw.origin, raw.right_origin] {
+    if dep is Some(id) && self.find(id) is None {
+      return false
+    }
+  }
+  let mut left = raw.origin.map(fn(id) { self.clean_end(id).id })
+  let right = raw.right_origin.map(fn(id) { self.clean_start(id).id })
+  let parent = match raw.parent {
+    Some(name) => Some(name)
+    None =>
+      match left {
+        Some(id) => self.items[id].parent
+        None => right.bind(fn(id) { self.items[id].parent })
+      }
+  }
+  let mut content = raw.content
+  if parent is None {
+    content = Garbage(content.length())
+  }
+  let item : Item = {
+    id: raw.id,
+    origin: raw.origin,
+    right_origin: raw.right_origin,
+    parent,
+    content,
+    left,
+    right,
+    deleted: content is (Deleted(_) | Garbage(_)),
+  }
+  if parent is Some(name) {
+    let branch = self.branch(name)
+    let start = match left {
+      Some(id) => self.items[id].right
+      None => branch.head
+    }
+    let conflict = match (left, right) {
+      (None, Some(id)) => self.items[id].left is Some(_)
+      _ => start != right || left is None
+    }
+    if conflict {
+      let before : Set[Id] = Set([])
+      let conflicting : Set[Id] = Set([])
+      let mut cursor = start
+      while cursor is Some(id) && cursor != right {
+        let other = self.items[id]
+        before.add(id)
+        conflicting.add(id)
+        if raw.origin == other.origin {
+          if id.client < raw.id.client {
+            left = Some(id)
+            conflicting.clear()
+          } else if raw.right_origin == other.right_origin {
+            break
+          }
+        } else if other.origin is Some(origin) &&
+          self.find(origin) is Some(origin_item) {
+          if before.contains(origin_item.id) {
+            if !conflicting.contains(origin_item.id) {
+              left = Some(id)
+              conflicting.clear()
+            }
+          } else {
+            break
+          }
+        } else {
+          break
+        }
+        cursor = other.right
+      }
+    }
+    item.left = left
+    item.right = match left {
+      Some(id) => self.items[id].right
+      None => branch.head
+    }
+    if left is Some(id) {
+      self.items[id].right = Some(item.id)
+    } else {
+      branch.head = Some(item.id)
+    }
+    if item.right is Some(id) {
+      self.items[id].left = Some(item.id)
+    }
+  }
+  self.items[item.id] = item
+  match self.clients.get(item.id.client) {
+    Some(entries) => entries.push(item)
+    None => self.clients[item.id.client] = [item]
+  }
+  self.state.set_max(item.id.client, end.to_uint())
+  true
+}
+
+///|
+fn Doc::settle(self : Doc) -> Unit {
+  for ;; {
+    let mut progress = false
+    let unresolved = []
+    for raw in self.pending {
+      if self.integrate(raw) {
+        progress = true
+      } else {
+        unresolved.push(raw)
+      }
+    }
+    self.pending.clear()
+    for raw in unresolved {
+      self.pending.push(raw)
+    }
+    if !progress {
+      break
+    }
+  }
+  for client, ranges in self.deletes {
+    for (start, end) in ranges {
+      let mut clock = start
+      while clock < end {
+        guard self.find({ client, clock, }) is Some(found) else { break }
+        let item = if found.id.clock < clock {
+          self.split(found, (clock - found.id.clock).reinterpret_as_int())
+        } else {
+          found
+        }
+        let remaining = end - clock
+        if item.content.length().reinterpret_as_uint() > remaining {
+          self.split(item, remaining.reinterpret_as_int()) |> ignore
+        }
+        item.deleted = true
+        clock += item.content.length().reinterpret_as_uint()
+      }
+    }
+  }
+}
+
+///|
+fn Doc::add_delete(
+  self : Doc,
+  client : UInt64,
+  start : UInt32,
+  end : UInt32,
+) -> Unit {
+  if start == end {
+    return
+  }
+  let ranges = self.deletes.get(client).unwrap_or([])
+  ranges.push((start, end))
+  ranges.sort_by(fn(a, b) { a.0.compare(b.0) })
+  let merged : Array[(UInt32, UInt32)] = []
+  for range in ranges {
+    if merged.last() is Some(previous) && previous.1 >= range.0 {
+      merged[merged.length() - 1] = (previous.0, previous.1.max(range.1))
+    } else {
+      merged.push(range)
+    }
+  }
+  self.deletes[client] = merged
+}
+
+///|
+pub struct Text {
+  priv doc : Doc
+  priv name : String
+}
+
+///|
+pub fn Doc::get_or_insert_text(self : Doc, name : String) -> Text {
+  self.branch(name) |> ignore
+  { doc: self, name, }
+}
+
+///|
+pub fn Text::get_string(self : Text) -> String {
+  let out = StringBuilder()
+  let mut cursor = self.doc.branch(self.name).head
+  while cursor is Some(id) {
+    let item = self.doc.items[id]
+    if !item.deleted && item.content is Characters(s) {
+      out.write_string(s)
+    }
+    cursor = item.right
+  }
+  out.to_string()
+}
+
+///|
+pub fn Text::length(self : Text) -> Int32 {
+  self.get_string().length()
+}
+
+///|
+fn Text::position(self : Text, index : Int32) -> (Id?, Id?) {
+  guard index >= 0 else { abort("negative text index") }
+  let mut remaining = index
+  let mut left = None
+  let mut cursor = self.doc.branch(self.name).head
+  while cursor is Some(id) {
+    let item = self.doc.items[id]
+    if !item.deleted {
+      if remaining == 0 {
+        return (left, cursor)
+      }
+      let len = item.content.length()
+      if remaining < len {
+        let tail = self.doc.split(item, remaining)
+        return (Some(item.id), Some(tail.id))
+      }
+      remaining -= len
+    }
+    left = cursor
+    cursor = item.right
+  }
+  guard remaining == 0 else { abort("text index out of bounds") }
+  (left, None)
+}
+
+///|
+pub fn Text::insert(self : Text, index : Int32, value : String) -> Unit {
+  let (left, right) = self.position(index)
+  if value.is_empty() {
+    return
+  }
+  let clock = self.doc.state.get(self.doc.client)
+  guard clock.to_uint64() + value.length().to_uint64() <= 0xffff_ffffUL else {
+    abort("document clock exhausted")
+  }
+  let origin = left.map(fn(id) {
+    let item = self.doc.items[id]
+    (
+      {
+        client: id.client,
+        clock: id.clock + item.content.length().reinterpret_as_uint() - 1U,
+      } : Id)
+  })
+  let raw : RawItem = {
+    id: { client: self.doc.client, clock, },
+    origin,
+    right_origin: right,
+    parent: Some(self.name),
+    content: Characters(value),
+  }
+  guard self.doc.integrate(raw) else {
+    abort("local insert has missing dependency")
+  }
+  self.doc.settle()
+}
+
+///|
+pub fn Text::remove_range(self : Text, index : Int32, length : Int32) -> Unit {
+  guard length >= 0 &&
+    index >= 0 &&
+    index <= self.length() &&
+    length <= self.length() - index else {
+    abort("text deletion out of bounds")
+  }
+  let (_, start) = self.position(index)
+  let mut remaining = length
+  let mut cursor = start
+  while remaining > 0 && cursor is Some(id) {
+    let item = self.doc.items[id]
+    if !item.deleted {
+      if remaining < item.content.length() {
+        self.doc.split(item, remaining) |> ignore
+      }
+      let length = item.content.length()
+      self.doc.add_delete(
+        id.client,
+        id.clock,
+        id.clock + length.reinterpret_as_uint(),
+      )
+      item.deleted = true
+      remaining -= length
+    }
+    cursor = item.right
+  }
+}

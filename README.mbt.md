@@ -12,3 +12,29 @@ Implementation sequence:
 4. Transactions, observers, undo, snapshots, relative positions, subdocuments and the remaining pinned upstream surface.
 
 Every milestone needs real Rust interoperability tests, rather than only MoonBit-to-MoonBit convergence tests. Validation evidence and remaining limitations will be recorded as each milestone lands.
+
+## Implemented and checked
+
+Collaborative plain text uses the upstream YATA conflict-ordering algorithm, UTF-16 clocks, state vectors, binary v1 updates, deletion ranges, duplicate suppression and pending dependency integration. Deleted content is retained. The initial Rust oracle covers 129 scenarios, 22,790 operation snapshots and 774 bidirectional document transfers.
+
+```mbt check
+///|
+test "two replicas exchange concurrent edits" {
+  let a = @yrs.Doc(client_id=1UL)
+  let b = @yrs.Doc(client_id=2UL)
+  let left = a.get_or_insert_text("note")
+  let right = b.get_or_insert_text("note")
+  left.insert(0, "Hello")
+  b.apply_update_v1(a.encode_state_as_update_v1())
+  left.insert(5, " Moon")
+  right.insert(5, " Rust")
+  a.apply_update_v1(b.encode_state_as_update_v1(remote=a.state_vector()))
+  b.apply_update_v1(a.encode_state_as_update_v1(remote=b.state_vector()))
+  assert_eq(left.get_string(), "Hello Moon Rust")
+  assert_eq(left.get_string(), right.get_string())
+}
+```
+
+Current limitations: only plain-text item content is implemented; unsupported content is rejected before applying an update. Binary v2, the remaining shared types and transaction/event APIs are still outstanding. The store currently favors straightforward correctness over upstream's block compaction and indexing optimizations. This is not a production release or a completed port.
+
+Run `moon test --target all` and `python3 validation/compare.py`. The oracle uses the installed Rust 1.97.1 toolchain and the exact reference checkout under `.repos/y-crdt`; its Cargo dependencies are locked. Clone `https://github.com/y-crdt/y-crdt.git` there and check out `ac339600c712642e556895426113c3f9c117de39` before running it.
