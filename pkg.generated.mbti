@@ -10,9 +10,13 @@ pub fn convert_update_v1_to_v2(Bytes, max_items? : Int) -> Bytes raise DecodeErr
 
 pub fn convert_update_v2_to_v1(Bytes, max_items? : Int) -> Bytes raise DecodeError
 
+pub fn decode_messages(Bytes) -> Array[Message] raise DecodeError
+
 pub fn diff_updates_v1(Bytes, Bytes) -> Bytes raise DecodeError
 
 pub fn diff_updates_v2(Bytes, Bytes) -> Bytes raise DecodeError
+
+pub fn encode_messages(Array[Message]) -> Bytes
 
 pub fn encode_state_vector_from_update_v1(Bytes) -> Bytes raise DecodeError
 
@@ -23,10 +27,21 @@ pub fn merge_updates_v1(Array[Bytes]) -> Bytes raise DecodeError
 pub fn merge_updates_v2(Array[Bytes]) -> Bytes raise DecodeError
 
 // Errors
+pub suberror AwarenessError {
+  ClientNotFound(UInt64)
+} derive(@debug.Debug)
+pub fn AwarenessError::to_repr(Self) -> @debug.Repr
+
 pub suberror DecodeError {
   InvalidData(String)
 } derive(@debug.Debug)
 pub fn DecodeError::to_repr(Self) -> @debug.Repr
+
+pub suberror ProtocolError {
+  PermissionDenied(String)
+  UnsupportedMessage(Byte)
+} derive(@debug.Debug)
+pub fn ProtocolError::to_repr(Self) -> @debug.Repr
 
 // Types and methods
 pub(all) enum Any {
@@ -60,6 +75,68 @@ pub fn ArrayRef::length(Self) -> Int
 pub fn ArrayRef::remove_range(Self, Int, Int) -> Unit
 pub fn ArrayRef::to_array(Self) -> Array[Out]
 pub fn ArrayRef::to_json(Self) -> Json
+
+pub struct Awareness {
+  // private fields
+}
+pub fn Awareness::Awareness(Doc, clock~ : () -> UInt64) -> Self
+pub fn Awareness::apply_update(Self, AwarenessUpdate, origin? : Bytes) -> AwarenessSummary?
+pub fn Awareness::clean_local_state(Self) -> Unit
+pub fn Awareness::client_id(Self) -> UInt64
+pub fn Awareness::doc(Self) -> Doc
+pub fn Awareness::entries(Self) -> Array[(UInt64, AwarenessState)]
+pub fn Awareness::handle_message(Self, Message) -> Message? raise
+pub fn Awareness::handle_sync(Self, Bytes) -> Array[Message] raise
+pub fn Awareness::local_state(Self) -> Json?
+pub fn Awareness::local_state_raw(Self) -> String?
+pub fn Awareness::meta(Self, UInt64) -> (UInt, UInt64)?
+pub fn Awareness::on_change(Self, String, (Self, AwarenessSummary, Bytes?) -> Unit) -> Unit
+pub fn Awareness::on_update(Self, String, (Self, AwarenessSummary, Bytes?) -> Unit) -> Unit
+pub fn Awareness::remove_state(Self, UInt64) -> Unit
+pub fn Awareness::set_local_state(Self, Json) -> Unit
+pub fn Awareness::set_local_state_raw(Self, String) -> Unit
+pub fn Awareness::start_sync(Self) -> Bytes
+pub fn Awareness::state(Self, UInt64) -> Json?
+pub fn Awareness::state_raw(Self, UInt64) -> String?
+pub fn Awareness::unobserve_change(Self, String) -> Bool
+pub fn Awareness::unobserve_update(Self, String) -> Bool
+pub fn Awareness::update(Self) -> AwarenessUpdate
+pub fn Awareness::update_with_clients(Self, Array[UInt64]) -> AwarenessUpdate raise AwarenessError
+
+pub(all) struct AwarenessEntry {
+  clock : UInt
+  json : String
+} derive(Eq, @debug.Debug)
+pub fn AwarenessEntry::equal(Self, Self) -> Bool
+pub fn AwarenessEntry::not_equal(Self, Self) -> Bool
+pub fn AwarenessEntry::to_repr(Self) -> @debug.Repr
+
+pub(all) struct AwarenessState {
+  clock : UInt
+  last_updated : UInt64
+  data : String?
+} derive(Eq, @debug.Debug)
+pub fn AwarenessState::equal(Self, Self) -> Bool
+pub fn AwarenessState::not_equal(Self, Self) -> Bool
+pub fn AwarenessState::to_repr(Self) -> @debug.Repr
+
+pub(all) struct AwarenessSummary {
+  added : ReadOnlyArray[UInt64]
+  updated : ReadOnlyArray[UInt64]
+  removed : ReadOnlyArray[UInt64]
+} derive(Eq, @debug.Debug)
+pub fn AwarenessSummary::all_changes(Self) -> Array[UInt64]
+pub fn AwarenessSummary::equal(Self, Self) -> Bool
+pub fn AwarenessSummary::not_equal(Self, Self) -> Bool
+pub fn AwarenessSummary::to_repr(Self) -> @debug.Repr
+
+pub struct AwarenessUpdate {
+  // private fields
+}
+pub fn AwarenessUpdate::AwarenessUpdate(entries? : Array[(UInt64, AwarenessEntry)]) -> Self
+pub fn AwarenessUpdate::decode_v1(Bytes) -> Self raise DecodeError
+pub fn AwarenessUpdate::encode_v1(Self) -> Bytes
+pub fn AwarenessUpdate::entries(Self) -> Array[(UInt64, AwarenessEntry)]
 
 pub struct Doc {
   // private fields
@@ -105,6 +182,16 @@ pub fn MapRef::insert_text(Self, String) -> Text
 pub fn MapRef::remove(Self, String) -> Unit
 pub fn MapRef::to_json(Self) -> Json
 
+pub(all) enum Message {
+  Sync(SyncMessage)
+  Auth(String?)
+  AwarenessQuery
+  Awareness(AwarenessUpdate)
+  Custom(Byte, Bytes)
+}
+pub fn Message::decode_v1(Bytes) -> Self raise DecodeError
+pub fn Message::encode_v1(Self) -> Bytes
+
 pub(all) enum Out {
   Value(Any)
   Array(ArrayRef)
@@ -126,6 +213,12 @@ pub fn StateVector::encode_v1(Self) -> Bytes
 pub fn StateVector::entries(Self) -> Array[(UInt64, UInt)]
 pub fn StateVector::get(Self, UInt64) -> UInt
 pub fn StateVector::set_max(Self, UInt64, UInt) -> Unit
+
+pub(all) enum SyncMessage {
+  SyncStep1(StateVector)
+  SyncStep2(Bytes)
+  Update(Bytes)
+}
 
 pub struct Text {
   // private fields

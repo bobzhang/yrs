@@ -1,0 +1,15 @@
+{
+  "upstream": "ac339600c712642e556895426113c3f9c117de39",
+  "scenarios": 128,
+  "operation_snapshots": 33024,
+  "cross_runtime_awareness_transfers": 768,
+  "checks": [
+    "presence metadata",
+    "change and update observers",
+    "stale duplicate and delayed updates",
+    "remote local-state removal protection",
+    "default sync handshakes",
+    "awareness queries"
+  ],
+  "status": "passed"
+}

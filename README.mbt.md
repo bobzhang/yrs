@@ -48,3 +48,18 @@ Binary v2 currently uses a checked conversion layer around the common v1 integra
 Sparse updates can integrate beyond missing clock ranges when their dependencies are available. State vectors report only contiguous prefixes; `has_missing_updates()` reports holes, pending dependencies and early deletions. Full-state encoding forwards pending blocks. Stateless `merge_updates_v1/v2`, `diff_updates_v1/v2` and `encode_state_vector_from_update_v1/v2` preserve item identities and gaps without integrating a document.
 
 `python3 validation/updates.py` checks partial-history relays and stateless utilities against Rust: 4,416 independent snapshots, 36,432 identical-wire replay snapshots and 352 merge/diff cases passed. The pinned reference has GC and sparse-v2 defects; explicit failures and reproduction instructions are recorded in [validation/REFERENCE_LIMITATIONS.md](validation/REFERENCE_LIMITATIONS.md) and [validation/update-results.json](validation/update-results.json). These results do not establish compatibility for reference cases that crash or emit overflowing clocks.
+
+Sync and presence: `Awareness(doc, clock=...)` implements Yjs presence clocks,
+raw JSON state, change/update observers, disconnect notices and local-state
+protection. The explicit millisecond clock keeps the API portable and testable.
+`start_sync`, `handle_sync`, `Message`, and `encode_messages` implement the default
+y-sync handshake, incremental updates, awareness queries and authorization
+responses. A packet is processed in order, matching upstream partial application
+when a later message is invalid. Custom protocol dispatch can use decoded messages;
+the default handler rejects unsupported custom tags.
+
+`python3 validation/presence.py` checks 128 randomized scenarios against pinned
+Rust Yrs: 33,024 operation snapshots (including presence metadata and observer
+events) and 768 cross-runtime awareness transfers. The wire codec also has fixed
+byte fixtures and malformed-packet tests. Presence observers are implemented;
+document transaction observers remain outstanding.
