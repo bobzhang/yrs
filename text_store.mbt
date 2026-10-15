@@ -93,6 +93,7 @@ priv struct Item {
   mut content : Content
   mut left : Id?
   mut right : Id?
+  mut redone : Id?
   mut deleted : Bool
 }
 
@@ -109,6 +110,7 @@ priv struct Branch {
 /// A document replica. Each independently edited replica must use a distinct
 /// client ID. This initial API uses Yjs UTF-16 positions and retains tombstones.
 pub struct Doc {
+  priv identity : UInt64
   priv mut active_transaction : Transaction?
   priv mut notifying_transaction : Bool
   priv deep_observers : Map[
@@ -149,6 +151,7 @@ pub struct Doc {
 ///|
 pub fn Doc::Doc(client_id~ : UInt64) -> Doc {
   {
+    identity: allocate_identity(),
     active_transaction: None,
     notifying_transaction: false,
     deep_observers: {},
@@ -229,6 +232,9 @@ fn Doc::find(self : Doc, id : Id) -> Item? {
 
 ///|
 fn Doc::split(self : Doc, item : Item, at : Int32) -> Item {
+  if self.active_transaction is Some(transaction) {
+    transaction.merge_clients.add(item.id.client) |> ignore
+  }
   let length = item.content.length()
   guard at > 0 && at < length else { abort("invalid item split") }
   let id : Id = {
@@ -244,10 +250,15 @@ fn Doc::split(self : Doc, item : Item, at : Int32) -> Item {
     content: item.content.slice(at, length),
     left: Some(item.id),
     right: item.right,
+    redone: item.redone.map(fn(id) {
+      ({ client: id.client, clock: id.clock + at.reinterpret_as_uint(), } : Id)
+    }),
     deleted: item.deleted,
   }
   if item.right is Some(right) {
     self.items[right].left = Some(id)
+  } else if item.parent is Some(parent) && item.parent_sub is Some(key) {
+    self.branch(parent).values[key] = id
   }
   item.content = item.content.slice(0, at)
   item.right = Some(id)
@@ -366,6 +377,7 @@ fn Doc::integrate_missing(self : Doc, raw : RawItem) -> Bool {
     content,
     left,
     right,
+    redone: None,
     deleted: content is (Deleted(_) | Garbage(_)),
   }
   if parent is Some(name) && parent_sub is Some(key) {
@@ -753,17 +765,16 @@ fn Doc::mark_deleted(self : Doc, item : Item) -> Unit {
     )
     if item.content is Shared(_) &&
       self.roots.get(Nested(item.id)) is Some(branch) {
-      let starts = branch.heads.values().to_array()
-      if branch.head is Some(id) {
-        starts.push(id)
+      // Only the current map value can be live. Restored values may retain
+      // neighbors in an older parent, so a cached chain head is insufficient.
+      for id in branch.values.values() {
+        work.push(self.items[id])
       }
-      for start in starts {
-        let mut cursor = Some(start)
-        while cursor is Some(id) {
-          let child = self.items[id]
-          work.push(child)
-          cursor = child.right
-        }
+      let mut cursor = branch.head
+      while cursor is Some(id) {
+        let child = self.items[id]
+        work.push(child)
+        cursor = child.right
       }
     }
   }

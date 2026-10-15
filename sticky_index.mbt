@@ -169,7 +169,8 @@ fn Doc::sticky_index(
 ///|
 pub fn StickyIndex::get_offset(self : StickyIndex, doc : Doc) -> Offset? {
   let (parent, index) = match self.scope {
-    Relative(id) => {
+    Relative(original) => {
+      guard doc.follow_redone(original) is Some(id) else { return None }
       guard doc.state.get(id.client) > id.clock &&
         doc.find(id) is Some(item) &&
         item.parent is Some(parent) else {
@@ -203,7 +204,8 @@ pub fn StickyIndex::get_offset(self : StickyIndex, doc : Doc) -> Offset? {
       let text : Text = { doc, name: parent, }
       (parent, if self.assoc == After { text.length() } else { 0 })
     }
-    Nested(id) => {
+    Nested(original) => {
+      guard doc.follow_redone(original) is Some(id) else { return None }
       guard doc.state.get(id.client) > id.clock &&
         doc.find(id) is Some({ content: Shared(_), .. }) else {
         return None
