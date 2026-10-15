@@ -110,6 +110,7 @@ priv struct Branch {
 pub struct Doc {
   priv mut active_transaction : Transaction?
   priv mut notifying_transaction : Bool
+  priv map_observers : Map[Parent, Map[String, (MapEvent, Transaction) -> Unit]]
   priv before_observers : Map[String, (Transaction) -> Unit]
   priv after_observers : Map[String, (Transaction) -> Unit]
   priv cleanup_observers : Map[String, (Transaction) -> Unit]
@@ -132,6 +133,7 @@ pub fn Doc::Doc(client_id~ : UInt64) -> Doc {
   {
     active_transaction: None,
     notifying_transaction: false,
+    map_observers: {},
     before_observers: {},
     after_observers: {},
     cleanup_observers: {},
@@ -341,6 +343,9 @@ fn Doc::integrate_missing(self : Doc, raw : RawItem) -> Bool {
     left,
     right,
     deleted: content is (Deleted(_) | Garbage(_)),
+  }
+  if parent is Some(name) && parent_sub is Some(key) {
+    self.touch_map(name, key)
   }
   if parent is Some(name) {
     let branch = self.branch(name)
@@ -692,6 +697,9 @@ fn Doc::mark_deleted(self : Doc, item : Item) -> Unit {
   while work.pop() is Some(item) {
     if item.deleted {
       continue
+    }
+    if item.parent is Some(parent) && item.parent_sub is Some(key) {
+      self.touch_map(parent, key)
     }
     item.deleted = true
     if self.active_transaction is Some(transaction) {

@@ -1,6 +1,6 @@
 use std::{io::{self,BufRead},sync::{Arc,Mutex}};
 use serde_json::{Value,json};
-use yrs::{Doc,Options,OffsetKind,Text,GetString,Map,ReadTxn,Transact,Update,TransactionMut};
+use yrs::{Observable,Doc,Options,OffsetKind,Text,GetString,Map,ReadTxn,Transact,Update,TransactionMut};
 use yrs::updates::decoder::Decode;
 fn hex(b:&[u8])->String{b.iter().map(|b|format!("{b:02x}")).collect()}
 fn ranges(set:&yrs::IdSet)->Vec<(u64,u32,u32)>{let mut r=vec![];for (id,rs) in set.iter(){for range in rs.iter(){r.push((id.get(),range.start,range.end))}}r.sort();r}
@@ -22,6 +22,21 @@ fn main(){
    let log=events.clone();d.observe_transaction_cleanup("oracle",move|tx,_|{log.lock().unwrap().push(meta(tx,i,"cleanup"))}).unwrap();
    let log=events.clone();let out=packets.clone();d.observe_update_v1("oracle",move|tx,e|{log.lock().unwrap().push(meta(tx,i,"v1"));out.lock().unwrap().push((i,false,e.update.clone()))}).unwrap();
    let log=events.clone();let out=packets.clone();d.observe_update_v2("oracle",move|tx,e|{log.lock().unwrap().push(meta(tx,i,"v2"));out.lock().unwrap().push((i,true,e.update.clone()))}).unwrap();
+  }
+  for (i,map) in maps.iter().enumerate(){
+   let log=events.clone();map.observe("oracle",move|tx,event|{
+    use yrs::types::{EntryChange,ToJson};
+    let mut changes=serde_json::Map::new();
+    for (key,change) in event.keys(tx){
+     let value=match change {
+      EntryChange::Inserted(value)=>json!({"action":"add","new_value":value.to_json(tx)}),
+      EntryChange::Updated(old,value)=>json!({"action":"update","old_value":old.to_json(tx),"new_value":value.to_json(tx)}),
+      EntryChange::Removed(value)=>json!({"action":"delete","old_value":value.to_json(tx)})
+     };
+     changes.insert(key.to_string(),value);
+    }
+    log.lock().unwrap().push(json!({"doc":i,"phase":"map","changes":changes}));
+   });
   }
   let shadows:Vec<_>=(0..6).map(|i|{let mut o=Options::with_client_id(yrs::block::ClientID::new(100+i));o.skip_gc=true;Doc::with_options(o)}).collect();
   let shadow_texts:Vec<_>=shadows.iter().map(|d|d.get_or_insert_text("note")).collect();

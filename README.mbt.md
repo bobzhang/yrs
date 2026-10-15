@@ -87,11 +87,14 @@ Existing mutation methods open an implicit transaction when needed. Document
 observers cover before-observer, after-transaction, cleanup and v1/v2 update
 phases. Transaction handles expose origin, locality, insertion/deletion ranges,
 and stable committed state vectors and updates. Raising from the action commits
-the edits already made. Observer callbacks can read their document; starting a
-mutation on that same document during observer delivery is rejected.
+the edits already made. Observer callbacks can read their document. The after-transaction hook can
+append edits to the current commit; other observer phases reject mutations of
+the observed document.
 
 `python3 validation/transactions.py` compares 96 randomized grouped-edit histories
 in both wire formats with Rust: 26,496 transaction snapshots, 116,632 lifecycle
 events and 37,144 emitted updates replayed into independent replicas. This caught
-and fixed rich-text positioning before tombstones. Collection-specific/deep
-observers and undo are still outstanding.
+and fixed rich-text positioning before tombstones. Map entry observers now report transaction-level inserted, updated and removed
+values; 10,718 map events match Rust in the same randomized suite. Observers on
+newly created or deleted nested maps are suppressed, matching upstream. Sequence
+and deep observers and undo are still outstanding.

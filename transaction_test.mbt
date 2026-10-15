@@ -112,3 +112,22 @@ test "remote update transactions identify source and suppress duplicate update e
     target.get_or_insert_text("note").to_delta().map(fn(c) { c.to_json() }),
   )
 }
+
+///|
+test "after-transaction hook may add edits to the same emitted update" {
+  let doc = @yrs.Doc(client_id=1UL)
+  let text = doc.get_or_insert_text("note")
+  let updates : Array[Bytes] = []
+  let phases : Array[String] = []
+  doc.observe_after_transaction("append", fn(_) {
+    phases.push("after")
+    text.insert(text.length(), "!")
+  })
+  doc.observe_update_v1("test", fn(bytes, _) { updates.push(bytes) })
+  text.insert(0, "hello")
+  assert_eq(updates.length(), 1)
+  assert_eq(phases, ["after"])
+  let peer = @yrs.Doc(client_id=2UL)
+  peer.apply_update_v1(updates[0])
+  assert_eq(peer.get_or_insert_text("note").get_string(), "hello!")
+}

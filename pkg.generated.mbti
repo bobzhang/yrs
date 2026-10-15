@@ -187,6 +187,13 @@ pub fn Doc::unobserve_transaction_cleanup(Self, String) -> Bool
 pub fn Doc::unobserve_update_v1(Self, String) -> Bool
 pub fn Doc::unobserve_update_v2(Self, String) -> Bool
 
+pub(all) enum EntryChange {
+  Inserted(Out)
+  Updated(Out, Out)
+  Removed(Out)
+}
+pub fn EntryChange::to_json(Self) -> Json
+
 pub(all) struct Id {
   client : UInt64
   clock : UInt
@@ -211,6 +218,13 @@ pub fn IndexScope::equal(Self, Self) -> Bool
 pub fn IndexScope::not_equal(Self, Self) -> Bool
 pub fn IndexScope::to_repr(Self) -> @debug.Repr
 
+pub struct MapEvent {
+  // private fields
+}
+pub fn MapEvent::keys(Self) -> Map[String, EntryChange]
+pub fn MapEvent::target(Self) -> MapRef
+pub fn MapEvent::to_json(Self) -> Json
+
 pub struct MapRef {
   // private fields
 }
@@ -220,8 +234,10 @@ pub fn MapRef::insert(Self, String, Any) -> Unit
 pub fn MapRef::insert_array(Self, String) -> ArrayRef
 pub fn MapRef::insert_map(Self, String) -> Self
 pub fn MapRef::insert_text(Self, String) -> Text
+pub fn MapRef::observe(Self, String, (MapEvent, Transaction) -> Unit) -> Unit
 pub fn MapRef::remove(Self, String) -> Unit
 pub fn MapRef::to_json(Self) -> Json
+pub fn MapRef::unobserve(Self, String) -> Bool
 
 pub(all) enum Message {
   Sync(SyncMessage)

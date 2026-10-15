@@ -9,6 +9,7 @@ pub struct Transaction {
   priv mut is_local : Bool
   priv added : Array[(UInt64, UInt32, UInt32)]
   priv capture_update : Bool
+  priv map_changes : Map[Parent, Map[String, (Id?, Out?)]]
   priv removed : Array[(UInt64, UInt32, UInt32)]
   priv mut encoded : Bytes?
   priv mut closed : Bool
@@ -134,6 +135,7 @@ fn Doc::begin_transaction(
     is_local: true,
     added: [],
     capture_update,
+    map_changes: {},
     removed: [],
     encoded: None,
     closed: false,
@@ -149,12 +151,24 @@ fn Doc::commit_transaction(self : Doc, transaction : Transaction) -> Unit {
   for (_, callback) in self.before_observers.to_array() {
     callback(transaction)
   }
+  for event in transaction.map_events() {
+    if self.map_observers.get(event.map.name) is Some(observers) {
+      for (_, callback) in observers.to_array() {
+        callback(event, transaction)
+      }
+    }
+  }
   self.notifying_transaction = false
   if self.collect_deletes {
     self.cleanup_formatting()
     self.collect_deletes = false
     self.deleted_items.clear()
     self.inserted_items.clear()
+  }
+  // Rust's after-transaction callback receives a mutable transaction. Its
+  // additional edits belong to this commit but do not repeat type observers.
+  for (_, callback) in self.after_observers.to_array() {
+    callback(transaction)
   }
   if transaction.capture_update {
     transaction.before_state() |> ignore
@@ -163,9 +177,6 @@ fn Doc::commit_transaction(self : Doc, transaction : Transaction) -> Unit {
   }
   transaction.closed = true
   self.notifying_transaction = true
-  for (_, callback) in self.after_observers.to_array() {
-    callback(transaction)
-  }
   for (_, callback) in self.cleanup_observers.to_array() {
     callback(transaction)
   }
@@ -180,6 +191,9 @@ fn Doc::commit_transaction(self : Doc, transaction : Transaction) -> Unit {
       }
     }
   }
+  self.collect_deletes = false
+  self.deleted_items.clear()
+  self.inserted_items.clear()
   self.notifying_transaction = false
   self.active_transaction = None
 }
@@ -194,6 +208,7 @@ fn[T] Doc::with_mutation(self : Doc, action : () -> T) -> T {
   }
   let transaction = self.begin_transaction(
     None,
+    !self.map_observers.is_empty() ||
     !self.before_observers.is_empty() ||
     !self.after_observers.is_empty() ||
     !self.cleanup_observers.is_empty() ||

@@ -34,15 +34,15 @@ def main():
    commands.append(c)
   commands += [['sync',x,y] for _ in range(3) for x in range(3) for y in range(3) if x!=y]
   cases.append(commands)
- checks=events=updates=0
+ checks=events=updates=map_events=0
  for version in ['v1','v2']:
   print('checking '+version,flush=True)
   a,b=execute(['validation/rust/target/release/transactions',version],cases),execute(['node','validation/transactions.cjs',version],cases)
   for seed,(r,m) in enumerate(zip(a,b)):
    for step,(x,y) in enumerate(zip(r['snapshots'],m['snapshots'])):
-    checks+=1;events+=len(x['events']);updates+=sum(e['phase'] in ['v1','v2'] for e in x['events'])
+    checks+=1;events+=sum(e['phase']!='map' for e in x['events']);map_events+=sum(e['phase']=='map' for e in x['events']);updates+=sum(e['phase'] in ['v1','v2'] for e in x['events'])
     if x!=y:
      Path('/tmp/yrs-transactions-failure.json').write_text(json.dumps(cases[seed][:step+1])+'\n');raise AssertionError(f'{version} seed={seed} step={step} op={cases[seed][step]} Rust={x!r} Moon={y!r}')
- result={'upstream':'ac339600c712642e556895426113c3f9c117de39','scenarios':len(cases),'wire_versions':['v1','v2'],'transaction_snapshots':checks,'lifecycle_event_comparisons':events,'emitted_updates_replayed':updates,'status':'passed'}
+ result={'upstream':'ac339600c712642e556895426113c3f9c117de39','scenarios':len(cases),'wire_versions':['v1','v2'],'transaction_snapshots':checks,'lifecycle_event_comparisons':events,'emitted_updates_replayed':updates,'map_event_comparisons':map_events,'status':'passed'}
  (ROOT/'validation/transaction-results.json').write_text(json.dumps(result,indent=2)+'\n');print(json.dumps(result))
 if __name__=='__main__':main()

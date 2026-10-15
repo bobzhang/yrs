@@ -86,6 +86,13 @@ fn run(input : String, v2 : Bool) -> String raise {
       packets.push((i, true, bytes))
     })
   }
+  for i, map in maps {
+    map.observe("oracle", fn(event, _) {
+      events.push(
+        ({ "doc": Json(i), "phase": "map", "changes": event.to_json() } : Json),
+      )
+    })
+  }
   let shadows = Array::makei(6, fn(i) {
     @yrs.Doc(client_id=(100 + i).to_uint64())
   })

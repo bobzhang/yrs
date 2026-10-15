@@ -8,5 +8,6 @@
   "transaction_snapshots": 26496,
   "lifecycle_event_comparisons": 116632,
   "emitted_updates_replayed": 37144,
+  "map_event_comparisons": 10718,
   "status": "passed"
 }
