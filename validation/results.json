@@ -1,6 +1,6 @@
 {
   "upstream": "ac339600c712642e556895426113c3f9c117de39",
-  "scenarios": 513,
+  "scenarios": 641,
   "wire_versions": [
     "v1",
     "v2"
@@ -10,10 +10,10 @@
     true
   ],
   "checks": {
-    "independent_operation_snapshots": 273432,
+    "independent_operation_snapshots": 364568,
     "wire_replay_snapshots": 546816,
     "same_state_local_operations": 109400
   },
-  "cross_runtime_documents": 12312,
+  "cross_runtime_documents": 15384,
   "status": "passed"
 }
