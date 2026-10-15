@@ -6,6 +6,10 @@ pub fn evaluate(String) -> String
 
 pub fn evaluate_v2(String) -> String
 
+pub fn utilities(String) -> String
+
+pub fn utilities_v2(String) -> String
+
 // Errors
 
 // Types and methods

@@ -51,7 +51,7 @@ fn Doc::insert_content(
 ) -> Id {
   let length = content.length()
   guard length > 0 else { abort("empty item") }
-  let clock = self.state.get(self.client)
+  let clock = self.next_clock(self.client)
   guard clock.to_uint64() + length.to_uint64() <= 0xffff_ffffUL else {
     abort("document clock exhausted")
   }

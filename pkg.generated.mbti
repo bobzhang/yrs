@@ -10,6 +10,18 @@ pub fn convert_update_v1_to_v2(Bytes, max_items? : Int) -> Bytes raise DecodeErr
 
 pub fn convert_update_v2_to_v1(Bytes, max_items? : Int) -> Bytes raise DecodeError
 
+pub fn diff_updates_v1(Bytes, Bytes) -> Bytes raise DecodeError
+
+pub fn diff_updates_v2(Bytes, Bytes) -> Bytes raise DecodeError
+
+pub fn encode_state_vector_from_update_v1(Bytes) -> Bytes raise DecodeError
+
+pub fn encode_state_vector_from_update_v2(Bytes) -> Bytes raise DecodeError
+
+pub fn merge_updates_v1(Array[Bytes]) -> Bytes raise DecodeError
+
+pub fn merge_updates_v2(Array[Bytes]) -> Bytes raise DecodeError
+
 // Errors
 pub suberror DecodeError {
   InvalidData(String)
@@ -60,6 +72,7 @@ pub fn Doc::encode_state_as_update_v2(Self, remote? : StateVector) -> Bytes rais
 pub fn Doc::get_or_insert_array(Self, String) -> ArrayRef
 pub fn Doc::get_or_insert_map(Self, String) -> MapRef
 pub fn Doc::get_or_insert_text(Self, String) -> Text
+pub fn Doc::has_missing_updates(Self) -> Bool
 pub fn Doc::pending_items(Self) -> Int
 pub fn Doc::state_vector(Self) -> StateVector
 

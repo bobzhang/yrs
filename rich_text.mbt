@@ -241,16 +241,13 @@ fn Text::clean_format_gap(
 }
 
 ///|
-fn Doc::cleanup_formatting(self : Doc, before : StateVector) -> Unit {
+fn Doc::cleanup_formatting(self : Doc) -> Unit {
   let full : Set[Parent] = Set([])
-  for client, items in self.clients {
-    for item in items {
-      if item.id.clock >= before.get(client) &&
-        !item.deleted &&
-        item.content is Format(_, _) &&
-        item.parent is Some(parent) {
-        full.add(parent)
-      }
+  for item in self.inserted_items {
+    if !item.deleted &&
+      item.content is Format(_, _) &&
+      item.parent is Some(parent) {
+      full.add(parent)
     }
   }
   let deleted = self.deleted_items[:].to_owned()

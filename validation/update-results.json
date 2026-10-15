@@ -1,0 +1,138 @@
+{
+  "upstream": "ac339600c712642e556895426113c3f9c117de39",
+  "relay_scenarios": 32,
+  "wire_versions": [
+    "v1"
+  ],
+  "rust_gc_modes": [
+    false,
+    true
+  ],
+  "independent_relay_snapshots": 4416,
+  "wire_replay_snapshots": 36432,
+  "gc_producer_convergence_checks": 24,
+  "stateless_merge_diff_cases": 352,
+  "reference_failures": [
+    {
+      "wire_version": "v1",
+      "rust_gc": true,
+      "scenario": 1,
+      "error": "reference emitted an overflowing skip block"
+    },
+    {
+      "wire_version": "v1",
+      "rust_gc": true,
+      "scenario": 2,
+      "error": "reference emitted an overflowing skip block"
+    },
+    {
+      "wire_version": "v1",
+      "rust_gc": true,
+      "scenario": 3,
+      "error": "reference emitted an overflowing skip block"
+    },
+    {
+      "wire_version": "v1",
+      "rust_gc": true,
+      "scenario": 6,
+      "error": "reference emitted an overflowing skip block"
+    },
+    {
+      "wire_version": "v1",
+      "rust_gc": true,
+      "scenario": 7,
+      "error": "reference emitted an overflowing skip block"
+    },
+    {
+      "wire_version": "v1",
+      "rust_gc": true,
+      "scenario": 11,
+      "error": "reference emitted an overflowing skip block"
+    },
+    {
+      "wire_version": "v1",
+      "rust_gc": true,
+      "scenario": 12,
+      "error": "reference emitted an overflowing skip block"
+    },
+    {
+      "wire_version": "v1",
+      "rust_gc": true,
+      "scenario": 13,
+      "error": "reference emitted an overflowing skip block"
+    },
+    {
+      "wire_version": "v1",
+      "rust_gc": true,
+      "scenario": 14,
+      "error": "reference emitted an overflowing skip block"
+    },
+    {
+      "wire_version": "v1",
+      "rust_gc": true,
+      "scenario": 15,
+      "error": "reference emitted an overflowing skip block"
+    },
+    {
+      "wire_version": "v1",
+      "rust_gc": true,
+      "scenario": 18,
+      "error": "reference emitted an overflowing skip block"
+    },
+    {
+      "wire_version": "v1",
+      "rust_gc": true,
+      "scenario": 19,
+      "error": "reference emitted an overflowing skip block"
+    },
+    {
+      "wire_version": "v1",
+      "rust_gc": true,
+      "scenario": 20,
+      "error": "reference emitted an overflowing skip block"
+    },
+    {
+      "wire_version": "v1",
+      "rust_gc": true,
+      "scenario": 21,
+      "error": "reference emitted an overflowing skip block"
+    },
+    {
+      "wire_version": "v1",
+      "rust_gc": true,
+      "scenario": 23,
+      "error": "reference emitted an overflowing skip block"
+    },
+    {
+      "wire_version": "v1",
+      "rust_gc": true,
+      "scenario": 25,
+      "error": "reference emitted an overflowing skip block"
+    },
+    {
+      "wire_version": "v1",
+      "rust_gc": true,
+      "scenario": 26,
+      "error": "reference emitted an overflowing skip block"
+    },
+    {
+      "wire_version": "v1",
+      "rust_gc": true,
+      "scenario": 28,
+      "signal": "SIGBUS"
+    },
+    {
+      "wire_version": "v1",
+      "rust_gc": true,
+      "scenario": 29,
+      "error": "reference emitted an overflowing skip block"
+    },
+    {
+      "wire_version": "v1",
+      "rust_gc": true,
+      "scenario": 31,
+      "error": "reference emitted an overflowing skip block"
+    }
+  ],
+  "status": "passed_available_reference_cases"
+}

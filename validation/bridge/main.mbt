@@ -136,12 +136,28 @@ fn evaluate_mode(input : String, v2 : Bool) -> String raise {
         guard args[2] is String(key) else { abort("expected key") }
         maps[x].remove(key)
       }
-      "s" | "q" => {
+      "s" | "q" | "u" => {
         let y = integer(args[2])
-        let bytes = if v2 {
-          docs[x].encode_state_as_update_v2(remote=docs[y].state_vector())
+        let remote = if kind == "u" {
+          guard args[3] is Array(entries) else {
+            abort("expected state vector")
+          }
+          @yrs.StateVector(
+            entries=entries.map(fn(pair) {
+              guard pair is Array(parts) else { abort("expected state entry") }
+              (
+                integer(parts[0]).to_uint64(),
+                integer(parts[1]).reinterpret_as_uint(),
+              )
+            }),
+          )
         } else {
-          docs[x].encode_state_as_update_v1(remote=docs[y].state_vector())
+          docs[y].state_vector()
+        }
+        let bytes = if v2 {
+          docs[x].encode_state_as_update_v2(remote~)
+        } else {
+          docs[x].encode_state_as_update_v1(remote~)
         }
         if kind == "q" {
           queued.push((y, bytes))
@@ -230,6 +246,7 @@ fn evaluate_mode(input : String, v2 : Bool) -> String raise {
 #export_name("evaluate")
 pub fn evaluate(input : String) -> String {
   evaluate_mode(input, false) catch {
+    @yrs.InvalidData(message) => ({ "error": Json(message) } : Json).stringify()
     err => ({ "error": Json(err.to_string()) } : Json).stringify()
   }
 }
@@ -238,6 +255,62 @@ pub fn evaluate(input : String) -> String {
 #export_name("evaluate_v2")
 pub fn evaluate_v2(input : String) -> String {
   evaluate_mode(input, true) catch {
+    @yrs.InvalidData(message) => ({ "error": Json(message) } : Json).stringify()
+    err => ({ "error": Json(err.to_string()) } : Json).stringify()
+  }
+}
+
+///|
+fn utilities_mode(input : String, v2 : Bool) -> String raise {
+  guard @json.parse(input) is Object(args) &&
+    args.get("updates") is Some(Array(updates)) &&
+    args.get("remote") is Some(String(remote)) else {
+    abort("bad utility request")
+  }
+  let updates = updates.map(fn(value) {
+    guard value is String(value) else { abort("expected hex") }
+    unhex(value)
+  })
+  let merged = if v2 {
+    @yrs.merge_updates_v2(updates)
+  } else {
+    @yrs.merge_updates_v1(updates)
+  }
+  let diff = if v2 {
+    @yrs.diff_updates_v2(merged, unhex(remote))
+  } else {
+    @yrs.diff_updates_v1(merged, unhex(remote))
+  }
+  let sv = if v2 {
+    @yrs.encode_state_vector_from_update_v2(merged)
+  } else {
+    @yrs.encode_state_vector_from_update_v1(merged)
+  }
+  let entries = @yrs.StateVector::decode_v1(sv)
+    .entries()
+    .map(fn(pair) { ([Json(pair.0), Json(pair.1)] : Json) })
+  (
+    {
+      "merged": Json(hex(merged)),
+      "diff": Json(hex(diff)),
+      "states": Json(entries),
+    } : Json).stringify()
+}
+
+///|
+#export_name("utilities")
+pub fn utilities(input : String) -> String {
+  utilities_mode(input, false) catch {
+    @yrs.InvalidData(message) => ({ "error": Json(message) } : Json).stringify()
+    err => ({ "error": Json(err.to_string()) } : Json).stringify()
+  }
+}
+
+///|
+#export_name("utilities_v2")
+pub fn utilities_v2(input : String) -> String {
+  utilities_mode(input, true) catch {
+    @yrs.InvalidData(message) => ({ "error": Json(message) } : Json).stringify()
     err => ({ "error": Json(err.to_string()) } : Json).stringify()
   }
 }

@@ -13,6 +13,14 @@ fn read_update(
       let origin = if (info & 128) != 0 { Some(reader.id()) } else { None }
       let right_origin = if (info & 64) != 0 { Some(reader.id()) } else { None }
       let kind = info & 31
+      if kind == 10 {
+        let length = reader.clock()
+        guard clock.to_uint64() + length.to_uint64() <= 0xffff_ffffUL else {
+          raise InvalidData("clock overflow")
+        }
+        clock += length
+        continue
+      }
       let parent = if kind != 0 &&
         kind != 10 &&
         origin is None &&
@@ -108,8 +116,9 @@ pub fn Doc::apply_update_v1(
   bytes : Bytes,
 ) -> Unit raise DecodeError {
   let (items, deletions) = read_update({ bytes, offset: 0, })
-  let before = self.state_vector()
   self.collect_deletes = true
+  let retained = self.pending[:].to_owned()
+  self.pending.clear()
   for raw in items {
     self.pending.push(raw)
   }
@@ -117,9 +126,14 @@ pub fn Doc::apply_update_v1(
     self.add_delete(client, start, end)
   }
   self.settle()
-  self.cleanup_formatting(before)
+  for raw in retained {
+    self.pending.push(raw)
+  }
+  self.settle()
+  self.cleanup_formatting()
   self.collect_deletes = false
   self.deleted_items.clear()
+  self.inserted_items.clear()
 }
 
 ///|
@@ -127,112 +141,107 @@ pub fn Doc::encode_state_as_update_v1(
   self : Doc,
   remote~ : StateVector = StateVector(),
 ) -> Bytes {
-  let writer : Writer = { bytes: [], }
-  let clients = self.state
-    .entries()
-    .filter(fn(pair) { pair.1 > remote.get(pair.0) })
-  clients.sort_by(fn(a, b) { b.0.compare(a.0) })
-  writer.uint(clients.length().to_uint64())
-  for (client, _) in clients {
-    let known = remote.get(client)
-    let items = self.clients[client].filter(fn(item) {
-      item.id.clock + item.content.length().reinterpret_as_uint() > known
-    })
-    writer.uint(items.length().to_uint64())
-    writer.uint(client)
-    writer.uint(known.to_uint64())
-    for item in items {
-      let offset = if item.id.clock < known {
-        (known - item.id.clock).reinterpret_as_int()
-      } else {
-        0
-      }
-      let content = item.content.slice(offset, item.content.length())
-      let origin = if offset == 0 {
-        item.origin
-      } else {
-        Some({ client, clock: known - 1U, })
-      }
-      let kind = match content {
-        Characters(_) => 4
-        Values(_) => 8
-        Binary(_) => 3
-        Shared(_) => 7
-        Format(_, _) => 6
-        Embed(_) => 5
-        Deleted(_) => 1
-        Garbage(_) => 0
-      }
-      let info = if kind == 0 {
-        0
-      } else {
-        kind |
-        (if origin is Some(_) { 128 } else { 0 }) |
-        (if item.right_origin is Some(_) { 64 } else { 0 }) |
-        (if item.parent_sub is Some(_) { 32 } else { 0 })
-      }
-      writer.byte(info)
-      if kind != 0 {
-        if origin is Some(id) {
-          writer.id(id)
-        }
-        if item.right_origin is Some(id) {
-          writer.id(id)
-        }
-        if origin is None && item.right_origin is None {
-          match item.parent.unwrap() {
-            Root(name) => {
-              writer.uint(1UL)
-              writer.string(name)
-            }
-            Nested(id) => {
-              writer.uint(0UL)
-              writer.id(id)
-            }
-          }
-          if item.parent_sub is Some(key) {
-            writer.string(key)
-          }
-        }
-      }
-      match content {
-        Characters(s) => writer.string(s)
-        Binary(b) => writer.buffer(b)
-        Format(key, value) => {
-          writer.string(key)
-          writer.string(value.to_json().stringify())
-        }
-        Embed(value) => writer.string(value.to_json().stringify())
-        Shared(kind) =>
-          writer.byte(
-            match kind {
-              SharedArray => 0
-              SharedMap => 1
-              SharedText => 2
-            },
-          )
-        Values(values) => {
-          writer.uint(values.length().to_uint64())
-          for value in values {
-            writer.any(value)
-          }
-        }
-        Deleted(n) | Garbage(n) => writer.uint(n.to_uint64())
+  let items = []
+  for client, blocks in self.clients {
+    if remote.clocks.contains(client) &&
+      self.state.get(client) <= remote.get(client) {
+      continue
+    }
+    for item in blocks {
+      if item.id.clock + item.content.length().reinterpret_as_uint() >
+        remote.get(client) {
+        items.push(
+          (
+            {
+              id: item.id,
+              origin: item.origin,
+              right_origin: item.right_origin,
+              parent: item.parent,
+              parent_sub: item.parent_sub,
+              content: item.content,
+            } : RawItem).trim_start(remote.get(client)),
+        )
       }
     }
   }
-  let clients = self.deletes.to_array()
-  clients.sort_by(fn(a, b) { b.0.compare(a.0) })
-  writer.uint(clients.length().to_uint64())
-  for (client, ranges) in clients {
-    writer.uint(client)
-    writer.uint(ranges.length().to_uint64())
-    for (start, end) in ranges {
-      writer.uint(start.to_uint64())
-      writer.uint((end - start).to_uint64())
+  // Pending blocks must be forwarded even when a recipient's advertised state
+  // is ahead of our integrated prefix. They may carry missing dependencies.
+  for item in self.pending {
+    items.push(item)
+  }
+  encode_raw_update(items, self.deletes)
+}
+
+///|
+fn Writer::raw_item(self : Writer, item : RawItem) -> Unit {
+  let content = item.content
+  let origin = item.origin
+  let kind = match content {
+    Characters(_) => 4
+    Values(_) => 8
+    Binary(_) => 3
+    Shared(_) => 7
+    Format(_, _) => 6
+    Embed(_) => 5
+    Deleted(_) => 1
+    Garbage(_) => 0
+  }
+  let info = if kind == 0 {
+    0
+  } else {
+    kind |
+    (if origin is Some(_) { 128 } else { 0 }) |
+    (if item.right_origin is Some(_) { 64 } else { 0 }) |
+    (if item.parent_sub is Some(_) { 32 } else { 0 })
+  }
+  self.byte(info)
+  if kind != 0 {
+    if origin is Some(id) {
+      self.id(id)
+    }
+    if item.right_origin is Some(id) {
+      self.id(id)
+    }
+    if origin is None && item.right_origin is None {
+      match item.parent.unwrap() {
+        Root(name) => {
+          self.uint(1UL)
+          self.string(name)
+        }
+        Nested(id) => {
+          self.uint(0UL)
+          self.id(id)
+        }
+      }
+      if item.parent_sub is Some(key) {
+        self.string(key)
+      }
     }
   }
-  writer.finish()
+  match content {
+    Characters(s) => self.string(s)
+    Binary(b) => self.buffer(b)
+    Format(key, value) => {
+      self.string(key)
+      self.string(value.to_json().stringify())
+    }
+    Embed(value) => self.string(value.to_json().stringify())
+    Shared(kind) =>
+      self.byte(
+        match kind {
+          SharedArray => 0
+          SharedMap => 1
+          SharedText => 2
+        },
+      )
+    Values(values) => {
+      self.uint(values.length().to_uint64())
+      for value in values {
+        self.any(value)
+      }
+    }
+    Deleted(n) | Garbage(n) => self.uint(n.to_uint64())
+  }
 }
 
 ///|

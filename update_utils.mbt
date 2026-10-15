@@ -1,0 +1,180 @@
+///|
+fn RawItem::trim_start(self : RawItem, clock : UInt32) -> RawItem {
+  if clock <= self.id.clock {
+    return self
+  }
+  let offset = (clock - self.id.clock).reinterpret_as_int()
+  {
+    ..self,
+    id: { client: self.id.client, clock, },
+    origin: if self.content is Garbage(_) {
+      None
+    } else {
+      Some({ client: self.id.client, clock: clock - 1U, })
+    },
+    content: self.content.slice(offset, self.content.length()),
+  }
+}
+
+///|
+// Gaps are represented by skip blocks when encoding; they never enter a Doc.
+fn normalize_items(items : Array[RawItem]) -> Array[RawItem] {
+  let sorted = items[:].to_owned()
+  sorted.sort_by(fn(a, b) {
+    let client = b.id.client.compare(a.id.client)
+    if client != 0 {
+      client
+    } else {
+      a.id.clock.compare(b.id.clock)
+    }
+  })
+  let out : Array[RawItem] = []
+  for item in sorted {
+    let mut start = item.id.clock
+    if out.last() is Some(previous) && previous.id.client == item.id.client {
+      start = start.max(
+        previous.id.clock + previous.content.length().reinterpret_as_uint(),
+      )
+    }
+    if start < item.id.clock + item.content.length().reinterpret_as_uint() {
+      out.push(item.trim_start(start))
+    }
+  }
+  out
+}
+
+///|
+fn encode_raw_update(
+  items : Array[RawItem],
+  deletes : Map[UInt64, Array[(UInt32, UInt32)]],
+) -> Bytes {
+  let groups : Map[UInt64, Array[RawItem]] = Map([])
+  for item in normalize_items(items) {
+    match groups.get(item.id.client) {
+      Some(items) => items.push(item)
+      None => groups[item.id.client] = [item]
+    }
+  }
+  let clients = groups.to_array()
+  clients.sort_by(fn(a, b) { b.0.compare(a.0) })
+  let writer : Writer = { bytes: [], }
+  writer.uint(clients.length().to_uint64())
+  for (client, items) in clients {
+    let mut count = items.length()
+    let mut clock = items[0].id.clock
+    for item in items {
+      if clock < item.id.clock {
+        count += 1
+      }
+      clock = item.id.clock + item.content.length().reinterpret_as_uint()
+    }
+    writer.uint(count.to_uint64())
+    writer.uint(client)
+    clock = items[0].id.clock
+    writer.uint(clock.to_uint64())
+    for item in items {
+      if clock < item.id.clock {
+        writer.byte(10)
+        writer.uint((item.id.clock - clock).to_uint64())
+      }
+      writer.raw_item(item)
+      clock = item.id.clock + item.content.length().reinterpret_as_uint()
+    }
+  }
+  let clients = deletes.to_array()
+  clients.sort_by(fn(a, b) { b.0.compare(a.0) })
+  writer.uint(clients.length().to_uint64())
+  for (client, ranges) in clients {
+    writer.uint(client)
+    writer.uint(ranges.length().to_uint64())
+    for (start, end) in ranges {
+      writer.uint(start.to_uint64())
+      writer.uint((end - start).to_uint64())
+    }
+  }
+  writer.finish()
+}
+
+///|
+/// Merge updates without integrating a document, preserving missing histories.
+/// Byte layout may differ from upstream block compaction; item identities and
+/// delete ranges are preserved. Unsupported content is rejected during decode.
+pub fn merge_updates_v1(updates : Array[Bytes]) -> Bytes raise DecodeError {
+  let all = []
+  let deletes = Doc(client_id=0UL)
+  for bytes in updates {
+    let (items, ranges) = read_update({ bytes, offset: 0, })
+    for item in items {
+      all.push(item)
+    }
+    for (client, start, end) in ranges {
+      deletes.add_delete(client, start, end)
+    }
+  }
+  encode_raw_update(all, deletes.deletes)
+}
+
+///|
+pub fn diff_updates_v1(
+  update : Bytes,
+  state_vector : Bytes,
+) -> Bytes raise DecodeError {
+  let remote = StateVector::decode_v1(state_vector)
+  let (items, ranges) = read_update({ bytes: update, offset: 0, })
+  let filtered = []
+  for item in items {
+    let known = remote.get(item.id.client)
+    if item.id.clock + item.content.length().reinterpret_as_uint() > known {
+      filtered.push(item.trim_start(known))
+    }
+  }
+  let deletes = Doc(client_id=0UL)
+  for (client, start, end) in ranges {
+    deletes.add_delete(client, start, end)
+  }
+  encode_raw_update(filtered, deletes.deletes)
+}
+
+///|
+/// Extract contiguous clock prefixes; a missing prefix or a skip is not known.
+pub fn encode_state_vector_from_update_v1(
+  update : Bytes,
+) -> Bytes raise DecodeError {
+  let (items, _) = read_update({ bytes: update, offset: 0, })
+  let state = StateVector()
+  for item in normalize_items(items) {
+    if item.id.clock == state.get(item.id.client) {
+      state.set_max(
+        item.id.client,
+        item.id.clock + item.content.length().reinterpret_as_uint(),
+      )
+    }
+  }
+  state.encode_v1()
+}
+
+///|
+pub fn merge_updates_v2(updates : Array[Bytes]) -> Bytes raise DecodeError {
+  convert_update_v1_to_v2(
+    merge_updates_v1(
+      updates.map(fn(bytes) raise DecodeError { convert_update_v2_to_v1(bytes) }),
+    ),
+  )
+}
+
+///|
+pub fn diff_updates_v2(
+  update : Bytes,
+  state_vector : Bytes,
+) -> Bytes raise DecodeError {
+  convert_update_v1_to_v2(
+    diff_updates_v1(convert_update_v2_to_v1(update), state_vector),
+  )
+}
+
+///|
+pub fn encode_state_vector_from_update_v2(
+  update : Bytes,
+) -> Bytes raise DecodeError {
+  encode_state_vector_from_update_v1(convert_update_v2_to_v1(update))
+}

@@ -113,6 +113,7 @@ pub struct Doc {
   priv pending : Array[RawItem]
   priv mut collect_deletes : Bool
   priv deleted_items : Array[Item]
+  priv inserted_items : Array[Item]
   priv deletes : Map[UInt64, Array[(UInt32, UInt32)]]
 }
 
@@ -128,6 +129,7 @@ pub fn Doc::Doc(client_id~ : UInt64) -> Doc {
     deletes: Map([]),
     collect_deletes: false,
     deleted_items: [],
+    inserted_items: [],
   }
 }
 
@@ -241,25 +243,41 @@ fn Doc::clean_end(self : Doc, id : Id) -> Item {
 
 ///|
 fn Doc::integrate(self : Doc, raw : RawItem) -> Bool {
-  let known = self.state.get(raw.id.client)
-  if raw.id.clock > known {
-    return false
+  let end = raw.id.clock + raw.content.length().reinterpret_as_uint()
+  let mut start = raw.id.clock
+  let missing : Array[RawItem] = []
+  for item in self.clients.get(raw.id.client).unwrap_or([]) {
+    let item_end = item.id.clock + item.content.length().reinterpret_as_uint()
+    if item_end <= start {
+      continue
+    }
+    if item.id.clock >= end {
+      break
+    }
+    if start < item.id.clock {
+      missing.push({
+        ..raw.trim_start(start),
+        content: raw.content.slice(
+          (start - raw.id.clock).reinterpret_as_int(),
+          (item.id.clock - raw.id.clock).reinterpret_as_int(),
+        ),
+      })
+    }
+    start = start.max(item_end)
   }
-  let end = raw.id.clock.to_uint64() + raw.content.length().to_uint64()
-  if end <= known.to_uint64() {
-    return true
+  if start < end {
+    missing.push(raw.trim_start(start))
   }
-  let offset = (known - raw.id.clock).reinterpret_as_int()
-  let raw = if offset == 0 {
-    raw
-  } else {
-    {
-      ..raw,
-      id: { client: raw.id.client, clock: known, },
-      origin: Some({ client: raw.id.client, clock: known - 1U, }),
-      content: raw.content.slice(offset, raw.content.length()),
+  for part in missing {
+    if !self.integrate_missing(part) {
+      return false
     }
   }
+  true
+}
+
+///|
+fn Doc::integrate_missing(self : Doc, raw : RawItem) -> Bool {
   if raw.parent is Some(Nested(id)) && self.find(id) is None {
     return false
   }
@@ -367,7 +385,13 @@ fn Doc::integrate(self : Doc, raw : RawItem) -> Bool {
   }
   self.items[item.id] = item
   match self.clients.get(item.id.client) {
-    Some(entries) => entries.push(item)
+    Some(entries) => {
+      let mut index = entries.length()
+      while index > 0 && entries[index - 1].id.clock > item.id.clock {
+        index -= 1
+      }
+      entries.insert(index, item)
+    }
     None => self.clients[item.id.client] = [item]
   }
   if parent is Some(name) && parent_sub is Some(key) {
@@ -383,7 +407,14 @@ fn Doc::integrate(self : Doc, raw : RawItem) -> Bool {
   if parent is Some(Nested(id)) && self.find(id).unwrap().deleted {
     self.mark_deleted(item)
   }
-  self.state.set_max(item.id.client, end.to_uint())
+  if self.collect_deletes {
+    self.inserted_items.push(item)
+  }
+  let mut prefix = self.state.get(item.id.client)
+  while self.find({ client: item.id.client, clock: prefix, }) is Some(known) {
+    prefix = known.id.clock + known.content.length().reinterpret_as_uint()
+  }
+  self.state.set_max(item.id.client, prefix)
   true
 }
 
@@ -392,11 +423,21 @@ fn Doc::settle(self : Doc) -> Unit {
   for ;; {
     let mut progress = false
     let unresolved = []
-    for raw in self.pending {
+    let blocked : Set[UInt64] = Set([])
+    for raw in normalize_items(self.pending) {
+      if blocked.contains(raw.id.client) {
+        unresolved.push(raw)
+        continue
+      }
+      let before = self.items.length()
       if self.integrate(raw) {
         progress = true
       } else {
         unresolved.push(raw)
+        blocked.add(raw.id.client)
+      }
+      if self.items.length() != before {
+        progress = true
       }
     }
     self.pending.clear()
@@ -409,20 +450,28 @@ fn Doc::settle(self : Doc) -> Unit {
   }
   for (client, ranges) in self.deletes.to_array() {
     for (start, end) in ranges {
-      let mut clock = start
-      while clock < end {
-        guard self.find({ client, clock, }) is Some(found) else { break }
-        let item = if found.id.clock < clock {
-          self.split(found, (clock - found.id.clock).reinterpret_as_int())
+      let known = self.clients
+        .get(client)
+        .map(fn(items) { items[:].to_owned() })
+        .unwrap_or([])
+      for found in known {
+        let found_end = found.id.clock +
+          found.content.length().reinterpret_as_uint()
+        if found.id.clock >= end {
+          break
+        }
+        if found_end <= start {
+          continue
+        }
+        let item = if found.id.clock < start {
+          self.split(found, (start - found.id.clock).reinterpret_as_int())
         } else {
           found
         }
-        let remaining = end - clock
-        if item.content.length().reinterpret_as_uint() > remaining {
-          self.split(item, remaining.reinterpret_as_int()) |> ignore
+        if item.id.clock + item.content.length().reinterpret_as_uint() > end {
+          self.split(item, (end - item.id.clock).reinterpret_as_int()) |> ignore
         }
         self.mark_deleted(item)
-        clock += item.content.length().reinterpret_as_uint()
       }
     }
   }
@@ -528,7 +577,7 @@ pub fn Text::insert(self : Text, index : Int32, value : String) -> Unit {
   if value.is_empty() {
     return
   }
-  let clock = self.doc.state.get(self.doc.client)
+  let clock = self.doc.next_clock(self.doc.client)
   guard clock.to_uint64() + value.length().to_uint64() <= 0xffff_ffffUL else {
     abort("document clock exhausted")
   }
@@ -638,4 +687,30 @@ fn Content::visible_length(self : Content) -> Int32 {
     Format(_, _) | Deleted(_) | Garbage(_) => 0
     _ => self.length()
   }
+}
+
+///|
+fn Doc::next_clock(self : Doc, client : UInt64) -> UInt32 {
+  match self.clients.get(client).bind(Array::last) {
+    Some(item) => item.id.clock + item.content.length().reinterpret_as_uint()
+    None => 0U
+  }
+}
+
+///|
+pub fn Doc::has_missing_updates(self : Doc) -> Bool {
+  if !self.pending.is_empty() {
+    return true
+  }
+  for client, _ in self.clients {
+    if self.state.get(client) < self.next_clock(client) {
+      return true
+    }
+  }
+  for client, ranges in self.deletes {
+    if ranges.last() is Some((_, end)) && end > self.next_clock(client) {
+      return true
+    }
+  }
+  false
 }
