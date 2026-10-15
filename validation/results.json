@@ -1,7 +1,15 @@
 {
   "upstream": "ac339600c712642e556895426113c3f9c117de39",
   "scenarios": 385,
-  "operation_snapshots": 68358,
-  "cross_runtime_documents": 2310,
+  "wire_versions": [
+    "v1",
+    "v2"
+  ],
+  "rust_gc_modes": [
+    false,
+    true
+  ],
+  "operation_snapshots": 273432,
+  "cross_runtime_documents": 9240,
   "status": "passed"
 }

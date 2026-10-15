@@ -15,7 +15,7 @@ Every milestone needs real Rust interoperability tests, rather than only MoonBit
 
 ## Implemented and checked
 
-Collaborative plain text uses the upstream YATA conflict-ordering algorithm, UTF-16 clocks, state vectors, binary v1 updates, deletion ranges, duplicate suppression and pending dependency integration. Deleted content is retained. Shared arrays and maps use the same store, with immutable lib0 values (including binary, signed 64-bit integers, floating point, arrays and objects). The Rust oracle covers 385 scenarios, 68,358 operation snapshots and 2,310 bidirectional document transfers, including nested maps/arrays/text, parent replacement and concurrent child edits.
+Collaborative plain text uses the upstream YATA conflict-ordering algorithm, UTF-16 clocks, state vectors, binary v1 and v2 updates, deletion ranges, duplicate suppression and pending dependency integration. Deleted content is retained. Shared arrays and maps use the same store, with immutable lib0 values (including binary, signed 64-bit integers, floating point, arrays and objects). The Rust oracle covers 385 scenarios in four wire-version/GC configurations, 273,432 operation snapshots and 9,240 bidirectional document transfers, including nested maps/arrays/text, parent replacement and concurrent child edits.
 
 ```mbt check
 ///|
@@ -35,6 +35,8 @@ test "two replicas exchange concurrent edits" {
 }
 ```
 
-Current limitations: rich text and XML are not yet implemented; unsupported content is rejected before applying an update. Binary v2, the remaining shared types and transaction/event APIs are still outstanding. The store currently favors straightforward correctness over upstream's block compaction and indexing optimizations. This is not a production release or a completed port.
+Current limitations: rich text and XML are not yet implemented; unsupported content is rejected before applying an update. The remaining shared types and transaction/event APIs are still outstanding. The store currently favors straightforward correctness over upstream's block compaction and indexing optimizations. This is not a production release or a completed port.
 
 Run `moon test --target all` and `python3 validation/compare.py`. The oracle uses the installed Rust 1.97.1 toolchain and the exact reference checkout under `.repos/y-crdt`; its Cargo dependencies are locked. Clone `https://github.com/y-crdt/y-crdt.git` there and check out `ac339600c712642e556895426113c3f9c117de39` before running it.
+
+Binary v2 currently uses a checked conversion layer around the common v1 integration path. It implements unsigned, difference and byte RLE columns, UTF-16 string lengths, key dictionaries and delta delete sets. This favors one integration implementation over minimum intermediate allocation. `convert_update_v2_to_v1` defaults to a configurable 1,000,000-item expansion budget; lib0 nesting is bounded at 256.

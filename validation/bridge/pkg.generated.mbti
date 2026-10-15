@@ -4,6 +4,8 @@ package "bobzhang/yrs/validation/bridge"
 // Values
 pub fn evaluate(String) -> String
 
+pub fn evaluate_v2(String) -> String
+
 // Errors
 
 // Types and methods

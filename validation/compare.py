@@ -69,23 +69,33 @@ def main():
         scenarios.append(commands)
     def execute(command, cases):
         inp=''.join(json.dumps(case,ensure_ascii=False)+'\n' for case in cases)
-        return [json.loads(line) for line in run(command,input=inp,capture_output=True).stdout.splitlines()]
+        results = [json.loads(line) for line in run(command,input=inp,capture_output=True).stdout.splitlines()]
+        for index, result in enumerate(results):
+            if 'error' in result:
+                Path('/tmp/yrs-failing-scenario.json').write_text(json.dumps(cases[index])+'\n')
+                raise RuntimeError(f'{command} scenario={index}: {result}')
+        return results
     rust_cmd=['validation/rust/target/release/yrs-reference']
     moon_cmd=['node','validation/run.cjs']
-    rust=execute(rust_cmd,scenarios)
-    moon=execute(moon_cmd,scenarios)
-    assert len(rust)==len(moon)==len(scenarios)
-    for seed,(a,b) in enumerate(zip(rust,moon)):
-        for index,(ra,mb) in enumerate(zip(a['snapshots'],b['snapshots'])):
-            assert ra==mb, f'seed={seed} step={index} op={scenarios[seed][index]} Rust={ra!r} Moon={mb!r}'
-        assert [[[str(c),n] for c,n in state] for state in a['states']]==b['states'],f'state vector differs seed={seed}'
-    for source,receiver in [(rust,moon_cmd),(moon,rust_cmd)]:
-        cases=[[['a',i,update] for i,update in enumerate(result['updates'])] for result in source]
-        received=execute(receiver,cases)
-        for seed,(original,actual) in enumerate(zip(source,received)):
-            assert original['snapshots'][-1]==actual['snapshots'][-1],f'cross-runtime update differs seed={seed}'
-            assert [[[str(c),n] for c,n in state] for state in original['states']]==[[[str(c),n] for c,n in state] for state in actual['states']]
-    result={'upstream':'ac339600c712642e556895426113c3f9c117de39','scenarios':len(scenarios),'operation_snapshots':sum(map(len,scenarios)),'cross_runtime_documents':len(scenarios)*6,'status':'passed'}
+    base_rust,base_moon=rust_cmd,moon_cmd
+    for version in ['v1','v2']:
+      for gc in [False,True]:
+        rust_cmd=base_rust+[version]+(['--gc'] if gc else [])
+        moon_cmd=base_moon+[version]
+        rust=execute(rust_cmd,scenarios)
+        moon=execute(moon_cmd,scenarios)
+        assert len(rust)==len(moon)==len(scenarios)
+        for seed,(a,b) in enumerate(zip(rust,moon)):
+            for index,(ra,mb) in enumerate(zip(a['snapshots'],b['snapshots'])):
+                assert ra==mb, f'seed={seed} step={index} op={scenarios[seed][index]} Rust={ra!r} Moon={mb!r}'
+            assert [[[str(c),n] for c,n in state] for state in a['states']]==b['states'],f'state vector differs seed={seed}'
+        for source,receiver in [(rust,moon_cmd),(moon,rust_cmd)]:
+            cases=[[['a',i,update] for i,update in enumerate(result['updates'])] for result in source]
+            received=execute(receiver,cases)
+            for seed,(original,actual) in enumerate(zip(source,received)):
+                assert original['snapshots'][-1]==actual['snapshots'][-1],f'cross-runtime update differs seed={seed}'
+                assert [[[str(c),n] for c,n in state] for state in original['states']]==[[[str(c),n] for c,n in state] for state in actual['states']]
+    result={'upstream':'ac339600c712642e556895426113c3f9c117de39','scenarios':len(scenarios),'wire_versions':['v1','v2'],'rust_gc_modes':[False,True],'operation_snapshots':sum(map(len,scenarios))*4,'cross_runtime_documents':len(scenarios)*24,'status':'passed'}
     (ROOT/'validation/results.json').write_text(json.dumps(result,indent=2)+'\n')
     print(json.dumps(result))
 if __name__=='__main__': main()

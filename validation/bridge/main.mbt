@@ -32,9 +32,8 @@ fn unhex(s : String) -> Bytes {
 }
 
 ///|
-#export_name("evaluate")
-pub fn evaluate(input : String) -> String {
-  let parsed = try! @json.parse(input)
+fn evaluate_mode(input : String, v2 : Bool) -> String raise {
+  let parsed = @json.parse(input)
   guard parsed is Array(commands) else { abort("expected commands") }
   let docs = [@yrs.Doc(client_id=1UL), Doc(client_id=2UL), Doc(client_id=3UL)]
   let texts = docs.map(fn(d) { d.get_or_insert_text("note") })
@@ -103,23 +102,35 @@ pub fn evaluate(input : String) -> String {
       }
       "s" | "q" => {
         let y = integer(args[2])
-        let bytes = docs[x].encode_state_as_update_v1(
-          remote=docs[y].state_vector(),
-        )
+        let bytes = if v2 {
+          docs[x].encode_state_as_update_v2(remote=docs[y].state_vector())
+        } else {
+          docs[x].encode_state_as_update_v1(remote=docs[y].state_vector())
+        }
         if kind == "q" {
           queued.push((y, bytes))
+        } else if v2 {
+          docs[y].apply_update_v2(bytes)
         } else {
-          try! docs[y].apply_update_v1(bytes)
+          docs[y].apply_update_v1(bytes)
         }
       }
       "r" =>
         if !queued.is_empty() {
           let (y, bytes) = queued[x % queued.length()]
-          try! docs[y].apply_update_v1(bytes)
+          if v2 {
+            docs[y].apply_update_v2(bytes)
+          } else {
+            docs[y].apply_update_v1(bytes)
+          }
         }
       "a" => {
         guard args[2] is String(s) else { abort("expected hex") }
-        try! docs[x].apply_update_v1(unhex(s))
+        if v2 {
+          docs[x].apply_update_v2(unhex(s))
+        } else {
+          docs[x].apply_update_v1(unhex(s))
+        }
       }
       _ => abort("unknown command")
     }
@@ -140,7 +151,15 @@ pub fn evaluate(input : String) -> String {
       ),
     )
   }
-  let updates = docs.map(fn(d) { hex(d.encode_state_as_update_v1()) })
+  let updates = docs.map(fn(d) raise {
+    hex(
+      if v2 {
+        d.encode_state_as_update_v2()
+      } else {
+        d.encode_state_as_update_v1()
+      },
+    )
+  })
   let states = docs.map(fn(d) {
     Json(
       d
@@ -155,4 +174,20 @@ pub fn evaluate(input : String) -> String {
       "updates": Json(updates),
       "states": Json(states),
     } : Json).stringify()
+}
+
+///|
+#export_name("evaluate")
+pub fn evaluate(input : String) -> String {
+  evaluate_mode(input, false) catch {
+    err => ({ "error": Json(err.to_string()) } : Json).stringify()
+  }
+}
+
+///|
+#export_name("evaluate_v2")
+pub fn evaluate_v2(input : String) -> String {
+  evaluate_mode(input, true) catch {
+    err => ({ "error": Json(err.to_string()) } : Json).stringify()
+  }
 }
