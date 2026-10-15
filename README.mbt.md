@@ -35,7 +35,9 @@ test "two replicas exchange concurrent edits" {
 }
 ```
 
-Current limitations: rich text and XML are not yet implemented; unsupported content is rejected before applying an update. The remaining shared types and transaction/event APIs are still outstanding. The store currently favors straightforward correctness over upstream's block compaction and indexing optimizations. This is not a production release or a completed port.
+Rich text supports attributed insertion, formatting, JSON embeds and formatted deltas. A further 128 randomized histories exercise overlapping formatting, delayed/duplicate delivery and local edits from identical serialized states. The oracle replays identical binary histories in both implementations because upstream Rust attribute-map iteration makes independently generated rich-text histories nondeterministic. Adjacent string delta chunks with equal attributes are compared as one chunk; values, attributes, embeds and imported state vectors remain checked.
+
+Current limitations: XML is not yet implemented; unsupported content is rejected before applying an update. The remaining shared types and transaction/event APIs are still outstanding. The store currently favors straightforward correctness over upstream's block compaction and indexing optimizations. This is not a production release or a completed port.
 
 Run `moon test --target all` and `python3 validation/compare.py`. The oracle uses the installed Rust 1.97.1 toolchain and the exact reference checkout under `.repos/y-crdt`; its Cargo dependencies are locked. Clone `https://github.com/y-crdt/y-crdt.git` there and check out `ac339600c712642e556895426113c3f9c117de39` before running it.
 

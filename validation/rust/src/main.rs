@@ -17,13 +17,30 @@ fn main() {
   let maps: Vec<_> = docs.iter().map(|d| d.get_or_insert_map("settings")).collect();
   let mut queued: Vec<(usize,Vec<u8>)> = vec![];
   let mut snapshots=vec![];
+  let mut trace=false;
+  let mut history=vec![];
+  let mut local_cases=vec![];
+  let mut previous=vec![yrs::StateVector::default();3];
   for cmd in commands {
    let a=cmd.as_array().unwrap();
    let kind=a[0].as_str().unwrap();
    let x=a[1].as_u64().unwrap() as usize;
+   if ["i","d","f","t","b"].contains(&kind) && trace {
+    let bytes=if v2 { docs[x].transact().encode_state_as_update_v2(&Default::default()) } else { docs[x].transact().encode_state_as_update_v1(&Default::default()) };
+    local_cases.push(json!([["a",x,hex(&bytes)],cmd.clone()]));
+   }
    match kind {
+    "trace" => { trace=true; continue; }
     "i" => { let mut txn=docs[x].transact_mut(); let n=texts[x].len(&txn); let pos=a[2].as_u64().unwrap() as u32 % (n+1); texts[x].insert(&mut txn,pos,a[3].as_str().unwrap()); }
     "d" => { let mut txn=docs[x].transact_mut(); let n=texts[x].len(&txn); let pos=a[2].as_u64().unwrap() as u32 % (n+1); let len=a[3].as_u64().unwrap() as u32 % (n-pos+1); texts[x].remove_range(&mut txn,pos,len); }
+    "f" | "t" | "b" => {
+      let mut txn=docs[x].transact_mut();
+      let n=texts[x].len(&txn); let pos=a[2].as_u64().unwrap() as u32 % (n+1);
+      let attrs: yrs::types::Attrs=serde_json::from_value(a[4].clone()).unwrap();
+      if kind=="f" { let len=a[3].as_u64().unwrap() as u32 % (n-pos+1); texts[x].format(&mut txn,pos,len,attrs); }
+      else if kind=="t" { texts[x].insert_with_attributes(&mut txn,pos,a[3].as_str().unwrap(),attrs); }
+      else { let value: yrs::Any=serde_json::from_value(a[3].clone()).unwrap(); texts[x].insert_embed_with_attributes(&mut txn,pos,value,attrs); }
+    }
     "n" => {
       let mut txn=docs[x].transact_mut();
       let inner=maps[x].insert(&mut txn,a[2].as_str().unwrap(),yrs::MapPrelim::default());
@@ -54,10 +71,21 @@ fn main() {
     "a" => { docs[x].transact_mut().apply_update(if v2 { Update::decode_v2(&unhex(a[2].as_str().unwrap())) } else { Update::decode_v1(&unhex(a[2].as_str().unwrap())) }.unwrap()).unwrap(); }
     _ => panic!("bad command")
    }
-   snapshots.push((0..3).map(|i| {let txn=docs[i].transact(); json!({"text":texts[i].get_string(&txn),"array":arrays[i].to_json(&txn),"map":maps[i].to_json(&txn)})}).collect::<Vec<_>>());
+   if trace {
+    for i in 0..3 {
+     let txn=docs[i].transact();
+     let bytes=if v2 { txn.encode_state_as_update_v2(&previous[i]) } else { txn.encode_state_as_update_v1(&previous[i]) };
+     history.push(json!(["a",i,hex(&bytes)]));
+     previous[i]=txn.state_vector();
+    }
+   }
+   snapshots.push((0..3).map(|i| {let txn=docs[i].transact(); {
+ let delta=texts[i].diff(&txn, |_| ()).into_iter().map(|c| { let mut v=json!({"insert":c.insert.to_json(&txn)}); if let Some(attrs)=c.attributes { v["attributes"]=serde_json::to_value(attrs).unwrap(); } v }).collect::<Vec<_>>();
+ json!({"text":texts[i].get_string(&txn),"delta":delta,"array":arrays[i].to_json(&txn),"map":maps[i].to_json(&txn)})
+ }}).collect::<Vec<_>>());
   }
   let updates=docs.iter().map(|d|hex(&if v2 { d.transact().encode_state_as_update_v2(&Default::default()) } else { d.transact().encode_state_as_update_v1(&Default::default()) })).collect::<Vec<_>>();
   let states=docs.iter().map(|d| {let mut v=d.transact().state_vector().iter().map(|(c,n)|(c.get(),*n)).collect::<Vec<_>>();v.sort();v}).collect::<Vec<_>>();
-  println!("{}",json!({"snapshots":snapshots,"updates":updates,"states":states}));
+  println!("{}",json!({"snapshots":snapshots,"updates":updates,"states":states,"history":history,"local_cases":local_cases}));
  }
 }

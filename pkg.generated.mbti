@@ -111,10 +111,20 @@ pub fn StateVector::set_max(Self, UInt64, UInt) -> Unit
 pub struct Text {
   // private fields
 }
+pub fn Text::format(Self, Int, Int, Array[(String, Any)]) -> Unit
 pub fn Text::get_string(Self) -> String
 pub fn Text::insert(Self, Int, String) -> Unit
+pub fn Text::insert_embed(Self, Int, Any, attributes? : Array[(String, Any)]) -> Unit
+pub fn Text::insert_with_attributes(Self, Int, String, Array[(String, Any)]) -> Unit
 pub fn Text::length(Self) -> Int
 pub fn Text::remove_range(Self, Int, Int) -> Unit
+pub fn Text::to_delta(Self) -> Array[TextChunk]
+
+pub(all) struct TextChunk {
+  insert : Out
+  attributes : ReadOnlyArray[(String, Any)]
+}
+pub fn TextChunk::to_json(Self) -> Json
 
 // Type aliases
 

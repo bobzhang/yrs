@@ -31,6 +31,8 @@ fn read_update(
         None
       }
       let content = match kind {
+        5 => Embed(reader.json_value())
+        6 => Format(reader.string(), reader.json_value())
         7 =>
           Shared(
             match reader.byte() {
@@ -106,6 +108,8 @@ pub fn Doc::apply_update_v1(
   bytes : Bytes,
 ) -> Unit raise DecodeError {
   let (items, deletions) = read_update({ bytes, offset: 0, })
+  let before = self.state_vector()
+  self.collect_deletes = true
   for raw in items {
     self.pending.push(raw)
   }
@@ -113,6 +117,9 @@ pub fn Doc::apply_update_v1(
     self.add_delete(client, start, end)
   }
   self.settle()
+  self.cleanup_formatting(before)
+  self.collect_deletes = false
+  self.deleted_items.clear()
 }
 
 ///|
@@ -151,6 +158,8 @@ pub fn Doc::encode_state_as_update_v1(
         Values(_) => 8
         Binary(_) => 3
         Shared(_) => 7
+        Format(_, _) => 6
+        Embed(_) => 5
         Deleted(_) => 1
         Garbage(_) => 0
       }
@@ -189,6 +198,11 @@ pub fn Doc::encode_state_as_update_v1(
       match content {
         Characters(s) => writer.string(s)
         Binary(b) => writer.buffer(b)
+        Format(key, value) => {
+          writer.string(key)
+          writer.string(value.to_json().stringify())
+        }
+        Embed(value) => writer.string(value.to_json().stringify())
         Shared(kind) =>
           writer.byte(
             match kind {
@@ -219,4 +233,12 @@ pub fn Doc::encode_state_as_update_v1(
     }
   }
   writer.finish()
+}
+
+///|
+fn Reader::json_value(self : Reader) -> Any raise DecodeError {
+  let value = @json.parse(self.string()) catch {
+    _ => raise InvalidData("invalid embedded JSON")
+  }
+  Any::from_json(value)
 }

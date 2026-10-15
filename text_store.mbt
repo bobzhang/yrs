@@ -17,6 +17,8 @@ priv enum Content {
   Values(ReadOnlyArray[Any])
   Binary(Bytes)
   Shared(SharedKind)
+  Format(String, Any)
+  Embed(Any)
   Deleted(Int32)
   Garbage(Int32)
 }
@@ -26,7 +28,7 @@ fn Content::length(self : Content) -> Int32 {
   match self {
     Characters(s) => s.length()
     Values(values) => values.length()
-    Binary(_) | Shared(_) => 1
+    Binary(_) | Shared(_) | Format(_, _) | Embed(_) => 1
     Deleted(n) | Garbage(n) => n
   }
 }
@@ -59,7 +61,7 @@ fn Content::slice(self : Content, start : Int32, end : Int32) -> Content {
           Array::makei(end - start, fn(i) { values[start + i] })[:],
         ),
       )
-    Binary(_) | Shared(_) => {
+    Binary(_) | Shared(_) | Format(_, _) | Embed(_) => {
       guard start == 0 && end == 1 else { abort("binary item is indivisible") }
       self
     }
@@ -96,6 +98,7 @@ priv struct Branch {
   mut head : Id?
   heads : Map[String, Id]
   values : Map[String, Id]
+  mut formatted : Bool
 }
 
 ///|
@@ -108,6 +111,8 @@ pub struct Doc {
   priv items : Map[Id, Item]
   priv roots : Map[Parent, Branch]
   priv pending : Array[RawItem]
+  priv mut collect_deletes : Bool
+  priv deleted_items : Array[Item]
   priv deletes : Map[UInt64, Array[(UInt32, UInt32)]]
 }
 
@@ -121,6 +126,8 @@ pub fn Doc::Doc(client_id~ : UInt64) -> Doc {
     roots: Map([]),
     pending: [],
     deletes: Map([]),
+    collect_deletes: false,
+    deleted_items: [],
   }
 }
 
@@ -144,7 +151,12 @@ fn Doc::branch(self : Doc, name : Parent) -> Branch {
   match self.roots.get(name) {
     Some(b) => b
     None => {
-      let b : Branch = { head: None, heads: Map([]), values: Map([]), }
+      let b : Branch = {
+        head: None,
+        heads: Map([]),
+        values: Map([]),
+        formatted: false,
+      }
       self.roots[name] = b
       b
     }
@@ -297,6 +309,9 @@ fn Doc::integrate(self : Doc, raw : RawItem) -> Bool {
   }
   if parent is Some(name) {
     let branch = self.branch(name)
+    if content is Format(_, _) {
+      branch.formatted = true
+    }
     let start = match left {
       Some(id) => self.items[id].right
       None => branch.first(parent_sub)
@@ -474,7 +489,7 @@ pub fn Text::length(self : Text) -> Int32 {
   while cursor is Some(id) {
     let item = self.doc.items[id]
     if !item.deleted {
-      length += item.content.length()
+      length += item.content.visible_length()
     }
     cursor = item.right
   }
@@ -493,7 +508,7 @@ fn Text::position(self : Text, index : Int32) -> (Id?, Id?) {
       if remaining == 0 {
         return (left, cursor)
       }
-      let len = item.content.length()
+      let len = item.content.visible_length()
       if remaining < len {
         let tail = self.doc.split(item, remaining)
         return (Some(item.id), Some(tail.id))
@@ -547,25 +562,23 @@ pub fn Text::remove_range(self : Text, index : Int32, length : Int32) -> Unit {
     length <= self.length() - index else {
     abort("text deletion out of bounds")
   }
-  let (_, start) = self.position(index)
+  let pos = self.rich_position(index)
+  let start = pos.right
+  let start_attrs = Map::from_array(pos.attrs.to_array())
   let mut remaining = length
-  let mut cursor = start
-  while remaining > 0 && cursor is Some(id) {
+  while remaining > 0 && pos.right is Some(id) {
     let item = self.doc.items[id]
-    if !item.deleted {
-      if remaining < item.content.length() {
+    if !item.deleted && item.content.visible_length() > 0 {
+      if remaining < item.content.visible_length() {
         self.doc.split(item, remaining) |> ignore
       }
-      let length = item.content.length()
-      self.doc.add_delete(
-        id.client,
-        id.clock,
-        id.clock + length.reinterpret_as_uint(),
-      )
+      remaining -= item.content.visible_length()
       self.doc.mark_deleted(item)
-      remaining -= length
     }
-    cursor = item.right
+    pos.forward()
+  }
+  if !start_attrs.is_empty() {
+    self.clean_format_gap(start, pos.right, start_attrs, pos.attrs)
   }
 }
 
@@ -593,6 +606,9 @@ fn Doc::mark_deleted(self : Doc, item : Item) -> Unit {
       continue
     }
     item.deleted = true
+    if self.collect_deletes {
+      self.deleted_items.push(item)
+    }
     self.add_delete(
       item.id.client,
       item.id.clock,
@@ -613,5 +629,13 @@ fn Doc::mark_deleted(self : Doc, item : Item) -> Unit {
         }
       }
     }
+  }
+}
+
+///|
+fn Content::visible_length(self : Content) -> Int32 {
+  match self {
+    Format(_, _) | Deleted(_) | Garbage(_) => 0
+    _ => self.length()
   }
 }

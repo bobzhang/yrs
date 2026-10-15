@@ -41,12 +41,28 @@ fn evaluate_mode(input : String, v2 : Bool) -> String raise {
   let maps = docs.map(fn(d) { d.get_or_insert_map("settings") })
   let queued : Array[(Int32, Bytes)] = []
   let snapshots : Array[Json] = []
+  let mut trace = false
+  let history : Array[Json] = []
+  let local_cases : Array[Json] = []
+  let previous = docs.map(fn(d) { d.state_vector() })
   for command in commands {
     guard command is Array(args) && args[0] is String(kind) else {
       abort("bad command")
     }
     let x = integer(args[1])
+    if trace && ["i", "d", "f", "t", "b"].contains(kind) {
+      let bytes = if v2 {
+        docs[x].encode_state_as_update_v2()
+      } else {
+        docs[x].encode_state_as_update_v1()
+      }
+      local_cases.push(([["a", Json(x), Json(hex(bytes))], command] : Json))
+    }
     match kind {
+      "trace" => {
+        trace = true
+        continue
+      }
       "i" => {
         guard args[3] is String(s) else { abort("expected string") }
         texts[x].insert(integer(args[2]) % (texts[x].length() + 1), s)
@@ -55,6 +71,26 @@ fn evaluate_mode(input : String, v2 : Bool) -> String raise {
         let n = texts[x].length()
         let pos = integer(args[2]) % (n + 1)
         texts[x].remove_range(pos, integer(args[3]) % (n - pos + 1))
+      }
+      "f" | "t" | "b" => {
+        guard args[4] is Object(fields) else { abort("expected attributes") }
+        let attrs = fields
+          .to_array()
+          .map(fn(pair) { (pair.0, @yrs.Any::from_json(pair.1)) })
+        let n = texts[x].length()
+        let pos = integer(args[2]) % (n + 1)
+        if kind == "f" {
+          texts[x].format(pos, integer(args[3]) % (n - pos + 1), attrs)
+        } else if kind == "t" {
+          guard args[3] is String(value) else { abort("expected text") }
+          texts[x].insert_with_attributes(pos, value, attrs)
+        } else {
+          texts[x].insert_embed(
+            pos,
+            @yrs.Any::from_json(args[3]),
+            attributes=attrs,
+          )
+        }
       }
       "n" => {
         guard args[2] is String(key) && args[3] is String(title) else {
@@ -134,6 +170,17 @@ fn evaluate_mode(input : String, v2 : Bool) -> String raise {
       }
       _ => abort("unknown command")
     }
+    if trace {
+      for i in 0..<3 {
+        let bytes = if v2 {
+          docs[i].encode_state_as_update_v2(remote=previous[i])
+        } else {
+          docs[i].encode_state_as_update_v1(remote=previous[i])
+        }
+        history.push((["a", Json(i), Json(hex(bytes))] : Json))
+        previous[i] = docs[i].state_vector()
+      }
+    }
     snapshots.push(
       Json(
         Array::makei(3, fn(i) {
@@ -144,6 +191,7 @@ fn evaluate_mode(input : String, v2 : Bool) -> String raise {
           (
             {
               "text": Json(texts[i].get_string()),
+              "delta": Json(texts[i].to_delta().map(@yrs.TextChunk::to_json)),
               "array": Json(arrays[i].to_array().map(@yrs.Out::to_json)),
               "map": Json(map),
             } : Json)
@@ -173,6 +221,8 @@ fn evaluate_mode(input : String, v2 : Bool) -> String raise {
       "snapshots": Json(snapshots),
       "updates": Json(updates),
       "states": Json(states),
+      "history": Json(history),
+      "local_cases": Json(local_cases),
     } : Json).stringify()
 }
 
