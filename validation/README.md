@@ -22,6 +22,7 @@ moon fmt --check
 moon check --target all --deny-warn
 moon test --target all
 moon info
+python3 validation/typed_v2.py
 python3 validation/compare.py
 python3 validation/contracts.py
 python3 validation/handles.py
@@ -122,3 +123,10 @@ The weak oracle separates construction from reads: new quotations must equal
 independently computed visible slices, while Rust- and MoonBit-authored wire
 histories are replayed into both engines for query/observer comparisons. This
 prevents corrected starting identities from concealing a query or event defect.
+
+The 0.1.1 review adds `typed_v2.py` to the values release gate, bringing the matrix
+to 13 suites and 44 commands. Its unchanged Rust and MoonBit bridges independently
+assert Buffer, Undefined and exact Int64 embeds and attributes, exchange both
+authors' packets, and re-export them across both runtimes again. Public API tests
+add pending, generic, historical and retained-transaction coverage. The review
+record and associated GitHub issues are in [reviews/2026-10-16-ultra.md](reviews/2026-10-16-ultra.md).

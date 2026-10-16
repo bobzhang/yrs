@@ -160,3 +160,32 @@ Individual `validation/*-results.json` files describe their exact scope. Histori
 reports saying “partial compatibility” refer to exact pinned Rust behavior; read
 their exception details and the current contract rather than treating them as a
 percentage. Release reports identify the exact library source hash tested.
+
+## Review corrections in 0.1.1
+
+V2 rich-text embeds and formatting use typed `Any` fields directly. Binary,
+Undefined and Int64 values survive v2 transport, merges, diffs, pending inspection,
+transaction callbacks, historical updates and generic v2 codecs. Explicit v1
+encoding or v2-to-v1 conversion still projects rich-text values into JSON because
+that is the v1 format; use v2 when those distinctions matter. Array/map `Any`
+content already has typed representation in both formats.
+
+Sparse documents retain a contiguous replication frontier in `Doc.state_vector`.
+Encoding selects actual available blocks even beyond that frontier, including
+when the recipient advertises the same zero prefix. Cursors resolve actual
+integrated anchors. `Doc.snapshot` instead records the highest integrated clock
+and excludes missing ranges in its snapshot delete set. This preserves the
+observed historical view after gaps later arrive. These exclusions are historical
+metadata only: ordinary document updates never delete unseen ranges on that basis.
+Use `Doc.state_vector`, not a sparse snapshot's vector, for replication.
+
+Transactions exposed through every observer family freeze their metadata and v1/v2
+bytes at commit. Reusing a decoded update creates independent local subdocuments;
+its serialized options remain stable after application. Conflict-deleted weak
+items cannot attach subscriptions to a winning map entry.
+
+Awareness metadata can retain a removed client. A newer non-null state for that
+client is an addition and emits both change and update notifications. Pinned Rust
+only emits an update in this case; the oracle asserts that defect and permits
+only the independently observed absent-to-present event correction. See the
+[fresh review record](validation/reviews/2026-10-16-ultra.md).

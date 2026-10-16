@@ -569,3 +569,35 @@ causal state, with the six occurrences fixed by the deterministic corpus. This
 is an operation-change observer contract, not a promise to notify only when the
 rendered value differs. Unrelated map keys and duplicate packets are separately
 required not to notify the link.
+
+## Sparse relays and historical cuts (0.1.1 review)
+
+Pinned Rust skips a client's integrated sparse blocks when encoding against a
+recipient state vector whose zero prefix equals its own. Reproduce by inserting
+an unrelated prefix, then independent map keys a and b, and delivering only a to
+one peer and b to another. Both advertise `{client: 0}`; Rust's differential relay
+omits a. The port selects actual available blocks instead. `sparse_transport_test.mbt`
+checks both wire formats, GC modes, zero/nonzero missing prefixes, emitted updates,
+receiver state vectors, duplicates and eventual prefix arrival.
+
+Sparse cursors resolve against integrated identities rather than contiguous
+frontiers. Sparse snapshots use observed upper clock bounds and explicit missing
+ranges in their historical delete sets. `sparse_history_test.mbt` checks that these
+cuts retain exactly the visible history before and after prefix arrival, and that
+ordinary replication never propagates synthetic snapshot exclusions as deletions.
+These corrections do not change the contiguous replication state vector.
+
+## Awareness restoration notifications (0.1.1 review)
+
+`presence.py` begins with a six-command unchanged-Rust witness: set A's state,
+send it to B, remove A at B, advance A's clock twice, send A to B. Rust stores A as
+present but emits only `update(updated=[A])`; the port emits both
+`change(added=[A])` and `update(added=[A])`.
+
+The differential comparison continues to require identical state, clocks, text,
+and all unrelated events. It adjusts only Rust update entries whose prior stored
+state is null and current stored state is non-null, moving that identity from
+updated to added and adding the corresponding change entry. The 129 deterministic
+histories contain 1,745 such corrections over 33,030 operation snapshots; all 774
+cross-runtime awareness transfers agree. `awareness_restore_test.mbt` also checks
+silent duplicates and unchanged-value heartbeats.

@@ -10,7 +10,7 @@ requirements. The implementation audit and all 13 release suites pass.
 ## Installation
 
 ```sh
-moon add bobzhang/yrs@0.1.0
+moon add bobzhang/yrs@0.1.1
 ```
 
 [GitHub](https://github.com/bobzhang/yrs) · [Mooncakes](https://mooncakes.io/docs/bobzhang/yrs)
@@ -94,9 +94,13 @@ pinned public declaration/member. Corrections to upstream behavior have
 [retained reproductions](validation/REFERENCE_LIMITATIONS.md). Yrs weak links are
 an upstream extension; their semantics are checked against Rust, not Yjs 13.
 
+The 0.1.1 follow-up fixes gaps found by a fresh Codex CLI review: typed v2
+rich-text values, sparse relays and history, ghost weak subscriptions, and
+retained observer transactions. See the [review and issue dispositions](validation/reviews/2026-10-16-ultra.md).
+
 ## Validation
 
-178 tests pass on all four backends. Differential tests use unchanged Yrs at
+189 tests pass on all four backends. Differential tests use unchanged Yrs at
 `ac339600c712642e556895426113c3f9c117de39` and pinned Yjs 13.6.27.
 The core matrix covers 641 scenarios across both wire formats and GC modes.
 Mixed MoonBit/Yjs undo tests check rendered content, state vectors, deletion ranges,

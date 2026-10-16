@@ -1,5 +1,24 @@
 # Changelog
 
+## 0.1.1 — 2026-10-16
+
+Fresh Codex CLI review fixes, with public issues and regression tests:
+
+- Preserve binary embeds, Undefined and exact Int64 values throughout v2 document,
+  transaction, update-utility, pending, historical and generic codec paths (#2).
+  V1 rich-text JSON conversion retains its format-defined limitations.
+- Forward integrated sparse blocks using actual clocks; resolve their cursor
+  anchors; capture visible sparse history with explicit snapshot exclusion ranges
+  without turning missing history into replication deletions (#1).
+- Do not attach weak subscriptions to a conflict-deleted map value (#3).
+- Freeze transactions retained by weak and subdocument observers (#4).
+- Emit awareness change notifications when a removed remote participant returns
+  (#5), correcting the same defect in pinned Rust Yrs.
+
+Decoded updates preserve subdocument options without sharing live child instances
+between receiving documents. Added a bidirectional typed-v2 Rust oracle and an
+explicit awareness restoration witness. Existing public signatures are preserved.
+
 ## 0.1.0 — 2026-10-16
 
 Initial MoonBit port of Yrs 0.28.0 with the weak-reference extension and Yjs
