@@ -1,0 +1,19 @@
+{
+  "upstream": "ac339600c712642e556895426113c3f9c117de39",
+  "histories": 48,
+  "wire_versions": [
+    1,
+    2
+  ],
+  "successful_undo_redo_checkpoints": 2496,
+  "cross_runtime_reloads": 4992,
+  "reference_restored_parent_defects": 2,
+  "checks": [
+    "structured XML including text attributes",
+    "nested maps and arrays",
+    "rich text",
+    "concurrent editing authors",
+    "save/reload after each successful undo or redo"
+  ],
+  "status": "passed with explicit reference restored-parent encoding exception"
+}

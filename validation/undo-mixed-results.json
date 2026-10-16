@@ -9,8 +9,16 @@
   "replica_state_comparisons": 102528,
   "duplicate_deliveries": 3264,
   "undo_redo_actions": 7562,
-  "format_cleanup_reconciliation_rounds": 404,
+  "reconciliation_rounds": 254,
+  "reconciliation_kinds": {
+    "rendered_content": 250,
+    "xml_attributes_only": 4
+  },
   "independent_restoration_identity_equality_required": false,
-  "observer_events_compared": false,
+  "structured_xml_attributes_compared": true,
+  "observer_events_compared": "identical remote sync and duplicate transactions after prior state reconciliation",
+  "observer_transaction_comparisons": 9186,
+  "notification_batches": 5738,
+  "deep_events": 5074,
   "status": "passed"
 }

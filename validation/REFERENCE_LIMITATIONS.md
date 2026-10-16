@@ -102,14 +102,21 @@ undo. This preserves the exact identities that drive conflict resolution. The
 96-history matrix passes both wire formats, including nested collections, XML,
 remote edits, undo/redo, duplicate delivery and final replica convergence.
 
-Importing rich text can generate additional formatting deletion operations. A
-mirror and its source therefore exchange those generated updates before their
-complete rendered states are compared. The result records the number of such
-reconciliation rounds; it does not omit formatting or normalize away attribute
-differences. This checks convergence after all generated operations have arrived,
-not equality before those additional deletions have been delivered. Observer
-notifications and independently allocated undo identities remain outside this
-matrix. The prior independent-history failure is not removed or marked passed.
+Imports can generate additional deletion operations, including formatting cleanup
+and the restored-parent attribute defect documented below. Source and mirror
+exchange generated operations before comparing complete state. Comparisons now
+include structured XML-text attributes, which rendered XML alone does not expose.
+The refreshed matrix records 254 reconciliation rounds (250 rendered-content,
+four attribute-only) and compares 9,186 remote synchronization/duplicate observer
+transactions, including 5,738 notification batches and 5,074 deep events.
+
+This checks convergence after generated operations have arrived, not equality
+before reconciliation. Locally executed undo observer equivalence and independent
+restoration identities remain separate gates. `undo.py` now records its current
+strict mismatch rather than retaining a historical passing report: a follower
+loses restored nested-map entries in Rust while the corrected port preserves them.
+`undo_persistence.py` independently checks every sampled successful port undo/redo
+checkpoint against both decoders, and explicitly reproduces Rust's self-reload loss.
 
 
 ## Legacy JSON content decoder

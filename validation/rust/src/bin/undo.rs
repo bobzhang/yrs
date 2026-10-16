@@ -1,3 +1,16 @@
+fn xml_snapshot(node: yrs::XmlOut, txn: &yrs::Transaction) -> Value {
+ match node {
+  yrs::XmlOut::Element(e) => {
+   let attrs:serde_json::Map<String,Value>=e.attributes(txn).map(|(k,v)|(k.to_string(),serde_json::to_value(v.to_json(txn)).unwrap())).collect();
+   json!({"tag":e.tag().as_ref(),"attributes":attrs,"children":e.children(txn).map(|c|xml_snapshot(c,txn)).collect::<Vec<_>>()})
+  }
+  yrs::XmlOut::Fragment(f) => json!({"children":f.children(txn).map(|c|xml_snapshot(c,txn)).collect::<Vec<_>>()}),
+  yrs::XmlOut::Text(t) => {
+   let attrs:serde_json::Map<String,Value>=t.attributes(txn).map(|(k,v)|(k.to_string(),serde_json::to_value(v.to_json(txn)).unwrap())).collect();
+   json!({"text":t.get_string(txn),"attributes":attrs})
+  }
+ }
+}
 
 use std::{io::{self,BufRead,Write},sync::{Arc,Mutex}};
 use serde_json::{Value,json};
@@ -70,7 +83,7 @@ fn main(){let v2=std::env::args().any(|s|s=="v2");let live=std::env::args().any(
  "xedit"=>{let len=xmls[x].len(&tx);if len>0{let node=xmls[x].children(&tx).nth((n%len)as usize);if let Some(yrs::XmlOut::Element(e))=node{e.insert_attribute(&mut tx,"class",format!("c{n}"));let child=e.children(&tx).next();if let Some(yrs::XmlOut::Text(t))=child{t.insert_attribute(&mut tx,"lang","en");let p=n%(t.len(&tx)+1);t.insert(&mut tx,p,"!");}}}},
  _=>panic!("op")}
  }}
- let current:Vec<_>=docs.iter().enumerate().map(|(i,d)|{let tx=d.transact();json!({"map":roots[i].to_json(&tx),"xml":xmls[i].get_string(&tx),"text":texts[i].get_string(&tx),"delta":texts[i].diff(&tx,yrs::types::text::YChange::identity).iter().map(|d|json!({"insert":d.insert.to_json(&tx),"attributes":d.attributes})).collect::<Vec<_>>()})}).collect();
+ let current:Vec<_>=docs.iter().enumerate().map(|(i,d)|{let tx=d.transact();json!({"map":roots[i].to_json(&tx),"xml":xmls[i].get_string(&tx),"xml_nodes":xmls[i].children(&tx).map(|n|xml_snapshot(n,&tx)).collect::<Vec<_>>(),"text":texts[i].get_string(&tx),"delta":texts[i].diff(&tx,yrs::types::text::YChange::identity).iter().map(|d|json!({"insert":d.insert.to_json(&tx),"attributes":d.attributes})).collect::<Vec<_>>()})}).collect();
  snapshots.push(json!({"docs":current,"notifications":*log.lock().unwrap(),"result":result,"stacks":managers.iter().map(|m|json!([m.undo_stack().len(),m.redo_stack().len()])).collect::<Vec<_>>()}));
  }
  if live {

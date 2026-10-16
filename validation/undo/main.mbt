@@ -1,4 +1,29 @@
 ///|
+fn xml_snapshot(node : @yrs.XmlNode) -> Json {
+  match node {
+    Element(node) => {
+      let attrs : Map[String, Json] = Map([])
+      for (key, value) in node.attributes() {
+        attrs[key] = value.to_json()
+      }
+      {
+        "tag": Json(node.tag()),
+        "attributes": Json(attrs),
+        "children": Json(node.as_fragment().children().map(xml_snapshot)),
+      }
+    }
+    Fragment(node) => { "children": Json(node.children().map(xml_snapshot)) }
+    Text(node) => {
+      let attrs : Map[String, Json] = Map([])
+      for (key, value) in node.attributes() {
+        attrs[key] = value.to_json()
+      }
+      { "text": Json(node.get_string()), "attributes": Json(attrs) }
+    }
+  }
+}
+
+///|
 fn hex(bytes : Bytes) -> String {
   let out = StringBuilder()
   let digits = "0123456789abcdef"
@@ -276,6 +301,7 @@ fn run(input : String, v2 : Bool, live~ : Bool = false) -> String raise {
         {
           "map": roots[i].to_json(),
           "xml": Json(xmls[i].get_string()),
+          "xml_nodes": Json(xmls[i].children().map(xml_snapshot)),
           "text": Json(texts[i].get_string()),
           "delta": Json(
             texts[i]

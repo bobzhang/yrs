@@ -65,7 +65,17 @@ def main():
       if [canonical(v) for v in replay['snapshots']]==expected:
        matched=True;alternative_runs.append({'version':version,'scenario':seed,'step':step,'attempt':attempt+1});break
      if not matched:
-      Path('/tmp/yrs-undo-failure.json').write_text(json.dumps(prefix)+'\n');raise AssertionError(f'{version} seed={seed} step={step} op={cases[seed][step]} Rust={x!r} Moon={y!r}')
+      Path('/tmp/yrs-undo-failure.json').write_text(json.dumps(prefix)+'\n')
+      fixture='validation/fixtures/undo-independent-failure.json'
+      (ROOT/fixture).write_text(json.dumps(prefix)+'\n')
+      result={'upstream':'ac339600c712642e556895426113c3f9c117de39','scenarios':len(cases),
+              'concurrent_undo_authors':concurrent,'transaction_snapshots_before_failure':checks,
+              'structured_xml_attributes_compared':True,'observer_events_compared':False,
+              'first_mismatch':{'version':version,'scenario':seed,'step':step,'operation':cases[seed][step],'fixture':fixture},
+              'alternate_reference_runs':alternative_runs,'status':'failed exact independent-history comparison',
+              'context':'The port corrects restored-parent origins; unchanged Rust can lose restored entries during synchronization. See undo_persistence.py for explicit self-reload witnesses. This mismatch is not counted as a pass.'}
+      (ROOT/('validation/undo-concurrent-results.json' if concurrent else 'validation/undo-results.json')).write_text(json.dumps(result,indent=2)+'\n')
+      raise AssertionError(f'{version} seed={seed} step={step} op={cases[seed][step]} Rust={x!r} Moon={y!r}')
   for source,target in [(a,['node','validation/undo.cjs',version]),(b,['validation/rust/target/release/undo',version])]:
    packets=[];expected=[]
    for row in source:

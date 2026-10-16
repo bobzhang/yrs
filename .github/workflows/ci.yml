@@ -52,7 +52,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        suite: [core, contracts, wire, lifecycle]
+        suite: [core, contracts, wire, lifecycle, undo]
     steps:
       - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5
       - name: Check out the unchanged pinned Rust reference
@@ -94,6 +94,10 @@ jobs:
               python3 validation/sparse_wire.py
               python3 validation/pending.py
               python3 validation/pending_scheduling.py
+              ;;
+            undo)
+              python3 validation/undo_mixed.py
+              python3 validation/undo_persistence.py
               ;;
             lifecycle)
               python3 validation/transactions.py

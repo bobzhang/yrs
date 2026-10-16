@@ -122,15 +122,19 @@ transactions and documents. Use `expand_scope` with a shared `Out` handle, then
 `Default` value and can be changed by stack observers. Restored content receives
 new CRDT identities; persistent positions follow local restoration chains.
 
-`python3 validation/undo.py` validates one editing replica with remote followers:
-96 randomized histories, 34,176 transaction snapshots across v1/v2, and 1,152
-bidirectional Rust/MoonBit full-state transfers. It compares rendered structures,
-rich-text attributes, stack depths and undo/redo return values. Rust's unordered
-restoration can produce several outcomes; each accepted alternative must match
-an entire MoonBit history prefix in a fresh reference run. These runs are
-recorded in `validation/undo-results.json`. No mismatching history is silently
-excluded. Exact observer events during independently generated undo histories
-are outside this comparison.
+`python3 validation/undo.py` is the strict independent-history comparison. It
+currently fails at a synchronization after undo: the port preserves restored
+nested-map entries that pinned Rust loses on the wire. The exact first mismatch
+and its history are recorded in `validation/undo-results.json`; it is not counted
+as a pass. Rust's unordered restoration can also produce several outcomes; each
+accepted alternative must match an entire MoonBit history prefix in a fresh run.
+
+`python3 validation/undo_persistence.py` checks the corrected persistence contract.
+All 2,496 successful undo/redo checkpoints from 48 multi-author histories survive
+4,992 Rust/MoonBit reloads across both wire versions, including XML-text attributes
+that rendered XML does not show. A five-command fixture independently demonstrates
+the unchanged Rust self-reload failure. The fix reanchors restored map values in
+their restored parent branch, and covers ordinary nested maps too.
 
 **Undo compatibility still has open audit items.** `YRS_UNDO_CONCURRENT=1 python3
 validation/undo.py` exercises independently generated editing/undo histories;
@@ -202,11 +206,14 @@ editing owners. Every replica has a mirror in the other runtime that receives
 identical wire history, and every generated cleanup deletion is synchronized
 before asserting convergence. Both wire formats pass 96 histories: 102,528
 replica comparisons, 7,562 undo/redo actions and 3,264 duplicate deliveries.
-The run required 404 formatting-cleanup reconciliation rounds. Results are in
-`validation/undo-mixed-results.json`. This validates live concurrent undo
-interoperability without assuming independent HashSet restoration orders must
-allocate identical identities. Exact undo observer parity is not checked by this
-matrix, and the independent-history mismatch fixture remains retained.
+The run required 254 reconciliation rounds: 250 involving rendered content and
+four exposing XML attributes absent from the rendered string. Structured XML is
+now compared throughout. All 9,186 remote synchronization/duplicate transactions
+have matching observer notifications (5,738 batches and 5,074 deep events).
+These results cover notifications for identical incoming packets after prior
+state reconciliation; locally generated undo events and independently allocated
+restoration identities remain separate audit items. Results are in
+`validation/undo-mixed-results.json`.
 
 
 Legacy JSON content and opaque shared-type references are preserved on the wire.

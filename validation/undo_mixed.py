@@ -9,6 +9,7 @@ assuming independently allocated restored IDs must produce identical conflicts.
 import json,random,subprocess,select,tempfile
 from pathlib import Path
 from undo import canonical,ROOT
+from events import canonical as canonical_events
 
 class Session:
  def __init__(self,command):
@@ -49,6 +50,16 @@ def main():
  subprocess.run(['cargo','+1.97.1','build','--release','--locked','--manifest-path','validation/rust/Cargo.toml','--bin','undo'],cwd=ROOT,check=True)
  subprocess.run(['moon','build','validation/undo','--release','--target','js'],cwd=ROOT,check=True)
  checked=duplicates=undo_actions=reconciliations=0
+ observer_checks=notification_batches=deep_events=0
+ reconciliation_kinds={'rendered_content':0,'xml_attributes_only':0}
+ def notifications(row):
+  return canonical_events({'notifications':row['snapshots'][-1]['notifications']})['notifications']
+ def compare_events(rows, version, seed, step, command):
+  a,b=map(notifications,rows)
+  if a!=b:
+   Path('/tmp/yrs-undo-mixed-events-failure.json').write_text(json.dumps({'version':version,'seed':seed,'step':step,'command':command,'rust':rows[0],'moon':rows[1]})+'\n')
+   raise AssertionError(('remote events',version,seed,step,command,a,b))
+  return len(a),sum(len(batch.get('events',[])) for batch in a)
  for version in ['v1','v2']:
   for seed in range(96):
    sessions=[Session(['validation/rust/target/release/undo',version,'--live']),Session(['node','validation/undo-live.cjs',version])]
@@ -62,15 +73,17 @@ def main():
      elif op=='sync':
       packet=last[owner]['updates'][x];target=c[2]
       last=[s.call([['apply',target,packet]]) for s in sessions]
+      batches,events=compare_events(last,version,seed,step,c)
+      observer_checks+=1;notification_batches+=batches;deep_events+=events
      else:
       last[owner]=sessions[owner].call([c])
       packet=last[owner]['updates'][x]
       last[1-owner]=sessions[1-owner].call([['apply',x,packet]])
       if op in ('undo','redo'):undo_actions+=1
      a,b=state(last[0]),state(last[1])
-     # A remote rich-text import can generate additional formatting deletions.
-     # Those are new CRDT operations, so they must flow back to the sender
-     # before convergence is asserted; compare all content after reconciliation.
+     # Imports can generate extra deletions, including undo-restored XML
+     # attributes. Compare structured XML as well as rendered strings; exchange
+     # generated operations before asserting convergence and count both causes.
      for round in range(3):
       if a==b:break
       for target in range(3):
@@ -78,6 +91,9 @@ def main():
         last[0]=sessions[0].call([['apply',target,last[1]['updates'][target]]])
         last[1]=sessions[1].call([['apply',target,last[0]['updates'][target]]])
         reconciliations+=1
+        rendered=lambda d:{k:v for k,v in d.items() if k!='xml_nodes'}
+        kind='xml_attributes_only' if rendered(a[target])==rendered(b[target]) else 'rendered_content'
+        reconciliation_kinds[kind]+=1
       a,b=state(last[0]),state(last[1])
      if a!=b:
       Path('/tmp/yrs-undo-mixed-failure.json').write_text(json.dumps({'version':version,'seed':seed,'commands':commands[:step+1],'rust':last[0],'moon':last[1]})+'\n')
@@ -88,10 +104,13 @@ def main():
       last=[s.call([['apply',x,packet]]) for s in sessions]
       assert state(last[0])==state(last[1])==before,(version,seed,step,'duplicate')
       duplicates+=1
+      batches,events=compare_events(last,version,seed,step,['duplicate',x])
+      assert batches==0,(version,seed,step,'duplicate emitted events')
+      observer_checks+=1
     final=state(last[0]);assert final[0]==final[1]==final[2],(version,seed,'convergence',final)
    finally:
     for s in sessions:s.close()
    if seed%16==15:print(f'{version}: {seed+1}/96 mixed histories passed',flush=True)
- result={'upstream':'ac339600c712642e556895426113c3f9c117de39','scenarios':96,'wire_versions':['v1','v2'],'mixed_authorship':True,'replica_state_comparisons':checked,'duplicate_deliveries':duplicates,'undo_redo_actions':undo_actions,'format_cleanup_reconciliation_rounds':reconciliations,'independent_restoration_identity_equality_required':False,'observer_events_compared':False,'status':'passed'}
+ result={'upstream':'ac339600c712642e556895426113c3f9c117de39','scenarios':96,'wire_versions':['v1','v2'],'mixed_authorship':True,'replica_state_comparisons':checked,'duplicate_deliveries':duplicates,'undo_redo_actions':undo_actions,'reconciliation_rounds':reconciliations,'reconciliation_kinds':reconciliation_kinds,'independent_restoration_identity_equality_required':False,'structured_xml_attributes_compared':True,'observer_events_compared':'identical remote sync and duplicate transactions after prior state reconciliation','observer_transaction_comparisons':observer_checks,'notification_batches':notification_batches,'deep_events':deep_events,'status':'passed'}
  (ROOT/'validation/undo-mixed-results.json').write_text(json.dumps(result,indent=2)+'\n');print(json.dumps(result))
 if __name__=='__main__':main()
