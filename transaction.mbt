@@ -96,10 +96,6 @@ pub fn Transaction::encode_update_v1(self : Transaction) -> Bytes {
   let before = self.before_state()
   let items = []
   for client, blocks in self.document.clients {
-    if before.clocks.contains(client) &&
-      self.document.state.get(client) <= before.get(client) {
-      continue
-    }
     let clock = before.get(client)
     for index in first_block_after(blocks, clock)..<blocks.length() {
       let item = blocks[index]

@@ -183,10 +183,6 @@ fn Doc::encode_document(
 ) -> Bytes {
   let items = []
   for client, blocks in self.clients {
-    if remote.clocks.contains(client) &&
-      self.state.get(client) <= remote.get(client) {
-      continue
-    }
     let clock = remote.get(client)
     for index in first_block_after(blocks, clock)..<blocks.length() {
       let item = blocks[index]
