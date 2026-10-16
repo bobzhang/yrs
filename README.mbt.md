@@ -169,7 +169,7 @@ replicas may use different offset modes while exchanging identical updates.
 Insert, remove and format offsets in byte mode must fall on Unicode character
 boundaries. CRDT state-vector clocks always remain UTF-16 code units.
 `python3 validation/offsets.py` validates 96 randomized mixed-mode histories,
-34,176 snapshots, 27,770 text events and 1,152 wire replay cases across v1/v2.
+34,176 snapshots, 28,242 text events and 1,152 wire replay cases across v1/v2.
 These cover Chinese, astral characters, combining accents and ZWJ emoji. This
 matrix does not yet establish Unicode sticky-position parity.
 
@@ -187,3 +187,11 @@ With GC enabled in both runtimes, all 641 core scenarios passed in v1/v2:
 document transfers. See `validation/gc-results.json`. This establishes the core
 GC interoperability matrix; concurrent undo and long-run memory/performance
 validation are still separate outstanding checks.
+
+
+`In` describes detached nested inputs for `ArrayRef::insert` and
+`MapRef::insert_input`. `Out::to_input` captures an independent copy of shared
+arrays, maps, rich text and XML trees. `Text::apply_delta` accepts `TextDelta`
+insert/delete/retain operations, including attributed text and shared-type
+embeds, in a single transaction. The mixed-offset Rust matrix includes these
+delta edits and checks observer output as well as rendered text and clocks.

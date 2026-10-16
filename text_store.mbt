@@ -766,24 +766,7 @@ pub fn Text::remove_range(self : Text, index : Int32, length : Int32) -> Unit {
       abort("text deletion out of bounds")
     }
     let pos = self.rich_position(index)
-    let start = pos.right
-    let start_attrs = Map::from_array(pos.attrs.to_array())
-    let mut remaining = length
-    while remaining > 0 && pos.right is Some(id) {
-      let item = self.doc.items[id]
-      if !item.deleted && item.content.offset_length(self.doc) > 0 {
-        if remaining < item.content.offset_length(self.doc) {
-          self.doc.split(item, item.content.block_offset(remaining, self.doc))
-          |> ignore
-        }
-        remaining -= item.content.offset_length(self.doc)
-        self.doc.mark_deleted(item)
-      }
-      pos.forward()
-    }
-    if !start_attrs.is_empty() {
-      self.clean_format_gap(start, pos.right, start_attrs, pos.attrs)
-    }
+    pos.remove(length)
   })
 }
 

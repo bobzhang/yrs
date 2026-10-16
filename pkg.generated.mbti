@@ -75,6 +75,7 @@ pub fn ArrayEvent::target(Self) -> ArrayRef
 pub struct ArrayRef {
   // private fields
 }
+pub fn ArrayRef::insert(Self, Int, In) -> Out
 pub fn ArrayRef::insert_array(Self, Int) -> Self
 pub fn ArrayRef::insert_doc(Self, Int, Doc) -> Doc
 pub fn ArrayRef::insert_map(Self, Int) -> MapRef
@@ -262,6 +263,17 @@ pub fn Id::op_le(Self, Self) -> Bool
 pub fn Id::op_lt(Self, Self) -> Bool
 pub fn Id::to_repr(Self) -> @debug.Repr
 
+pub(all) enum In {
+  Value(Any)
+  Array(ReadOnlyArray[In])
+  Map(ReadOnlyArray[(String, In)])
+  Text(ReadOnlyArray[TextDelta])
+  XmlElement(String, ReadOnlyArray[(String, In)], ReadOnlyArray[In])
+  XmlFragment(ReadOnlyArray[In])
+  XmlText(ReadOnlyArray[TextDelta], ReadOnlyArray[(String, In)])
+  Subdoc(Doc)
+}
+
 pub(all) enum IndexScope {
   Relative(Id)
   Nested(Id)
@@ -287,6 +299,7 @@ pub fn MapRef::get(Self, String) -> Out?
 pub fn MapRef::insert(Self, String, Any) -> Unit
 pub fn MapRef::insert_array(Self, String) -> ArrayRef
 pub fn MapRef::insert_doc(Self, String, Doc) -> Doc
+pub fn MapRef::insert_input(Self, String, In) -> Out
 pub fn MapRef::insert_map(Self, String) -> Self
 pub fn MapRef::insert_text(Self, String) -> Text
 pub fn MapRef::observe(Self, String, (MapEvent, Transaction) -> Unit) -> Unit
@@ -333,6 +346,7 @@ pub(all) enum Out {
   XmlFragment(XmlFragment)
   XmlText(XmlText)
 }
+pub fn Out::to_input(Self) -> In
 pub fn Out::to_json(Self) -> Json
 pub fn Out::to_string(Self) -> String
 
@@ -409,6 +423,7 @@ pub(all) enum SyncMessage {
 pub struct Text {
   // private fields
 }
+pub fn Text::apply_delta(Self, Array[TextDelta]) -> Unit
 pub fn Text::format(Self, Int, Int, Array[(String, Any)]) -> Unit
 pub fn Text::get_string(Self) -> String
 pub fn Text::insert(Self, Int, String) -> Unit
@@ -429,6 +444,12 @@ pub(all) struct TextChunk {
   attributes : ReadOnlyArray[(String, Any)]
 }
 pub fn TextChunk::to_json(Self) -> Json
+
+pub(all) enum TextDelta {
+  Inserted(In, ReadOnlyArray[(String, Any)])
+  Deleted(Int)
+  Retain(Int, ReadOnlyArray[(String, Any)])
+}
 
 pub struct TextEvent {
   // private fields

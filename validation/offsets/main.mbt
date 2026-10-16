@@ -116,6 +116,14 @@ fn run(input : String, v2 : Bool) -> String raise {
         let end = p + integer(c[3]) % (points.length() - p)
         if op == "d" {
           texts[x].remove_range(points[p], points[end] - points[p])
+        } else if op == "delta" {
+          texts[x].apply_delta([
+            Retain(points[p], []),
+            Deleted(points[end] - points[p]),
+            Inserted(Value(String("界🦀")), [
+              ("bold", Bool(integer(c[4]) == 1)),
+            ]),
+          ])
         } else {
           texts[x].format(points[p], points[end] - points[p], [
             ("bold", Bool(integer(c[4]) == 1)),

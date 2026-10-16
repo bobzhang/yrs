@@ -6,12 +6,13 @@
     "utf16",
     "bytes"
   ],
+  "input_delta_operations": true,
   "wire_versions": [
     "v1",
     "v2"
   ],
   "transaction_snapshots": 34176,
-  "text_events": 27770,
+  "text_events": 28242,
   "wire_replay_cases": 1152,
   "status": "passed"
 }

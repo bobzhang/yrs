@@ -19,7 +19,7 @@ pub fn ArrayRef::length(self : ArrayRef) -> Int32 {
 
 ///|
 pub fn ArrayRef::to_array(self : ArrayRef) -> Array[Out] {
-  let result = []
+  let result : Array[Out] = []
   let mut cursor = self.doc.branch(self.name).head
   while cursor is Some(id) {
     let item = self.doc.items[id]

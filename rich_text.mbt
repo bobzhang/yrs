@@ -152,16 +152,7 @@ fn Text::insert_formatted(
       return
     }
     let pos = self.rich_position(index)
-    let attrs = Map::from_array(attributes)
-    for key, _ in pos.attrs {
-      if !attrs.contains(key) {
-        attrs[key] = Null
-      }
-    }
-    pos.minimize(attrs)
-    let restore = pos.insert_attributes(attrs)
-    pos.insert(content)
-    pos.restore(restore)
+    pos.insert_formatted(content, attributes) |> ignore
   })
 }
 
@@ -195,45 +186,7 @@ pub fn Text::format(
   self.doc.with_mutation(fn() {
     guard length >= 0 else { abort("negative format length") }
     let pos = self.rich_position(index)
-    let attrs = Map::from_array(attributes)
-    pos.minimize(attrs)
-    let restore = pos.insert_attributes(attrs)
-    let mut remaining = length
-    while pos.right is Some(id) {
-      let item = self.doc.items[id]
-      if !(remaining > 0 ||
-        (!restore.is_empty() && (item.deleted || item.content is Format(_, _)))) {
-        break
-      }
-      if !item.deleted {
-        match item.content {
-          Format(key, value) =>
-            if attrs.get(key) is Some(desired) {
-              if desired == value {
-                restore.remove(key)
-              } else {
-                restore[key] = value
-              }
-              self.doc.mark_deleted(item)
-            }
-          _ => {
-            let len = item.content.offset_length(self.doc)
-            if remaining < len {
-              let tail = self.doc.split(
-                item,
-                item.content.block_offset(remaining, self.doc),
-              )
-              pos.left = Some(item.id)
-              pos.right = Some(tail.id)
-              break
-            }
-            remaining -= len
-          }
-        }
-      }
-      pos.forward()
-    }
-    pos.restore(restore)
+    pos.format(length, attributes)
   })
 }
 
@@ -454,4 +407,100 @@ pub fn Text::to_delta(self : Text) -> Array[TextChunk] {
     cursor = item.right
   }
   result
+}
+
+///|
+fn RichPosition::insert_formatted(
+  pos : RichPosition,
+  content : Content,
+  attributes : Array[(String, Any)],
+) -> Id {
+  let attrs = Map::from_array(attributes)
+  for key, _ in pos.attrs {
+    if !attrs.contains(key) {
+      attrs[key] = Null
+    }
+  }
+  pos.minimize(attrs)
+  let restore = pos.insert_attributes(attrs)
+  pos.insert(content)
+  let id = pos.left.unwrap()
+  pos.restore(restore)
+  id
+}
+
+///|
+fn RichPosition::format(
+  pos : RichPosition,
+  length : Int32,
+  attributes : Array[(String, Any)],
+) -> Unit {
+  let attrs = Map::from_array(attributes)
+  pos.minimize(attrs)
+  let restore = pos.insert_attributes(attrs)
+  let mut remaining = length
+  while pos.right is Some(id) {
+    let item = pos.doc.items[id]
+    if !(remaining > 0 ||
+      (!restore.is_empty() && (item.deleted || item.content is Format(_, _)))) {
+      break
+    }
+    if !item.deleted {
+      match item.content {
+        Format(key, value) =>
+          if attrs.get(key) is Some(desired) {
+            if desired == value {
+              restore.remove(key)
+            } else {
+              restore[key] = value
+            }
+            pos.doc.mark_deleted(item)
+          }
+        _ => {
+          let len = item.content.offset_length(pos.doc)
+          if remaining < len {
+            let tail = pos.doc.split(
+              item,
+              item.content.block_offset(remaining, pos.doc),
+            )
+            pos.left = Some(item.id)
+            pos.right = Some(tail.id)
+            break
+          }
+          remaining -= len
+        }
+      }
+    }
+    pos.forward()
+  }
+  pos.restore(restore)
+}
+
+///|
+fn RichPosition::remove(
+  pos : RichPosition,
+  length : Int32,
+  cleanup_empty~ : Bool = false,
+) -> Unit {
+  guard length >= 0 else { abort("negative deletion length") }
+  let text : Text = { doc: pos.doc, name: pos.parent, }
+  let start = pos.right
+  let start_attrs = Map::from_array(pos.attrs.to_array())
+  let mut remaining = length
+  while remaining > 0 && pos.right is Some(id) {
+    let item = pos.doc.items[id]
+    if !item.deleted && item.content.offset_length(pos.doc) > 0 {
+      if remaining < item.content.offset_length(pos.doc) {
+        pos.doc.split(item, item.content.block_offset(remaining, pos.doc))
+        |> ignore
+      }
+      remaining -= item.content.offset_length(pos.doc)
+      pos.doc.mark_deleted(item)
+    }
+    pos.forward()
+  }
+  if cleanup_empty || !start_attrs.is_empty() {
+    text.clean_format_gap(start, pos.right, start_attrs, pos.attrs)
+  }
+  guard remaining == 0 else { abort("text deletion out of bounds") }
 }

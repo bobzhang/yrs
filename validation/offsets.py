@@ -26,10 +26,10 @@ def main():
  for seed in range(96):
   rng=random.Random(19000+seed);commands=[]
   for step in range(160):
-   x=rng.randrange(3);kind=rng.randrange(5);p=rng.randrange(100)
+   x=rng.randrange(3);kind=rng.randrange(6);p=rng.randrange(100)
    if kind<2:commands.append(['i',x,p,rng.choice(['abc','界','🦀','a界🦀','é','e\u0301','👩\u200d💻','\n'])])
    elif kind==2:commands.append(['d',x,p,rng.randrange(100)])
-   elif kind==3:commands.append(['f',x,p,rng.randrange(100),rng.randrange(2)])
+   elif kind in (3,4):commands.append(['f' if kind==3 else 'delta',x,p,rng.randrange(100),rng.randrange(2)])
    else:commands.append(['sync',x,(x+rng.randrange(1,3))%3])
   commands += [['sync',x,y] for _ in range(3) for x in range(3) for y in range(3) if x!=y]
   cases.append(commands)
@@ -50,6 +50,6 @@ def main():
     assert canonical(r['snapshots'][0])==canonical(m['snapshots'][0]),(r,m)
     transfers+=1
   print(version+' passed',flush=True)
- result={'upstream':'ac339600c712642e556895426113c3f9c117de39','scenarios':len(cases),'offset_modes':['bytes','utf16','bytes'],'wire_versions':['v1','v2'],'transaction_snapshots':checks,'text_events':events,'wire_replay_cases':transfers,'status':'passed'}
+ result={'upstream':'ac339600c712642e556895426113c3f9c117de39','scenarios':len(cases),'offset_modes':['bytes','utf16','bytes'],'input_delta_operations':True,'wire_versions':['v1','v2'],'transaction_snapshots':checks,'text_events':events,'wire_replay_cases':transfers,'status':'passed'}
  (ROOT/'validation/offset-results.json').write_text(json.dumps(result,indent=2)+'\n');print(json.dumps(result))
 if __name__=='__main__':main()
