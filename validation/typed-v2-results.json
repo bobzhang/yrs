@@ -1,0 +1,15 @@
+{
+  "upstream": "ac339600c712642e556895426113c3f9c117de39",
+  "values": [
+    "Buffer([1,2])",
+    "Undefined",
+    "Integer(9007199254740993)"
+  ],
+  "cross_runtime_document_transfers": 12,
+  "checks": [
+    "typed rich-text embeds",
+    "typed formatting attributes",
+    "bidirectional v2 re-export"
+  ],
+  "status": "passed"
+}

@@ -15,7 +15,7 @@ ROOT = Path(__file__).resolve().parent.parent
 # mixed authors, GC-on port authors, and persistence. Yjs tests both author types.
 SUITES = {
     'core': ['compare'],
-    'values': ['value_decode', 'value_encode', 'any_stream', 'streams'],
+    'values': ['value_decode', 'value_encode', 'any_stream', 'streams', 'typed_v2'],
     'contracts': ['contracts', 'handles', 'attribution', 'block_ranges', 'type_refs',
                   'update_codecs', 'codec_updates', 'protocol_codec'],
     'wire': ['updates', 'update_info', 'sparse_wire', 'pending', 'pending_scheduling',
