@@ -121,12 +121,18 @@ Historical development measurements are retained in
 
 ## Performance and limits
 
-Correctness compatibility does not imply performance parity. The last full native
-benchmark on the largest GC-enabled editing trace measured about **120 seconds
-and 117 MiB peak RSS** for MoonBit versus **12.9 seconds and 93 MiB** for Rust.
-Those measurements predate the final correctness fixes; see the exact revisions
-and whole-process methodology in [the native report](validation/trace-native-results.json).
-The [JavaScript report](validation/trace-results.json) is recorded separately.
+Correctness compatibility does not imply performance parity. After the 0.1.1 review
+fixes, the largest GC-enabled editing trace measured **115.8 seconds
+and 116.8 MiB peak RSS** for MoonBit native versus **13.7 seconds
+and 93.2 MiB** for Rust (8.43× elapsed time,
+1.25× peak RSS). All five traces passed with GC on/off on both native
+and JavaScript, including bidirectional v1/v2 imports.
+
+These are single-run whole-process measurements, including parsing, replication,
+reconnects and restarts. See the [complete tables and methodology](validation/README.md#performance-after-the-011-review-fixes),
+[native results](validation/trace-native-results.json), and
+[JavaScript results](validation/trace-results.json). They are workload-specific
+measurements, not a universal speed ratio or an isolated estimate of the fixes' cost.
 
 Collection positions use MoonBit `Int`; binary clocks retain the full UInt32 range.
 Decoder resource limits and host memory still apply. This initial release has

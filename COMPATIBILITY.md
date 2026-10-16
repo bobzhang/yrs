@@ -150,9 +150,11 @@ success criteria. The release instead tests mixed Yjs authors under both GC mode
 GC-disabled mixed Rust authors, GC-enabled port authors with Rust mirrors, and
 saved-state roundtrips in both runtimes.
 
-The port does not promise equal runtime/memory use: the largest measured native
-editing trace is approximately nine times slower than Rust. This is a performance
-limitation, not missing CRDT functionality. See the versioned benchmark reports.
+The port does not promise equal runtime/memory use. After the 0.1.1 review fixes,
+the largest GC-enabled native editing trace took 115.8 seconds versus
+13.7 seconds for Rust (8.43×), with 116.8 versus 93.2 MiB
+peak RSS. This is a single-run whole-process workload measurement, not a general
+language performance ratio. See the [benchmark tables and caveats](validation/README.md#performance-after-the-011-review-fixes).
 
 Known reference defects and deliberate corrections are recorded in
 [`validation/REFERENCE_LIMITATIONS.md`](validation/REFERENCE_LIMITATIONS.md).
