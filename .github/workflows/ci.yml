@@ -82,6 +82,7 @@ jobs:
             contracts)
               python3 validation/contracts.py
               python3 validation/handles.py
+              python3 validation/value_decode.py
               python3 validation/protocol_codec.py
               ;;
             wire)

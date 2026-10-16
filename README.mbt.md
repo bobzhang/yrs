@@ -498,3 +498,11 @@ text, arrays, maps, XML fragments and XML text, with concrete convenience method
 for each. `SharedRef`, `RootRef`, and `DefaultPrelim` are open traits, so an
 application can wrap a shared collection in its own type and still initialize,
 save a typed hook, and resolve it on another replica.
+
+`get_as[T : FromAny]` on maps and arrays decodes values directly into typed
+application data. Integers, binary buffers and nested shared collections retain
+their representations; missing entries decode as null. Implement `FromAny` for
+application records, or use `get_json_as[T : @json.FromJson]` for MoonBit's JSON
+conventions (which represent `Int64` as a string). `Out.to_any()` and `from_any`
+are also public. The Rust serde oracle checks 7,250 conversions, including
+lossless numeric boundaries, nonfinite floats, signed zero, options and arrays.

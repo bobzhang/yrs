@@ -25,6 +25,7 @@ moon info
 python3 validation/compare.py
 python3 validation/contracts.py
 python3 validation/handles.py
+python3 validation/value_decode.py
 python3 validation/protocol_codec.py
 python3 validation/sparse_wire.py
 python3 validation/pending.py

@@ -3,6 +3,7 @@ package "bobzhang/yrs"
 
 import {
   "moonbitlang/core/debug",
+  "moonbitlang/core/json",
   "moonbitlang/core/set",
 }
 
@@ -22,6 +23,8 @@ pub fn encode_messages(Array[Message]) -> Bytes
 pub fn encode_state_vector_from_update_v1(Bytes) -> Bytes raise DecodeError
 
 pub fn encode_state_vector_from_update_v2(Bytes) -> Bytes raise DecodeError
+
+pub fn[T : FromAny] from_any(Any) -> T raise ValueDecodeError
 
 pub fn merge_updates_v1(Array[Bytes]) -> Bytes raise DecodeError
 
@@ -58,6 +61,12 @@ pub(all) suberror QuoteError {
 } derive(@debug.Debug)
 pub fn QuoteError::to_repr(Self) -> @debug.Repr
 
+pub(all) suberror ValueDecodeError {
+  TypeMismatch(String)
+  OutOfRange(String)
+} derive(@debug.Debug)
+pub fn ValueDecodeError::to_repr(Self) -> @debug.Repr
+
 // Types and methods
 pub(all) enum Any {
   Undefined
@@ -73,12 +82,14 @@ pub(all) enum Any {
 pub fn Any::decode(Bytes) -> Self raise DecodeError
 pub fn Any::encode(Self) -> Bytes
 pub fn Any::equal(Self, Self) -> Bool
+pub fn Any::from_any(Self) -> Self raise ValueDecodeError
 pub fn Any::from_json(Json) -> Self
 pub fn Any::json_path(Self, JsonPath) -> Iter[Self]
 pub fn Any::not_equal(Self, Self) -> Bool
 pub fn Any::to_json(Self) -> Json
 pub fn Any::to_repr(Self) -> @debug.Repr
 pub fn Any::to_string(Self) -> String
+pub impl FromAny for Any
 pub impl Eq for Any
 
 pub struct ArrayEvent {
@@ -97,6 +108,8 @@ pub fn ArrayRef::default_prelim() -> In
 pub fn ArrayRef::from_branch(Doc, BranchId) -> Self?
 pub fn ArrayRef::from_out(Out) -> Self?
 pub fn ArrayRef::get(Self, Int) -> Out?
+pub fn[T : FromAny] ArrayRef::get_as(Self, Int) -> T raise ValueDecodeError
+pub fn[T : @json.FromJson] ArrayRef::get_json_as(Self, Int) -> T raise @json.JsonDecodeError
 pub fn ArrayRef::get_or_insert_root(Doc, String) -> Self
 pub fn ArrayRef::hook(Self) -> Hook[Self]
 pub fn ArrayRef::insert(Self, Int, In) -> Out
@@ -519,6 +532,8 @@ pub fn MapRef::entries(Self) -> Array[(String, Out)]
 pub fn MapRef::from_branch(Doc, BranchId) -> Self?
 pub fn MapRef::from_out(Out) -> Self?
 pub fn MapRef::get(Self, String) -> Out?
+pub fn[T : FromAny] MapRef::get_as(Self, String) -> T raise ValueDecodeError
+pub fn[T : @json.FromJson] MapRef::get_json_as(Self, String) -> T raise @json.JsonDecodeError
 pub fn[T : DefaultPrelim] MapRef::get_or_init(Self, String) -> T
 pub fn MapRef::get_or_init_array(Self, String) -> ArrayRef
 pub fn MapRef::get_or_init_map(Self, String) -> Self
@@ -615,6 +630,7 @@ pub(all) enum Out {
 }
 pub fn Out::branch_id(Self) -> BranchId?
 pub fn Out::is_deleted(Self) -> Bool
+pub fn Out::to_any(Self) -> Any
 pub fn Out::to_input(Self) -> In
 pub fn Out::to_json(Self) -> Json
 pub fn Out::to_string(Self) -> String
@@ -1071,6 +1087,24 @@ pub(open) trait DefaultPrelim : SharedRef {
   fn default_prelim() -> In
   fn from_out(Out) -> Self?
 }
+
+pub(open) trait FromAny {
+  fn from_any(Any) -> Self raise ValueDecodeError
+}
+pub impl FromAny for Unit
+pub impl FromAny for Bool
+pub impl FromAny for Int
+pub impl FromAny for Int64
+pub impl FromAny for UInt
+pub impl FromAny for UInt64
+pub impl FromAny for Float
+pub impl FromAny for Double
+pub impl FromAny for String
+pub impl[T : FromAny] FromAny for T?
+pub impl FromAny for Bytes
+pub impl[T : FromAny] FromAny for Array[T]
+pub impl[T : FromAny] FromAny for Map[String, T]
+pub impl[A : FromAny, B : FromAny] FromAny for (A, B)
 
 pub(open) trait Protocol {
   fn start(Self, Awareness) -> Bytes raise = _

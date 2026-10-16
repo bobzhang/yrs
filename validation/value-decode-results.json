@@ -1,0 +1,14 @@
+{
+  "upstream": "ac339600c712642e556895426113c3f9c117de39",
+  "values": 725,
+  "conversions": 7250,
+  "checks": [
+    "integer limits and lossless numeric conversion",
+    "floating-point bit patterns including NaN infinity and signed zero",
+    "null and undefined options",
+    "arrays",
+    "type rejection",
+    "Rust saturating float-to-integer endpoint"
+  ],
+  "status": "passed"
+}
