@@ -566,6 +566,16 @@ fn Doc::integrate_missing(self : Doc, raw : RawItem) -> Bool {
     }
   }
   self.items[item.id] = item
+  // GC/deleted blocks may arrive without an explicit deletion-set entry, or
+  // be synthesized when their parent has already been collected. Remember
+  // their deletion so peers that already know the clock receive it as well.
+  if item.deleted {
+    self.add_delete(
+      item.id.client,
+      item.id.clock,
+      item.id.clock + item.content.length().reinterpret_as_uint(),
+    )
+  }
   if self.active_transaction is Some(transaction) {
     if parent is Some(name) && parent_sub is None {
       transaction.sequences.add(name)

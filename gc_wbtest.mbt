@@ -108,3 +108,27 @@ test "GC range search includes overlapping blocks and skips unrelated clients" {
   )
   assert_eq(text.get_string(), "abij")
 }
+
+///|
+test "received GC blocks advertise deletions even when the receiver already knows their clocks" {
+  // One client, one GC block at client 7 clock 0, length 1, empty delete set.
+  let collected = b"\x01\x01\x07\x00\x00\x01\x00"
+  for gc in [false, true] {
+    let source = Doc(client_id=8UL, skip_gc=!gc)
+    source.apply_update_v1(collected)
+    assert_true(
+      source.snapshot().delete_set().contains({ client: 7UL, clock: 0U, }),
+    )
+    for v2 in [false, true] {
+      let peer = Doc(client_id=7UL)
+      peer.get_or_insert_text("text").insert(0, "x")
+      let remote = peer.state_vector()
+      if v2 {
+        peer.apply_update_v2(source.encode_state_as_update_v2(remote~))
+      } else {
+        peer.apply_update_v1(source.encode_state_as_update_v1(remote~))
+      }
+      assert_eq(peer.get_or_insert_text("text").get_string(), "")
+    }
+  }
+}

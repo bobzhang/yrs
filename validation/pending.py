@@ -26,6 +26,15 @@ def main():
          'validation/rust/Cargo.toml', '--bin', 'pending', '--bin', 'update_info'])
     run(['moon', 'build', 'validation/pending', '--target', 'js', '--release'])
     run(['moon', 'build', 'validation/update_info', '--target', 'js', '--release'])
+    # GC/deleted structs are deletions in their own right, even when the sender
+    # omitted the redundant delete-set entry. Their deletion must be relayed.
+    collected_cases = [{'packets': [list(bytes.fromhex(packet))]} for packet in [
+        '01010700000100', '01010700010104746578740100']]
+    reference_collected = execute(['validation/rust/target/release/pending'], collected_cases)
+    port_collected = execute(['node', 'validation/pending.cjs'], collected_cases)
+    assert reference_collected == port_collected, 'GC/deleted block deletion-set propagation'
+    for row in port_collected:
+        assert row['before']['full']['deleted'] == [[7, 0, 1]]
     histories = execute(['validation/rust/target/release/pending'],
                         [{'produce': seed} for seed in range(64)])
     packets = {bytes(packet).hex() for history in histories for packet in history}
