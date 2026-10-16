@@ -462,3 +462,9 @@ Tests exercise custom authentication, network transaction origins, delegated
 update handlers, malformed later messages, and authorization that suspends before
 allowing or rejecting edits. The existing Rust sync/presence comparison still
 passes all 33,024 snapshots and 768 cross-runtime transfers.
+
+The current API inventory and release gates are in
+[`COMPATIBILITY.md`](COMPATIBILITY.md). It accounts for all 83 pinned Rust root
+exports and distinguishes implemented operations, MoonBit adaptations, missing
+low-level APIs, and behavioral work still open. It is not a full-compatibility
+claim.
