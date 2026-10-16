@@ -171,6 +171,36 @@ pub fn MapRef::insert_input(self : MapRef, key : String, input : In) -> Out {
 }
 
 ///|
+/// Insert a primitive or shared collection as one embedded text element.
+/// Omitted attributes inherit the surrounding formatting; an explicit array
+/// replaces it. The returned handle refers to the newly integrated collection.
+pub fn Text::insert_embed_input(
+  self : Text,
+  index : Int32,
+  input : In,
+  attributes? : Array[(String, Any)],
+) -> Out {
+  self.doc.with_mutation(fn() {
+    if input is Subdoc(child) {
+      self.doc.check_subdocument(child)
+    }
+    let pos = self.rich_position(index)
+    let content = match input {
+      Value(value) => Embed(value)
+      _ => input.content(true)
+    }
+    let id = match attributes {
+      Some(attrs) => pos.insert_formatted(content, attrs)
+      None => {
+        pos.insert(content)
+        pos.left.unwrap()
+      }
+    }
+    input.populate(self.doc, id)
+  })
+}
+
+///|
 pub fn Text::apply_delta(self : Text, delta : Array[TextDelta]) -> Unit {
   self.doc.with_mutation(fn() {
     let pos = self.rich_position(0)

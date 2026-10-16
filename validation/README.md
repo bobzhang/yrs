@@ -57,3 +57,7 @@ while reporting an explicitly expected reference exception or partial parity:
 that verifies the stated invariants, not full compatibility. Consult
 [`REFERENCE_LIMITATIONS.md`](REFERENCE_LIMITATIONS.md) and
 [`../COMPATIBILITY.md`](../COMPATIBILITY.md) before interpreting a green CI run.
+
+`python3 validation/embeds.py` exercises inherited and explicit embed formatting,
+shared map/array/text embeds, concurrent edits, identical-wire replay and
+bidirectional v1/v2 imports through the main three-replica bridge.

@@ -19,6 +19,11 @@ fn xml_snapshot(node: yrs::XmlOut, txn: &yrs::Transaction) -> Value {
   }
  }
 }
+fn insert_embed<V>(text: &yrs::TextRef, txn: &mut yrs::TransactionMut, at: u32, value: V, attrs: Option<yrs::types::Attrs>)
+where V: Into<yrs::block::EmbedPrelim<V>> + yrs::block::Prelim {
+ if let Some(attrs)=attrs { text.insert_embed_with_attributes(txn,at,value,attrs); }
+ else { text.insert_embed(txn,at,value); }
+}
 fn main() {
  let v2=std::env::args().any(|s|s=="v2");
  let utilities=std::env::args().any(|s|s=="utilities");
@@ -53,7 +58,7 @@ fn main() {
    let a=cmd.as_array().unwrap();
    let kind=a[0].as_str().unwrap();
    let x=a[1].as_u64().unwrap() as usize;
-   if ["i","d","f","t","b"].contains(&kind) && trace {
+   if ["i","d","f","t","b","embed"].contains(&kind) && trace {
     let bytes=if v2 { docs[x].transact().encode_state_as_update_v2(&Default::default()) } else { docs[x].transact().encode_state_as_update_v1(&Default::default()) };
     local_cases.push(json!([["a",x,hex(&bytes)],cmd.clone()]));
    }
@@ -68,6 +73,17 @@ fn main() {
       if kind=="f" { let len=a[3].as_u64().unwrap() as u32 % (n-pos+1); texts[x].format(&mut txn,pos,len,attrs); }
       else if kind=="t" { texts[x].insert_with_attributes(&mut txn,pos,a[3].as_str().unwrap(),attrs); }
       else { let value: yrs::Any=serde_json::from_value(a[3].clone()).unwrap(); texts[x].insert_embed_with_attributes(&mut txn,pos,value,attrs); }
+    }
+    "embed" => {
+     let mut txn=docs[x].transact_mut();let pos=a[2].as_u64().unwrap() as u32%(texts[x].len(&txn)+1);
+     let attrs:Option<yrs::types::Attrs>=serde_json::from_value(a[5].clone()).unwrap();
+     let value:yrs::Any=serde_json::from_value(a[4].clone()).unwrap();
+     match a[3].as_str().unwrap() {
+      "map" => insert_embed(&texts[x],&mut txn,pos,yrs::MapPrelim::from([(String::from("value"),yrs::In::Any(value))]),attrs),
+      "array" => insert_embed(&texts[x],&mut txn,pos,yrs::ArrayPrelim::from([yrs::In::Any(value)]),attrs),
+      "text" => insert_embed(&texts[x],&mut txn,pos,yrs::TextPrelim::new(a[4].as_str().unwrap()),attrs),
+      _ => insert_embed(&texts[x],&mut txn,pos,value,attrs),
+     }
     }
     "x" => {
      let mut txn=docs[x].transact_mut(); let pos=a[2].as_u64().unwrap() as u32 % (xmls[x].len(&txn)+1);

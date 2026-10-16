@@ -22,7 +22,7 @@ def canonical_snapshot(snapshot):
         document['delta']=merged
     return snapshot
 
-def main():
+def main(scenarios_override=None, report_name="results.json"):
     run(['cargo','+1.97.1','build','--release','--locked','--manifest-path','validation/rust/Cargo.toml'])
     run(['moon','build','--release','--target','js'])
     scenarios=[]
@@ -113,6 +113,8 @@ def main():
         for _ in range(3):
             commands.extend(['s',x,y] for x in range(3) for y in range(3) if x!=y)
         scenarios.append(commands)
+    if scenarios_override is not None:
+        scenarios=scenarios_override
     start=int(os.environ.get('YRS_CASE_START','0'))
     scenarios=scenarios[start:]
     def execute(command, cases):
@@ -180,6 +182,6 @@ def main():
                 assert canonical_snapshot(original['snapshots'][-1])==canonical_snapshot(actual['snapshots'][-1]),f'cross-runtime update differs seed={seed}'
                 assert [[[str(c),n] for c,n in state] for state in original['states']]==[[[str(c),n] for c,n in state] for state in actual['states']]
     result={'upstream':'ac339600c712642e556895426113c3f9c117de39','scenarios':len(scenarios),'wire_versions':versions,'rust_gc_modes':gc_modes,'moonbit_gc_modes':gc_modes,'checks':checks,'cross_runtime_documents':len(scenarios)*6*len(versions)*len(gc_modes),'status':'passed'}
-    if not any(name.startswith('YRS_') for name in os.environ): (ROOT/'validation/results.json').write_text(json.dumps(result,indent=2)+'\n')
+    if not any(name.startswith('YRS_') for name in os.environ): (ROOT/'validation'/report_name).write_text(json.dumps(result,indent=2)+'\n')
     print(json.dumps(result))
 if __name__=='__main__': main()

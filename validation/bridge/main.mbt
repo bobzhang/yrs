@@ -80,7 +80,7 @@ fn evaluate_mode(input : String, v2 : Bool, gc~ : Bool = false) -> String raise 
       abort("bad command")
     }
     let x = integer(args[1])
-    if trace && ["i", "d", "f", "t", "b"].contains(kind) {
+    if trace && ["i", "d", "f", "t", "b", "embed"].contains(kind) {
       let bytes = if v2 {
         docs[x].encode_state_as_update_v2()
       } else {
@@ -121,6 +121,27 @@ fn evaluate_mode(input : String, v2 : Bool, gc~ : Bool = false) -> String raise 
             attributes=attrs,
           )
         }
+      }
+      "embed" => {
+        let attributes = match args[5] {
+          Object(fields) =>
+            Some(
+              fields.to_array().map(fn(p) { (p.0, @yrs.Any::from_json(p.1)) }),
+            )
+          _ => None
+        }
+        let input : @yrs.In = match args[3] {
+          "map" => Map([("value", Value(@yrs.Any::from_json(args[4])))])
+          "array" => Array([Value(@yrs.Any::from_json(args[4]))])
+          "text" => Text([Inserted(Value(@yrs.Any::from_json(args[4])), [])])
+          _ => Value(@yrs.Any::from_json(args[4]))
+        }
+        texts[x].insert_embed_input(
+          integer(args[2]) % (texts[x].length() + 1),
+          input,
+          attributes?,
+        )
+        |> ignore
       }
       "x" => {
         guard args[3] is String(tag) && args[4] is String(value) else {

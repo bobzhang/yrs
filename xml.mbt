@@ -172,14 +172,14 @@ fn xml_text_chunks(chunks : Array[TextChunk]) -> String {
 pub fn Out::to_string(self : Out) -> String {
   match self {
     Value(value) => value.to_string()
-    UndefinedRef(_) | WeakLink(_) => ""
+    UndefinedRef(_) => ""
+    WeakLink(value) => value.get_string()
     Subdoc(value) => "Doc(id: \{value.client_id()}, guid: \{value.guid()})"
     Text(value) => value.get_string()
     XmlElement(value) => value.get_string()
     XmlFragment(value) => value.get_string()
     XmlText(value) => value.get_string()
-    Array(value) => Any::from_json(value.to_json()).to_string()
-    Map(value) => Any::from_json(value.to_json()).to_string()
+    Array(_) | Map(_) => self.to_any().to_string()
   }
 }
 

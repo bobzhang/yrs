@@ -22,7 +22,7 @@ The generated `pkg.generated.mbti` is the authoritative MoonBit API.
 | `In`, `Out`, deprecated `Value` | `In`, `Out`, generic `Out.cast[T : FromOut]` with original-value errors; no deprecated `Value` alias |
 | `Array`, `ArrayRef`, `ArrayPrelim` | `ArrayRef` methods, typed `get_as`, and `In.Array` preliminary values |
 | `Map`, `MapRef`, `MapPrelim` | `MapRef` methods, typed `get_as`, generic `get_or_init[T : DefaultPrelim]`, concrete helpers and `In.Map` preliminary values |
-| `Text`, `TextRef`, `TextPrelim` | `Text` methods and `In.Text` preliminary values |
+| `Text`, `TextRef`, `TextPrelim` | `Text` methods, primitive/shared embeds with inherited or explicit formatting, and `In.Text` preliminary values |
 | `Xml`, `XmlOut` | `XmlNode`, concrete XML methods and `In` constructors |
 | `XmlElementRef`, `XmlElementPrelim` | `XmlElement`, `In.XmlElement` |
 | `XmlFragment`, `XmlFragmentRef`, `XmlFragmentPrelim` | `XmlFragment`, `In.XmlFragment` |

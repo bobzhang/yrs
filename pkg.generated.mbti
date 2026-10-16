@@ -782,6 +782,7 @@ pub fn Text::get_string(Self) -> String
 pub fn Text::hook(Self) -> Hook[Self]
 pub fn Text::insert(Self, Int, String) -> Unit
 pub fn Text::insert_embed(Self, Int, Any, attributes? : Array[(String, Any)]) -> Unit
+pub fn Text::insert_embed_input(Self, Int, In, attributes? : Array[(String, Any)]) -> Out
 pub fn Text::insert_with_attributes(Self, Int, String, Array[(String, Any)]) -> Unit
 pub fn Text::length(Self) -> Int
 pub fn Text::observe(Self, String, (TextEvent, Transaction) -> Unit) -> Unit

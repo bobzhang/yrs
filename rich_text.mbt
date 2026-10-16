@@ -172,9 +172,9 @@ pub fn Text::insert_embed(
   self : Text,
   index : Int32,
   value : Any,
-  attributes~ : Array[(String, Any)] = [],
+  attributes? : Array[(String, Any)],
 ) -> Unit {
-  self.insert_formatted(index, Embed(value), attributes)
+  self.insert_embed_input(index, Value(value), attributes?) |> ignore
 }
 
 ///|

@@ -99,3 +99,52 @@ test "delta deletion cleans formatting even with empty starting attributes" {
     "[{\"delete\":1},{\"insert\":\"界🦀\",\"attributes\":{\"bold\":false}},{\"retain\":1,\"attributes\":{\"bold\":true}}]",
   )
 }
+
+///|
+test "shared text embeds return live handles and distinguish inherited attributes" {
+  let doc = @yrs.Doc(client_id=1UL)
+  let text = doc.get_or_insert_text("text")
+  text.insert_with_attributes(0, "ab", [("bold", Bool(true))])
+  let embedded = text.insert_embed_input(
+    1,
+    Map([("answer", Value(Integer(42L)))]),
+  )
+  guard embedded is Map(map) else { fail("expected shared embed") }
+  map.insert("answer", Integer(43L))
+  assert_eq(text.length(), 3)
+  assert_eq(text.get_string(), "ab")
+  assert_eq(text.to_delta()[1].attributes.iter().to_array(), [
+    ("bold", @yrs.Any::Bool(true)),
+  ])
+  text.insert_embed(2, String("one atom"), attributes=[])
+  assert_eq(text.length(), 4)
+  assert_eq(text.get_string(), "ab")
+  assert_eq(text.to_delta()[2].attributes.iter().to_array(), [])
+  let peer = @yrs.Doc(client_id=2UL)
+  peer.apply_update_v2(doc.encode_state_as_update_v2())
+  let received = peer.get_or_insert_text("text")
+  assert_eq(received.length(), 4)
+  assert_eq(
+    received.to_delta().map(@yrs.TextChunk::to_json),
+    text.to_delta().map(@yrs.TextChunk::to_json),
+  )
+  text.remove_range(1, 1)
+  assert_true(embedded.is_deleted())
+}
+
+///|
+test "output strings preserve quoted text and nested integer and binary values" {
+  let doc = @yrs.Doc(client_id=1UL)
+  let text = doc.get_or_insert_text("text")
+  text.insert(0, "hello MoonBit")
+  let map = doc.get_or_insert_map("root")
+  let quote = map.insert_input(
+    "quote",
+    WeakLink(text.quote(Included(6), Unbounded)),
+  )
+  assert_eq(quote.to_string(), "MoonBit")
+  let array = doc.get_or_insert_array("values")
+  array.push_back(Value(Integer(9223372036854775807L))) |> ignore
+  array.push_back(Value(Buffer(b"\x00\xff"))) |> ignore
+  assert_eq(@yrs.Out::Array(array).to_string(), "[9223372036854775807, 0x00ff]")
+}

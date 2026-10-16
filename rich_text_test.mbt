@@ -11,7 +11,7 @@ test "rich text marks, embeds and removals survive both update versions" {
   let expected : Json = [
     { "insert": "hello", "attributes": { "bold": true } },
     { "insert": "!", "attributes": { "italic": true } },
-    { "insert": { "image": "moon.png" } },
+    { "insert": { "image": "moon.png" }, "attributes": { "italic": true } },
     { "insert": " world" },
   ]
   assert_eq(Json(text.to_delta().map(@yrs.TextChunk::to_json)), expected)
