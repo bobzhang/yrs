@@ -22,6 +22,10 @@ const managers = docs.map((_, i) => new Y.UndoManager([roots[i], xmls[i], texts[
   captureTimeout: 500, trackedOrigins: new Set(['user'])
 }));
 let notifications = [];
+let emitted = [];
+docs.forEach((doc, i) => doc.on(v2 ? 'updateV2' : 'update', bytes => {
+  emitted.push([i, Buffer.from(bytes).toString('hex')]);
+}));
 const value = v => v instanceof Y.AbstractType ? v.toJSON() : v;
 function delta(ops) {
   return ops.map(op => {
@@ -115,6 +119,7 @@ function snapshot(result) {
       delta: texts[i].toDelta().map(d => ({insert: value(d.insert), attributes: d.attributes || null}))}))};
 }
 function run(commands) {
+  emitted = [];
   const snapshots = [];
   for (const [op, x, arg] of commands) {
     notifications = [];
@@ -137,7 +142,7 @@ function run(commands) {
     snapshots.push(snapshot(result));
   }
   if (!snapshots.length) {notifications = []; snapshots.push(snapshot(null));}
-  return {snapshots, updates: docs.map(d => Buffer.from(encode(d)).toString('hex')),
+  return {snapshots, emitted, updates: docs.map(d => Buffer.from(encode(d)).toString('hex')),
     causal: docs.map(d => {
       const s = Y.snapshot(d);
       return {state: [...s.sv].map(([c, n]) => [String(c), n]),

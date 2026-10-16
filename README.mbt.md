@@ -335,6 +335,14 @@ Decoded deleted-content items count as insertions until integration; GC blocks
 are included only when requested. State vectors support causal partial ordering,
 and state vectors and sticky indices support both metadata encoding versions.
 
+`python3 validation/undo_observer_network.py` tests actual observer-packet
+transport between three mixed Yjs/MoonBit authors. It never uses full-state
+updates to repair network convergence. Shuffled delivery, duplicates, nested
+edits and undo/redo pass 128 histories per backend, with 43,920 packet deliveries
+and 768 independent reloads. Use `--target native` for the native runner. Packets
+generated during remote imports are forwarded too; each network must quiesce
+with matching document contents, state vectors and deletion histories.
+
 `python3 validation/undo_high_clocks.py` seeds compact GC histories just below
 Int32::MAX and near UInt32::MAX, then runs mixed Yjs/MoonBit editing and undo on
 JavaScript and native. Both formats and GC modes pass 136,704 replica comparisons

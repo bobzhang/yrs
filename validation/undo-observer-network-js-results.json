@@ -1,0 +1,22 @@
+{
+  "reference": "yjs",
+  "yjs_version": "13.6.27",
+  "moonbit_target": "js",
+  "network_transport": "update observer packets only",
+  "histories": 128,
+  "wire_versions": [
+    "v1",
+    "v2"
+  ],
+  "gc_modes": [
+    false,
+    true
+  ],
+  "local_commands": 18868,
+  "emitted_packets": 21960,
+  "delivered_packets": 43920,
+  "duplicate_checks": 3378,
+  "converged_replicas": 384,
+  "cross_runtime_reloads": 768,
+  "status": "passed"
+}

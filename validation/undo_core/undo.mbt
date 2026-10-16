@@ -116,13 +116,14 @@ priv struct Session {
   tick : Array[UInt64]
   managers : Array[@yrs.UndoManager[Unit]]
   notifications : Array[Json]
+  emitted : Array[Json]
 }
 
 ///|
 let sessions : Array[Session] = []
 
 ///|
-fn make_session(gc : Bool) -> Session {
+fn make_session(gc : Bool, v2 : Bool) -> Session {
   let docs = Array::makei(3, fn(i) {
     @yrs.Doc(client_id=(i + 1).to_uint64(), skip_gc=!gc)
   })
@@ -139,7 +140,17 @@ fn make_session(gc : Bool) -> Session {
     manager
   })
   let notifications : Array[Json] = []
+  let emitted : Array[Json] = []
   for i in 0..<3 {
+    if v2 {
+      docs[i].observe_update_v2("wire", fn(bytes, _) {
+        emitted.push(Json([Json(i), Json(hex(bytes))]))
+      })
+    } else {
+      docs[i].observe_update_v1("wire", fn(bytes, _) {
+        emitted.push(Json([Json(i), Json(hex(bytes))]))
+      })
+    }
     roots[i].observe_deep("deep", fn(events, _) {
       notifications.push({
         "doc": Json(i),
@@ -164,7 +175,7 @@ fn make_session(gc : Bool) -> Session {
       })
     })
   }
-  { docs, roots, xmls, texts, tick, managers, notifications, }
+  { docs, roots, xmls, texts, tick, managers, notifications, emitted, }
 }
 
 ///|
@@ -177,12 +188,13 @@ fn run(
   guard @json.parse(input) is Array(commands) else { abort("commands") }
   let session = if live {
     if sessions.is_empty() {
-      sessions.push(make_session(gc))
+      sessions.push(make_session(gc, v2))
     }
     sessions[0]
   } else {
-    make_session(gc)
+    make_session(gc, v2)
   }
+  session.emitted.clear()
   let docs = session.docs
   let roots = session.roots
   let xmls = session.xmls
@@ -380,6 +392,7 @@ fn run(
       "snapshots": Json(snapshots),
       "updates": Json(updates),
       "causal": Json(causal),
+      "emitted": Json(session.emitted),
     } : Json).stringify()
 }
 
