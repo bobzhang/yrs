@@ -285,3 +285,20 @@ and state vectors and sticky indices support both metadata encoding versions.
 from 64 histories with garbage collection enabled and disabled, plus a retained
 deleted-content regression. Another 96 cases compare exact v2 state-vector and
 sticky-index bytes, including Unicode root names and both cursor associations.
+
+
+`IdMap[A]` associates named `ContentAttribute[A]` values with identity intervals.
+Insertion and union combine overlapping metadata; intersection keeps shared
+identities and combines both sides' metadata, while subtraction removes identities
+regardless of their values. `attributions` covers a requested `BlockRange`, filling
+gaps with empty attributes. Maps support filtering, conversion to `IdSet`, snapshot
+iteration and v1/v2 codecs with caller-supplied value conversion through `Any`.
+
+`python3 validation/attribution.py` passes 20,680 snapshots from 128 randomized
+histories and two retained regressions, plus 10,344 cross-runtime imports. It checks
+range algebra, Unicode attribute dictionaries and both encoding formats. 17,561
+snapshots also have identical bytes. Rust dictionaries can contain multiple entries
+for equal attributes after merging separately allocated maps; MoonBit encodes a
+single dictionary entry per equal value. Both runtimes decode either representation
+to the same ranges and metadata. Attribute list order and duplicate-input behavior
+follow upstream; callers can provide unique attributes for ordinary set semantics.

@@ -1,5 +1,5 @@
 ///|
-pub suberror DecodeError {
+pub(all) suberror DecodeError {
   InvalidData(String)
 } derive(Debug)
 

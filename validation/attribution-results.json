@@ -1,0 +1,20 @@
+{
+  "upstream": "ac339600c712642e556895426113c3f9c117de39",
+  "histories": 130,
+  "exact_codec_snapshots": 17561,
+  "snapshots": 20680,
+  "cross_runtime_imports": 10344,
+  "checks": [
+    "overlap attribution union",
+    "remove",
+    "merge",
+    "intersection",
+    "difference",
+    "filter",
+    "IdSet conversion",
+    "gap queries",
+    "v1/v2 cross-runtime decoding and canonical encoding",
+    "Unicode dictionary entries"
+  ],
+  "status": "passed"
+}

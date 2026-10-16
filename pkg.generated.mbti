@@ -33,7 +33,7 @@ pub suberror AwarenessError {
 } derive(@debug.Debug)
 pub fn AwarenessError::to_repr(Self) -> @debug.Repr
 
-pub suberror DecodeError {
+pub(all) suberror DecodeError {
   InvalidData(String)
 } derive(@debug.Debug)
 pub fn DecodeError::to_repr(Self) -> @debug.Repr
@@ -112,6 +112,16 @@ pub fn Assoc::equal(Self, Self) -> Bool
 pub fn Assoc::not_equal(Self, Self) -> Bool
 pub fn Assoc::to_repr(Self) -> @debug.Repr
 
+pub(all) struct AttrRange[A] {
+  start : UInt
+  end : UInt
+  attrs : ContentAttributes[A]
+} derive(Eq, @debug.Debug)
+pub fn[A] AttrRange::AttrRange(UInt, UInt, attrs? : ContentAttributes[A]) -> Self[A]
+pub fn[A : Eq] AttrRange::equal(Self[A], Self[A]) -> Bool
+pub fn[A : Eq] AttrRange::not_equal(Self[A], Self[A]) -> Bool
+pub fn[A : @debug.Debug] AttrRange::to_repr(Self[A]) -> @debug.Repr
+
 pub struct Awareness {
   // private fields
 }
@@ -174,6 +184,16 @@ pub fn AwarenessUpdate::decode_v1(Bytes) -> Self raise DecodeError
 pub fn AwarenessUpdate::encode_v1(Self) -> Bytes
 pub fn AwarenessUpdate::entries(Self) -> Array[(UInt64, AwarenessEntry)]
 
+pub(all) struct BlockRange {
+  client : UInt64
+  clock : UInt
+  length : UInt
+} derive(Eq, @debug.Debug)
+pub fn BlockRange::BlockRange(UInt64, UInt, UInt) -> Self
+pub fn BlockRange::equal(Self, Self) -> Bool
+pub fn BlockRange::not_equal(Self, Self) -> Bool
+pub fn BlockRange::to_repr(Self) -> @debug.Repr
+
 pub(all) enum BranchId {
   Nested(Id)
   Root(String)
@@ -197,6 +217,27 @@ pub(all) enum ChangeKind {
 pub fn ChangeKind::equal(Self, Self) -> Bool
 pub fn ChangeKind::not_equal(Self, Self) -> Bool
 pub fn ChangeKind::to_repr(Self) -> @debug.Repr
+
+pub(all) struct ContentAttribute[A] {
+  name : String
+  value : A
+} derive(Eq, @debug.Debug)
+pub fn[A] ContentAttribute::ContentAttribute(String, A) -> Self[A]
+pub fn[A : Eq] ContentAttribute::equal(Self[A], Self[A]) -> Bool
+pub fn[A : Eq] ContentAttribute::not_equal(Self[A], Self[A]) -> Bool
+pub fn[A : @debug.Debug] ContentAttribute::to_repr(Self[A]) -> @debug.Repr
+
+pub struct ContentAttributes[A] {
+  // private fields
+} derive(@debug.Debug)
+pub fn[A] ContentAttributes::ContentAttributes(values? : Array[ContentAttribute[A]]) -> Self[A]
+pub fn[A] ContentAttributes::as_array(Self[A]) -> Array[ContentAttribute[A]]
+pub fn[A : Eq] ContentAttributes::equal(Self[A], Self[A]) -> Bool
+pub fn[A] ContentAttributes::length(Self[A]) -> Int
+pub fn[A : Eq] ContentAttributes::merge(Self[A], Self[A]) -> Self[A]
+pub fn[A : Eq] ContentAttributes::not_equal(Self[A], Self[A]) -> Bool
+pub fn[A : @debug.Debug] ContentAttributes::to_repr(Self[A]) -> @debug.Repr
+pub impl[A : Eq] Eq for ContentAttributes[A]
 
 pub(all) enum Delta {
   Inserted(Out, ReadOnlyArray[(String, Any)])
@@ -293,6 +334,33 @@ pub fn Id::op_gt(Self, Self) -> Bool
 pub fn Id::op_le(Self, Self) -> Bool
 pub fn Id::op_lt(Self, Self) -> Bool
 pub fn Id::to_repr(Self) -> @debug.Repr
+
+pub struct IdMap[A] {
+  // private fields
+}
+pub fn[A] IdMap::IdMap() -> Self[A]
+pub fn[A] IdMap::as_id_set(Self[A]) -> IdSet
+pub fn[A] IdMap::attributions(Self[A], BlockRange) -> Array[AttrRange[A]]
+pub fn[A] IdMap::contains(Self[A], Id) -> Bool
+pub fn[A] IdMap::copy(Self[A]) -> Self[A]
+pub fn[A] IdMap::decode_v1(Bytes, (Any) -> A raise DecodeError, max_items? : Int) -> Self[A] raise DecodeError
+pub fn[A] IdMap::decode_v2(Bytes, (Any) -> A raise DecodeError, max_items? : Int) -> Self[A] raise DecodeError
+pub fn[A : Eq, B] IdMap::diff_map_with(Self[A], Self[B]) -> Unit
+pub fn[A : Eq] IdMap::diff_with(Self[A], IdSet) -> Unit
+pub fn[A : Eq] IdMap::encode_v1(Self[A], (A) -> Any) -> Bytes
+pub fn[A : Eq] IdMap::encode_v2(Self[A], (A) -> Any) -> Bytes raise DecodeError
+pub fn[A : Eq] IdMap::equal(Self[A], Self[A]) -> Bool
+pub fn[A] IdMap::filter(Self[A], (ReadOnlyArray[ContentAttribute[A]]) -> Bool) -> Self[A]
+pub fn[A : Eq] IdMap::from_set(IdSet, Array[ContentAttribute[A]]) -> Self[A]
+pub fn[A : Eq] IdMap::insert(Self[A], BlockRange, Array[ContentAttribute[A]]) -> Unit
+pub fn[A : Eq] IdMap::intersect_with(Self[A], Self[A]) -> Unit
+pub fn[A] IdMap::is_empty(Self[A]) -> Bool
+pub fn[A] IdMap::iter(Self[A]) -> Iter[(UInt64, AttrRange[A])]
+pub fn[A : Eq] IdMap::merge_many(Array[Self[A]]) -> Self[A]
+pub fn[A : Eq] IdMap::merge_with(Self[A], Self[A]) -> Unit
+pub fn[A : Eq] IdMap::not_equal(Self[A], Self[A]) -> Bool
+pub fn[A : Eq] IdMap::remove(Self[A], BlockRange) -> Unit
+pub impl[A : Eq] Eq for IdMap[A]
 
 pub struct IdSet {
   // private fields
