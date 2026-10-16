@@ -468,3 +468,13 @@ The current API inventory and release gates are in
 exports and distinguishes implemented operations, MoonBit adaptations, missing
 low-level APIs, and behavioral work still open. It is not a full-compatibility
 claim.
+
+`python3 validation/sparse_wire.py` checks sparse v1/v2 utility interoperability
+against Yjs 13.6.27 (install the pinned `validation/yjs` dependencies first). It
+covers 64 concurrent Unicode/rich-text, array and nested-map histories, 512
+merge/diff cases, and 4,096 completed receiver comparisons with GC on/off.
+Insertion identities, deletion coverage and contiguous state vectors agree.
+Observed receiver vectors converge exactly; 32 artificial surrogate-splitting
+vector cases expose a recorded Yjs text-loss difference, where Rust and MoonBit
+preserve the original character. This closes the sparse-v2 wire validation gap
+without claiming identical intermediate pending behavior.

@@ -1,0 +1,31 @@
+{
+  "yjs": "13.6.27",
+  "histories": 64,
+  "sparse_utility_cases": 512,
+  "observed_state_vector_cases": 256,
+  "arbitrary_state_vector_cases": 256,
+  "yjs_surrogate_split_completion_differences": 32,
+  "binary_versions": [
+    1,
+    2
+  ],
+  "producer_gc_modes": [
+    false,
+    true
+  ],
+  "receiver_gc_modes": [
+    false,
+    true
+  ],
+  "completed_receiver_comparisons": 4096,
+  "checks": [
+    "three concurrent clients with Unicode text, formatting, arrays and nested maps",
+    "reverse and duplicate delivery with missing histories",
+    "exact insertion identities, deletions and contiguous state from independent Yjs decoder",
+    "independent diff clipping invariant",
+    "both producer merge/diff outputs accepted by both runtimes",
+    "complete-history structures, state and insertion/delete coverage"
+  ],
+  "scope": "wire utilities and complete-history convergence; not intermediate scheduler parity",
+  "status": "passed with explicit Yjs surrogate-split exception for arbitrary state vectors"
+}

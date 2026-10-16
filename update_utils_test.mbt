@@ -126,3 +126,27 @@ test "overflowing skip blocks are rejected before any document mutation" {
   assert_eq(doc.state_vector().get(2UL), 0U)
   assert_eq(doc.get_or_insert_text("note").get_string(), "")
 }
+
+///|
+test "an early suffix cut inside a surrogate pair cannot replace the original character" {
+  // Synthetic remote clock 1 bisects the two-clock scalar. Rust, unlike Yjs
+  // 13.6.27, preserves the original full item when it arrives after this suffix.
+  let source = @yrs.Doc(client_id=1UL)
+  source.get_or_insert_text("text").insert(0, "🌙")
+  let full = source.encode_state_as_update_v1()
+  let remote = @yrs.StateVector(entries=[(1UL, 1U)]).encode_v1()
+  let suffix = @yrs.diff_updates_v1(full, remote)
+  for v2 in [false, true] {
+    let receiver = @yrs.Doc(client_id=2UL)
+    if v2 {
+      receiver.apply_update_v2(@yrs.convert_update_v1_to_v2(suffix))
+      receiver.apply_update_v2(@yrs.convert_update_v1_to_v2(full))
+    } else {
+      receiver.apply_update_v1(suffix)
+      receiver.apply_update_v1(full)
+    }
+    assert_eq(receiver.get_or_insert_text("text").get_string(), "🌙")
+    assert_eq(receiver.state_vector().get(1UL), 2U)
+    assert_false(receiver.has_pending_updates())
+  }
+}

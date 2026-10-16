@@ -24,7 +24,7 @@ Rust attributes use hash maps. Their iteration order can change formatting-marke
 
 ## Sparse v2 encoding
 
-The pinned reference also panics in `transaction.rs:408` when merging its own pending v2 updates (`UnexpectedValue`). Its `BlockSlice::Skip` encoder writes the length through the v2 length column, while its update decoder reads skip lengths from the raw stream. The port uses the raw stream, matching the decoder and Yjs wire format. `validation/updates.py` currently records v1 relay/utility comparisons; the regular collection/rich-text suite still checks both v1 and v2. Sparse v2 is covered by MoonBit regression tests, with cross-runtime validation still outstanding.
+The pinned reference also panics in `transaction.rs:408` when merging its own pending v2 updates (`UnexpectedValue`). Its `BlockSlice::Skip` encoder writes the length through the v2 length column, while its update decoder reads skip lengths from the raw stream. The port uses the raw stream, matching the decoder and Yjs wire format. `validation/updates.py` currently records v1 relay/utility comparisons; the regular collection/rich-text suite still checks both v1 and v2. Sparse v2 is also checked against pinned Yjs by `validation/sparse_wire.py`: 512 v1/v2 utility cases and 4,096 complete-history receiver comparisons. This validates the wire utilities, not equivalence of intermediate pending-store scheduling.
 
 ## Historical snapshot clipping
 
@@ -312,3 +312,19 @@ six payload lengths (including length-encoding boundaries). The unchanged Rust
 decoder accepts all 1,512 port packets with the exact original tag and payload.
 Low-tag encodings agree exactly; 768 high-tag encodings differ from Rust's
 malformed output. These are explicit encoder exceptions, not byte-parity passes.
+
+## Yjs surrogate-split suffix recovery
+
+`fixtures/yjs-surrogate-suffix-loss.json` contains a two-packet reproducer for
+Yjs 13.6.27. Insert `🌙` with client 1, then request a diff against the synthetic
+state vector `{1: 1}`, which claims knowledge of only half the scalar's two
+UTF-16 clocks. Deliver this suffix before the original full item. Rust and
+MoonBit preserve `🌙`; Yjs renders two replacement characters. This is an
+adversarial state vector, not one observed during valid whole-character editing.
+
+The sparse-wire oracle separately exercises 256 observed receiver state vectors
+and 256 arbitrary clock vectors. It records 32 text mismatches caused solely by
+this Yjs surrogate replacement, requires the port's completed text/arrays/maps to
+match the original history, and checks insertion identities and deletion ranges
+independently. All observed-state-vector cases agree. The exception is counted
+explicitly; arbitrary-clock text mismatches are not reported as parity passes.
