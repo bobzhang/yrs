@@ -122,8 +122,10 @@ priv struct Session {
 let sessions : Array[Session] = []
 
 ///|
-fn make_session() -> Session {
-  let docs = Array::makei(3, fn(i) { @yrs.Doc(client_id=(i + 1).to_uint64()) })
+fn make_session(gc : Bool) -> Session {
+  let docs = Array::makei(3, fn(i) {
+    @yrs.Doc(client_id=(i + 1).to_uint64(), skip_gc=!gc)
+  })
   let roots = docs.map(fn(d) { d.get_or_insert_map("root") })
   let xmls = docs.map(fn(d) { d.get_or_insert_xml_fragment("xml") })
   let texts = docs.map(fn(d) { d.get_or_insert_text("text") })
@@ -166,15 +168,20 @@ fn make_session() -> Session {
 }
 
 ///|
-fn run(input : String, v2 : Bool, live~ : Bool = false) -> String raise {
+fn run(
+  input : String,
+  v2 : Bool,
+  live~ : Bool = false,
+  gc~ : Bool = false,
+) -> String raise {
   guard @json.parse(input) is Array(commands) else { abort("commands") }
   let session = if live {
     if sessions.is_empty() {
-      sessions.push(make_session())
+      sessions.push(make_session(gc))
     }
     sessions[0]
   } else {
-    make_session()
+    make_session(gc)
   }
   let docs = session.docs
   let roots = session.roots
@@ -367,8 +374,16 @@ pub fn evaluate_v2(input : String) -> String {
 
 ///|
 #export_name("evaluate_live")
-pub fn evaluate_live(input : String, v2 : Bool) -> String {
-  run(input, v2, live=true) catch {
+pub fn evaluate_live(input : String, v2 : Bool, gc : Bool) -> String {
+  run(input, v2, live=true, gc~) catch {
+    e => ({ "error": Json(e.to_string()) } : Json).stringify()
+  }
+}
+
+///|
+#export_name("evaluate_gc")
+pub fn evaluate_gc(input : String, v2 : Bool) -> String {
+  run(input, v2, gc=true) catch {
     e => ({ "error": Json(e.to_string()) } : Json).stringify()
   }
 }

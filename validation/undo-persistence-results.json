@@ -5,9 +5,13 @@
     1,
     2
   ],
-  "successful_undo_redo_checkpoints": 2496,
-  "cross_runtime_reloads": 4992,
-  "reference_restored_parent_defects": 2,
+  "gc_modes": [
+    false,
+    true
+  ],
+  "successful_undo_redo_checkpoints": 4992,
+  "cross_runtime_reloads": 9984,
+  "reference_restored_parent_defects": 4,
   "checks": [
     "structured XML including text attributes",
     "nested maps and arrays",

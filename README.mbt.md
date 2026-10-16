@@ -132,8 +132,8 @@ as a pass. Rust's unordered restoration can also produce several outcomes; each
 accepted alternative must match an entire MoonBit history prefix in a fresh run.
 
 `python3 validation/undo_persistence.py` checks the corrected persistence contract.
-All 2,496 successful undo/redo checkpoints from 48 multi-author histories survive
-4,992 Rust/MoonBit reloads across both wire versions, including XML-text attributes
+All 4,992 successful undo/redo checkpoints from 48 multi-author histories survive
+9,984 Rust/MoonBit reloads across both wire versions with GC enabled and disabled, including XML-text attributes
 that rendered XML does not show. A five-command fixture independently demonstrates
 the unchanged Rust self-reload failure. The fix reanchors restored map values in
 their restored parent branch, and covers ordinary nested maps too.

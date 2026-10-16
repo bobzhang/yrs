@@ -17,9 +17,10 @@ def main():
     reference_defects = 0
     actions = transfers = 0
     seeds = list(range(24)) + list(range(48, 72))
-    for version in ['v1', 'v2']:
-        rust = ['validation/rust/target/release/undo', version]
-        moon = ['node', 'validation/undo.cjs', version]
+    for gc, version in [(gc, v) for gc in [False, True] for v in ['v1', 'v2']]:
+        flags = ['--gc'] if gc else []
+        rust = ['validation/rust/target/release/undo', version] + flags
+        moon = ['node', 'validation/undo.cjs', version] + flags
         r = execute(rust, [fixture])[0]
         m = execute(moon, [fixture])[0]
         expected = doc(m['snapshots'][-1]['docs'][0])
@@ -32,7 +33,7 @@ def main():
             assert doc(received['snapshots'][-1]['docs'][0]) == expected
         packets, expected = [], []
         for seed in seeds:
-            session = Session(['node', 'validation/undo-live.cjs', version])
+            session = Session(['node', 'validation/undo-live.cjs', version] + flags)
             try:
                 session.call([])
                 for c in history(seed):
@@ -49,12 +50,12 @@ def main():
             for index, (before, row) in enumerate(zip(expected, received)):
                 after = doc(row['snapshots'][-1]['docs'][0])
                 if before != after:
-                    (ROOT / 'validation/fixtures/undo-persistence-failure.json').write_text(json.dumps({'version': version, 'commands': packets[index], 'expected': before, 'actual': after}) + '\n')
-                    raise AssertionError((version, command, index, before, after))
+                    (ROOT / 'validation/fixtures/undo-persistence-failure.json').write_text(json.dumps({'version': version, 'gc': gc, 'commands': packets[index], 'expected': before, 'actual': after}) + '\n')
+                    raise AssertionError((version, gc, command, index, before, after))
                 transfers += 1
-        print(version, len(packets), 'successful undo/redo checkpoints passed', flush=True)
+        print(version, 'gc='+str(gc), len(packets), 'successful undo/redo checkpoints passed', flush=True)
     result = {'upstream': 'ac339600c712642e556895426113c3f9c117de39', 'histories': len(seeds),
-              'wire_versions': [1, 2], 'successful_undo_redo_checkpoints': actions,
+              'wire_versions': [1, 2], 'gc_modes': [False, True], 'successful_undo_redo_checkpoints': actions,
               'cross_runtime_reloads': transfers, 'reference_restored_parent_defects': reference_defects,
               'checks': ['structured XML including text attributes', 'nested maps and arrays',
                          'rich text', 'concurrent editing authors', 'save/reload after each successful undo or redo'],

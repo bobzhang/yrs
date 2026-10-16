@@ -48,9 +48,9 @@ fn event(e:&Event,tx:&TransactionMut)->Value{
 }
 fn hex(bytes:&[u8])->String{bytes.iter().map(|b|format!("{b:02x}")).collect()}
 fn unhex(s:&str)->Vec<u8>{(0..s.len()).step_by(2).map(|i|u8::from_str_radix(&s[i..i+2],16).unwrap()).collect()}
-fn main(){let v2=std::env::args().any(|s|s=="v2");let live=std::env::args().any(|s|s=="--live");let stdin=io::stdin();let mut lines=stdin.lock().lines();while let Some(line)=lines.next(){
+fn main(){let gc=std::env::args().any(|s|s=="--gc");let v2=std::env::args().any(|s|s=="v2");let live=std::env::args().any(|s|s=="--live");let stdin=io::stdin();let mut lines=stdin.lock().lines();while let Some(line)=lines.next(){
  let mut commands:Vec<Value>=serde_json::from_str(&line.unwrap()).unwrap();
- let docs:Vec<_>=(1..=3).map(|i|{let mut o=Options::with_client_id(yrs::block::ClientID::new(i));o.skip_gc=true;o.offset_kind=OffsetKind::Utf16;Doc::with_options(o)}).collect();
+ let docs:Vec<_>=(1..=3).map(|i|{let mut o=Options::with_client_id(yrs::block::ClientID::new(i));o.skip_gc=!gc;o.offset_kind=OffsetKind::Utf16;Doc::with_options(o)}).collect();
  let roots:Vec<_>=docs.iter().map(|d|d.get_or_insert_map("root")).collect();let xmls:Vec<_>=docs.iter().map(|d|d.get_or_insert_xml_fragment("xml")).collect();
  let texts:Vec<_>=docs.iter().map(|d|d.get_or_insert_text("text")).collect();
  let tick=Arc::new(std::sync::atomic::AtomicU64::new(100));
