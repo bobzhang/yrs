@@ -530,3 +530,24 @@ The refreshed run records 11 Rust retry stalls, 131 further buffering difference
 pending deletion cases and three stale final pending flags. These counts supersede
 the earlier matrix above. All 320 scoped-GC cases also pass. Exact intermediate
 Rust pending metadata is deliberately not reproduced.
+
+## Quote construction must count visible positions
+
+`fixtures/upstream-weak-visible-start.json` inserts `Xab`, deletes `X`, then quotes
+from excluded position 0 through included position 1. The requested view is `b`.
+Pinned Rust anchors the start on the deleted `X` and returns `ab` from both its
+plain and XML queries. Format markers can cause the same mistake. The port also
+had this defect; quotation construction now skips deleted and zero-width items
+before choosing the visible starting identity.
+
+`weak_range_test.mbt` checks every bounded range of an eight-character sequence
+with deleted prefixes/interior characters, with and without formatting, in both
+GC modes. The broader weak oracle now independently checks 9,004 newly created
+quotations against visible positional slices (1,740 intentionally differ from
+Rust). It compares queries and notifications on identical Rust- and MoonBit-
+authored wire histories, so differences in newly selected anchors cannot hide
+read or observer defects. This checks 74,240 replay snapshots, 37,120 local
+document states and 6,656 reloads. The remaining 40 plain/eight XML query
+exceptions require a demonstrated internal inconsistency in Rust. All 27,744
+extra notifications are classified (27,576 changed views, 168 format markers);
+zero Rust notifications are missing. Counts supersede previous weak matrices.

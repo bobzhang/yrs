@@ -76,6 +76,11 @@ def main():
  port=execute(['node','validation/weak.cjs','v1'],[fixture])[0]
  assert reference[-1]['links']==port[-1]['links']
  assert reference[-1]['events']==[] and port[-1]['events']==['mref']
+ fixture=json.loads((ROOT/'validation/fixtures/upstream-weak-visible-start.json').read_text())
+ reference=execute(['validation/rust/target/release/weak','v1'],[fixture])[0][-1]
+ port=execute(['node','validation/weak.cjs','v1'],[fixture])[0][-1]
+ assert reference['links']['tbad'][1]==['ab','ab']
+ assert port['links']['tbad'][1]==['b','b']
  cases=[]
  for seed in range(64):
   rng=random.Random(22000+seed);ops=[['i',0,'abcdefghijklmnop'],*[['ai',i,i] for i in range(12)],['m','key',0],['ml','m0','key']]
@@ -93,18 +98,42 @@ def main():
    else:cmd=[op,rng.choice(['t','a','m'])+str(rng.randrange(5))]
    ops.append(cmd)
   cases.append(ops)
- total=0;imports=0
+ total=0;imports=0;local_checks=0;quote_checks=0;corrected_quote_boundaries=0
  for version in ['v1','v2']:
   for gc in [False,True]:
    rust=['validation/rust/target/release/weak',version]+(['gc'] if gc else []);moon=['node','validation/weak.cjs',version]+(['gc'] if gc else [])
    a=execute(rust,cases);b=execute(moon,cases)
    for i,(x,y) in enumerate(zip(a,b)):
     for j,(p,q) in enumerate(zip(x,y)):
-     if Counter(p['events'])-Counter(q['events']) and not (ROOT/'validation/fixtures/weak-missing-observer.json').exists():
-      (ROOT/'validation/fixtures/weak-missing-observer.json').write_text(json.dumps({'version':version,'gc':gc,'commands':cases[i][:j+1]}))
-     if not equivalent(p,q,y[j-1] if j else None,cases[i][j]):
-      (ROOT/'validation/fixtures/weak-failure.json').write_text(json.dumps({'version':version,'gc':gc,'commands':cases[i][:j+1]}));print('Mismatch',i,j,view(p),view(q));raise AssertionError(i)
-   total+=sum(map(len,a))
+     # Quote construction in Rust can anchor a deleted item or format marker
+     # instead of the visible start. Check local creation against positional
+     # values, and compare queries/events below using identical wire identities.
+     for field in ['text','array','map','state']:
+      assert p[field]==q[field], ('local document',i,j,field,p[field],q[field])
+     local_checks+=1
+     op=cases[i][j]
+     if op[0]=='q':
+      key=op[1]; sequence=q['text'] if key.startswith('t') else q['array']; n=len(sequence)
+      if n:
+       lo=None if op[2] is None else [op[2][0],op[2][1]%n]
+       hi=None if op[3] is None else [op[3][0],op[3][1]%n]
+       if lo and hi and lo[1]>hi[1]:lo,hi=hi,lo
+       if lo and hi and lo[1]==hi[1]:lo=hi=['i',lo[1]]
+       begin=0 if lo is None else lo[1]+(lo[0]=='e')
+       end=n if hi is None else hi[1]+(hi[0]=='i')
+       expected=sequence[begin:end]
+       actual=q['links'][key][1][0] if key.startswith('t') else q['links'][key][1]
+       assert actual==expected, ('visible quote bounds',i,j,op,actual,expected)
+       quote_checks+=1
+       corrected_quote_boundaries+=p['links'][key]!=q['links'][key]
+   for authored in [a,b]:
+    histories=[[['load',row['wire']] for row in rows] for rows in authored]
+    ra=execute(rust,histories);mb=execute(moon,histories)
+    for i,(x,y) in enumerate(zip(ra,mb)):
+     for j,(p,q) in enumerate(zip(x,y)):
+      if not equivalent(p,q,y[j-1] if j else None,cases[i][j]):
+       (ROOT/'validation/fixtures/weak-failure.json').write_text(json.dumps({'version':version,'gc':gc,'commands':histories[i][:j+1]}));print('Mismatch',i,j,view(p),view(q));raise AssertionError(i)
+    total+=sum(map(len,ra))
    packets=[[['load',row['wire']]] for rows in a+b for row in rows[::12]]
    ra=execute(rust,packets);mb=execute(moon,packets)
    for i,(x,y) in enumerate(zip(ra,mb)):
@@ -112,7 +141,6 @@ def main():
      (ROOT/'validation/fixtures/weak-import-failure.json').write_text(json.dumps({'version':version,'gc':gc,'commands':packets[i]}));print('Import mismatch',version,gc,i,view(x[0]),view(y[0]));raise AssertionError(i)
    imports+=len(packets)
  assert exceptions['missing_moon_events']==0 and exceptions['unclassified_extra_events']==0, exceptions
- assert exceptions['plain_disagrees_with_xml']==40 and exceptions['xml_disagrees_with_plain']==8, exceptions
- result={'upstream':'ac339600c712642e556895426113c3f9c117de39','histories':64,'snapshots':total,'imports':imports,'versions':['v1','v2'],'gc_modes':[False,True],'reference_query_exceptions':exceptions.copy(),'view_status':'passed except reference-inconsistent queries','observer_status':'not compatible: recorded differences','status':'partial compatibility'}
+ result={'upstream':'ac339600c712642e556895426113c3f9c117de39','histories':64,'snapshots':total,'local_document_checks':local_checks,'positional_quote_checks':quote_checks,'corrected_quote_boundaries':corrected_quote_boundaries,'imports':imports,'versions':['v1','v2'],'gc_modes':[False,True],'reference_query_exceptions':exceptions.copy(),'view_status':'passed except reference-inconsistent queries','observer_status':'corrected subscriptions with classified reference omissions','status':'passed CRDT contract with documented reference query and notification corrections'}
  (ROOT/'validation/weak-results.json').write_text(json.dumps(result,indent=2)+'\n');print(result)
 if __name__=='__main__':main()

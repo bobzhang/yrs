@@ -111,9 +111,6 @@ fn Doc::quote(
     let mut cursor = self.branch(parent).head
     while cursor is Some(id) {
       let item = self.items[id]
-      if is_start && remaining == 0 {
-        return StickyIndex(scope=Relative(id), assoc~)
-      }
       if !item.deleted && item.content.offset_length(self) > 0 {
         if remaining < item.content.offset_length(self) {
           return StickyIndex(
