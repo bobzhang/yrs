@@ -16,8 +16,12 @@
   },
   "independent_restoration_identity_equality_required": false,
   "structured_xml_attributes_compared": true,
-  "observer_events_compared": "identical remote sync and duplicate transactions after prior state reconciliation",
+  "observer_events_compared": "identical remote sync/duplicate transactions and port-owned local edits/undo/redo versus Rust wire mirrors, after prior state reconciliation",
   "observer_transaction_comparisons": 9186,
+  "port_local_undo_redo_observer_comparisons": 3772,
+  "port_local_edit_observer_comparisons": 7768,
+  "port_local_notification_batches": 10058,
+  "port_local_deep_events": 11156,
   "notification_batches": 5738,
   "deep_events": 5074,
   "status": "passed"

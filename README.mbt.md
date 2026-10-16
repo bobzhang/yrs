@@ -210,9 +210,11 @@ The run required 254 reconciliation rounds: 250 involving rendered content and
 four exposing XML attributes absent from the rendered string. Structured XML is
 now compared throughout. All 9,186 remote synchronization/duplicate transactions
 have matching observer notifications (5,738 batches and 5,074 deep events).
-These results cover notifications for identical incoming packets after prior
-state reconciliation; locally generated undo events and independently allocated
-restoration identities remain separate audit items. Results are in
+A further 3,772 port-local undo/redo transactions and 7,768 port-local editing
+transactions match the notifications from Rust mirrors applying their updates
+(10,058 batches and 11,156 deep events). Comparisons occur after prior state
+reconciliation. Independently allocated Rust undo identities remain a separate
+audit item. Results are in
 `validation/undo-mixed-results.json`.
 
 

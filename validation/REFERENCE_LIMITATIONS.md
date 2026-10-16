@@ -111,8 +111,10 @@ four attribute-only) and compares 9,186 remote synchronization/duplicate observe
 transactions, including 5,738 notification batches and 5,074 deep events.
 
 This checks convergence after generated operations have arrived, not equality
-before reconciliation. Locally executed undo observer equivalence and independent
-restoration identities remain separate gates. `undo.py` now records its current
+before reconciliation. Port-local undo/redo notifications also match unchanged Rust mirrors in 3,772
+transactions; 7,768 port-local editing transactions are checked the same way.
+These comparisons do not independently execute Rust undo. Independent restoration
+identities remain a separate gate. `undo.py` now records its current
 strict mismatch rather than retaining a historical passing report: a follower
 loses restored nested-map entries in Rust while the corrected port preserves them.
 `undo_persistence.py` independently checks every sampled successful port undo/redo

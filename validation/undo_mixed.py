@@ -51,6 +51,7 @@ def main():
  subprocess.run(['moon','build','validation/undo','--release','--target','js'],cwd=ROOT,check=True)
  checked=duplicates=undo_actions=reconciliations=0
  observer_checks=notification_batches=deep_events=0
+ local_undo_checks=local_edit_checks=local_batches=local_events=0
  reconciliation_kinds={'rendered_content':0,'xml_attributes_only':0}
  def notifications(row):
   return canonical_events({'notifications':row['snapshots'][-1]['notifications']})['notifications']
@@ -80,6 +81,13 @@ def main():
       packet=last[owner]['updates'][x]
       last[1-owner]=sessions[1-owner].call([['apply',x,packet]])
       if op in ('undo','redo'):undo_actions+=1
+      # For MoonBit-owned edits, compare locally generated events directly with
+      # unchanged Rust applying exactly the generated update to its mirror.
+      if owner==1 and op in ('undo','redo','batch'):
+       batches,events=compare_events(last,version,seed,step,c)
+       local_batches+=batches;local_events+=events
+       if op=='batch':local_edit_checks+=1
+       else:local_undo_checks+=1
      a,b=state(last[0]),state(last[1])
      # Imports can generate extra deletions, including undo-restored XML
      # attributes. Compare structured XML as well as rendered strings; exchange
@@ -111,6 +119,6 @@ def main():
    finally:
     for s in sessions:s.close()
    if seed%16==15:print(f'{version}: {seed+1}/96 mixed histories passed',flush=True)
- result={'upstream':'ac339600c712642e556895426113c3f9c117de39','scenarios':96,'wire_versions':['v1','v2'],'mixed_authorship':True,'replica_state_comparisons':checked,'duplicate_deliveries':duplicates,'undo_redo_actions':undo_actions,'reconciliation_rounds':reconciliations,'reconciliation_kinds':reconciliation_kinds,'independent_restoration_identity_equality_required':False,'structured_xml_attributes_compared':True,'observer_events_compared':'identical remote sync and duplicate transactions after prior state reconciliation','observer_transaction_comparisons':observer_checks,'notification_batches':notification_batches,'deep_events':deep_events,'status':'passed'}
+ result={'upstream':'ac339600c712642e556895426113c3f9c117de39','scenarios':96,'wire_versions':['v1','v2'],'mixed_authorship':True,'replica_state_comparisons':checked,'duplicate_deliveries':duplicates,'undo_redo_actions':undo_actions,'reconciliation_rounds':reconciliations,'reconciliation_kinds':reconciliation_kinds,'independent_restoration_identity_equality_required':False,'structured_xml_attributes_compared':True,'observer_events_compared':'identical remote sync/duplicate transactions and port-owned local edits/undo/redo versus Rust wire mirrors, after prior state reconciliation','observer_transaction_comparisons':observer_checks,'port_local_undo_redo_observer_comparisons':local_undo_checks,'port_local_edit_observer_comparisons':local_edit_checks,'port_local_notification_batches':local_batches,'port_local_deep_events':local_events,'notification_batches':notification_batches,'deep_events':deep_events,'status':'passed'}
  (ROOT/'validation/undo-mixed-results.json').write_text(json.dumps(result,indent=2)+'\n');print(json.dumps(result))
 if __name__=='__main__':main()
