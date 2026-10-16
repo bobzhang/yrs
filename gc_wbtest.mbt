@@ -64,3 +64,47 @@ test "snapshot encoder rejects automatic GC documents" {
     _ => fail("snapshot encoding should reject GC")
   }
 }
+
+///|
+test "GC refreshes undo retention after insertion-only transactions and history release" {
+  let doc = Doc(client_id=1UL, skip_gc=false)
+  let text = doc.get_or_insert_text("text")
+  text.insert(0, "prefix")
+  let undo : UndoManager[Unit] = UndoManager(clock=fn() { 100UL })
+  undo.expand_scope(Text(text))
+  text.remove_range(0, 6)
+  // An insertion-only transaction does not need GC. Retained old characters
+  // must still be released when a later collection sees the cleared history.
+  undo.reset()
+  text.insert(0, "tail")
+  undo.clear_all()
+  doc.gc()
+  assert_false(
+    doc.clients[1UL].any(fn(item) {
+      item.deleted && item.content is Characters(_)
+    }),
+  )
+  undo.reset()
+  text.remove_range(1, 2)
+  doc.gc()
+  assert_true(undo.undo())
+  assert_eq(text.get_string(), "tail")
+  let copy = Doc(client_id=2UL)
+  copy.apply_update_v2(doc.encode_state_as_update_v2())
+  assert_eq(copy.get_or_insert_text("text").get_string(), "tail")
+}
+
+///|
+test "GC range search includes overlapping blocks and skips unrelated clients" {
+  let doc = Doc(client_id=1UL, skip_gc=true)
+  let text = doc.get_or_insert_text("text")
+  text.insert(0, "abcdefghij")
+  text.remove_range(2, 6)
+  // Interior range must include its containing deleted block, even though its
+  // start clock precedes the range. Automatic GC uses the same range lookup.
+  doc.collect_garbage([(1UL, 4U, 5U), (77UL, 0U, 10U)])
+  assert_true(
+    doc.find({ client: 1UL, clock: 4U, }).unwrap().content is Deleted(6),
+  )
+  assert_eq(text.get_string(), "abij")
+}

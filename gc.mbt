@@ -10,7 +10,9 @@ fn Doc::keep_ranges(
   keep : Bool,
 ) -> Unit {
   for (client, start, end) in ranges {
-    for item in self.clients.get(client).unwrap_or([]) {
+    let blocks = self.clients.get(client).unwrap_or([])
+    for i in first_block_after(blocks, start)..<blocks.length() {
+      let item = blocks[i]
       if item.id.clock >= end {
         break
       }
@@ -23,6 +25,9 @@ fn Doc::keep_ranges(
           break
         }
         entry.keep = keep
+        if keep {
+          self.has_keep_marks = true
+        }
         cursor = match entry.parent {
           Some(Nested(id)) => self.find(id)
           _ => None
@@ -37,17 +42,25 @@ fn Doc::collect_garbage(
   self : Doc,
   ranges : Array[(UInt64, UInt32, UInt32)],
 ) -> Unit {
+  if ranges.is_empty() {
+    return
+  }
   // Keep ownership is derived from all active managers, so clearing one
   // history cannot release another manager's retained content.
-  for item in self.items.values() {
-    item.keep = false
+  if self.has_keep_marks {
+    for item in self.items.values() {
+      item.keep = false
+    }
+    self.has_keep_marks = false
   }
   for retained in self.undo_retention.values() {
     self.keep_ranges(retained(), true)
   }
   let pending : Array[(Item, Bool)] = []
   for (client, start, end) in ranges {
-    for item in self.clients.get(client).unwrap_or([]) {
+    let blocks = self.clients.get(client).unwrap_or([])
+    for i in first_block_after(blocks, start)..<blocks.length() {
+      let item = blocks[i]
       if item.id.clock >= end {
         break
       }

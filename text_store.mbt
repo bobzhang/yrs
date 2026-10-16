@@ -173,6 +173,7 @@ pub struct Doc {
   priv wire_encoding : Int32
   priv mut owner : (Doc, Id)?
   priv children_docs : Map[UInt64, Doc]
+  priv mut has_keep_marks : Bool
   priv undo_retention : Map[String, () -> Array[(UInt64, UInt32, UInt32)]]
   priv subdoc_observers : Observer[String, (SubdocsEvent, Transaction) -> Unit]
   priv destroy_observers : Observer[String, (Doc) -> Unit]
@@ -252,6 +253,7 @@ fn make_doc(
     cleanup_enabled,
     owner: None,
     children_docs: {},
+    has_keep_marks: false,
     undo_retention: {},
     subdoc_observers: Observer(),
     destroy_observers: Observer(),
