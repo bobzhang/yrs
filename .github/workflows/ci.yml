@@ -102,6 +102,7 @@ jobs:
               python3 validation/undo_mixed.py
               ;;
             undo-persistence)
+              python3 validation/undo_gc.py
               python3 validation/undo_mixed.py --gc on --owner moon --report validation/undo-gc-port-results.json
               python3 validation/undo_persistence.py
               ;;

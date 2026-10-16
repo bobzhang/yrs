@@ -1,0 +1,18 @@
+{
+  "upstream": "ac339600c712642e556895426113c3f9c117de39",
+  "fixture": "validation/fixtures/upstream-undo-gc-parent.json",
+  "operations": 7,
+  "reference_only_gc_crashes": 20,
+  "port_snapshots_matching_gc_disabled_reference": 28,
+  "port_state_cross_runtime_reloads": 24,
+  "wire_versions": [
+    1,
+    2
+  ],
+  "gc_modes": [
+    false,
+    true
+  ],
+  "status": "reference crash isolated; port regression passed",
+  "scope": "Seven-operation deterministic witness, not a waiver for other mixed-author failures."
+}

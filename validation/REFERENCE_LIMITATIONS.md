@@ -413,6 +413,18 @@ into fresh Rust documents with either GC mode; replaying only the received
 packets also succeeds. This implicates the retained local undo/GC state, but
 does not yet establish the precise cause or prove the port free of related bugs.
 
+`fixtures/upstream-undo-gc-parent.json` now isolates this failure in seven
+operations executed entirely by Rust: create a nested map on A, synchronize B,
+edit its children on B, undo on A, undo on B, create an unrelated map on B
+(clearing its redo history), then synchronize A's deletion to B. There are no
+MoonBit-generated packets or captured nondeterministic identities in this fixture.
+`python3 validation/undo_gc.py` reproduces the Rust panic ten times in each wire
+format. With GC disabled, all seven Rust snapshots match the port with GC either
+enabled or disabled. All port full states reload in both runtimes. The public
+API regression also checks continued undo/redo and save/reload on all backends.
+This establishes that the minimized crash is internal to the reference; the
+larger mixed-author gate remains separate and is not automatically waived.
+
 The harness records both processes' complete call streams on failure in
 `/tmp/yrs-undo-mixed-execution-failure.json`. These are diagnostic evidence, not
 a deterministic standalone replay: rerunning Rust local undo may allocate
