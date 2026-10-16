@@ -1,8 +1,8 @@
 {
   "upstream": "ac339600c712642e556895426113c3f9c117de39",
-  "scenarios": 128,
-  "operation_snapshots": 33024,
-  "cross_runtime_awareness_transfers": 768,
+  "scenarios": 129,
+  "operation_snapshots": 33030,
+  "cross_runtime_awareness_transfers": 774,
   "checks": [
     "presence metadata",
     "change and update observers",
@@ -11,5 +11,6 @@
     "default sync handshakes",
     "awareness queries"
   ],
+  "rust_restoration_event_corrections": 1745,
   "status": "passed"
 }

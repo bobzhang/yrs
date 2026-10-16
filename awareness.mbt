@@ -331,9 +331,11 @@ pub fn Awareness::apply_update(
             } else {
               removed.push(client)
             }
+          } else if state.data is None {
+            added.push(client)
           } else {
             updated.push(client)
-            if state.data is Some(_) && state.data != data {
+            if state.data != data {
               changed.push(client)
             }
           }
