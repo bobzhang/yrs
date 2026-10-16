@@ -30,6 +30,8 @@ pub fn merge_updates_v1(Array[Bytes]) -> Bytes raise DecodeError
 
 pub fn merge_updates_v2(Array[Bytes]) -> Bytes raise DecodeError
 
+pub fn[T : ToAny] to_any(T) -> Any raise ValueEncodeError
+
 pub fn uuid_v4(() -> Bytes) -> String
 
 pub fn uuid_v4_from(Bytes) -> String
@@ -67,6 +69,12 @@ pub(all) suberror ValueDecodeError {
 } derive(@debug.Debug)
 pub fn ValueDecodeError::to_repr(Self) -> @debug.Repr
 
+pub(all) suberror ValueEncodeError {
+  UnrepresentableInt
+  Custom(String)
+} derive(@debug.Debug)
+pub fn ValueEncodeError::to_repr(Self) -> @debug.Repr
+
 // Types and methods
 pub(all) enum Any {
   Undefined
@@ -86,10 +94,12 @@ pub fn Any::from_any(Self) -> Self raise ValueDecodeError
 pub fn Any::from_json(Json) -> Self
 pub fn Any::json_path(Self, JsonPath) -> Iter[Self]
 pub fn Any::not_equal(Self, Self) -> Bool
+pub fn Any::to_any(Self) -> Self raise ValueEncodeError
 pub fn Any::to_json(Self) -> Json
 pub fn Any::to_repr(Self) -> @debug.Repr
 pub fn Any::to_string(Self) -> String
 pub impl FromAny for Any
+pub impl ToAny for Any
 pub impl Eq for Any
 
 pub struct ArrayEvent {
@@ -1482,6 +1492,28 @@ pub(open) trait SharedRef {
   fn from_branch(Doc, BranchId) -> Self?
   fn hook(Self) -> Hook[Self]
 }
+
+pub(open) trait ToAny {
+  fn to_any(Self) -> Any raise ValueEncodeError
+}
+pub impl ToAny for Unit
+pub impl ToAny for Bool
+pub impl ToAny for Byte
+pub impl ToAny for Char
+pub impl ToAny for Int
+pub impl ToAny for Int64
+pub impl ToAny for UInt
+pub impl ToAny for UInt16
+pub impl ToAny for UInt64
+pub impl ToAny for Float
+pub impl ToAny for Double
+pub impl ToAny for String
+pub impl[T : ToAny] ToAny for T?
+pub impl[T : ToAny] ToAny for ReadOnlyArray[T]
+pub impl ToAny for Bytes
+pub impl[T : ToAny] ToAny for Array[T]
+pub impl[T : ToAny] ToAny for Map[String, T]
+pub impl[A : ToAny, B : ToAny] ToAny for (A, B)
 
 pub(open) trait Write {
   fn write_all(Self, Bytes) -> Unit

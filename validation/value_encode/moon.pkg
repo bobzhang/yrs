@@ -1,0 +1,8 @@
+import {
+  "bobzhang/yrs",
+  "moonbitlang/core/json",
+}
+
+pkgtype(kind: "foreign_library")
+
+supported_targets = "js"

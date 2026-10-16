@@ -73,3 +73,8 @@ reexports and records inherent methods, trait members, public fields and enum
 variants. External/blanket trait implementations are not counted. The inventory
 is a checklist for the API audit, not a compatibility score. `--cached --check`
 uses the previously generated rustdoc JSON.
+
+`python3 validation/value_encode.py` compares the `ToAny` application adapter
+with Rust serde serialization, retaining exact numeric variants and float bits.
+It covers custom records, nested unsigned overflow, byte buffers, optional values
+and the recursive Undefined-to-Null normalization performed by serde.

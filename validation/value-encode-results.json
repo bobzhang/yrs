@@ -1,0 +1,14 @@
+{
+  "upstream": "ac339600c712642e556895426113c3f9c117de39",
+  "conversions": 3481,
+  "rejected_unrepresentable_values": 906,
+  "checks": [
+    "exact integer and floating-point variants",
+    "unsigned overflow including nested values",
+    "signed zero, infinities and NaN bit patterns",
+    "typed arrays, maps, tuples, optional values and custom records",
+    "byte buffers",
+    "recursive Any serde normalization"
+  ],
+  "status": "passed"
+}

@@ -68,9 +68,14 @@ Rust also exposes
   with 64-bit methods; Rust's generic integer trait and u128 are not exposed.
 - `block` / `branch` / `iter` / `atomic`: raw pointers, mutation internals,
   transaction-bound iterators and atomic storage are not ported as public APIs.
-- Value deserialization: `FromAny` / `from_any` expose a direct typed adapter;
+- Value serialization: `ToAny` / `to_any` and `FromAny` / `from_any` expose
+  direct typed adapters without JSON precision loss;
   application records implement the open trait. `FromOut` exposes direct handle/primitive casts separately, including Rust's narrowing integer conversion. Built-in conversion rules are
-  compared with Rust serde. `get_json_as` is a separate MoonBit JSON adapter.
+  compared with Rust serde. Serialization covers primitives, optional values, arrays,
+  string-keyed maps, pairs, raw bytes and custom records; 3,481 cases agree with
+  Rust, including 906 unsigned-overflow rejections. Application enum/record
+  representations are explicitly implemented with the open trait; MoonBit
+  compiler-derived serde attributes are not provided. `get_json_as` is a separate MoonBit JSON adapter.
 - `types` / `undo`: concrete editing and observation are implemented; method-level
   edge cases, generic conversions and event equivalence remain under audit.
 - Errors use MoonBit error types. Stricter malformed-input validation is

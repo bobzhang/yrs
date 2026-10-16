@@ -87,6 +87,7 @@ jobs:
               python3 validation/update_codecs.py
               python3 validation/codec_updates.py
               python3 validation/value_decode.py
+              python3 validation/value_encode.py
               python3 validation/embeds.py
               python3 validation/prelims.py
               python3 validation/protocol_codec.py
