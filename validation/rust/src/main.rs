@@ -2,7 +2,7 @@ use std::io::{self, BufRead};
 use yrs::{Doc, Text, GetString, ReadTxn, Transact, Options, OffsetKind, Update};
 use yrs::updates::decoder::Decode;
 use yrs::{Array, Map, Xml, XmlFragment};
-use yrs::types::ToJson;
+use yrs::types::{ToJson,AsPrelim};
 use serde_json::{Value, json};
 fn hex(b: &[u8]) -> String { b.iter().map(|b| format!("{b:02x}")).collect() }
 fn unhex(s: &str) -> Vec<u8> { (0..s.len()).step_by(2).map(|i| u8::from_str_radix(&s[i..i+2],16).unwrap()).collect() }
@@ -90,6 +90,23 @@ fn main() {
      let node=xmls[x].insert(&mut txn,pos,yrs::XmlElementPrelim::empty(a[3].as_str().unwrap()));
      node.insert_attribute(&mut txn,"class","entry");
      node.insert(&mut txn,0,yrs::XmlTextPrelim::new(a[4].as_str().unwrap()));
+    }
+    "xmlattr" => {
+     let mut txn=docs[x].transact_mut();let len=xmls[x].len(&txn);
+     if len>0 {
+      let node=xmls[x].get(&txn,a[2].as_u64().unwrap() as u32%len).unwrap();
+      let element=node.into_xml_element().unwrap();let key=a[4].as_str().unwrap();
+      let value:yrs::Any=serde_json::from_value(a[5].clone()).unwrap();
+      if a[3]=="text" {let child=element.get(&txn,0).unwrap().into_xml_text().unwrap();child.insert_attribute(&mut txn,key,value);}
+      else {element.insert_attribute(&mut txn,key,value);}
+     }
+    }
+    "copyxml" => {
+     let mut txn=docs[x].transact_mut();let len=xmls[x].len(&txn);
+     if len>0 {
+      let node=xmls[x].get(&txn,a[2].as_u64().unwrap() as u32%len).unwrap().into_xml_element().unwrap();
+      let copy=node.as_prelim(&txn);xmls[x].push_back(&mut txn,copy);
+     }
     }
     "X" => {
      let mut txn=docs[x].transact_mut();let n=xmls[x].len(&txn);let pos=a[2].as_u64().unwrap() as u32 % (n+1);

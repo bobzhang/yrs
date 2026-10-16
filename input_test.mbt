@@ -148,3 +148,31 @@ test "output strings preserve quoted text and nested integer and binary values" 
   array.push_back(Value(Buffer(b"\x00\xff"))) |> ignore
   assert_eq(@yrs.Out::Array(array).to_string(), "[9223372036854775807, 0x00ff]")
 }
+
+///|
+test "XML preliminary copies stringify attributes like upstream" {
+  let doc = @yrs.Doc(client_id=1UL)
+  let root = doc.get_or_insert_xml_fragment("xml")
+  let node = root.insert_element(0, "p")
+  node.insert_attribute("count", Integer(9223372036854775807L))
+  node.insert_attribute("binary", Buffer(b"\x00\xff"))
+  let child = node.as_fragment().insert_text(0)
+  child.as_text().insert(0, "child")
+  child.insert_attribute("enabled", Bool(true))
+  let copy = root.push_back(@yrs.Out::XmlElement(node).to_input())
+  guard copy is Element(copy) else { fail("expected element") }
+  assert_eq(
+    copy.get_attribute("count").unwrap().to_any(),
+    String("9223372036854775807"),
+  )
+  assert_eq(copy.get_attribute("binary").unwrap().to_any(), String("0x00ff"))
+  guard copy.as_fragment().get(0) is Some(Text(copied_text)) else {
+    fail("expected text")
+  }
+  assert_eq(
+    copied_text.get_attribute("enabled").unwrap().to_any(),
+    String("true"),
+  )
+  child.as_text().insert(0, "changed ")
+  assert_eq(copied_text.as_text().get_string(), "child")
+}

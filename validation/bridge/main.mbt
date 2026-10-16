@@ -154,6 +154,27 @@ fn evaluate_mode(input : String, v2 : Bool, gc~ : Bool = false) -> String raise 
         node.insert_attribute("class", String("entry"))
         node.as_fragment().insert_text(0).as_text().insert(0, value)
       }
+      "xmlattr" =>
+        if xmls[x].length() > 0 {
+          let node = xmls[x].get(integer(args[2]) % xmls[x].length()).unwrap()
+          guard node is Element(element) && args[4] is String(key) else {
+            abort("element")
+          }
+          let value = @yrs.Any::from_json(args[5])
+          if args[3] == "text" {
+            guard element.as_fragment().get(0) is Some(Text(child)) else {
+              abort("text child")
+            }
+            child.insert_attribute(key, value)
+          } else {
+            element.insert_attribute(key, value)
+          }
+        }
+      "copyxml" =>
+        if xmls[x].length() > 0 {
+          let node = xmls[x].get(integer(args[2]) % xmls[x].length()).unwrap()
+          xmls[x].push_back(node.as_out().to_input()) |> ignore
+        }
       "X" => {
         let n = xmls[x].length()
         let pos = integer(args[2]) % (n + 1)

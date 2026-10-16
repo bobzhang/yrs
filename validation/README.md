@@ -61,3 +61,7 @@ that verifies the stated invariants, not full compatibility. Consult
 `python3 validation/embeds.py` exercises inherited and explicit embed formatting,
 shared map/array/text embeds, concurrent edits, identical-wire replay and
 bidirectional v1/v2 imports through the main three-replica bridge.
+
+`python3 validation/prelims.py` checks XML copies, typed attribute stringification
+and concurrent insertion around tombstones, using independent replicas and
+bidirectional v1/v2 imports.

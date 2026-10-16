@@ -35,6 +35,11 @@ pub fn Out::to_input(self : Out) -> In {
       value.entries().map(fn(e) { (e.0, e.1.to_input()) })[:],
     )
   }
+  fn xml_attributes(value : MapRef) -> ReadOnlyArray[(String, In)] {
+    ReadOnlyArray::from_array(
+      value.entries().map(fn(e) { (e.0, In::Value(String(e.1.to_string()))) }),
+    )
+  }
   fn children(value : XmlFragment) -> ReadOnlyArray[In] {
     ReadOnlyArray::from_array(
       value
@@ -57,11 +62,12 @@ pub fn Out::to_input(self : Out) -> In {
     XmlElement(value) =>
       XmlElement(
         value.tag,
-        entries(value.as_map()),
+        xml_attributes(value.as_map()),
         children(value.as_fragment()),
       )
     XmlFragment(value) => XmlFragment(children(value))
-    XmlText(value) => XmlText(text(value.as_text()), entries(value.as_map()))
+    XmlText(value) =>
+      XmlText(text(value.as_text()), xml_attributes(value.as_map()))
     Subdoc(value) => Subdoc(value.unloaded_copy())
     UndefinedRef(value) => value.infer_input()
     WeakLink(value) => WeakLink(value.as_prelim())

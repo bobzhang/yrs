@@ -100,8 +100,11 @@ pub fn XmlFragment::insert(
   guard value is (XmlElement(_, _, _) | XmlFragment(_) | XmlText(_, _)) else {
     abort("XML child must be an XML node")
   }
-  let array : ArrayRef = { doc: self.doc, name: self.name, }
-  array.insert(index, value).as_xml().unwrap()
+  self.doc.with_mutation(fn() {
+    guard value.content(false) is Shared(kind) else { abort("XML node type") }
+    let id = self.insert_shared(index, kind)
+    value.populate(self.doc, id).as_xml().unwrap()
+  })
 }
 
 ///|

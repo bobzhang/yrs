@@ -1,0 +1,23 @@
+{
+  "upstream": "ac339600c712642e556895426113c3f9c117de39",
+  "scenarios": 32,
+  "wire_versions": [
+    "v1",
+    "v2"
+  ],
+  "rust_gc_modes": [
+    false,
+    true
+  ],
+  "moonbit_gc_modes": [
+    false,
+    true
+  ],
+  "checks": {
+    "independent_operation_snapshots": 12672,
+    "wire_replay_snapshots": 0,
+    "same_state_local_operations": 0
+  },
+  "cross_runtime_documents": 768,
+  "status": "passed"
+}

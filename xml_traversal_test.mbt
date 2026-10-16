@@ -39,3 +39,21 @@ test "XML traversal follows live siblings and skips removed nested subtrees" {
     visited,
   )
 }
+
+///|
+test "generic XML appends share direct insertion anchors around tombstones" {
+  let a = @yrs.Doc(client_id=1UL)
+  let b = @yrs.Doc(client_id=2UL)
+  let root = a.get_or_insert_xml_fragment("root")
+  let peer = b.get_or_insert_xml_fragment("root")
+  root.insert_element(0, "p") |> ignore
+  root.insert_element(1, "deleted") |> ignore
+  root.remove(1)
+  b.apply_update_v1(a.encode_state_as_update_v1())
+  root.push_back(XmlElement("x", [], [])) |> ignore
+  peer.insert_element(1, "y") |> ignore
+  a.apply_update_v1(b.encode_state_as_update_v1())
+  b.apply_update_v1(a.encode_state_as_update_v1())
+  assert_eq(root.get_string(), "<p></p><x></x><y></y>")
+  assert_eq(peer.get_string(), root.get_string())
+}
