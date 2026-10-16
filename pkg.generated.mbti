@@ -445,10 +445,13 @@ pub fn Doc::cleanup_formatting_enabled(Self) -> Bool
 pub fn Doc::client_id(Self) -> UInt64
 pub fn Doc::collection_id(Self) -> String?
 pub fn Doc::destroy(Self) -> Unit
+pub fn Doc::encode_diff(Self, StateVector, &Encoder) -> Unit
 pub fn Doc::encode_diff_v1(Self, StateVector) -> Bytes
 pub fn Doc::encode_diff_v2(Self, StateVector) -> Bytes raise DecodeError
+pub fn Doc::encode_state_as_update(Self, StateVector, &Encoder) -> Unit
 pub fn Doc::encode_state_as_update_v1(Self, remote? : StateVector) -> Bytes
 pub fn Doc::encode_state_as_update_v2(Self, remote? : StateVector) -> Bytes raise DecodeError
+pub fn Doc::encode_state_from_snapshot(Self, Snapshot, &Encoder) -> Unit raise DecodeError
 pub fn Doc::encode_state_from_snapshot_v1(Self, Snapshot) -> Bytes raise DecodeError
 pub fn Doc::encode_state_from_snapshot_v2(Self, Snapshot) -> Bytes raise DecodeError
 pub fn Doc::equal(Self, Self) -> Bool
@@ -1060,6 +1063,7 @@ pub fn Transaction::cleanups(Self) -> IdSet
 pub fn Transaction::delete_set(Self) -> IdSet
 pub fn Transaction::deletions(Self) -> Array[(UInt64, UInt, UInt)]
 pub fn Transaction::doc(Self) -> Doc
+pub fn Transaction::encode_update(Self, &Encoder) -> Unit
 pub fn Transaction::encode_update_v1(Self) -> Bytes
 pub fn Transaction::encode_update_v2(Self) -> Bytes raise DecodeError
 pub fn Transaction::gc(Self, delete_set? : IdSet) -> Unit
