@@ -361,3 +361,13 @@ callback is caused by deleting a format marker attached to the empty quotation.
 Observers report changes to CRDT structure, so an empty rendered string alone
 does not imply that no quoted operation changed. These classifications explain
 the tested differences; they do not turn them into exact upstream event parity.
+
+## Minimum signed variable integer encoding
+
+Pinned Rust's `write_var::<i64>` and `write_var_signed::<i64>` negate a negative
+value in signed arithmetic. In release mode `i64::MIN` remains negative after
+negation and the encoder emits `[64]` (negative zero), losing the integer. The
+port computes an unsigned magnitude and emits all ten bytes. The unchanged Rust
+decoder accepts those bytes and returns `i64::MIN`. `validation/streams.py`
+retains both exceptions separately from 2,032 exact encoding/decoding cases;
+fixed-width `write_i64` has no such issue.

@@ -245,6 +245,27 @@ pub fn BranchId::not_equal(Self, Self) -> Bool
 pub fn BranchId::to_json(Self) -> Json
 pub fn BranchId::to_repr(Self) -> @debug.Repr
 
+pub struct ByteWriter {
+  // private fields
+}
+pub fn ByteWriter::ByteWriter() -> Self
+pub fn ByteWriter::to_bytes(Self) -> Bytes
+pub fn ByteWriter::write_all(Self, Bytes) -> Unit
+pub fn ByteWriter::write_buf(Self, Bytes) -> Unit
+pub fn ByteWriter::write_f32(Self, Float) -> Unit
+pub fn ByteWriter::write_f64(Self, Double) -> Unit
+pub fn ByteWriter::write_i64(Self, Int64) -> Unit
+pub fn ByteWriter::write_string(Self, String) -> Unit
+pub fn ByteWriter::write_u16(Self, UInt16) -> Unit
+pub fn ByteWriter::write_u32(Self, UInt) -> Unit
+pub fn ByteWriter::write_u32_be(Self, UInt) -> Unit
+pub fn ByteWriter::write_u64(Self, UInt64) -> Unit
+pub fn ByteWriter::write_u8(Self, Byte) -> Unit
+pub fn ByteWriter::write_var_int(Self, Int64) -> Unit
+pub fn ByteWriter::write_var_signed(Self, (Int64, Bool)) -> Unit
+pub fn ByteWriter::write_var_uint(Self, UInt64) -> Unit
+pub impl Write for ByteWriter
+
 pub(all) enum Change {
   Added(ReadOnlyArray[Out])
   Removed(Int)
@@ -280,6 +301,29 @@ pub fn[A : Eq] ContentAttributes::merge(Self[A], Self[A]) -> Self[A]
 pub fn[A : Eq] ContentAttributes::not_equal(Self[A], Self[A]) -> Bool
 pub fn[A : @debug.Debug] ContentAttributes::to_repr(Self[A]) -> @debug.Repr
 pub impl[A : Eq] Eq for ContentAttributes[A]
+
+pub struct Cursor {
+  // private fields
+}
+pub fn Cursor::Cursor(Bytes) -> Self
+pub fn Cursor::has_content(Self) -> Bool
+pub fn Cursor::position(Self) -> Int
+pub fn Cursor::read_buf(Self) -> Bytes raise DecodeError
+pub fn Cursor::read_exact(Self, Int) -> Bytes raise DecodeError
+pub fn Cursor::read_f32(Self) -> Float raise DecodeError
+pub fn Cursor::read_f64(Self) -> Double raise DecodeError
+pub fn Cursor::read_i64(Self) -> Int64 raise DecodeError
+pub fn Cursor::read_string(Self) -> String raise DecodeError
+pub fn Cursor::read_u16(Self) -> UInt16 raise DecodeError
+pub fn Cursor::read_u32(Self) -> UInt raise DecodeError
+pub fn Cursor::read_u32_be(Self) -> UInt raise DecodeError
+pub fn Cursor::read_u64(Self) -> UInt64 raise DecodeError
+pub fn Cursor::read_u8(Self) -> Byte raise DecodeError
+pub fn Cursor::read_var_int(Self) -> Int64 raise DecodeError
+pub fn Cursor::read_var_signed(Self) -> (Int64, Bool) raise DecodeError
+pub fn Cursor::read_var_uint(Self) -> UInt64 raise DecodeError
+pub fn Cursor::remaining(Self) -> Int
+pub impl Read for Cursor
 
 pub struct DefaultProtocol {
 }
@@ -1187,6 +1231,23 @@ pub(open) trait Protocol {
   fn missing_handle(Self, Awareness, Byte, Bytes) -> Message? raise = _
 }
 
+pub(open) trait Read {
+  fn read_exact(Self, Int) -> Bytes raise DecodeError
+  fn read_u8(Self) -> Byte raise DecodeError = _
+  fn read_u16(Self) -> UInt16 raise DecodeError = _
+  fn read_u32(Self) -> UInt raise DecodeError = _
+  fn read_u32_be(Self) -> UInt raise DecodeError = _
+  fn read_u64(Self) -> UInt64 raise DecodeError = _
+  fn read_i64(Self) -> Int64 raise DecodeError = _
+  fn read_f32(Self) -> Float raise DecodeError = _
+  fn read_f64(Self) -> Double raise DecodeError = _
+  fn read_var_uint(Self) -> UInt64 raise DecodeError = _
+  fn read_var_int(Self) -> Int64 raise DecodeError = _
+  fn read_var_signed(Self) -> (Int64, Bool) raise DecodeError = _
+  fn read_buf(Self) -> Bytes raise DecodeError = _
+  fn read_string(Self) -> String raise DecodeError = _
+}
+
 pub(open) trait RootRef : SharedRef {
   fn get_or_insert_root(Doc, String) -> Self
 }
@@ -1194,4 +1255,21 @@ pub(open) trait RootRef : SharedRef {
 pub(open) trait SharedRef {
   fn from_branch(Doc, BranchId) -> Self?
   fn hook(Self) -> Hook[Self]
+}
+
+pub(open) trait Write {
+  fn write_all(Self, Bytes) -> Unit
+  fn write_u8(Self, Byte) -> Unit = _
+  fn write_u16(Self, UInt16) -> Unit = _
+  fn write_u32(Self, UInt) -> Unit = _
+  fn write_u32_be(Self, UInt) -> Unit = _
+  fn write_u64(Self, UInt64) -> Unit = _
+  fn write_i64(Self, Int64) -> Unit = _
+  fn write_f32(Self, Float) -> Unit = _
+  fn write_f64(Self, Double) -> Unit = _
+  fn write_var_uint(Self, UInt64) -> Unit = _
+  fn write_var_int(Self, Int64) -> Unit = _
+  fn write_var_signed(Self, (Int64, Bool)) -> Unit = _
+  fn write_buf(Self, Bytes) -> Unit = _
+  fn write_string(Self, String) -> Unit = _
 }

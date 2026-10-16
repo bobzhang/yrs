@@ -520,3 +520,11 @@ MoonBit and Rust executables used throughout the matrix. Both backends pass all
 ten cases. The previous largest GC-enabled measurements were 168.15 seconds
 (native) and 481.76 seconds (JavaScript); these are separate whole-process runs,
 not controlled speedup estimates. The remaining gap versus Rust is substantial.
+
+`Read` and `Write` provide lib0 stream defaults over application-defined byte
+input/output. `Cursor(bytes)` and `ByteWriter()` are ready-to-use implementations.
+The methods distinguish fixed-width integers from variable integers, preserve
+negative zero through `(value, negative)` signed pairs, and reject truncated or
+overflowing input. `validation/streams.py` checks 10,480 fields against Rust,
+2,032 cross-decoding cases and 10,723 truncated inputs. The port corrects Rust's
+minimum-i64 variable-encoding overflow; both decoders accept the lossless bytes.

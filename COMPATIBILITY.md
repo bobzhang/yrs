@@ -53,8 +53,11 @@ This root inventory is **not a complete public-module audit**. Rust also exposes
 
 - `sync`: awareness, message codecs, `Protocol`, `AsyncProtocol`, and
   `DefaultProtocol` are available. Transport and scheduling are host concerns.
-- `updates` / `encoding`: public v1/v2 utilities and codecs are available, but
-  Rust's extensible encoder/decoder traits and low-level stream objects are not.
+- `updates` / `encoding`: public v1/v2 utilities and codecs are available;
+  open `Read` / `Write` stream traits, `Cursor`, and `ByteWriter` now support
+  application-defined byte streams. Rust's update-specific extensible encoder/decoder
+  traits remain unimplemented. Varint signedness and width are expressed explicitly
+  with 64-bit methods; Rust's generic integer trait and u128 are not exposed.
 - `block` / `branch` / `iter` / `atomic`: raw pointers, mutation internals,
   transaction-bound iterators and atomic storage are not ported as public APIs.
 - Value deserialization: `FromAny` / `from_any` expose a direct typed adapter;

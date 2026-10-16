@@ -1,0 +1,18 @@
+{
+  "upstream": "ac339600c712642e556895426113c3f9c117de39",
+  "exact_cases": 2032,
+  "encoded_fields": 10480,
+  "cross_decode_with_trailing_byte": 2032,
+  "truncated_inputs": 10723,
+  "reference_min_i64_encoder_defects": 2,
+  "checks": [
+    "fixed integer endian order",
+    "full-width varints",
+    "negative zero",
+    "float bit patterns",
+    "UTF-8 including BOM and astral characters",
+    "byte arrays",
+    "cursor positions"
+  ],
+  "status": "passed with explicit reference minimum signed integer encoder exception"
+}
