@@ -62,7 +62,7 @@ def provenance():
         ROOT/'validation/traces.py', ROOT/'validation/traces.cjs',
         ROOT/'validation/rust/Cargo.toml', ROOT/'validation/rust/Cargo.lock',
         ROOT/'validation/rust/src/bin/traces.rs'] +
-        [p for package in ['traces', 'traces_native'] for p in (ROOT/'validation'/package).iterdir()
+        [p for package in ['traces', 'traces_core', 'traces_native'] for p in (ROOT/'validation'/package).iterdir()
          if p.suffix in ['.mbt', '.c'] or p.name == 'moon.pkg']
     ))
     digest = hashlib.sha256()
