@@ -44,7 +44,7 @@ fn read_update(reader : Reader) -> (Array[RawItem], IdSet) raise DecodeError {
             let value = reader.string()
             values.push(
               if value == "undefined" {
-                Undefined
+                Any::Undefined
               } else {
                 Any::from_json(
                   @json.parse(value) catch {

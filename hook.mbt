@@ -10,6 +10,13 @@ pub(open) trait SharedRef {
 /// Shared collections that can be created at the document root.
 pub(open) trait RootRef: SharedRef {
   fn get_or_insert_root(Doc, String) -> Self
+  fn type_ref() -> TypeRef
+  fn root(String) -> Root[Self] = _
+}
+
+///|
+impl RootRef with fn root(name) {
+  Root(name)
 }
 
 ///|
@@ -186,6 +193,26 @@ pub impl RootRef for XmlFragment with fn get_or_insert_root(doc, name) {
 }
 
 ///|
+pub impl RootRef for Text with fn type_ref() {
+  Text
+}
+
+///|
+pub impl RootRef for ArrayRef with fn type_ref() {
+  Array
+}
+
+///|
+pub impl RootRef for MapRef with fn type_ref() {
+  Map
+}
+
+///|
+pub impl RootRef for XmlFragment with fn type_ref() {
+  XmlFragment
+}
+
+///|
 pub impl SharedRef for XmlElement with fn from_branch(doc, id) {
   guard id.live_parent(doc) is Some(name) else { return None }
   guard doc.event_kind(name) is Some(SharedXmlElement(tag)) else { return None }
@@ -249,16 +276,16 @@ pub extend XmlElement with SharedRef::{from_branch}
 pub extend WeakRef with SharedRef::{from_branch}
 
 ///|
-pub extend Text with RootRef::{get_or_insert_root}
+pub extend Text with RootRef::{get_or_insert_root, type_ref, root}
 
 ///|
-pub extend ArrayRef with RootRef::{get_or_insert_root}
+pub extend ArrayRef with RootRef::{get_or_insert_root, type_ref, root}
 
 ///|
-pub extend MapRef with RootRef::{get_or_insert_root}
+pub extend MapRef with RootRef::{get_or_insert_root, type_ref, root}
 
 ///|
-pub extend XmlFragment with RootRef::{get_or_insert_root}
+pub extend XmlFragment with RootRef::{get_or_insert_root, type_ref, root}
 
 ///|
 pub impl[S] Eq for Hook[S] with fn equal(self, other) {

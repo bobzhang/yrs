@@ -5,6 +5,36 @@ fn bytes(value : Json) -> Bytes raise {
 }
 
 ///|
+fn type_ref(value : Json) -> @yrs.TypeRef raise {
+  guard value is { "kind": kind, .. } else { abort("type reference") }
+  let kind : Int32 = @json.from_json(kind)
+  match kind {
+    0 => Array
+    1 => Map
+    2 => Text
+    3 => {
+      guard value is { "tag": String(tag), .. } else { abort("tag") }
+      XmlElement(tag)
+    }
+    4 => XmlFragment
+    5 => XmlHook
+    6 => XmlText
+    7 => {
+      guard value is { "start": start, "end": end, .. } else { abort("link") }
+      WeakLink(
+        @yrs.LinkSource(
+          @yrs.StickyIndex::from_json(start),
+          @yrs.StickyIndex::from_json(end),
+        ),
+      )
+    }
+    9 => SubDoc
+    15 => Undefined
+    _ => abort("kind")
+  }
+}
+
+///|
 fn encode(ops : Array[Json], encoder : &@yrs.Encoder) -> Unit raise {
   for op in ops {
     guard op is Array([String(kind), value]) else { abort("operation") }
@@ -23,6 +53,7 @@ fn encode(ops : Array[Json], encoder : &@yrs.Encoder) -> Unit raise {
         }
       }
       "client" => encoder.write_client(@json.from_json(value))
+      "typevalue" => type_ref(value).encode(encoder)
       "string" | "key" => {
         guard value is String(s) else { abort("string") }
         if kind == "key" {
@@ -64,7 +95,7 @@ fn encode(ops : Array[Json], encoder : &@yrs.Encoder) -> Unit raise {
 fn decode(ops : Array[Json], decoder : &@yrs.Decoder) -> Json raise {
   let values = []
   for op in ops {
-    guard op is Array([String(kind), _]) else { abort("operation") }
+    guard op is Array([String(kind), expected]) else { abort("operation") }
     let value : Json = match kind {
       "reset" => {
         decoder.reset_ds_cur_val()
@@ -79,6 +110,13 @@ fn decode(ops : Array[Json], decoder : &@yrs.Decoder) -> Json raise {
         [Json(id.client.to_string()), Json(id.clock)]
       }
       "client" => Json(decoder.read_client().to_string())
+      "typevalue" => {
+        let actual = @yrs.TypeRef::decode(decoder)
+        {
+          "kind": Json(actual.kind().to_int()),
+          "equal": Json(actual == type_ref(expected)),
+        }
+      }
       "string" => Json(@yrs.Read::read_string(decoder))
       "key" => Json(decoder.read_key())
       "parent" => Json(decoder.read_parent_info())

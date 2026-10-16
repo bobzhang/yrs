@@ -206,6 +206,12 @@ insert/delete/retain operations, including attributed text and shared-type
 embeds, in a single transaction. The mixed-offset Rust matrix includes these
 delta edits and checks observer output as well as rendered text and clocks.
 
+`TypeRef` exposes shared-type metadata with composable v1/v2 encoding. It covers
+collection kinds, XML names, weak-link boundaries and legacy descriptors.
+`Out::type_ref` inspects a value; `T::type_ref()` and `T::root(name)` work for
+generic `T : RootRef` code. `python3 validation/type_refs.py` checks exact bytes,
+cross-runtime decoding and truncated inputs against Rust.
+
 
 `python3 validation/undo_mixed.py` tests live networks with both Rust and MoonBit
 editing owners. Every replica has a mirror in the other runtime that receives

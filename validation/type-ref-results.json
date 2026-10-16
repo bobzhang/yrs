@@ -1,0 +1,22 @@
+{
+  "upstream": "ac339600c712642e556895426113c3f9c117de39",
+  "descriptors": 1213,
+  "wire_versions": [
+    1,
+    2
+  ],
+  "composed_streams": 60,
+  "cross_runtime_streams": 120,
+  "truncated_v1_inputs_per_runtime": 14241,
+  "exact_bytes_equal": true,
+  "checks": [
+    "all type tags",
+    "Unicode XML names",
+    "single and ranged weak links",
+    "root/nested unbounded endpoints",
+    "both associations",
+    "client/clock boundaries",
+    "interleaved compression columns and trailing fields"
+  ],
+  "status": "passed"
+}

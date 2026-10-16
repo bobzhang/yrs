@@ -82,6 +82,10 @@ Rust also exposes
   across shared collections, output values, XML nodes and weak links. Rust's
   associated preliminary types are represented by the `In` enum; application
   types can implement the trait without constructing an `Out` wrapper.
+  Public `TypeRef` descriptors expose every upstream kind, including legacy
+  types and weak-link boundaries, and implement generic v1/v2 codecs. Typed root
+  handles expose `RootRef.type_ref` and `RootRef.root`. The descriptor oracle
+  checks 1,213 values against unchanged Rust with exact byte equality.
 - Errors use MoonBit error types. Stricter malformed-input validation is
   intentional; Rust panic behavior is not a compatibility target.
 
