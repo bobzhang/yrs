@@ -5,11 +5,13 @@ pub fn Doc::encode_diff_v1(self : Doc, remote : StateVector) -> Bytes {
 }
 
 ///|
+// Keep the public fallible signature for source compatibility.
+#warnings("-unused_error_type")
 pub fn Doc::encode_diff_v2(
   self : Doc,
   remote : StateVector,
 ) -> Bytes raise DecodeError {
-  convert_update_v1_to_v2(self.encode_diff_v1(remote), max_items=0x7fff_ffff)
+  self.encode_document(remote, false, v2=true)
 }
 
 ///|
@@ -28,12 +30,7 @@ pub fn Doc::prune_pending(self : Doc) -> Update? {
     if self.pending.is_empty() && pending_deletions.is_empty() {
       return None
     }
-    let result = try! Update::decode_v1(
-      encode_raw_update(
-        self.pending[:].to_owned(),
-        Snapshot(deletions=pending_deletions.ranges()).deletes,
-      ),
-    )
+    let result = Update::from_blocks(self.pending, pending_deletions)
     self.pending.clear()
     let retained = IdSet(ranges=all_deletions).intersect(known)
     self.deletes.clear()
@@ -84,7 +81,7 @@ pub fn Doc::pending_update(self : Doc) -> Update? {
   if self.pending.is_empty() {
     return None
   }
-  Some(try! Update::decode_v1(encode_raw_update(self.pending, Map([]))))
+  Some(Update::from_blocks(self.pending, IdSet()))
 }
 
 ///|

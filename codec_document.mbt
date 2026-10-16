@@ -8,7 +8,7 @@ pub fn Doc::encode_diff(
   encoder : &Encoder,
 ) -> Unit {
   try! copy_update_fields(
-    DecoderV1(self.encode_diff_v1(remote)),
+    DecoderV2(self.encode_diff_v2(remote)),
     encoder,
     0x7fff_ffff,
   )
@@ -34,7 +34,7 @@ pub fn Doc::encode_state_from_snapshot(
   encoder : &Encoder,
 ) -> Unit raise DecodeError {
   copy_update_fields(
-    DecoderV1(self.encode_state_from_snapshot_v1(snapshot)),
+    DecoderV2(self.encode_state_from_snapshot_v2(snapshot)),
     encoder,
     0x7fff_ffff,
   )
@@ -47,7 +47,7 @@ pub fn Transaction::encode_update(
   encoder : &Encoder,
 ) -> Unit {
   try! copy_update_fields(
-    DecoderV1(self.encode_update_v1()),
+    DecoderV2(self.encode_update_v2()),
     encoder,
     0x7fff_ffff,
   )

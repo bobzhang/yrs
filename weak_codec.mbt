@@ -61,20 +61,3 @@ fn LinkSource::read(reader : UpdateReader) -> LinkSource raise DecodeError {
     StickyIndex(scope=end, assoc=if (flags & 4) != 0 { After } else { Before }),
   )
 }
-
-///|
-fn Reader::weak_link(self : Reader) -> LinkSource raise DecodeError {
-  LinkSource::read({
-    raw: self,
-    columns: [],
-    text: "",
-    text_offset: 0,
-    keys: [],
-    budget: 1000000,
-  })
-}
-
-///|
-fn Writer::weak_link(self : Writer, source : LinkSource) -> Unit {
-  source.write({ raw: self, v2: false, columns: [], strings: [], })
-}

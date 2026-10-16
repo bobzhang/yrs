@@ -29,7 +29,12 @@ pub fn Update::decode_v2(
   bytes : Bytes,
   max_items~ : Int32 = 1000000,
 ) -> Update raise DecodeError {
-  Update::decode_v1(convert_update_v2_to_v1(bytes, max_items~))
+  let (blocks, deleted, has_blocks) = read_update_fields(
+    UpdateReader::make(bytes, true, max_items),
+  )
+  let result = Update::from_blocks(blocks, deleted)
+  result.has_blocks = has_blocks
+  result
 }
 
 ///|
@@ -38,8 +43,10 @@ pub fn Update::encode_v1(self : Update) -> Bytes {
 }
 
 ///|
+// Keep the public fallible signature for source compatibility.
+#warnings("-unused_error_type")
 pub fn Update::encode_v2(self : Update) -> Bytes raise DecodeError {
-  convert_update_v1_to_v2(self.wire, max_items=0x7fff_ffff)
+  encode_raw_update(self.blocks, self.deleted.deletion_map(), v2=true)
 }
 
 ///|
@@ -114,6 +121,15 @@ pub fn Update::merge(self : Update, other : Update) -> Unit {
 
 ///|
 pub fn Update::encode_diff_v1(self : Update, state : StateVector) -> Bytes {
+  self.encode_diff_wire(state, false)
+}
+
+///|
+fn Update::encode_diff_wire(
+  self : Update,
+  state : StateVector,
+  v2 : Bool,
+) -> Bytes {
   let blocks = self.blocks.filter_map(fn(item) {
     let known = state.get(item.id.client)
     if item.id.clock + item.content.length().reinterpret_as_uint() > known {
@@ -122,18 +138,34 @@ pub fn Update::encode_diff_v1(self : Update, state : StateVector) -> Bytes {
       None
     }
   })
-  encode_raw_update(blocks, self.deleted.deletion_map())
+  encode_raw_update(blocks, self.deleted.deletion_map(), v2~)
 }
 
 ///|
+// Keep the public fallible signature for source compatibility.
+#warnings("-unused_error_type")
 pub fn Update::encode_diff_v2(
   self : Update,
   state : StateVector,
 ) -> Bytes raise DecodeError {
-  convert_update_v1_to_v2(self.encode_diff_v1(state), max_items=0x7fff_ffff)
+  self.encode_diff_wire(state, true)
 }
 
 ///|
+// Keep the public fallible signature for source compatibility.
+#warnings("-unused_error_type")
 pub fn Doc::apply_update(self : Doc, update : Update) -> Unit raise DecodeError {
-  self.apply_update_v1(update.encode_v1())
+  self.apply_raw_update(update.blocks, update.deleted)
+}
+
+///|
+fn Update::from_blocks(blocks : Array[RawItem], deleted : IdSet) -> Update {
+  let blocks = normalize_items(blocks.map(RawItem::owned_update_item))
+  let deleted = deleted.copy()
+  {
+    wire: encode_raw_update(blocks, deleted.deletion_map()),
+    blocks,
+    deleted,
+    has_blocks: !blocks.is_empty(),
+  }
 }

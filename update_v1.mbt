@@ -1,142 +1,14 @@
 ///|
 fn read_update(reader : Reader) -> (Array[RawItem], IdSet) raise DecodeError {
-  let items = []
-  let clients = reader.count()
-  for _ in 0..<clients {
-    let count = reader.count()
-    let client = reader.uint()
-    let mut clock = reader.clock()
-    for _ in 0..<count {
-      let info = reader.byte()
-      let origin = if (info & 128) != 0 { Some(reader.id()) } else { None }
-      let right_origin = if (info & 64) != 0 { Some(reader.id()) } else { None }
-      let kind = info & 31
-      if kind == 10 {
-        let length = reader.clock()
-        guard clock.to_uint64() + length.to_uint64() <= 0xffff_ffffUL else {
-          raise InvalidData("clock overflow")
-        }
-        clock += length
-        continue
-      }
-      let parent : Parent? = if kind != 0 &&
-        kind != 10 &&
-        origin is None &&
-        right_origin is None {
-        match reader.uint() {
-          1UL => Some(Root(reader.string()))
-          0UL => Some(Nested(reader.id()))
-          _ => raise InvalidData("invalid parent discriminator")
-        }
-      } else {
-        None
-      }
-      let parent_sub = if parent is Some(_) && (info & 32) != 0 {
-        Some(reader.string())
-      } else {
-        None
-      }
-      // Deleted runs carry no per-clock payload. Keep each internal block within
-      // signed indexing bounds while accepting the full unsigned wire range.
-      if kind == 0 || kind == 1 {
-        let length = reader.clock()
-        guard clock.to_uint64() + length.to_uint64() <= 0xffff_ffffUL else {
-          raise InvalidData("clock overflow")
-        }
-        let end = clock + length
-        let mut left = origin
-        while clock < end {
-          let count = (end - clock).min(0x7fff_ffffU)
-          items.push({
-            id: { client, clock, },
-            origin: if kind == 0 {
-              None
-            } else {
-              left
-            },
-            right_origin,
-            parent,
-            parent_sub,
-            content: if kind == 0 {
-              Garbage(count.reinterpret_as_int())
-            } else {
-              Deleted(count.reinterpret_as_int())
-            },
-          })
-          clock += count
-          left = Some({ client, clock: clock - 1U, })
-        }
-        continue
-      }
-      let content = match kind {
-        2 => {
-          let values = []
-          let count = reader.count()
-          for _ in 0..<count {
-            let value = reader.string()
-            values.push(
-              if value == "undefined" {
-                Any::Undefined
-              } else {
-                Any::from_json(
-                  @json.parse(value) catch {
-                    _ => raise InvalidData("invalid legacy JSON")
-                  },
-                )
-              },
-            )
-          }
-          LegacyJson(ReadOnlyArray::from_array(values[:]))
-        }
-        9 => Subdocument(reader.subdocument())
-        5 => Embed(reader.json_value())
-        6 => Format(reader.string(), reader.json_value())
-        7 =>
-          Shared(
-            match reader.byte() {
-              0 => SharedArray
-              1 => SharedMap
-              2 => SharedText
-              3 => SharedXmlElement(reader.string())
-              4 => SharedXmlFragment
-              6 => SharedXmlText
-              7 => SharedWeak(reader.weak_link())
-              5 | 9 | 15 as reference => SharedOpaque(reference)
-              _ => raise InvalidData("unsupported shared type")
-            },
-          )
-        3 => Binary(reader.buffer())
-        8 => {
-          let values = []
-          let count = reader.count()
-          for _ in 0..<count {
-            values.push(reader.any())
-          }
-          Values(ReadOnlyArray::from_array(values[:]))
-        }
-        4 => Characters(reader.string())
-        _ => raise InvalidData("unsupported item content")
-      }
-      let length = content.length()
-      guard clock.to_uint64() + length.to_uint64() <= 0xffff_ffffUL else {
-        raise InvalidData("clock overflow")
-      }
-      if length > 0 && kind != 10 {
-        items.push({
-          id: { client, clock, },
-          origin,
-          right_origin,
-          parent,
-          parent_sub,
-          content,
-        })
-      }
-      clock += length.reinterpret_as_uint()
-    }
-  }
-  let deletions = IdSet::read(reader, false)
-  reader.finish()
-  (items, deletions)
+  let (items, deleted, _) = read_update_fields({
+    raw: reader,
+    columns: [],
+    text: "",
+    text_offset: 0,
+    keys: [],
+    budget: 0x7fff_ffff,
+  })
+  (items, deleted)
 }
 
 ///|
@@ -147,6 +19,15 @@ pub fn Doc::apply_update_v1(
   bytes : Bytes,
 ) -> Unit raise DecodeError {
   let (items, deletions) = read_update({ bytes, offset: 0, })
+  self.apply_raw_update(items, deletions)
+}
+
+///|
+fn Doc::apply_raw_update(
+  self : Doc,
+  items : Array[RawItem],
+  deletions : IdSet,
+) -> Unit {
   let deletions = deletions.ranges()
   self.with_mutation(fn() {
     self.active_transaction.unwrap().is_local = false
@@ -154,7 +35,7 @@ pub fn Doc::apply_update_v1(
     let retained = self.pending[:].to_owned()
     self.pending.clear()
     for raw in items {
-      self.pending.push(raw)
+      self.pending.push(raw.owned_update_item())
     }
     for (client, start, end) in deletions {
       self.add_delete(client, start, end)
@@ -180,6 +61,7 @@ fn Doc::encode_document(
   self : Doc,
   remote : StateVector,
   include_pending : Bool,
+  v2~ : Bool = false,
 ) -> Bytes {
   let items = []
   for client, blocks in self.clients {
@@ -213,11 +95,12 @@ fn Doc::encode_document(
     } else {
       self.integrated_delete_set().deletion_map()
     },
+    v2~,
   )
 }
 
 ///|
-fn Writer::raw_item(self : Writer, item : RawItem) -> Unit {
+fn UpdateWriter::raw_item(self : UpdateWriter, item : RawItem) -> Unit {
   let content = item.content
   let origin = item.origin
   let kind = match content {
@@ -240,23 +123,26 @@ fn Writer::raw_item(self : Writer, item : RawItem) -> Unit {
     (if item.right_origin is Some(_) { 64 } else { 0 }) |
     (if item.parent_sub is Some(_) { 32 } else { 0 })
   }
-  self.byte(info)
+  self.field(4, info.to_uint64())
   if kind != 0 {
     if origin is Some(id) {
-      self.id(id)
+      self.field(1, id.client)
+      self.field(2, id.clock.to_uint64())
     }
     if item.right_origin is Some(id) {
-      self.id(id)
+      self.field(1, id.client)
+      self.field(3, id.clock.to_uint64())
     }
     if origin is None && item.right_origin is None {
       match item.parent.unwrap() {
         Root(name) => {
-          self.uint(1UL)
+          self.field(6, 1UL)
           self.string(name)
         }
         Nested(id) => {
-          self.uint(0UL)
-          self.id(id)
+          self.field(6, 0UL)
+          self.field(1, id.client)
+          self.field(2, id.clock.to_uint64())
         }
       }
       if item.parent_sub is Some(key) {
@@ -267,34 +153,36 @@ fn Writer::raw_item(self : Writer, item : RawItem) -> Unit {
   match content {
     Subdocument(child) => {
       self.string(child.guid())
-      self.any(child.wire_options())
+      self.raw.any(
+        child.decoded_options.unwrap_or_else(fn() { child.wire_options() }),
+      )
     }
     Characters(s) => self.string(s)
-    Binary(b) => self.buffer(b)
+    Binary(b) => self.raw.buffer(b)
     Format(key, value) => {
-      self.string(key)
-      self.string(value.to_json().stringify())
+      self.key(key)
+      self.json(value)
     }
-    Embed(value) => self.string(value.to_json().stringify())
+    Embed(value) => self.json(value)
     Shared(kind) =>
       match kind {
-        SharedArray => self.byte(0)
-        SharedMap => self.byte(1)
-        SharedText => self.byte(2)
+        SharedArray => self.field(7, 0UL)
+        SharedMap => self.field(7, 1UL)
+        SharedText => self.field(7, 2UL)
         SharedXmlElement(tag) => {
-          self.byte(3)
-          self.string(tag)
+          self.field(7, 3UL)
+          self.key(tag)
         }
-        SharedXmlFragment => self.byte(4)
-        SharedXmlText => self.byte(6)
+        SharedXmlFragment => self.field(7, 4UL)
+        SharedXmlText => self.field(7, 6UL)
         SharedWeak(link) => {
-          self.byte(7)
-          self.weak_link(link)
+          self.field(7, 7UL)
+          link.write(self)
         }
-        SharedOpaque(reference) => self.byte(reference)
+        SharedOpaque(reference) => self.field(7, reference.to_uint64())
       }
     LegacyJson(values) => {
-      self.uint(values.length().to_uint64())
+      self.field(8, values.length().to_uint64())
       for value in values {
         self.string(
           if value is Undefined {
@@ -306,19 +194,11 @@ fn Writer::raw_item(self : Writer, item : RawItem) -> Unit {
       }
     }
     Values(values) => {
-      self.uint(values.length().to_uint64())
+      self.field(8, values.length().to_uint64())
       for value in values {
-        self.any(value)
+        self.raw.any(value)
       }
     }
-    Deleted(n) | Garbage(n) => self.uint(n.to_uint64())
+    Deleted(n) | Garbage(n) => self.field(8, n.to_uint64())
   }
-}
-
-///|
-fn Reader::json_value(self : Reader) -> Any raise DecodeError {
-  let value = @json.parse(self.string()) catch {
-    _ => raise InvalidData("invalid embedded JSON")
-  }
-  Any::from_json(value)
 }

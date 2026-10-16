@@ -385,16 +385,18 @@ pub fn Doc::apply_update_v2(
   bytes : Bytes,
   max_items~ : Int32 = 1000000,
 ) -> Unit raise DecodeError {
-  self.apply_update_v1(convert_update_v2_to_v1(bytes, max_items~))
+  let (items, deleted, _) = read_update_fields(
+    UpdateReader::make(bytes, true, max_items),
+  )
+  self.apply_raw_update(items, deleted)
 }
 
 ///|
+// Keep the public fallible signature for source compatibility.
+#warnings("-unused_error_type")
 pub fn Doc::encode_state_as_update_v2(
   self : Doc,
   remote~ : StateVector = StateVector(),
 ) -> Bytes raise DecodeError {
-  convert_update_v1_to_v2(
-    self.encode_state_as_update_v1(remote~),
-    max_items=0x7fff_ffff,
-  )
+  self.encode_document(remote, true, v2=true)
 }

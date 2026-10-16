@@ -84,9 +84,7 @@ fn Doc::wire_options(self : Doc) -> Any {
 }
 
 ///|
-fn Reader::subdocument(self : Reader) -> Doc raise DecodeError {
-  let guid = self.string()
-  let options = self.any()
+fn decode_subdocument(guid : String, options : Any) -> Doc {
   let mut gc = true
   let mut encoding = 1
   let mut auto_load = false
@@ -105,7 +103,7 @@ fn Reader::subdocument(self : Reader) -> Doc raise DecodeError {
   }
   // Like Yrs, receiving shouldLoad does not request a load. autoLoad does.
   // The parent assigns its client ID at commit, before providers can edit it.
-  make_doc(
+  let child = make_doc(
     0UL,
     guid,
     collection,
@@ -115,6 +113,8 @@ fn Reader::subdocument(self : Reader) -> Doc raise DecodeError {
     encoding,
     cleanup_enabled=false,
   )
+  child.decoded_options = Some(options)
+  child
 }
 
 ///|

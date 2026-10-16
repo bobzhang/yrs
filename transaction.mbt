@@ -21,6 +21,7 @@ pub struct Transaction {
   priv map_changes : Map[Parent, Map[String, (Id?, Out?)]]
   priv removed : Array[(UInt64, UInt32, UInt32)]
   priv mut encoded : Bytes?
+  priv mut encoded_v2 : Bytes?
   priv mut closed : Bool
 }
 
@@ -90,7 +91,12 @@ pub fn Transaction::deletions(
 
 ///|
 pub fn Transaction::encode_update_v1(self : Transaction) -> Bytes {
-  if self.encoded is Some(bytes) {
+  self.encode_update_wire(false)
+}
+
+///|
+fn Transaction::encode_update_wire(self : Transaction, v2 : Bool) -> Bytes {
+  if (if v2 { self.encoded_v2 } else { self.encoded }) is Some(bytes) {
     return bytes
   }
   let before = self.before_state()
@@ -112,14 +118,16 @@ pub fn Transaction::encode_update_v1(self : Transaction) -> Bytes {
       )
     }
   }
-  encode_raw_update(items, Snapshot(deletions=self.removed).deletes)
+  encode_raw_update(items, Snapshot(deletions=self.removed).deletes, v2~)
 }
 
 ///|
+// Keep the public fallible signature for source compatibility.
+#warnings("-unused_error_type")
 pub fn Transaction::encode_update_v2(
   self : Transaction,
 ) -> Bytes raise DecodeError {
-  convert_update_v1_to_v2(self.encode_update_v1(), max_items=0x7fff_ffff)
+  self.encode_update_wire(true)
 }
 
 ///|
@@ -151,6 +159,7 @@ fn Doc::begin_transaction(
     map_changes: {},
     removed: [],
     encoded: None,
+    encoded_v2: None,
     closed: false,
   }
   self.active_transaction = Some(transaction)
@@ -188,6 +197,7 @@ fn Doc::commit_transaction(self : Doc, transaction : Transaction) -> Unit {
     transaction.before_state() |> ignore
     transaction.after_state() |> ignore
     transaction.encoded = Some(transaction.encode_update_v1())
+    transaction.encoded_v2 = Some(try! transaction.encode_update_v2())
   }
   transaction.closed = true
   self.notifying_transaction = true

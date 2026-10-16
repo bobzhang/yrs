@@ -157,15 +157,15 @@ fn copy_link_fields(
 
 ///|
 pub impl Encode for Update with fn encode(self, encoder) {
-  // Updates own already-validated v1 bytes. No external input is parsed here.
-  try! copy_update_fields(DecoderV1(self.wire), encoder, 0x7fff_ffff)
+  // The typed v2 representation avoids a lossy JSON projection for rich text.
+  try! copy_update_fields(DecoderV2(self.encode_v2()), encoder, 0x7fff_ffff)
 }
 
 ///|
 pub impl Decode for Update with fn decode(decoder) {
-  let encoder = EncoderV1()
+  let encoder = EncoderV2()
   copy_update_fields(decoder, encoder, 1000000)
-  Update::decode_v1(encoder.to_bytes())
+  Update::decode_v2(encoder.to_bytes())
 }
 
 ///|

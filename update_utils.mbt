@@ -47,6 +47,7 @@ fn normalize_items(items : Array[RawItem]) -> Array[RawItem] {
 fn encode_raw_update(
   items : Array[RawItem],
   deletes : Map[UInt64, Array[(UInt32, UInt32)]],
+  v2~ : Bool = false,
 ) -> Bytes {
   let groups : Map[UInt64, Array[RawItem]] = Map([])
   for item in normalize_items(items) {
@@ -57,8 +58,8 @@ fn encode_raw_update(
   }
   let clients = groups.to_array()
   clients.sort_by(fn(a, b) { b.0.compare(a.0) })
-  let writer : Writer = { bytes: [], }
-  writer.uint(clients.length().to_uint64())
+  let writer = UpdateWriter::make(v2)
+  writer.raw.uint(clients.length().to_uint64())
   for (client, items) in clients {
     let mut count = items.length()
     let mut clock = items[0].id.clock
@@ -68,14 +69,14 @@ fn encode_raw_update(
       }
       clock = item.id.clock + item.content.length().reinterpret_as_uint()
     }
-    writer.uint(count.to_uint64())
-    writer.uint(client)
+    writer.raw.uint(count.to_uint64())
+    writer.field(1, client)
     clock = items[0].id.clock
-    writer.uint(clock.to_uint64())
+    writer.raw.uint(clock.to_uint64())
     for item in items {
       if clock < item.id.clock {
-        writer.byte(10)
-        writer.uint((item.id.clock - clock).to_uint64())
+        writer.field(4, 10UL)
+        writer.raw.uint((item.id.clock - clock).to_uint64())
       }
       writer.raw_item(item)
       clock = item.id.clock + item.content.length().reinterpret_as_uint()
@@ -83,16 +84,18 @@ fn encode_raw_update(
   }
   let clients = deletes.to_array()
   clients.sort_by(fn(a, b) { b.0.compare(a.0) })
-  writer.uint(clients.length().to_uint64())
+  writer.raw.uint(clients.length().to_uint64())
   for (client, ranges) in clients {
-    writer.uint(client)
-    writer.uint(ranges.length().to_uint64())
+    writer.raw.uint(client)
+    writer.raw.uint(ranges.length().to_uint64())
+    let mut previous = 0U
     for (start, end) in ranges {
-      writer.uint(start.to_uint64())
-      writer.uint((end - start).to_uint64())
+      writer.raw.uint((start - (if v2 { previous } else { 0U })).to_uint64())
+      writer.raw.uint((end - start - (if v2 { 1U } else { 0U })).to_uint64())
+      previous = end
     }
   }
-  writer.finish()
+  try! writer.finish()
 }
 
 ///|
@@ -149,11 +152,11 @@ pub fn encode_state_vector_from_update_v1(
 
 ///|
 pub fn merge_updates_v2(updates : Array[Bytes]) -> Bytes raise DecodeError {
-  convert_update_v1_to_v2(
-    merge_updates_v1(
-      updates.map(fn(bytes) raise DecodeError { convert_update_v2_to_v1(bytes) }),
-    ),
-  )
+  let result : Update = Update()
+  for bytes in updates {
+    result.merge(Update::decode_v2(bytes))
+  }
+  result.encode_v2()
 }
 
 ///|
@@ -161,14 +164,31 @@ pub fn diff_updates_v2(
   update : Bytes,
   state_vector : Bytes,
 ) -> Bytes raise DecodeError {
-  convert_update_v1_to_v2(
-    diff_updates_v1(convert_update_v2_to_v1(update), state_vector),
-  )
+  Update::decode_v2(update).encode_diff_v2(StateVector::decode_v1(state_vector))
 }
 
 ///|
 pub fn encode_state_vector_from_update_v2(
   update : Bytes,
 ) -> Bytes raise DecodeError {
-  encode_state_vector_from_update_v1(convert_update_v2_to_v1(update))
+  Update::decode_v2(update).state_vector().encode_v1()
+}
+
+///|
+// Decoded updates and pending-store snapshots own subdocument descriptors.
+// Integrating an update into one replica must not attach another replica's Doc.
+fn RawItem::owned_update_item(self : RawItem) -> RawItem {
+  match self.content {
+    Subdocument(child) =>
+      {
+        ..self,
+        content: Subdocument(
+          decode_subdocument(
+            child.guid(),
+            child.decoded_options.unwrap_or_else(fn() { child.wire_options() }),
+          ),
+        ),
+      }
+    _ => self
+  }
 }

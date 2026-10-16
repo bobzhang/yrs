@@ -170,6 +170,15 @@ pub fn Doc::encode_state_from_snapshot_v1(
   self : Doc,
   snapshot : Snapshot,
 ) -> Bytes raise DecodeError {
+  self.encode_snapshot(snapshot, false)
+}
+
+///|
+fn Doc::encode_snapshot(
+  self : Doc,
+  snapshot : Snapshot,
+  v2 : Bool,
+) -> Bytes raise DecodeError {
   guard self.skip_gc() else {
     raise InvalidData("snapshot encoding requires skip_gc=true")
   }
@@ -198,7 +207,7 @@ pub fn Doc::encode_state_from_snapshot_v1(
       )
     }
   }
-  encode_raw_update(items, snapshot.deletes)
+  encode_raw_update(items, snapshot.deletes, v2~)
 }
 
 ///|
@@ -206,8 +215,5 @@ pub fn Doc::encode_state_from_snapshot_v2(
   self : Doc,
   snapshot : Snapshot,
 ) -> Bytes raise DecodeError {
-  convert_update_v1_to_v2(
-    self.encode_state_from_snapshot_v1(snapshot),
-    max_items=0x7fff_ffff,
-  )
+  self.encode_snapshot(snapshot, true)
 }

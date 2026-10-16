@@ -126,6 +126,8 @@ priv struct Branch {
 /// A document replica. Each independently edited replica must use a distinct
 /// client ID. This initial API uses Yjs UTF-16 positions and retains tombstones.
 pub struct Doc {
+  // Original subdocument options exist only while this content is unintegrated.
+  priv mut decoded_options : Any?
   priv pending_weak : Set[Id]
   priv weak_observers : Map[
     Parent,
@@ -245,6 +247,7 @@ fn make_doc(
     update_v2_observers: Observer(),
     client,
     document_guid: guid,
+    decoded_options: None,
     collection,
     auto_loading: auto_load,
     loading: should_load,
@@ -608,6 +611,7 @@ fn Doc::integrate_missing(self : Doc, raw : RawItem) -> Bool {
     None => self.clients[item.id.client] = [item]
   }
   if item.content is Subdocument(child) {
+    child.decoded_options = None
     child.owner = Some((self, item.id))
     if self.active_transaction is Some(txn) {
       txn.sub_changed = true
