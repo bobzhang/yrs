@@ -76,15 +76,20 @@ pub fn ArrayEvent::target(Self) -> ArrayRef
 pub struct ArrayRef {
   // private fields
 }
+pub fn ArrayRef::get(Self, Int) -> Out?
 pub fn ArrayRef::insert(Self, Int, In) -> Out
 pub fn ArrayRef::insert_array(Self, Int) -> Self
 pub fn ArrayRef::insert_doc(Self, Int, Doc) -> Doc
 pub fn ArrayRef::insert_map(Self, Int) -> MapRef
 pub fn ArrayRef::insert_range(Self, Int, Array[Any]) -> Unit
 pub fn ArrayRef::insert_text(Self, Int) -> Text
+pub fn ArrayRef::iter(Self) -> Iter[Out]
 pub fn ArrayRef::length(Self) -> Int
 pub fn ArrayRef::observe(Self, String, (ArrayEvent, Transaction) -> Unit) -> Unit
 pub fn ArrayRef::observe_deep(Self, String, (ReadOnlyArray[Event], Transaction) -> Unit) -> Unit
+pub fn ArrayRef::push_back(Self, In) -> Out
+pub fn ArrayRef::push_front(Self, In) -> Out
+pub fn ArrayRef::remove(Self, Int) -> Unit
 pub fn ArrayRef::remove_range(Self, Int, Int) -> Unit
 pub fn ArrayRef::sticky_boundary(Self, assoc? : Assoc) -> StickyIndex
 pub fn ArrayRef::sticky_index(Self, Int, assoc? : Assoc) -> StickyIndex?
@@ -322,20 +327,31 @@ pub fn MapEvent::to_json(Self) -> Json
 pub struct MapRef {
   // private fields
 }
+pub fn MapRef::clear(Self) -> Unit
+pub fn MapRef::contains_key(Self, String) -> Bool
 pub fn MapRef::entries(Self) -> Array[(String, Out)]
 pub fn MapRef::get(Self, String) -> Out?
+pub fn MapRef::get_or_init_array(Self, String) -> ArrayRef
+pub fn MapRef::get_or_init_map(Self, String) -> Self
+pub fn MapRef::get_or_init_text(Self, String) -> Text
 pub fn MapRef::insert(Self, String, Any) -> Unit
 pub fn MapRef::insert_array(Self, String) -> ArrayRef
 pub fn MapRef::insert_doc(Self, String, Doc) -> Doc
 pub fn MapRef::insert_input(Self, String, In) -> Out
 pub fn MapRef::insert_map(Self, String) -> Self
 pub fn MapRef::insert_text(Self, String) -> Text
+pub fn MapRef::iter(Self) -> Iter[(String, Out)]
+pub fn MapRef::keys(Self) -> Iter[String]
+pub fn MapRef::length(Self) -> Int
 pub fn MapRef::observe(Self, String, (MapEvent, Transaction) -> Unit) -> Unit
 pub fn MapRef::observe_deep(Self, String, (ReadOnlyArray[Event], Transaction) -> Unit) -> Unit
 pub fn MapRef::remove(Self, String) -> Unit
+pub fn MapRef::remove_entry(Self, String) -> Out?
 pub fn MapRef::to_json(Self) -> Json
+pub fn MapRef::try_update(Self, String, Any) -> Bool
 pub fn MapRef::unobserve(Self, String) -> Bool
 pub fn MapRef::unobserve_deep(Self, String) -> Bool
+pub fn MapRef::values(Self) -> Iter[Out]
 
 pub(all) enum Message {
   Sync(SyncMessage)
@@ -598,8 +614,11 @@ pub struct XmlFragment {
 pub fn XmlFragment::as_map(Self) -> MapRef
 pub fn XmlFragment::attributes(Self) -> Array[(String, Out)]
 pub fn XmlFragment::children(Self) -> Array[XmlNode]
+pub fn XmlFragment::first_child(Self) -> XmlNode?
+pub fn XmlFragment::get(Self, Int) -> XmlNode?
 pub fn XmlFragment::get_attribute(Self, String) -> Out?
 pub fn XmlFragment::get_string(Self) -> String
+pub fn XmlFragment::insert(Self, Int, In) -> XmlNode
 pub fn XmlFragment::insert_attribute(Self, String, Any) -> Unit
 pub fn XmlFragment::insert_element(Self, Int, String) -> XmlElement
 pub fn XmlFragment::insert_fragment(Self, Int) -> Self
@@ -608,10 +627,14 @@ pub fn XmlFragment::length(Self) -> Int
 pub fn XmlFragment::observe(Self, String, (XmlEvent, Transaction) -> Unit) -> Unit
 pub fn XmlFragment::observe_deep(Self, String, (ReadOnlyArray[Event], Transaction) -> Unit) -> Unit
 pub fn XmlFragment::parent(Self) -> XmlNode?
+pub fn XmlFragment::push_back(Self, In) -> XmlNode
+pub fn XmlFragment::push_front(Self, In) -> XmlNode
+pub fn XmlFragment::remove(Self, Int) -> Unit
 pub fn XmlFragment::remove_attribute(Self, String) -> Unit
 pub fn XmlFragment::remove_range(Self, Int, Int) -> Unit
 pub fn XmlFragment::sticky_boundary(Self, assoc? : Assoc) -> StickyIndex
 pub fn XmlFragment::sticky_index(Self, Int, assoc? : Assoc) -> StickyIndex?
+pub fn XmlFragment::successors(Self) -> Iter[XmlNode]
 pub fn XmlFragment::unobserve(Self, String) -> Bool
 pub fn XmlFragment::unobserve_deep(Self, String) -> Bool
 
@@ -620,8 +643,14 @@ pub(all) enum XmlNode {
   Fragment(XmlFragment)
   Text(XmlText)
 }
+pub fn XmlNode::as_out(Self) -> Out
+pub fn XmlNode::branch_id(Self) -> BranchId
 pub fn XmlNode::get_string(Self) -> String
+pub fn XmlNode::is_deleted(Self) -> Bool
+pub fn XmlNode::next_sibling(Self) -> Self?
 pub fn XmlNode::parent(Self) -> Self?
+pub fn XmlNode::prev_sibling(Self) -> Self?
+pub fn XmlNode::siblings(Self, backwards? : Bool) -> Iter[Self]
 
 pub struct XmlText {
   // private fields
