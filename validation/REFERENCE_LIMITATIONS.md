@@ -189,7 +189,7 @@ Retained reproductions:
   have this exception across the matrix; these counts are asserted.
 - `fixtures/upstream-weak-split-observers.json`: Rust drops link subscriptions on a
   split item. MoonBit copies those subscriptions to both pieces. Across the matrix,
-  3,746 snapshots have observer differences: MoonBit produces 7,438 additional
+  7,306 snapshots have observer differences: MoonBit produces 14,072 additional
   events and misses zero reference events. Values still agree. Exact observer
   parity is **not established**; every event mismatch is counted, and any missing
   MoonBit event fails the run.
@@ -255,3 +255,17 @@ compares UTF-16 identities and positions exactly with Rust, then checks byte-mod
 identities against those same cursors and byte offsets against independently
 converted Unicode prefixes. All 12,864 snapshots pass those checks. Rust byte-mode
 results differ in 11,016 snapshots; these differences are counted explicitly.
+
+
+`fixtures/upstream-weak-open-end-observers.json` also demonstrates omitted Rust
+notifications when appending to an unbounded quotation or repopulating it after
+all quoted content is deleted. The port retains sequence quotations at their
+branch, attaches newly inserted items by range membership, and retries observation
+setup when an anchor arrives late. This is a deliberate correction to the pinned
+reference, in addition to preserving edges when blocks split.
+
+The separate mixed-runtime weak network suite covers 32 three-author histories
+in both wire formats and GC settings. All 15,360 state/view comparisons converge
+without query exceptions. It records 1,650 observer-difference snapshots (2,282
+additional MoonBit notifications, zero missing reference events). The main weak
+matrix's updated counts above include both split and open-boundary corrections.

@@ -70,7 +70,8 @@ fn report(d: &Doc, v2: bool) -> Value {
             result.insert(key.into(), json!([ids, value]));
         }
     }
-    json!({"text":text.get_string(&txn),"array":array.to_json(&txn),"map":map.to_json(&txn),"links":result,"wire":if v2{txn.encode_state_as_update_v2(&StateVector::default())}else{txn.encode_state_as_update_v1(&StateVector::default())}})
+    let mut state: Vec<_> = txn.state_vector().iter().map(|(c,n)|(c.get(),*n)).collect(); state.sort();
+    json!({"state":state,"text":text.get_string(&txn),"array":array.to_json(&txn),"map":map.to_json(&txn),"links":result,"wire":if v2{txn.encode_state_as_update_v2(&StateVector::default())}else{txn.encode_state_as_update_v1(&StateVector::default())}})
 }
 fn main() {
     let args: Vec<_> = std::env::args().collect();
@@ -80,7 +81,7 @@ fn main() {
     for line in io::stdin().lock().lines() {
         let input: Value = serde_json::from_str(&line.unwrap()).unwrap();
         let d = Doc::with_options(Options {
-            client_id: ClientID::new(1),
+            client_id: ClientID::new(if input[0][0] == "client" { input[0][1].as_u64().unwrap() } else { 1 }),
             offset_kind: OffsetKind::Utf16,
             skip_gc: !gc,
             cleanup_formatting: true,
@@ -94,6 +95,7 @@ fn main() {
         let events = std::sync::Arc::new(std::sync::Mutex::new(Vec::<String>::new()));
         for op in input.as_array().unwrap() {
             match op[0].as_str().unwrap() {
+                "client" => {},
                 "i" => {
                     let mut txn = d.transact_mut();
                     let len = t.len(&txn);

@@ -322,7 +322,7 @@ core document and wire checks; this feature is not yet a claim of full Yrs parit
 `python3 validation/weak.py` records 37,120 weak-link snapshots and 6,656 binary
 imports in v1/v2 with GC enabled and disabled. Document values, identities and
 quotations agree apart from 48 queries where Rust's plain/XML readers contradict
-each other. The same run records 3,746 observer mismatches (7,438 additional
+each other. The same run records 7,306 observer mismatches (14,072 additional
 MoonBit notifications, zero missing reference notifications); it explicitly reports
 partial compatibility. Retained reference-crash fixtures are tested separately.
 See `validation/REFERENCE_LIMITATIONS.md` before relying on exact weak event parity.
@@ -372,3 +372,16 @@ live replicas, packet generation/delivery, restart replicas and result encoding.
 These are single-run stress measurements, not isolated local-edit microbenchmarks;
 other validation work may be running concurrently. The native file-reading shim
 is confined to the validation runner and is not a library dependency.
+
+
+Weak sequence subscriptions now survive unbounded endpoint insertions, an empty
+quoted sequence, and anchors arriving after the weak reference. Deep observation
+also follows children inserted into a previously empty quotation. Map links retain
+the upstream deletion-detachment behavior described in the focused tests.
+`python3 validation/weak_network.py` checks three concurrent editing replicas with
+both Rust and MoonBit authors: 8,192 edits, 11,264 deliveries and 15,360 compared
+snapshots in v1/v2 with GC enabled and disabled. All values, weak boundaries,
+causal clocks and final convergence agree. There are 1,650 observer mismatch
+snapshots with 2,282 additional MoonBit notifications and zero missing Rust events;
+there are no query exceptions in this network matrix. Exact observer parity is
+still intentionally different from the pinned reference's lost subscriptions.

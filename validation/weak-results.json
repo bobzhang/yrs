@@ -15,9 +15,9 @@
     "xml_panics": 0,
     "plain_disagrees_with_xml": 40,
     "plain_unavailable_after_xml_panic": 0,
-    "observer_mismatch_snapshots": 3746,
+    "observer_mismatch_snapshots": 7306,
     "xml_disagrees_with_plain": 8,
-    "extra_moon_events": 7438,
+    "extra_moon_events": 14072,
     "missing_moon_events": 0
   },
   "view_status": "passed except reference-inconsistent queries",

@@ -45,6 +45,12 @@ def main():
  assert crashed.returncode!=0 and 'store.rs:342' in crashed.stderr and 'Option::unwrap()' in crashed.stderr
  safe=execute(['node','validation/weak.cjs','v1','raw-bounds'],[fixture])[0][-1]
  assert safe['links']['t4'][1]==['','']
+ fixture=json.loads((ROOT/'validation/fixtures/upstream-weak-open-end-observers.json').read_text())
+ reference=execute(['validation/rust/target/release/weak','v1'],[fixture])[0]
+ port=execute(['node','validation/weak.cjs','v1'],[fixture])[0]
+ for i in [2,4]:
+  assert reference[i]['events']==[] and port[i]['events']==['topen']
+  assert reference[i]['links']==port[i]['links']
  cases=[]
  for seed in range(64):
   rng=random.Random(22000+seed);ops=[['i',0,'abcdefghijklmnop'],*[['ai',i,i] for i in range(12)],['m','key',0],['ml','m0','key']]

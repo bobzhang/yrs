@@ -54,6 +54,12 @@ fn report(d : @yrs.Doc, v2 : Bool) -> Json raise {
   }
   {
     "text": Json(d.get_or_insert_text("text").get_string()),
+    "state": Json(
+      d
+      .state_vector()
+      .entries()
+      .map(fn(p) { Json([Json(p.0.to_int()), Json(p.1)]) }),
+    ),
     "array": d.get_or_insert_array("array").to_json(),
     "map": d.get_or_insert_map("map").to_json(),
     "links": Json(links),
@@ -64,7 +70,12 @@ fn report(d : @yrs.Doc, v2 : Bool) -> Json raise {
 ///|
 fn run(input : String, v2 : Bool, gc : Bool, raw_bounds : Bool) -> String raise {
   guard @json.parse(input) is Array(ops) else { abort("ops") }
-  let d = @yrs.Doc(client_id=1UL, skip_gc=!gc)
+  let client = if ops.get(0) is Some(Array([String("client"), value])) {
+    n(value).to_uint64()
+  } else {
+    1UL
+  }
+  let d = @yrs.Doc(client_id=client, skip_gc=!gc)
   let t = d.get_or_insert_text("text")
   let a = d.get_or_insert_array("array")
   let m = d.get_or_insert_map("map")
@@ -74,6 +85,7 @@ fn run(input : String, v2 : Bool, gc : Bool, raw_bounds : Bool) -> String raise 
   for command in ops {
     guard command is Array(op) else { abort("op") }
     match op[0] {
+      "client" => ()
       "i" => t.insert(n(op[1]) % (t.length() + 1), s(op[2]))
       "d" =>
         if t.length() > 0 {

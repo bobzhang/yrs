@@ -1,0 +1,35 @@
+{
+  "upstream": "ac339600c712642e556895426113c3f9c117de39",
+  "histories": 32,
+  "versions": [
+    "v1",
+    "v2"
+  ],
+  "gc_modes": [
+    false,
+    true
+  ],
+  "editing_replicas": 3,
+  "mixed_runtime_authorship": true,
+  "local_edits": 8192,
+  "deliveries": 11264,
+  "snapshot_comparisons": 15360,
+  "reference_query_and_observer_exceptions": {
+    "xml_panics": 0,
+    "plain_disagrees_with_xml": 0,
+    "plain_unavailable_after_xml_panic": 0,
+    "observer_mismatch_snapshots": 1650,
+    "xml_disagrees_with_plain": 0,
+    "extra_moon_events": 2282,
+    "missing_moon_events": 0
+  },
+  "checks": [
+    "identical wire histories",
+    "causal clocks",
+    "weak identity boundaries",
+    "bounded and unbounded views",
+    "duplicate delivery",
+    "final convergence"
+  ],
+  "status": "partial: views and convergence passed with recorded reference query/event exceptions"
+}
