@@ -207,3 +207,13 @@ The run required 404 formatting-cleanup reconciliation rounds. Results are in
 interoperability without assuming independent HashSet restoration orders must
 allocate identical identities. Exact undo observer parity is not checked by this
 matrix, and the independent-history mismatch fixture remains retained.
+
+
+Legacy JSON content and opaque shared-type references are preserved on the wire.
+`UndefinedRef` exposes retained compatibility branches through map, array and
+text views. `python3 validation/legacy.py` checks 1,728 Rust comparison snapshots
+and 1,152 replay documents for opaque references, plus 64 legacy JSON cases
+against Yjs 13.6.27 in both wire formats. Install the pinned JavaScript reference
+with `npm ci --ignore-scripts --prefix validation/yjs` first. A retained fixture
+demonstrates the pinned Rust legacy decoder's off-by-one error; the port follows
+Yjs for that obsolete format. See `validation/REFERENCE_LIMITATIONS.md`.

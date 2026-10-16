@@ -62,6 +62,7 @@ pub fn Out::to_input(self : Out) -> In {
     XmlFragment(value) => XmlFragment(children(value))
     XmlText(value) => XmlText(text(value.as_text()), entries(value.as_map()))
     Subdoc(value) => Subdoc(value.unloaded_copy())
+    UndefinedRef(value) => value.infer_input()
   }
 }
 

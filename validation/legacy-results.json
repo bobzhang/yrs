@@ -1,0 +1,23 @@
+{
+  "upstream": "ac339600c712642e556895426113c3f9c117de39",
+  "fixtures": 48,
+  "legacy_yjs_cases": 64,
+  "legacy_rust_decoder": "known off-by-one exception",
+  "yjs_version": "13.6.27",
+  "opaque_type_refs": [
+    5,
+    9,
+    15
+  ],
+  "wire_versions": [
+    "v1",
+    "v2"
+  ],
+  "gc_modes": [
+    false,
+    true
+  ],
+  "snapshots": 1728,
+  "wire_replay_documents": 1152,
+  "status": "passed"
+}

@@ -109,6 +109,8 @@ fn Transaction::observable(self : Transaction, parent : Parent) -> Bool {
 fn Item::values(self : Item, doc : Doc) -> Array[Out] {
   match self.content {
     Values(values) => values.iter().map(fn(v) { Out::Value(v) }).to_array()
+    LegacyJson(values) =>
+      values.iter().map(fn(value) { Out::Value(value) }).to_array()
     Binary(bytes) => [Value(Buffer(bytes))]
     Embed(value) => [Value(value)]
     Shared(kind) => [doc.shared_output(self.id, kind)]

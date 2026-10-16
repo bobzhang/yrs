@@ -39,6 +39,25 @@ fn read_update(
         None
       }
       let content = match kind {
+        2 => {
+          let values = []
+          let count = reader.count()
+          for _ in 0..<count {
+            let value = reader.string()
+            values.push(
+              if value == "undefined" {
+                Undefined
+              } else {
+                Any::from_json(
+                  @json.parse(value) catch {
+                    _ => raise InvalidData("invalid legacy JSON")
+                  },
+                )
+              },
+            )
+          }
+          LegacyJson(ReadOnlyArray::from_array(values[:]))
+        }
         9 => Subdocument(reader.subdocument())
         5 => Embed(reader.json_value())
         6 => Format(reader.string(), reader.json_value())
@@ -51,6 +70,7 @@ fn read_update(
               3 => SharedXmlElement(reader.string())
               4 => SharedXmlFragment
               6 => SharedXmlText
+              5 | 9 | 15 as reference => SharedOpaque(reference)
               _ => raise InvalidData("unsupported shared type")
             },
           )
@@ -182,6 +202,7 @@ fn Writer::raw_item(self : Writer, item : RawItem) -> Unit {
   let kind = match content {
     Characters(_) => 4
     Values(_) => 8
+    LegacyJson(_) => 2
     Binary(_) => 3
     Shared(_) => 7
     Subdocument(_) => 9
@@ -245,7 +266,20 @@ fn Writer::raw_item(self : Writer, item : RawItem) -> Unit {
         }
         SharedXmlFragment => self.byte(4)
         SharedXmlText => self.byte(6)
+        SharedOpaque(reference) => self.byte(reference)
       }
+    LegacyJson(values) => {
+      self.uint(values.length().to_uint64())
+      for value in values {
+        self.string(
+          if value is Undefined {
+            "undefined"
+          } else {
+            value.to_json().stringify()
+          },
+        )
+      }
+    }
     Values(values) => {
       self.uint(values.length().to_uint64())
       for value in values {

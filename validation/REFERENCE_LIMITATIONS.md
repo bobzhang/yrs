@@ -110,3 +110,21 @@ differences. This checks convergence after all generated operations have arrived
 not equality before those additional deletions have been delivered. Observer
 notifications and independently allocated undo identities remain outside this
 matrix. The prior independent-history failure is not removed or marked passed.
+
+
+## Legacy JSON content decoder
+
+The pinned Rust `ItemContent::JSON` decoder reads `count + 1` strings because its
+loop uses `remaining >= 0`. Its encoder writes exactly `count` strings. The
+valid v1 packet in `fixtures/upstream-legacy-json.json` is accepted by Yjs
+13.6.27 and rejected by pinned Rust with `EndOfBuffer`. The Rust output conversion
+also exposes the encoded JSON strings rather than their parsed values.
+
+The port follows [Yjs ContentJSON](https://github.com/yjs/yjs/blob/v13.6.27/src/structs/ContentJSON.js):
+read exactly the declared number of entries, parse each JSON value and preserve
+the special `undefined` entry. `legacy.py` asserts the pinned Rust failure and
+checks 64 v1/v2 cases against pinned Yjs, including deletion, block splitting and
+replay of MoonBit output. This is an explicit reference exception; it is not a
+passing Rust legacy-content comparison. A separate Rust matrix checks opaque
+shared-type references 5, 9 and 15 with modern content, in both wire formats and
+GC modes. Type reference 9 is distinct from actual subdocument content reference 9.

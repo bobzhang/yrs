@@ -4,3 +4,5 @@ target/
 .mooncakes/
 .DS_Store
 __pycache__/
+
+validation/yjs/node_modules/

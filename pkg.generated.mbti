@@ -340,6 +340,7 @@ pub fn OffsetKind::to_repr(Self) -> @debug.Repr
 pub(all) enum Out {
   Value(Any)
   Subdoc(Doc)
+  UndefinedRef(UndefinedRef)
   Array(ArrayRef)
   Map(MapRef)
   Text(Text)
@@ -472,6 +473,14 @@ pub fn Transaction::gc(Self) -> Unit
 pub fn Transaction::insertions(Self) -> Array[(UInt64, UInt, UInt)]
 pub fn Transaction::is_local(Self) -> Bool
 pub fn Transaction::origin(Self) -> Bytes?
+
+pub struct UndefinedRef {
+  // private fields
+}
+pub fn UndefinedRef::as_array(Self) -> ArrayRef
+pub fn UndefinedRef::as_map(Self) -> MapRef
+pub fn UndefinedRef::as_text(Self) -> Text
+pub fn UndefinedRef::type_ref(Self) -> Int
 
 pub struct UndoEvent[M] {
   mut meta : M

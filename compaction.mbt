@@ -10,6 +10,14 @@ fn Content::joined(self : Content, other : Content) -> Content? {
           ),
         ),
       )
+    (LegacyJson(a), LegacyJson(b)) =>
+      Some(
+        LegacyJson(
+          ReadOnlyArray::from_array(
+            (a.iter().to_array() + b.iter().to_array())[:],
+          ),
+        ),
+      )
     (Deleted(a), Deleted(b)) => Some(Deleted(a + b))
     (Garbage(a), Garbage(b)) => Some(Garbage(a + b))
     _ => None

@@ -188,7 +188,7 @@ fn Doc::notify_collections(self : Doc, transaction : Transaction) -> Unit {
           entries,
           changed_children: transaction.sequences.contains(parent),
         })
-      None => continue
+      None | Some(SharedOpaque(_)) => continue
     }
     match event {
       Text(event) =>

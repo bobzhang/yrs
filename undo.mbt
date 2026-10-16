@@ -30,6 +30,7 @@ fn Doc::materialize_ranges(
 fn Out::location(self : Out) -> (Doc, Parent)? {
   match self {
     Value(_) | Subdoc(_) => None
+    UndefinedRef(value) => Some((value.doc, value.name))
     Array(v) => Some((v.doc, v.name))
     Map(v) => Some((v.doc, v.name))
     Text(v) => Some((v.doc, v.name))

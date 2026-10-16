@@ -3,6 +3,7 @@
 pub(all) enum Out {
   Value(Any)
   Subdoc(Doc)
+  UndefinedRef(UndefinedRef)
   Array(ArrayRef)
   Map(MapRef)
   Text(Text)
@@ -21,6 +22,7 @@ fn Doc::shared_output(self : Doc, id : Id, kind : SharedKind) -> Out {
     SharedXmlElement(tag) => XmlElement({ doc: self, name, tag, })
     SharedXmlFragment => XmlFragment({ doc: self, name, })
     SharedXmlText => XmlText({ doc: self, name, })
+    SharedOpaque(reference) => UndefinedRef({ doc: self, name, reference, })
   }
 }
 
@@ -29,6 +31,7 @@ pub fn Out::to_json(self : Out) -> Json {
   match self {
     Value(value) => value.to_json()
     Subdoc(value) => { "guid": Json(value.guid()) }
+    UndefinedRef(_) => Json::null()
     Array(value) => value.to_json()
     Map(value) => value.to_json()
     Text(value) => Json(value.get_string())

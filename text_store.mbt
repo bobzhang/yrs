@@ -12,12 +12,14 @@ priv enum SharedKind {
   SharedXmlElement(String)
   SharedXmlFragment
   SharedXmlText
+  SharedOpaque(Int32)
 }
 
 ///|
 priv enum Content {
   Characters(String)
   Values(ReadOnlyArray[Any])
+  LegacyJson(ReadOnlyArray[Any])
   Binary(Bytes)
   Shared(SharedKind)
   Subdocument(Doc)
@@ -32,6 +34,7 @@ fn Content::length(self : Content) -> Int32 {
   match self {
     Characters(s) => s.length()
     Values(values) => values.length()
+    LegacyJson(values) => values.length()
     Binary(_) | Shared(_) | Subdocument(_) | Format(_, _) | Embed(_) => 1
     Deleted(n) | Garbage(n) => n
   }
@@ -59,6 +62,12 @@ fn utf16_slice(s : String, start : Int32, end : Int32) -> String {
 fn Content::slice(self : Content, start : Int32, end : Int32) -> Content {
   match self {
     Characters(s) => Characters(utf16_slice(s, start, end))
+    LegacyJson(values) =>
+      LegacyJson(
+        ReadOnlyArray::from_array(
+          Array::makei(end - start, fn(i) { values[start + i] })[:],
+        ),
+      )
     Values(values) =>
       Values(
         ReadOnlyArray::from_array(

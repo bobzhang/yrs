@@ -1,0 +1,16 @@
+{
+  "upstream": "ac339600c712642e556895426113c3f9c117de39",
+  "update_v1": "010101000201056974656d730609756e646566696e6564046e756c6c0474727565077b2278223a307d0622f09fa68022013000",
+  "expected_yjs_array": [
+    null,
+    null,
+    true,
+    {
+      "x": 0
+    },
+    "\ud83e\udd80",
+    0
+  ],
+  "rust_decode_error": "EndOfBuffer",
+  "reason": "ItemContent::JSON decoder reads count + 1 strings instead of count."
+}
