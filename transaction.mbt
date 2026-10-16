@@ -225,6 +225,8 @@ fn[T] Doc::with_mutation(self : Doc, action : () -> T) -> T {
   }
   let transaction = self.begin_transaction(
     None,
+    !self.weak_observers.is_empty() ||
+    !self.subdoc_observers.is_empty() ||
     !self.deep_observers.is_empty() ||
     !self.xml_observers.is_empty() ||
     !self.xml_text_observers.is_empty() ||
