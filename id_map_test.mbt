@@ -43,6 +43,25 @@ test "attributions split overlaps union metadata and cover query gaps" {
 }
 
 ///|
+test "attribution conversions retain empty clients until set subtraction" {
+  let set = @yrs.IdSet(ranges=[(1UL, 9U, 9U), (2UL, 0U, 2U)])
+  let map : @yrs.IdMap[String] = @yrs.IdMap::from_set(set, [])
+  assert_eq(map.as_id_set().client_ids(), [1UL, 2UL])
+  assert_eq(map.as_id_set().get(1UL), Some([]))
+  let empty : @yrs.IdMap[String] = @yrs.IdMap::from_set(
+    @yrs.IdSet(ranges=[(3UL, 0U, 0U)]),
+    [],
+  )
+  map.merge_with(empty)
+  assert_eq(map.as_id_set().client_ids(), [1UL, 2UL, 3UL])
+  map.diff_with(@yrs.IdSet())
+  assert_eq(map.as_id_set().client_ids(), [2UL])
+  assert_eq(empty.as_id_set().client_ids(), [3UL])
+  empty.diff_map_with((@yrs.IdMap() : @yrs.IdMap[Unit]))
+  assert_true(empty.is_empty())
+}
+
+///|
 test "attribution codecs preserve dictionaries empty values and detached snapshots" {
   let set = @yrs.IdSet(ranges=[(1UL, 0U, 3U), (2UL, 4U, 7U)])
   let map = @yrs.IdMap::from_set(set, [

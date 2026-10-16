@@ -21,6 +21,15 @@ def main():
    else:cmd=[op,x]
    ops.append(cmd)
   cases.append(ops)
+ for seed in range(64):
+  rng=random.Random(31100+seed)
+  cases.append([
+   ['from',0,[1,rng.randrange(100),0],[['author','alice']]],
+   ['reload1',0],['reload2',0],
+   ['from',1,[2,rng.randrange(100),0],[]],['merge',0,1],
+   ['insert',0,[3,4,2],[['author','bob']]],['reload1',0],['reload2',0],
+   ['diff',0,2],['diff',1,2],['from',1,[4,5,0],[]],['intersect',1,1],
+  ])
  cases.append(json.loads((ROOT/'validation/fixtures/attribution-dictionary-aliases.json').read_text()))
  cases.append(json.loads((ROOT/'validation/fixtures/attribution-duplicate-tail.json').read_text()))
  a=execute(['validation/rust/target/release/attribution'],cases);b=execute(['node','validation/attribution.cjs'],cases)
@@ -37,6 +46,6 @@ def main():
    transfers.append([['load1',0,row['v1']],['load2',1,row['v2']]])
  ta=execute(['validation/rust/target/release/attribution'],transfers);tb=execute(['node','validation/attribution.cjs'],transfers)
  assert [[semantic(r) for r in rows] for rows in ta]==[[semantic(r) for r in rows] for rows in tb]
- result={'upstream':'ac339600c712642e556895426113c3f9c117de39','histories':len(cases),'exact_codec_snapshots':exact,'snapshots':sum(map(len,a)),'cross_runtime_imports':2*len(transfers),'checks':['overlap attribution union','remove','merge','intersection','difference','filter','IdSet conversion','gap queries','v1/v2 cross-runtime decoding and canonical encoding','Unicode dictionary entries'],'status':'passed'}
+ result={'upstream':'ac339600c712642e556895426113c3f9c117de39','histories':len(cases),'exact_codec_snapshots':exact,'snapshots':sum(map(len,a)),'cross_runtime_imports':2*len(transfers),'checks':['overlap attribution union','remove','merge','intersection','difference','filter','IdSet conversion including empty-client metadata and pruning','gap queries','v1/v2 cross-runtime decoding and canonical encoding','Unicode dictionary entries'],'status':'passed'}
  (ROOT/'validation/attribution-results.json').write_text(json.dumps(result,indent=2)+'\n');print(json.dumps(result))
 if __name__=='__main__':main()

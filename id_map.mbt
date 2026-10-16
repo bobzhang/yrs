@@ -231,6 +231,11 @@ pub fn[A : Eq] IdMap::diff_with(self : IdMap[A], other : IdSet) -> Unit {
   for (client, start, end) in other.ranges() {
     self.remove(BlockRange(client, start, end - start))
   }
+  for (client, ranges) in self.clients.to_array() {
+    if ranges.is_empty() {
+      self.clients.remove(client)
+    }
+  }
 }
 
 ///|
@@ -258,7 +263,13 @@ pub fn[A] IdMap::filter(
 
 ///|
 pub fn[A] IdMap::as_id_set(self : IdMap[A]) -> IdSet {
-  IdSet(ranges=self.iter().map(fn(p) { (p.0, p.1.start, p.1.end) }).to_array())
+  let result = IdSet(
+    ranges=self.iter().map(fn(p) { (p.0, p.1.start, p.1.end) }).to_array(),
+  )
+  for client in self.clients.keys() {
+    result.clients.add(client)
+  }
+  result
 }
 
 ///|
