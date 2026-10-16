@@ -358,3 +358,17 @@ checks 12,864 snapshots from 3,216 cursor cases on 128 multilingual documents,
 including block splitting and v2 replication. Rust's UTF-16 results agree; its byte
 mode uses mixed units and differs in 11,016 snapshots. The port corrects that defect
 rather than copying invalid cursor clocks; see the retained reference fixture.
+
+Long-session validation uses the real Unicode editing traces bundled with the
+pinned upstream checkout (originally from Seph Gentle's editing-traces project).
+Run `python3 validation/traces.py` for JavaScript or add `--target native` for the
+native backend. Each run checks the independently reconstructed final text,
+reversed and duplicated delivery at reconnects, v1/v2 restarts, and bidirectional
+Rust/MoonBit wire imports. Full-state catchups needed after pending replay are
+counted separately. Both retention and GC modes are tested.
+
+The recorded wall time and peak RSS cover the entire process: JSON input, two
+live replicas, packet generation/delivery, restart replicas and result encoding.
+These are single-run stress measurements, not isolated local-edit microbenchmarks;
+other validation work may be running concurrently. The native file-reading shim
+is confined to the validation runner and is not a library dependency.
