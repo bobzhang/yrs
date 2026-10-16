@@ -96,6 +96,9 @@ fn Doc::collect_garbage(
 /// Historical snapshots cannot reconstruct content once it has been collected.
 pub fn Transaction::gc(self : Transaction) -> Unit {
   guard !self.closed else { abort("transaction is already closed") }
+  guard !self.document.notifying_transaction else {
+    abort("cannot collect inside a read-only observer")
+  }
   let ranges = []
   for client, blocks in self.document.clients {
     for item in blocks {

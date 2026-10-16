@@ -39,7 +39,7 @@ Rich text supports attributed insertion, formatting, JSON embeds and formatted d
 
 XML fragments, elements, attributes, formatted XML text and parent navigation now share the CRDT store. A further 128 randomized XML histories pass in v1/v2 with Rust GC both enabled and disabled (91,136 operation snapshots and 3,072 cross-runtime document transfers). XML insertion preserves upstream tombstone boundary choices.
 
-Current limitations: unsupported content is rejected before applying an update. The remaining shared types, undo and some transaction/event APIs are still outstanding. Adjacent CRDT blocks are compacted; upstream garbage collection and indexing work remain. This is not a production release or a completed port.
+Current limitations: unsupported content is rejected before applying an update. The remaining shared types, undo and some transaction/event APIs are still outstanding. Adjacent CRDT blocks are compacted; indexing and broader compatibility work remain. This is not a production release or a completed port.
 
 Run `moon test --target all` and `python3 validation/compare.py`. The oracle uses the installed Rust 1.97.1 toolchain and the exact reference checkout under `.repos/y-crdt`; its Cargo dependencies are locked. Clone `https://github.com/y-crdt/y-crdt.git` there and check out `ac339600c712642e556895426113c3f9c117de39` before running it.
 
@@ -143,8 +143,7 @@ The full 641-scenario core interoperability suite passed again after block
 compaction and the map-head split correction. Unit regressions cover compaction,
 remote-edit preservation, repeated nested restoration, cursor tracking and
 multiple documents. Remaining major milestones are concurrent undo compatibility,
-document/offset options, remaining shared types and APIs, garbage
-collection, and performance/stress validation. A public release and repository
+remaining document options, shared types and APIs, and performance/stress validation. A public release and repository
 completion claim are still pending those milestones.
 
 Subdocuments can be inserted into maps and arrays using `insert_doc`. Supply an
@@ -160,7 +159,7 @@ against Rust in both wire formats: 30,336 snapshots, 17,104 lifecycle events and
 destroy/reload. That matrix excludes the reference's stale destroyed-handle
 registry while checking the port's live-registration invariant; see
 `validation/REFERENCE_LIMITATIONS.md`. Decoded GC/offset options are preserved on
-the wire; actual garbage collection remains outstanding. Subdocument data providers and globally unique GUID generation are
+the wire. Subdocument data providers and globally unique GUID generation are
 host responsibilities.
 
 
@@ -173,3 +172,18 @@ boundaries. CRDT state-vector clocks always remain UTF-16 code units.
 34,176 snapshots, 27,770 text events and 1,152 wire replay cases across v1/v2.
 These cover Chinese, astral characters, combining accents and ZWJ emoji. This
 matrix does not yet establish Unicode sticky-position parity.
+
+
+Automatic garbage collection is available with `skip_gc=false`; the existing
+constructor default retains deleted content for historical snapshots. `Doc::gc`
+and `Transaction::gc` explicitly collect deleted content even with retention
+mode enabled. Undo managers protect their own active histories; clearing one
+manager does not discard another manager's history. Snapshot encoding rejects
+automatic-GC documents, matching Rust's API contract.
+
+With GC enabled in both runtimes, all 641 core scenarios passed in v1/v2:
+182,284 independent operation snapshots, 273,408 identical-wire replay snapshots,
+54,700 local rich-text operations from identical state, and 7,692 cross-runtime
+document transfers. See `validation/gc-results.json`. This establishes the core
+GC interoperability matrix; concurrent undo and long-run memory/performance
+validation are still separate outstanding checks.
