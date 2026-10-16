@@ -613,7 +613,10 @@ fn Doc::integrate_missing(self : Doc, raw : RawItem) -> Bool {
 }
 
 ///|
-fn Doc::settle(self : Doc) -> Unit {
+fn Doc::settle(
+  self : Doc,
+  incoming~ : Array[(UInt64, UInt32, UInt32)] = [],
+) -> Unit {
   for ;; {
     let mut progress = false
     let unresolved = []
@@ -642,7 +645,37 @@ fn Doc::settle(self : Doc) -> Unit {
       break
     }
   }
-  for (client, ranges) in self.deletes.to_array() {
+  // Previously applied deletions do not need to be replayed against old
+  // blocks. Only incoming ranges and retained deletions overlapping this
+  // transaction's insertions can change state. Keep retained early deletions
+  // in self.deletes so later dependency integration still observes them.
+  let applicable = incoming.copy()
+  if self.active_transaction is Some(transaction) {
+    for (client, start, end) in transaction.added {
+      guard self.deletes.get(client) is Some(ranges) else { continue }
+      let first = for lo = 0, hi = ranges.length(); lo < hi; {
+        let mid = lo + (hi - lo) / 2
+        if ranges[mid].1 <= start {
+          continue mid + 1, hi
+        } else {
+          continue lo, mid
+        }
+      } nobreak {
+        lo
+      }
+      for i in first..<ranges.length() {
+        let (a, b) = ranges[i]
+        if a >= end {
+          break
+        }
+        applicable.push((client, a.max(start), b.min(end)))
+      }
+    }
+  }
+  let selected = Snapshot(deletions=applicable).deletes
+  // Preserve established client iteration order for transaction side effects.
+  for client in self.deletes.keys().to_array() {
+    guard selected.get(client) is Some(ranges) else { continue }
     for (start, end) in ranges {
       guard self.clients.get(client) is Some(blocks) else { continue }
       // Deletions are retained across updates, so scanning every block for every

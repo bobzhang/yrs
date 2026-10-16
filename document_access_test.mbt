@@ -92,3 +92,38 @@ test "explicit garbage collection respects whole block scope" {
   doc.gc(delete_set=@yrs.IdSet(ranges=[(1UL, 0U, 5U)]))
   assert_false(doc.encode_state_as_update_v1() == before)
 }
+
+///|
+test "early deletions apply to local inserts and delayed nested descendants" {
+  let source = @yrs.Doc(client_id=8UL)
+  let text = source.get_or_insert_text("text")
+  text.insert(0, "abc")
+  let state = source.state_vector()
+  text.remove_range(1, 1)
+  let deletion = source.encode_diff_v1(state)
+  let replay = @yrs.Doc(client_id=8UL)
+  replay.apply_update_v1(deletion)
+  let resumed = replay.get_or_insert_text("text")
+  replay.transact(fn(_) raise {
+    resumed.insert(0, "abc")
+    assert_eq(resumed.get_string(), "ac")
+    resumed.insert(2, "d")
+  })
+  assert_eq(resumed.get_string(), "acd")
+  assert_false(replay.has_missing_updates())
+  let parent = source.get_or_insert_map("root")
+  let child = parent.insert_text("child")
+  let parent_wire = source.encode_state_as_update_v1()
+  let state = source.state_vector()
+  child.insert(0, "late content")
+  let child_wire = source.encode_diff_v1(state)
+  let state = source.state_vector()
+  parent.remove("child")
+  let deletion = source.encode_diff_v1(state)
+  let peer = @yrs.Doc(client_id=9UL)
+  peer.apply_update_v1(deletion)
+  peer.apply_update_v1(child_wire)
+  peer.apply_update_v1(parent_wire)
+  assert_eq(peer.get_or_insert_map("root").to_json(), {})
+  assert_eq(peer.snapshot(), source.snapshot())
+}

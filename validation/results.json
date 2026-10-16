@@ -9,6 +9,10 @@
     false,
     true
   ],
+  "moonbit_gc_modes": [
+    false,
+    true
+  ],
   "checks": {
     "independent_operation_snapshots": 364568,
     "wire_replay_snapshots": 546816,

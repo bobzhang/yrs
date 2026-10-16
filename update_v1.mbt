@@ -152,7 +152,7 @@ pub fn Doc::apply_update_v1(
     for (client, start, end) in deletions {
       self.add_delete(client, start, end)
     }
-    self.settle()
+    self.settle(incoming=deletions)
     for raw in retained {
       self.pending.push(raw)
     }
