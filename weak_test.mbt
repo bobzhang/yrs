@@ -144,3 +144,86 @@ test "weak quotations reject missing anchors and preserve UTF16 slices" {
     "界🦀",
   )
 }
+
+///|
+test "unbounded weak observers survive empty sequences and either endpoint" {
+  let doc = @yrs.Doc(client_id=1UL)
+  let text = doc.get_or_insert_text("text")
+  let links = doc.get_or_insert_map("links")
+  let link = weak(
+    links.insert_input("quote", WeakLink(text.quote(Unbounded, Unbounded))),
+  )
+  let changes = []
+  link.observe("open", fn(_, _) { changes.push(link.get_string()) })
+  text.insert(0, "middle")
+  text.insert(0, "left ")
+  text.insert(text.length(), " right")
+  text.remove_range(0, text.length())
+  text.insert(0, "again")
+  assert_eq(changes, ["middle", "left middle", "left middle right", "", "again"])
+  links.remove("quote")
+  text.insert(0, "unobserved ")
+  assert_eq(changes.length(), 5)
+}
+
+///|
+test "weak subscriptions attach after out-of-order anchor delivery" {
+  let source = @yrs.Doc(client_id=1UL)
+  let text = source.get_or_insert_text("text")
+  text.insert(0, "anchor")
+  let anchor = source.encode_state_as_update_v1()
+  let before = source.state_vector()
+  let links = source.get_or_insert_map("links")
+  links.insert_input("quote", WeakLink(text.quote(Included(0), Unbounded)))
+  |> ignore
+  let quote = source.encode_diff_v1(before)
+  let peer = @yrs.Doc(client_id=2UL)
+  peer.apply_update_v1(quote)
+  let link = weak(peer.get_or_insert_map("links").get("quote").unwrap())
+  let changes = []
+  link.observe("late", fn(_, _) { changes.push(link.get_string()) })
+  peer.apply_update_v1(anchor)
+  peer.get_or_insert_text("text").insert(6, "!")
+  assert_eq(changes, ["anchor", "anchor!"])
+  for version in 1..<=2 {
+    let remote = @yrs.Doc(client_id=3UL)
+    if version == 1 {
+      remote.apply_update_v1(peer.encode_state_as_update_v1())
+    } else {
+      remote.apply_update_v2(peer.encode_state_as_update_v2())
+    }
+    let remote_link = weak(
+      remote.get_or_insert_map("links").get("quote").unwrap(),
+    )
+    let hits = Ref(0)
+    remote_link.observe("imported", fn(_, _) { hits.val += 1 })
+    remote.get_or_insert_text("text").insert(7, "?")
+    assert_eq(remote_link.get_string(), "anchor!?")
+    assert_eq(hits.val, 1)
+  }
+}
+
+///|
+test "deep weak observers follow children inserted after an empty quotation" {
+  let doc = @yrs.Doc(client_id=1UL)
+  let array = doc.get_or_insert_array("array")
+  let links = doc.get_or_insert_map("links")
+  let link = weak(
+    links.insert_input("quote", WeakLink(array.quote(Unbounded, Unbounded))),
+  )
+  let paths = []
+  link.observe_deep("children", fn(events, _) {
+    for event in events {
+      if event is Map(_) {
+        paths.push(event.path().iter().map(fn(p) { p.to_json() }).to_array())
+      }
+    }
+  })
+  let child = array.insert_map(0)
+  child.insert("ready", Bool(true))
+  assert_eq(paths, [[Json(0)]])
+  array.remove(0)
+  let replacement = array.insert_map(0)
+  replacement.insert("ready", Bool(false))
+  assert_eq(paths, [[Json(0)], [Json(0)]])
+}

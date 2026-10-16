@@ -113,6 +113,7 @@ priv struct Item {
 
 ///|
 priv struct Branch {
+  weak_quotes : Set[Id]
   mut kind : SharedKind?
   mut head : Id?
   heads : Map[String, Id]
@@ -124,6 +125,7 @@ priv struct Branch {
 /// A document replica. Each independently edited replica must use a distinct
 /// client ID. This initial API uses Yjs UTF-16 positions and retains tombstones.
 pub struct Doc {
+  priv pending_weak : Set[Id]
   priv weak_observers : Map[
     Parent,
     Map[String, (WeakEvent, Transaction) -> Unit],
@@ -227,6 +229,7 @@ fn make_doc(
     array_observers: {},
     text_observers: {},
     map_observers: {},
+    pending_weak: Set([]),
     before_observers: {},
     after_observers: {},
     cleanup_observers: {},
@@ -278,6 +281,7 @@ fn Doc::branch(self : Doc, name : Parent) -> Branch {
     Some(b) => b
     None => {
       let b : Branch = {
+        weak_quotes: Set([]),
         kind: None,
         head: None,
         heads: Map([]),
@@ -643,6 +647,14 @@ fn Doc::settle(
     }
     if !progress {
       break
+    }
+  }
+  for link in self.pending_weak.to_array() {
+    if self.find(link)
+      is Some({ content: Shared(SharedWeak(source)), deleted: false, .. }) {
+      self.materialize_weak(link, source)
+    } else {
+      self.pending_weak.remove(link)
     }
   }
   // Previously applied deletions do not need to be replayed against old
