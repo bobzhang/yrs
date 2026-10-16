@@ -5,6 +5,11 @@ use yrs::{Doc, Options, ClientID, Text, Map, TextPrelim, Transact, ReadTxn, Stat
 use yrs::undo::{UndoManager, Options as UndoOptions, Event};
 use yrs::updates::{encoder::Encode, decoder::Decode};
 fn ranges(set:&IdSet)->Value { json!(set.iter().flat_map(|(c,rs)| rs.iter().map(move |r|json!([c.get().to_string(),r.start,r.end]))).collect::<Vec<_>>()) }
+fn set_metadata(set: &IdSet) -> Value { json!({
+ "clients": set.iter().map(|(c,_)|c.get()).collect::<Vec<_>>(),
+ "length": set.len(), "empty": set.is_empty(),
+ "get": (1..9).map(|c|set.get(&ClientID::new(c)).map(|rs|rs.iter().map(|r|[r.0.start,r.0.end]).collect::<Vec<_>>())).collect::<Vec<_>>()
+}) }
 fn parse_set(v:&Value)->IdSet { let mut s=IdSet::new(); for r in v.as_array().unwrap(){let start=r[1].as_u64().unwrap() as u32;let end=r[2].as_u64().unwrap() as u32;s.insert(ID::new(ClientID::new(r[0].as_u64().unwrap()),start),end-start);}s }
 fn branch_id(id:BranchID)->Value {match id {BranchID::Root(s)=>json!(["root",s]),BranchID::Nested(id)=>json!(["nested",id.client.get().to_string(),id.clock])}}
 fn record(events:&Arc<Mutex<Vec<Value>>>, name:&str, e:&mut Event<i32>) {
@@ -18,7 +23,15 @@ fn subscribe(m:&mut UndoManager<i32>, events:&Arc<Mutex<Vec<Value>>>) {
  let log=events.clone();m.observe_item_popped("popped",move |_,e|record(&log,"popped",e));
 }
 fn main(){for line in io::stdin().lock().lines(){let input:Value=serde_json::from_str(&line.unwrap()).unwrap();let result=match input[0].as_str().unwrap(){
- "sets"=>{let a=parse_set(&input[1]);let b=parse_set(&input[2]);let u=a.merge(&b);let d=a.diff(&b);let i=a.intersect(&b);json!({"a":ranges(&a),"union":ranges(&u),"diff":ranges(&d),"intersect":ranges(&i),"v1":a.encode_v1(),"v2":a.encode_v2(),"json":serde_json::to_value(a).unwrap()})},
+ "sets"=>{let a=parse_set(&input[1]);let b=parse_set(&input[2]);let u=a.merge(&b);let d=a.diff(&b);let i=a.intersect(&b);
+let mut wire=vec![0];wire.extend(a.encode_v1());let update=Update::decode_v1(&wire).unwrap();
+let snap=yrs::Snapshot::new(StateVector::default(),a.clone());
+let mut removed=a.clone();removed.remove_range(&yrs::block::BlockRange::new(ID::new(ClientID::new(7),0),0));
+json!({"removed":set_metadata(&removed),"update_empty":update.is_empty(),
+"update_meta":[set_metadata(update.delete_set()),set_metadata(Update::decode_v2(&update.encode_v2()).unwrap().delete_set()),
+set_metadata(Update::decode_v1(&yrs::merge_updates_v1([wire.as_slice(),&[0,0]]).unwrap()).unwrap().delete_set()),
+set_metadata(Update::decode_v1(&yrs::diff_updates_v1(&wire,&[0]).unwrap()).unwrap().delete_set()),
+set_metadata(&snap.delete_set),set_metadata(&yrs::Snapshot::decode_v1(&snap.encode_v1()).unwrap().delete_set),set_metadata(&yrs::Snapshot::decode_v2(&snap.encode_v2()).unwrap().delete_set)],"a":ranges(&a),"union":ranges(&u),"diff":ranges(&d),"intersect":ranges(&i),"v1":a.encode_v1(),"v2":a.encode_v2(),"json":serde_json::to_value(&a).unwrap(),"meta":[set_metadata(&a),set_metadata(&u),set_metadata(&d),set_metadata(&i),set_metadata(&IdSet::decode_v1(&a.encode_v1()).unwrap()),set_metadata(&IdSet::decode_v2(&a.encode_v2()).unwrap()),set_metadata(&serde_json::from_value::<IdSet>(serde_json::to_value(&a).unwrap()).unwrap())]})},
  "undo" | "restore"=>{
   let restoring=input[0]=="restore";
   let mut doc=Doc::with_options(Options{client_id:ClientID::new(1),guid:"A".into(),skip_gc:true,offset_kind:yrs::OffsetKind::Utf16,..Options::default()});

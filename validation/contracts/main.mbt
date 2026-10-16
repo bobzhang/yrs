@@ -26,6 +26,26 @@ fn ranges(set : @yrs.IdSet) -> Json {
 }
 
 ///|
+fn set_metadata(set : @yrs.IdSet) -> Json {
+  {
+    "clients": Json(set.client_ids().map(fn(c) { Json(c.to_int()) })),
+    "length": Json(set.length()),
+    "empty": Json(set.is_empty()),
+    "get": Json(
+      [
+        for c in 1..<9 => {
+          match set.get(c.to_uint64()) {
+            None => Json::null()
+            Some(ranges) =>
+              Json(ranges.map(fn(r) { Json([Json(r.0), Json(r.1)]) }))
+          }
+        }
+      ],
+    ),
+  }
+}
+
+///|
 fn parse_set(value : Json) -> @yrs.IdSet {
   @yrs.IdSet(
     ranges=array(value).map(fn(r) {
@@ -91,7 +111,25 @@ fn run(input : String) -> String raise {
     "sets" => {
       let a = parse_set(request[1])
       let b = parse_set(request[2])
+      let wire = Bytes::from_array([b'\x00'] + a.encode_v1().to_array())
+      let update = @yrs.Update::decode_v1(wire)
+      let snap = @yrs.Snapshot(delete_set=a)
+      let removed = a.merge(@yrs.IdSet())
+      removed.remove_range({ client: 7UL, clock: 0U, }, 0U)
       {
+        "removed": set_metadata(removed),
+        "update_empty": Json(update.is_empty()),
+        "update_meta": Json(
+          [
+            update.delete_set(),
+            @yrs.Update::decode_v2(update.encode_v2()).delete_set(),
+            @yrs.Update::decode_v1(@yrs.merge_updates_v1([wire, b"\x00\x00"])).delete_set(),
+            @yrs.Update::decode_v1(@yrs.diff_updates_v1(wire, b"\x00")).delete_set(),
+            snap.delete_set(),
+            @yrs.Snapshot::decode_v1(snap.encode_v1()).delete_set(),
+            @yrs.Snapshot::decode_v2(snap.encode_v2()).delete_set(),
+          ].map(set_metadata),
+        ),
         "a": ranges(a),
         "union": ranges(a.merge(b)),
         "diff": ranges(a.diff(b)),
@@ -99,6 +137,17 @@ fn run(input : String) -> String raise {
         "v1": bytes(a.encode_v1()),
         "v2": bytes(a.encode_v2()),
         "json": a.to_json(),
+        "meta": Json(
+          [
+            a,
+            a.merge(b),
+            a.diff(b),
+            a.intersect(b),
+            @yrs.IdSet::decode_v1(a.encode_v1()),
+            @yrs.IdSet::decode_v2(a.encode_v2()),
+            @yrs.IdSet::from_json(a.to_json()),
+          ].map(set_metadata),
+        ),
       }
     }
     "undo" | "restore" => {

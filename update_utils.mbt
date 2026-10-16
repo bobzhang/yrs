@@ -101,17 +101,15 @@ fn encode_raw_update(
 /// delete ranges are preserved. Unsupported content is rejected during decode.
 pub fn merge_updates_v1(updates : Array[Bytes]) -> Bytes raise DecodeError {
   let all = []
-  let deletes = Doc(client_id=0UL)
+  let deletes = IdSet()
   for bytes in updates {
     let (items, ranges) = read_update({ bytes, offset: 0, })
     for item in items {
       all.push(item)
     }
-    for (client, start, end) in ranges {
-      deletes.add_delete(client, start, end)
-    }
+    deletes.merge_with(ranges)
   }
-  encode_raw_update(all, deletes.deletes)
+  encode_raw_update(all, deletes.deletion_map())
 }
 
 ///|
@@ -128,11 +126,7 @@ pub fn diff_updates_v1(
       filtered.push(item.trim_start(known))
     }
   }
-  let deletes = Doc(client_id=0UL)
-  for (client, start, end) in ranges {
-    deletes.add_delete(client, start, end)
-  }
-  encode_raw_update(filtered, deletes.deletes)
+  encode_raw_update(filtered, ranges.deletion_map())
 }
 
 ///|

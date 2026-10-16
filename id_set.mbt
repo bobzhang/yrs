@@ -1,12 +1,65 @@
 ///|
 /// A normalized set of CRDT clock ranges. End clocks are exclusive.
+/// Like Yrs, zero-length insertion retains the client entry: length/is_empty
+/// count clients even when ranges() is empty. Difference/intersection prune them.
 pub struct IdSet {
   priv mut ranges : Array[(UInt64, UInt32, UInt32)]
+  priv mut clients : Set[UInt64]
 }
 
 ///|
 pub fn IdSet::IdSet(ranges~ : Array[(UInt64, UInt32, UInt32)] = []) -> IdSet {
-  { ranges: Snapshot(deletions=ranges).deletions(), }
+  {
+    ranges: normalize_id_ranges(ranges),
+    clients: Set::from_array(ranges.map(fn(r) { r.0 })),
+  }
+}
+
+///|
+fn normalize_id_ranges(
+  ranges : Array[(UInt64, UInt32, UInt32)],
+) -> Array[(UInt64, UInt32, UInt32)] {
+  let sorted = ranges.copy()
+  sorted.sort_by(fn(a, b) {
+    if a.0 != b.0 {
+      a.0.compare(b.0)
+    } else {
+      a.1.compare(b.1)
+    }
+  })
+  let result : Array[(UInt64, UInt32, UInt32)] = []
+  for (client, start, end) in sorted {
+    guard start <= end else { abort("reversed clock range") }
+    if start == end {
+      continue
+    }
+    if result.last() is Some((c, a, b)) && c == client && start <= b {
+      result[result.length() - 1] = (client, a, b.max(end))
+    } else {
+      result.push((client, start, end))
+    }
+  }
+  result
+}
+
+///|
+fn IdSet::copy(self : IdSet) -> IdSet {
+  {
+    ranges: self.ranges.copy(),
+    clients: Set::from_array(self.clients.to_array()),
+  }
+}
+
+///|
+fn IdSet::deletion_map(self : IdSet) -> Map[UInt64, Array[(UInt32, UInt32)]] {
+  let result : Map[UInt64, Array[(UInt32, UInt32)]] = Map([])
+  for client in self.clients {
+    result[client] = []
+  }
+  for (client, start, end) in self.ranges {
+    result[client].push((start, end))
+  }
+  result
 }
 
 ///|
@@ -21,24 +74,20 @@ pub fn IdSet::contains(self : IdSet, id : Id) -> Bool {
 
 ///|
 pub fn IdSet::is_empty(self : IdSet) -> Bool {
-  self.ranges.is_empty()
+  self.clients.is_empty()
 }
 
 ///|
 pub fn IdSet::client_ids(self : IdSet) -> Array[UInt64] {
-  let result = []
-  for (client, _, _) in self.ranges {
-    if result.last() != Some(client) {
-      result.push(client)
-    }
-  }
+  let result = self.clients.to_array()
+  result.sort()
   result
 }
 
 ///|
 /// Number of clients represented in this set, matching Yrs IdSet::len.
 pub fn IdSet::length(self : IdSet) -> Int32 {
-  self.client_ids().length()
+  self.clients.length()
 }
 
 ///|
@@ -46,7 +95,7 @@ pub fn IdSet::get(self : IdSet, client : UInt64) -> Array[(UInt32, UInt32)]? {
   let ranges = self.ranges
     .filter(fn(r) { r.0 == client })
     .map(fn(r) { (r.1, r.2) })
-  if ranges.is_empty() {
+  if !self.clients.contains(client) {
     None
   } else {
     Some(ranges)
@@ -56,19 +105,27 @@ pub fn IdSet::get(self : IdSet, client : UInt64) -> Array[(UInt32, UInt32)]? {
 ///|
 pub fn IdSet::insert(self : IdSet, id : Id, length : UInt32) -> Unit {
   guard length <= 0xffff_ffffU - id.clock else { abort("clock range overflow") }
-  self.ranges = Snapshot(
-    deletions=self.ranges + [(id.client, id.clock, id.clock + length)],
-  ).deletions()
+  self.clients.add(id.client)
+  if length > 0U {
+    self.ranges = normalize_id_ranges(
+      self.ranges + [(id.client, id.clock, id.clock + length)],
+    )
+  }
 }
 
 ///|
 pub fn IdSet::merge(self : IdSet, other : IdSet) -> IdSet {
-  IdSet(ranges=self.ranges + other.ranges)
+  {
+    ranges: normalize_id_ranges(self.ranges + other.ranges),
+    clients: Set::from_array(self.clients.to_array() + other.clients.to_array()),
+  }
 }
 
 ///|
 pub fn IdSet::merge_with(self : IdSet, other : IdSet) -> Unit {
-  self.ranges = self.merge(other).ranges
+  let merged = self.merge(other)
+  self.ranges = merged.ranges
+  self.clients = merged.clients
 }
 
 ///|
@@ -95,12 +152,14 @@ pub fn IdSet::diff(self : IdSet, other : IdSet) -> IdSet {
       result.push((client, cursor, end))
     }
   }
-  { ranges: result, }
+  IdSet(ranges=result)
 }
 
 ///|
 pub fn IdSet::diff_with(self : IdSet, other : IdSet) -> Unit {
-  self.ranges = self.diff(other).ranges
+  let difference = self.diff(other)
+  self.ranges = difference.ranges
+  self.clients = difference.clients
 }
 
 ///|
@@ -118,14 +177,19 @@ pub fn IdSet::intersect(self : IdSet, other : IdSet) -> IdSet {
 
 ///|
 pub fn IdSet::intersect_with(self : IdSet, other : IdSet) -> Unit {
-  self.ranges = self.intersect(other).ranges
+  let intersection = self.intersect(other)
+  self.ranges = intersection.ranges
+  self.clients = intersection.clients
 }
 
 ///|
 pub fn IdSet::remove_range(self : IdSet, id : Id, length : UInt32) -> Unit {
   let other = IdSet()
   other.insert(id, length)
-  self.diff_with(other)
+  self.ranges = self.diff(other).ranges
+  if !self.ranges.any(fn(r) { r.0 == id.client }) {
+    self.clients.remove(id.client)
+  }
 }
 
 ///|
@@ -162,9 +226,11 @@ pub fn IdSet::encode_v2(self : IdSet) -> Bytes raise DecodeError {
 ///|
 fn IdSet::read(reader : Reader, v2 : Bool) -> IdSet raise DecodeError {
   let ranges = []
+  let seen : Set[UInt64] = Set([])
   let clients = reader.count()
   for _ in 0..<clients {
     let client = reader.uint()
+    seen.add(client)
     let count = reader.count()
     let mut previous = 0UL
     for _ in 0..<count {
@@ -177,7 +243,7 @@ fn IdSet::read(reader : Reader, v2 : Bool) -> IdSet raise DecodeError {
       previous = start + length
     }
   }
-  IdSet(ranges~)
+  { ranges: normalize_id_ranges(ranges), clients: seen, }
 }
 
 ///|

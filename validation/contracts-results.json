@@ -1,10 +1,12 @@
 {
   "upstream": "ac339600c712642e556895426113c3f9c117de39",
-  "id_set_cases": 128,
+  "id_set_cases": 256,
+  "empty_client_set_cases": 128,
   "undo_histories": 96,
   "source_history_snapshots": 17280,
   "restored_stack_cases": 4416,
   "checks": [
+    "empty client counts lookup union subtraction and codec preservation",
     "set algebra",
     "v1/v2 exact set bytes",
     "serde stack schema",

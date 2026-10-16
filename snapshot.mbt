@@ -8,21 +8,40 @@ pub struct Snapshot {
 
 ///|
 /// Deletion tuples contain client ID, inclusive start and exclusive end.
+/// Optional delete_set metadata is copied and unioned with these tuples.
 pub fn Snapshot::Snapshot(
   state~ : StateVector = StateVector(),
   deletions~ : Array[(UInt64, UInt32, UInt32)] = [],
+  delete_set? : IdSet,
 ) -> Snapshot {
-  let normalized = Doc(client_id=0UL)
-  for (client, start, end) in deletions {
-    guard start <= end else { abort("reversed snapshot deletion range") }
-    normalized.add_delete(client, start, end)
+  let ranges = IdSet(ranges=deletions)
+  if delete_set is Some(set) {
+    ranges.merge_with(set)
   }
-  { state: StateVector(entries=state.entries()), deletes: normalized.deletes, }
+  {
+    state: StateVector(entries=state.entries()),
+    deletes: ranges.deletion_map(),
+  }
 }
 
 ///|
 pub fn Snapshot::state_vector(self : Snapshot) -> StateVector {
   StateVector(entries=self.state.entries())
+}
+
+///|
+/// Return an owned copy, retaining clients with no deletion ranges.
+pub fn Snapshot::delete_set(self : Snapshot) -> IdSet {
+  let ranges = []
+  for client, entries in self.deletes {
+    if entries.is_empty() {
+      ranges.push((client, 0U, 0U))
+    }
+    for (start, end) in entries {
+      ranges.push((client, start, end))
+    }
+  }
+  IdSet(ranges~)
 }
 
 ///|
@@ -104,29 +123,14 @@ pub fn Snapshot::encode_v2(self : Snapshot) -> Bytes raise DecodeError {
 
 ///|
 fn Snapshot::read(reader : Reader, v2 : Bool) -> Snapshot raise DecodeError {
-  let ranges = []
-  let clients = reader.count()
-  for _ in 0..<clients {
-    let client = reader.uint()
-    let count = reader.count()
-    let mut previous = 0UL
-    for _ in 0..<count {
-      let start = reader.clock().to_uint64() + (if v2 { previous } else { 0UL })
-      let length = reader.clock().to_uint64() + (if v2 { 1UL } else { 0UL })
-      guard start + length <= 0xffff_ffffUL else {
-        raise InvalidData("snapshot clock overflow")
-      }
-      ranges.push((client, start.to_uint(), (start + length).to_uint()))
-      previous = start + length
-    }
-  }
+  let deletions = IdSet::read(reader, v2)
   let state = StateVector()
   let clients = reader.count()
   for _ in 0..<clients {
     let client = reader.uint()
     state.clocks[client] = reader.clock()
   }
-  Snapshot(state~, deletions=ranges)
+  { state, deletes: deletions.deletion_map(), }
 }
 
 ///|

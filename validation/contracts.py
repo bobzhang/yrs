@@ -16,6 +16,17 @@ def main():
                 start=rng.randrange(10000);result.append([rng.randrange(1,8),start,start+rng.randrange(1,4000)])
             return result
         cases.append(['sets',ranges(),ranges()])
+    for seed in range(128):
+        rng=random.Random(16800+seed)
+        def sparse_ranges():
+            rows=[]
+            for client in range(1,9):
+                for _ in range(rng.randrange(4)):
+                    start=rng.randrange(100)
+                    rows.append([client,start,start+(rng.randrange(1,20) if rng.randrange(3)==0 else 0)])
+            return rows
+        cases.append(['sets',sparse_ranges(),sparse_ranges()])
+    set_count=len(cases)
     for seed in range(96):
         rng=random.Random(17000+seed);commands=[]
         for _ in range(180):
@@ -25,8 +36,8 @@ def main():
             else:command=[op]
             commands.append(command)
         cases.append(['undo',commands])
-    generated=execute(['validation/rust/target/release/contracts'],cases[128:])
-    cases=cases[:128]
+    generated=execute(['validation/rust/target/release/contracts'],cases[set_count:])
+    cases=cases[:set_count]
     for history in generated:
         for row in history[::8]:
             for action in ['undo','redo']:
@@ -42,6 +53,6 @@ def main():
             (ROOT/'validation/fixtures/contracts-failure.json').write_text(json.dumps(cases[index]))
             print('Mismatch',index,'Rust',a,'MoonBit',b)
             raise AssertionError(index)
-    result={'upstream':'ac339600c712642e556895426113c3f9c117de39','id_set_cases':128,'undo_histories':96,'source_history_snapshots':17280,'restored_stack_cases':len(cases)-128,'checks':['set algebra','v1/v2 exact set bytes','serde stack schema','identical saved-state imports','undo/redo results','stack metadata','changed-parent event multisets'],'status':'passed'}
+    result={'upstream':'ac339600c712642e556895426113c3f9c117de39','id_set_cases':set_count,'empty_client_set_cases':128,'undo_histories':96,'source_history_snapshots':17280,'restored_stack_cases':len(cases)-set_count,'checks':['empty client counts lookup union subtraction and codec preservation','set algebra','v1/v2 exact set bytes','serde stack schema','identical saved-state imports','undo/redo results','stack metadata','changed-parent event multisets'],'status':'passed'}
     (ROOT/'validation/contracts-results.json').write_text(json.dumps(result,indent=2)+'\n');print(json.dumps(result))
 if __name__=='__main__':main()

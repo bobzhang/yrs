@@ -159,7 +159,7 @@ pub fn StickyIndex::decode_v2(bytes : Bytes) -> StickyIndex raise DecodeError {
 
 ///|
 pub impl Eq for Snapshot with fn equal(self, other) {
-  self.state == other.state && self.deletions() == other.deletions()
+  self.state == other.state && self.deletes == other.deletes
 }
 
 ///|

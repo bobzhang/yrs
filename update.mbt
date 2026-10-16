@@ -19,7 +19,7 @@ pub fn Update::decode_v1(bytes : Bytes) -> Update raise DecodeError {
   {
     wire: bytes,
     blocks: normalize_items(blocks),
-    deleted: IdSet(ranges=deleted),
+    deleted,
     has_blocks: header.uint() > 0UL,
   }
 }
@@ -101,17 +101,14 @@ pub fn Update::insertions(
 
 ///|
 pub fn Update::delete_set(self : Update) -> IdSet {
-  IdSet(ranges=self.deleted.ranges())
+  self.deleted.copy()
 }
 
 ///|
 pub fn Update::merge(self : Update, other : Update) -> Unit {
   self.blocks = normalize_items(self.blocks + other.blocks)
   self.deleted.merge_with(other.deleted)
-  self.wire = encode_raw_update(
-    self.blocks,
-    Snapshot(deletions=self.deleted.ranges()).deletes,
-  )
+  self.wire = encode_raw_update(self.blocks, self.deleted.deletion_map())
   self.has_blocks = !self.blocks.is_empty()
 }
 
@@ -125,7 +122,7 @@ pub fn Update::encode_diff_v1(self : Update, state : StateVector) -> Bytes {
       None
     }
   })
-  encode_raw_update(blocks, Snapshot(deletions=self.deleted.ranges()).deletes)
+  encode_raw_update(blocks, self.deleted.deletion_map())
 }
 
 ///|

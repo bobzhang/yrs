@@ -1,7 +1,5 @@
 ///|
-fn read_update(
-  reader : Reader,
-) -> (Array[RawItem], Array[(UInt64, UInt32, UInt32)]) raise DecodeError {
+fn read_update(reader : Reader) -> (Array[RawItem], IdSet) raise DecodeError {
   let items = []
   let clients = reader.count()
   for _ in 0..<clients {
@@ -115,20 +113,7 @@ fn read_update(
       clock += length.reinterpret_as_uint()
     }
   }
-  let deletions = []
-  let clients = reader.count()
-  for _ in 0..<clients {
-    let client = reader.uint()
-    let count = reader.count()
-    for _ in 0..<count {
-      let start = reader.clock()
-      let len = reader.clock()
-      guard start.to_uint64() + len.to_uint64() <= 0xffff_ffffUL else {
-        raise InvalidData("delete range overflow")
-      }
-      deletions.push((client, start, start + len))
-    }
-  }
+  let deletions = IdSet::read(reader, false)
   reader.finish()
   (items, deletions)
 }
@@ -141,6 +126,7 @@ pub fn Doc::apply_update_v1(
   bytes : Bytes,
 ) -> Unit raise DecodeError {
   let (items, deletions) = read_update({ bytes, offset: 0, })
+  let deletions = deletions.ranges()
   self.with_mutation(fn() {
     self.active_transaction.unwrap().is_local = false
     self.collect_deletes = true

@@ -230,7 +230,7 @@ across replicas; `Doc::root_refs` enumerates root collections.
 Undo events expose `changed_parent_types` and `has_changed`, including changed
 collections' ancestors. Destroying a tracked document removes its scopes and
 stacks while preserving history for other documents. The contract oracle
-(`python3 validation/contracts.py`) checks 128 randomized set cases and 4,416
+(`python3 validation/contracts.py`) checks 256 randomized set cases and 4,416
 undo/redo operations from identical saved Rust state, sampled from 96 histories
 with 17,280 source snapshots. It compares stack JSON, metadata, results and
 changed-parent multisets. Independent undo allocations remain subject to the
@@ -478,3 +478,11 @@ Observed receiver vectors converge exactly; 32 artificial surrogate-splitting
 vector cases expose a recorded Yjs text-loss difference, where Rust and MoonBit
 preserve the original character. This closes the sparse-v2 wire validation gap
 without claiming identical intermediate pending behavior.
+
+`IdSet` preserves clients with no ranges, including zero-length insertion and
+v1/v2 decoding. Lookup distinguishes an absent client from an empty client;
+union preserves these entries, while subtraction/intersection remove them as
+Rust does. Updates and snapshots retain this metadata too. Use
+`Snapshot(delete_set=...)` and `snapshot.delete_set()` for owned copies. The
+expanded contracts oracle passes 256 set cases (128 exercising empty clients),
+including update/snapshot codecs, and 4,416 saved undo-stack operations.

@@ -643,9 +643,10 @@ pub impl[S] @debug.Debug for Root[S]
 pub struct Snapshot {
   // private fields
 } derive(@debug.Debug)
-pub fn Snapshot::Snapshot(state? : StateVector, deletions? : Array[(UInt64, UInt, UInt)]) -> Self
+pub fn Snapshot::Snapshot(state? : StateVector, deletions? : Array[(UInt64, UInt, UInt)], delete_set? : IdSet) -> Self
 pub fn Snapshot::decode_v1(Bytes) -> Self raise DecodeError
 pub fn Snapshot::decode_v2(Bytes) -> Self raise DecodeError
+pub fn Snapshot::delete_set(Self) -> IdSet
 pub fn Snapshot::deletions(Self) -> Array[(UInt64, UInt, UInt)]
 pub fn Snapshot::encode_v1(Self) -> Bytes
 pub fn Snapshot::encode_v2(Self) -> Bytes raise DecodeError

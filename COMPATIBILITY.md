@@ -30,7 +30,7 @@ The generated `pkg.generated.mbti` is the authoritative MoonBit API.
 | `GetString`, `Observable`, `DeepObservable` | Concrete `get_string`, `observe`, `observe_deep`, and keyed `unobserve` methods |
 | `Quotable`, `WeakPrelim`, `WeakRef` | Concrete `quote` methods, `WeakPrelim`, `WeakRef`; query/event differences remain open |
 | `SharedRef`, `RootRef`, `Root`, `Nested`, `Hook` | Typed collection resolution and identity serialization; generic trait surface is being audited |
-| `StateVector`, `Snapshot`, `Update`, `IdSet` | Implemented; empty-client metadata remains an edge-case audit item |
+| `StateVector`, `Snapshot`, `Update`, `IdSet` | Implemented, including owned empty-client metadata and v1/v2 round-trips |
 | `IdMap`, `AttrRange`, `ContentAttribute`, `ContentAttributes`, `Diff` | Generic attribution types and operations; `Diff` is used for text history results |
 | `Assoc`, `IndexScope`, `Offset`, `StickyIndex`, `IndexedSequence` | Cursor types plus concrete collection `sticky_index` / `sticky_boundary` methods |
 | `JsonPath`, `JsonPathEval` | `JsonPath` and `Doc.json_path` |
