@@ -23,6 +23,7 @@ fn main() {
             client_id: ClientID::new(client),
             skip_gc: !gc,
             offset_kind: OffsetKind::Utf16,
+            guid: format!("doc-{client}").into(),
             ..Options::default()
         });
         let root: Root<MapRef> = Root::new(name);
@@ -32,7 +33,9 @@ fn main() {
         let root_hook = map.hook();
         let nested_hook = text.hook();
         let nested = nested_hook.clone().into_nested().unwrap();
-        let peer = Doc::with_client_id(client + 1);
+        let peer = Doc::with_options(Options {
+            client_id: ClientID::new(client + 1), guid: doc.guid().clone(), ..Options::default()
+        });
         peer.transact_mut()
             .apply_update(
                 Update::decode_v2(
@@ -42,6 +45,14 @@ fn main() {
                 .unwrap(),
             )
             .unwrap();
+        let equality = json!({
+            "document_guid": doc == peer,
+            "document_instance": Doc::ptr_eq(&doc, &peer),
+            "root": map == peer.get_or_insert_map(name),
+            "nested": text == nested_hook.get(&peer.transact()).unwrap(),
+            "output": yrs::Out::YText(text.clone()) == yrs::Out::YText(nested_hook.get(&peer.transact()).unwrap()),
+            "different_types": yrs::Out::YMap(map.clone()) == yrs::Out::YText(peer.get_or_insert_text(name)),
+        });
         let remote = nested_hook
             .get(&peer.transact())
             .unwrap()
@@ -69,7 +80,7 @@ fn main() {
         assert_eq!(decoded.id(), nested_hook.id());
         println!(
             "{}",
-            json!({"root":serialized(&root_hook),"nested":encoded,"replacement":serialized(&replacement.hook()),"before":remote,"after":replacement.hook().get(&peer.transact()).unwrap().get_string(&peer.transact()),"old_missing":nested_hook.get(&doc.transact()).is_none() && nested_hook.get(&peer.transact()).is_none(),"root_present":root.get(&peer.transact()).is_some(),"nested_json_without_tag_accepted":serde_json::from_value::<Hook<()>>(json!({"id":nested_hook.id()})).is_ok()})
+            json!({"equality":equality,"root":serialized(&root_hook),"nested":encoded,"replacement":serialized(&replacement.hook()),"before":remote,"after":replacement.hook().get(&peer.transact()).unwrap().get_string(&peer.transact()),"old_missing":nested_hook.get(&doc.transact()).is_none() && nested_hook.get(&peer.transact()).is_none(),"root_present":root.get(&peer.transact()).is_some(),"nested_json_without_tag_accepted":serde_json::from_value::<Hook<()>>(json!({"id":nested_hook.id()})).is_ok()})
         );
     }
 }

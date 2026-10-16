@@ -22,7 +22,7 @@ def main():
     result = {
         'upstream': 'ac339600c712642e556895426113c3f9c117de39',
         'cases': len(cases), 'uuid_cases': len(uuids), 'checks': ['512 UUID formatter inputs including all-zero and all-one bytes',
-            'non-creating root lookup', 'typed root creation',
+            'logical shared-handle and output equality across replicas','document GUID equality versus instance identity','non-creating root lookup', 'typed root creation',
             'root and nested hook serde including phantom tag',
             '53-bit client identifiers and Unicode root names',
             'v2 replica resolution', 'v1 deletion and replacement propagation',

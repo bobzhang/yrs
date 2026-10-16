@@ -79,6 +79,12 @@ read/write lock or promise safe concurrent mutation from multiple native threads
 `AsyncProtocol` may suspend its handlers, but does not make `Doc` thread-safe.
 The host must serialize access to a shared document.
 
+Shared-handle equality compares logical branch IDs across documents. `Out`
+also requires the same value variant. `Doc` equality compares GUIDs, whereas
+`Doc.ptr_eq` compares in-memory instances; explicitly supply distinct GUIDs when
+that distinction matters. Untyped `UndefinedRef` outputs use instance equality,
+matching Rust's raw branch-pointer comparison.
+
 Observers use explicit keys and cancellation instead of Rust RAII subscription
 guards. Iterator-returning convenience methods may snapshot collections. These
 are API/lifetime adaptations, not claims of identical Rust ownership behavior.

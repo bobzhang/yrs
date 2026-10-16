@@ -11,7 +11,7 @@ pub(all) enum Out {
   XmlFragment(XmlFragment)
   XmlText(XmlText)
   WeakLink(WeakRef)
-}
+} derive(Eq)
 
 ///|
 fn Doc::shared_output(self : Doc, id : Id, kind : SharedKind) -> Out {

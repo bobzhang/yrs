@@ -13,7 +13,11 @@ fn run(input : String) -> String raise {
   guard request is Array([Number(client, ..), String(name), gc]) else {
     abort("input")
   }
-  let doc = @yrs.Doc(client_id=client.to_uint64(), skip_gc=gc != Json(true))
+  let doc = @yrs.Doc(
+    client_id=client.to_uint64(),
+    guid="doc-\{client.to_uint64()}",
+    skip_gc=gc != Json(true),
+  )
   let root : @yrs.Root[@yrs.MapRef] = Root(name)
   guard root.get(doc) is None else { abort("root exists") }
   let map = root.get_or_create(doc)
@@ -21,8 +25,20 @@ fn run(input : String) -> String raise {
   text.insert(0, "Moon🌙")
   let root_hook = map.hook()
   let nested_hook = text.hook()
-  let peer = @yrs.Doc(client_id=client.to_uint64() + 1UL)
+  let peer = @yrs.Doc(client_id=client.to_uint64() + 1UL, guid=doc.guid())
   peer.apply_update_v2(doc.encode_state_as_update_v2())
+  let equality : Json = {
+    "document_guid": Json(doc == peer),
+    "document_instance": Json(doc.ptr_eq(peer)),
+    "root": Json(map == peer.get_or_insert_map(name)),
+    "nested": Json(text == nested_hook.get(peer).unwrap()),
+    "output": Json(
+      @yrs.Out::Text(text) == @yrs.Out::Text(nested_hook.get(peer).unwrap()),
+    ),
+    "different_types": Json(
+      @yrs.Out::Map(map) == @yrs.Out::Text(peer.get_or_insert_text(name)),
+    ),
+  }
   let remote = nested_hook.get(peer).unwrap().get_string()
   guard nested_hook.into_nested().unwrap().get(peer).unwrap().get_string() ==
     remote else {
@@ -45,6 +61,7 @@ fn run(input : String) -> String raise {
   }
   (
     {
+      "equality": equality,
       "root": root_hook.to_json(),
       "nested": encoded,
       "replacement": replacement.hook().to_json(),

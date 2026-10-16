@@ -105,6 +105,7 @@ pub struct ArrayRef {
   // private fields
 }
 pub fn ArrayRef::default_prelim() -> In
+pub fn ArrayRef::equal(Self, Self) -> Bool
 pub fn ArrayRef::from_branch(Doc, BranchId) -> Self?
 pub fn ArrayRef::from_out(Out) -> Self?
 pub fn ArrayRef::get(Self, Int) -> Out?
@@ -120,6 +121,7 @@ pub fn ArrayRef::insert_range(Self, Int, Array[Any]) -> Unit
 pub fn ArrayRef::insert_text(Self, Int) -> Text
 pub fn ArrayRef::iter(Self) -> Iter[Out]
 pub fn ArrayRef::length(Self) -> Int
+pub fn ArrayRef::not_equal(Self, Self) -> Bool
 pub fn ArrayRef::observe(Self, String, (ArrayEvent, Transaction) -> Unit) -> Unit
 pub fn ArrayRef::observe_deep(Self, String, (ReadOnlyArray[Event], Transaction) -> Unit) -> Unit
 pub fn ArrayRef::push_back(Self, In) -> Out
@@ -138,6 +140,7 @@ pub impl DefaultPrelim for ArrayRef
 pub impl FromOut for ArrayRef
 pub impl RootRef for ArrayRef
 pub impl SharedRef for ArrayRef
+pub impl Eq for ArrayRef
 
 pub(all) enum Assoc {
   Before
@@ -326,6 +329,7 @@ pub fn Doc::encode_state_as_update_v1(Self, remote? : StateVector) -> Bytes
 pub fn Doc::encode_state_as_update_v2(Self, remote? : StateVector) -> Bytes raise DecodeError
 pub fn Doc::encode_state_from_snapshot_v1(Self, Snapshot) -> Bytes raise DecodeError
 pub fn Doc::encode_state_from_snapshot_v2(Self, Snapshot) -> Bytes raise DecodeError
+pub fn Doc::equal(Self, Self) -> Bool
 pub fn Doc::gc(Self, delete_set? : IdSet) -> Unit
 pub fn Doc::get(Self, String) -> Out?
 pub fn Doc::get_array(Self, String) -> ArrayRef?
@@ -342,6 +346,7 @@ pub fn Doc::has_missing_updates(Self) -> Bool
 pub fn Doc::has_pending_updates(Self) -> Bool
 pub fn Doc::json_path(Self, JsonPath) -> Iter[Out]
 pub fn Doc::load(Self) -> Unit
+pub fn Doc::not_equal(Self, Self) -> Bool
 pub fn Doc::observe_after_transaction(Self, String, (Transaction) -> Unit) -> Unit
 pub fn Doc::observe_before_observer_calls(Self, String, (Transaction) -> Unit) -> Unit
 pub fn Doc::observe_destroy(Self, String, (Self) -> Unit) -> Unit
@@ -373,6 +378,7 @@ pub fn Doc::unobserve_transaction_cleanup(Self, String) -> Bool
 pub fn Doc::unobserve_update_v1(Self, String) -> Bool
 pub fn Doc::unobserve_update_v2(Self, String) -> Bool
 pub impl FromOut for Doc
+pub impl Eq for Doc
 
 pub(all) enum EntryChange {
   Inserted(Out)
@@ -536,6 +542,7 @@ pub fn MapRef::clear(Self) -> Unit
 pub fn MapRef::contains_key(Self, String) -> Bool
 pub fn MapRef::default_prelim() -> In
 pub fn MapRef::entries(Self) -> Array[(String, Out)]
+pub fn MapRef::equal(Self, Self) -> Bool
 pub fn MapRef::from_branch(Doc, BranchId) -> Self?
 pub fn MapRef::from_out(Out) -> Self?
 pub fn MapRef::get(Self, String) -> Out?
@@ -559,6 +566,7 @@ pub fn MapRef::iter(Self) -> Iter[(String, Out)]
 pub fn MapRef::keys(Self) -> Iter[String]
 pub fn MapRef::length(Self) -> Int
 pub fn MapRef::link(Self, String) -> WeakPrelim?
+pub fn MapRef::not_equal(Self, Self) -> Bool
 pub fn MapRef::observe(Self, String, (MapEvent, Transaction) -> Unit) -> Unit
 pub fn MapRef::observe_deep(Self, String, (ReadOnlyArray[Event], Transaction) -> Unit) -> Unit
 pub fn MapRef::remove(Self, String) -> Unit
@@ -573,6 +581,7 @@ pub impl DefaultPrelim for MapRef
 pub impl FromOut for MapRef
 pub impl RootRef for MapRef
 pub impl SharedRef for MapRef
+pub impl Eq for MapRef
 
 pub(all) enum Message {
   Sync(SyncMessage)
@@ -636,10 +645,12 @@ pub(all) enum Out {
   XmlFragment(XmlFragment)
   XmlText(XmlText)
   WeakLink(WeakRef)
-}
+} derive(Eq)
 pub fn Out::branch_id(Self) -> BranchId?
 pub fn[T : FromOut] Out::cast(Self) -> Result[T, Self]
+pub fn Out::equal(Self, Self) -> Bool
 pub fn Out::is_deleted(Self) -> Bool
+pub fn Out::not_equal(Self, Self) -> Bool
 pub fn Out::to_any(Self) -> Any
 pub fn Out::to_input(Self) -> In
 pub fn Out::to_json(Self) -> Json
@@ -774,6 +785,7 @@ pub fn Text::apply_delta(Self, Array[TextDelta]) -> Unit
 pub fn Text::default_prelim() -> In
 pub fn[M] Text::diff(Self, (YChange) -> M) -> Array[Diff[M]]
 pub fn[M] Text::diff_range(Self, (YChange) -> M, hi? : Snapshot, lo? : Snapshot) -> Array[Diff[M]]
+pub fn Text::equal(Self, Self) -> Bool
 pub fn Text::format(Self, Int, Int, Array[(String, Any)]) -> Unit
 pub fn Text::from_branch(Doc, BranchId) -> Self?
 pub fn Text::from_out(Out) -> Self?
@@ -785,6 +797,7 @@ pub fn Text::insert_embed(Self, Int, Any, attributes? : Array[(String, Any)]) ->
 pub fn Text::insert_embed_input(Self, Int, In, attributes? : Array[(String, Any)]) -> Out
 pub fn Text::insert_with_attributes(Self, Int, String, Array[(String, Any)]) -> Unit
 pub fn Text::length(Self) -> Int
+pub fn Text::not_equal(Self, Self) -> Bool
 pub fn Text::observe(Self, String, (TextEvent, Transaction) -> Unit) -> Unit
 pub fn Text::observe_deep(Self, String, (ReadOnlyArray[Event], Transaction) -> Unit) -> Unit
 pub fn Text::push(Self, String) -> Unit
@@ -800,6 +813,7 @@ pub impl DefaultPrelim for Text
 pub impl FromOut for Text
 pub impl RootRef for Text
 pub impl SharedRef for Text
+pub impl Eq for Text
 
 pub(all) struct TextChunk {
   insert : Out
@@ -845,7 +859,10 @@ pub struct UndefinedRef {
 pub fn UndefinedRef::as_array(Self) -> ArrayRef
 pub fn UndefinedRef::as_map(Self) -> MapRef
 pub fn UndefinedRef::as_text(Self) -> Text
+pub fn UndefinedRef::equal(Self, Self) -> Bool
+pub fn UndefinedRef::not_equal(Self, Self) -> Bool
 pub fn UndefinedRef::type_ref(Self) -> Int
+pub impl Eq for UndefinedRef
 
 pub struct UndoEvent[M] {
   mut meta : M
@@ -934,11 +951,13 @@ pub struct WeakRef {
 pub fn WeakRef::as_prelim(Self) -> WeakPrelim
 pub fn WeakRef::branch_id(Self) -> BranchId
 pub fn WeakRef::end_id(Self) -> Id?
+pub fn WeakRef::equal(Self, Self) -> Bool
 pub fn WeakRef::from_branch(Doc, BranchId) -> Self?
 pub fn WeakRef::get_string(Self) -> String
 pub fn WeakRef::get_xml_string(Self) -> String
 pub fn WeakRef::hook(Self) -> Hook[Self]
 pub fn WeakRef::is_deleted(Self) -> Bool
+pub fn WeakRef::not_equal(Self, Self) -> Bool
 pub fn WeakRef::observe(Self, String, (WeakEvent, Transaction) -> Unit) -> Unit
 pub fn WeakRef::observe_deep(Self, String, (ReadOnlyArray[Event], Transaction) -> Unit) -> Unit
 pub fn WeakRef::source(Self) -> LinkSource
@@ -952,6 +971,7 @@ pub fn WeakRef::unobserve_deep(Self, String) -> Bool
 pub fn WeakRef::unquote(Self) -> Array[Out]
 pub impl FromOut for WeakRef
 pub impl SharedRef for WeakRef
+pub impl Eq for WeakRef
 
 pub struct XmlElement {
   // private fields
@@ -959,11 +979,13 @@ pub struct XmlElement {
 pub fn XmlElement::as_fragment(Self) -> XmlFragment
 pub fn XmlElement::as_map(Self) -> MapRef
 pub fn XmlElement::attributes(Self) -> Array[(String, Out)]
+pub fn XmlElement::equal(Self, Self) -> Bool
 pub fn XmlElement::from_branch(Doc, BranchId) -> Self?
 pub fn XmlElement::get_attribute(Self, String) -> Out?
 pub fn XmlElement::get_string(Self) -> String
 pub fn XmlElement::hook(Self) -> Hook[Self]
 pub fn XmlElement::insert_attribute(Self, String, Any) -> Unit
+pub fn XmlElement::not_equal(Self, Self) -> Bool
 pub fn XmlElement::observe(Self, String, (XmlEvent, Transaction) -> Unit) -> Unit
 pub fn XmlElement::observe_deep(Self, String, (ReadOnlyArray[Event], Transaction) -> Unit) -> Unit
 pub fn XmlElement::parent(Self) -> XmlNode?
@@ -977,6 +999,7 @@ pub fn XmlElement::unobserve(Self, String) -> Bool
 pub fn XmlElement::unobserve_deep(Self, String) -> Bool
 pub impl FromOut for XmlElement
 pub impl SharedRef for XmlElement
+pub impl Eq for XmlElement
 
 pub struct XmlEvent {
   // private fields
@@ -996,6 +1019,7 @@ pub fn XmlFragment::as_map(Self) -> MapRef
 pub fn XmlFragment::attributes(Self) -> Array[(String, Out)]
 pub fn XmlFragment::children(Self) -> Array[XmlNode]
 pub fn XmlFragment::default_prelim() -> In
+pub fn XmlFragment::equal(Self, Self) -> Bool
 pub fn XmlFragment::first_child(Self) -> XmlNode?
 pub fn XmlFragment::from_branch(Doc, BranchId) -> Self?
 pub fn XmlFragment::from_out(Out) -> Self?
@@ -1010,6 +1034,7 @@ pub fn XmlFragment::insert_element(Self, Int, String) -> XmlElement
 pub fn XmlFragment::insert_fragment(Self, Int) -> Self
 pub fn XmlFragment::insert_text(Self, Int) -> XmlText
 pub fn XmlFragment::length(Self) -> Int
+pub fn XmlFragment::not_equal(Self, Self) -> Bool
 pub fn XmlFragment::observe(Self, String, (XmlEvent, Transaction) -> Unit) -> Unit
 pub fn XmlFragment::observe_deep(Self, String, (ReadOnlyArray[Event], Transaction) -> Unit) -> Unit
 pub fn XmlFragment::parent(Self) -> XmlNode?
@@ -1029,17 +1054,20 @@ pub impl DefaultPrelim for XmlFragment
 pub impl FromOut for XmlFragment
 pub impl RootRef for XmlFragment
 pub impl SharedRef for XmlFragment
+pub impl Eq for XmlFragment
 
 pub(all) enum XmlNode {
   Element(XmlElement)
   Fragment(XmlFragment)
   Text(XmlText)
-}
+} derive(Eq)
 pub fn XmlNode::as_out(Self) -> Out
 pub fn XmlNode::branch_id(Self) -> BranchId
+pub fn XmlNode::equal(Self, Self) -> Bool
 pub fn XmlNode::get_string(Self) -> String
 pub fn XmlNode::is_deleted(Self) -> Bool
 pub fn XmlNode::next_sibling(Self) -> Self?
+pub fn XmlNode::not_equal(Self, Self) -> Bool
 pub fn XmlNode::parent(Self) -> Self?
 pub fn XmlNode::prev_sibling(Self) -> Self?
 pub fn XmlNode::siblings(Self, backwards? : Bool) -> Iter[Self]
@@ -1055,12 +1083,14 @@ pub fn XmlText::attributes(Self) -> Array[(String, Out)]
 pub fn XmlText::default_prelim() -> In
 pub fn[M] XmlText::diff(Self, (YChange) -> M) -> Array[Diff[M]]
 pub fn[M] XmlText::diff_range(Self, (YChange) -> M, hi? : Snapshot, lo? : Snapshot) -> Array[Diff[M]]
+pub fn XmlText::equal(Self, Self) -> Bool
 pub fn XmlText::from_branch(Doc, BranchId) -> Self?
 pub fn XmlText::from_out(Out) -> Self?
 pub fn XmlText::get_attribute(Self, String) -> Out?
 pub fn XmlText::get_string(Self) -> String
 pub fn XmlText::hook(Self) -> Hook[Self]
 pub fn XmlText::insert_attribute(Self, String, Any) -> Unit
+pub fn XmlText::not_equal(Self, Self) -> Bool
 pub fn XmlText::observe(Self, String, (XmlTextEvent, Transaction) -> Unit) -> Unit
 pub fn XmlText::observe_deep(Self, String, (ReadOnlyArray[Event], Transaction) -> Unit) -> Unit
 pub fn XmlText::parent(Self) -> XmlNode?
@@ -1074,6 +1104,7 @@ pub fn XmlText::unobserve_deep(Self, String) -> Bool
 pub impl DefaultPrelim for XmlText
 pub impl FromOut for XmlText
 pub impl SharedRef for XmlText
+pub impl Eq for XmlText
 
 pub struct XmlTextEvent {
   // private fields

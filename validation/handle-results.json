@@ -4,6 +4,8 @@
   "uuid_cases": 512,
   "checks": [
     "512 UUID formatter inputs including all-zero and all-one bytes",
+    "logical shared-handle and output equality across replicas",
+    "document GUID equality versus instance identity",
     "non-creating root lookup",
     "typed root creation",
     "root and nested hook serde including phantom tag",
