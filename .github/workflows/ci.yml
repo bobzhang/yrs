@@ -1,0 +1,105 @@
+name: Compatibility checks
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  MOONBIT_INSTALL_VERSION: 0.10.15+943464bfa
+  RUST_REFERENCE: ac339600c712642e556895426113c3f9c117de39
+
+jobs:
+  unit:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macos-latest]
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5
+      - uses: actions/setup-node@a0853c24544627f65ddf259abe73b1d18a591444 # v5
+        with:
+          node-version: 24
+      - name: Install pinned MoonBit
+        run: |
+          curl -fsSL https://cli.moonbitlang.com/install/unix.sh -o "$RUNNER_TEMP/install-moon.sh"
+          bash "$RUNNER_TEMP/install-moon.sh"
+          echo "$HOME/.moon/bin" >> "$GITHUB_PATH"
+      - run: moon version --all
+      - run: moon fmt --check
+      - run: moon check --target all --deny-warn
+      - run: moon test --target all
+      - name: Verify generated public interfaces
+        run: |
+          moon info
+          git diff --exit-code -- '*.mbti'
+
+  interoperability:
+    # Reference crash fixtures and process RSS measurements are currently
+    # characterized on macOS. Unit tests above also cover Linux.
+    runs-on: macos-latest
+    timeout-minutes: 30
+    strategy:
+      fail-fast: false
+      matrix:
+        suite: [core, contracts, wire, lifecycle]
+    steps:
+      - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5
+      - name: Check out the unchanged pinned Rust reference
+        uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5
+        with:
+          repository: y-crdt/y-crdt
+          ref: ${{ env.RUST_REFERENCE }}
+          path: .repos/y-crdt
+      - uses: actions/setup-node@a0853c24544627f65ddf259abe73b1d18a591444 # v5
+        with:
+          node-version: 24
+      - name: Install pinned toolchains and Yjs
+        run: |
+          curl -fsSL https://cli.moonbitlang.com/install/unix.sh -o "$RUNNER_TEMP/install-moon.sh"
+          bash "$RUNNER_TEMP/install-moon.sh"
+          echo "$HOME/.moon/bin" >> "$GITHUB_PATH"
+          rustup toolchain install 1.97.1 --profile minimal
+          npm ci --ignore-scripts --prefix validation/yjs
+      - name: Run interoperability checks
+        env:
+          SUITE: ${{ matrix.suite }}
+        run: |
+          case "$SUITE" in
+            core)
+              python3 validation/compare.py
+              ;;
+            contracts)
+              python3 validation/contracts.py
+              python3 validation/handles.py
+              python3 validation/protocol_codec.py
+              ;;
+            wire)
+              python3 validation/sparse_wire.py
+              python3 validation/pending.py
+              python3 validation/pending_scheduling.py
+              ;;
+            lifecycle)
+              python3 validation/transactions.py
+              python3 validation/presence.py
+              python3 validation/traces.py --traces friendsforever_flat --target native
+              ;;
+          esac
+      - name: Preserve reports and any failing fixtures
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: interoperability-${{ matrix.suite }}
+          path: |
+            validation/*results.json
+            validation/fixtures/

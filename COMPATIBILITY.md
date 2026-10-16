@@ -89,7 +89,7 @@ are API/lifetime adaptations, not claims of identical Rust ownership behavior.
 | Concurrent undo | Mixed-runtime networks and restored stack tests pass | Separate nondeterministic restored identities from actual event/behavior mismatches in independently generated histories |
 | Public API | Root exports inventoried above; main editing and protocol APIs implemented | Finish method/module audit and resolve or explicitly define the portability boundary for unimplemented APIs |
 | Performance | All five real editing traces pass on JS/native with GC on/off | Remeasure recent improvements and address the substantial large-trace runtime gap |
-| Release packaging | Local small commits and reproducible oracle scripts | Add CI and a concise supported-feature contract, run final regression gates, then create the public GitHub repository |
+| Release packaging | Local small commits and reproducible oracle scripts | Pinned CI and reproduction instructions are prepared locally; finish the supported-feature contract and regression gates, then create the public GitHub repository |
 
 Known reference defects and deliberate corrections are recorded in
 [`validation/REFERENCE_LIMITATIONS.md`](validation/REFERENCE_LIMITATIONS.md).
