@@ -412,12 +412,12 @@ v1/v2 restarts and bidirectional Rust imports. MoonBit required zero full-state
 catchups; the Rust runs required 4,454, tracked separately from normal replay.
 
 For the largest trace (259,778 transactions, GC enabled), the recorded process
-measurements were (native at `82c8a94`; JavaScript at `e0542e9`):
+measurements were (native at `43342d3`; JavaScript at `e0542e9`):
 
 | Runtime | Seconds | Peak RSS (MiB) |
 | --- | ---: | ---: |
-| MoonBit native | 145.56 | 117.22 |
-| Rust paired with native | 13.23 | 94.17 |
+| MoonBit native | 119.91 | 116.72 |
+| Rust paired with native | 12.89 | 92.92 |
 | MoonBit JavaScript | 184.77 | 434.06 |
 | Rust paired with JavaScript | 12.51 | 92.92 |
 
@@ -525,7 +525,8 @@ and `pending_delete_set()` return owned snapshots of unresolved blocks and early
 deletions without draining them, retrying integration, or notifying observers.
 
 The refreshed trace matrices include clock-indexed block lookups and a nearby
-text-position cache. Each case records its revision, source hash, clean/dirty
+text-position cache. The native run additionally includes GC range lookups and
+skips unnecessary whole-document retention scans. Each case records its revision, source hash, clean/dirty
 source status and toolchain. The JavaScript run also records hashes of the frozen
 MoonBit and Rust executables used throughout the matrix. Both backends pass all
 ten cases. The previous largest GC-enabled measurements were 168.15 seconds
