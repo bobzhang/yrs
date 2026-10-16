@@ -301,3 +301,14 @@ integrated encodings, and pass counts in both runtimes (at most nine passes).
 The fixture `pending-sparse-integration-difference.json` also agrees under this
 schedule. This narrows the remaining discrepancy to buffered-delivery behavior;
 it does not establish ordinary pending lifecycle parity, which remains partial.
+
+## High custom protocol message tags
+
+The pinned `Message::Custom` encoder writes its tag with `write_u8`, while the
+decoder reads a variable-length unsigned integer. Tags 128–255 therefore do not
+round-trip reliably. The port writes the varuint expected by both decoders.
+`python3 validation/protocol_codec.py` exercises all 252 non-reserved tags with
+six payload lengths (including length-encoding boundaries). The unchanged Rust
+decoder accepts all 1,512 port packets with the exact original tag and payload.
+Low-tag encodings agree exactly; 768 high-tag encodings differ from Rust's
+malformed output. These are explicit encoder exceptions, not byte-parity passes.

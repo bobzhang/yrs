@@ -50,7 +50,7 @@ fn Message::write(self : Message, writer : Writer) -> Unit {
       writer.buffer(update.encode_v1())
     }
     Custom(tag, bytes) => {
-      writer.byte(tag.to_int())
+      writer.uint(tag.to_int().to_uint64())
       writer.buffer(bytes)
     }
   }

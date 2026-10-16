@@ -96,3 +96,22 @@ test "protocol codec handles concatenated messages and rejects truncation" {
     _ => fail("unsupported message accepted")
   }
 }
+
+///|
+test "custom protocol tags use varuint encoding throughout the byte tag domain" {
+  for tag in 4..<=255 {
+    let message : @yrs.Message = Custom(tag.to_byte(), b"payload")
+    let encoded = message.encode_v1()
+    match @yrs.Message::decode_v1(encoded) {
+      Custom(actual_tag, payload) => {
+        assert_eq(actual_tag, tag.to_byte())
+        assert_eq(payload, b"payload")
+      }
+      _ => fail("custom message changed kind")
+    }
+    let packet = @yrs.encode_messages([message, Auth(None)])
+    let decoded = @yrs.decode_messages(packet)
+    assert_eq(decoded.length(), 2)
+    assert_eq(@yrs.encode_messages(decoded), packet)
+  }
+}

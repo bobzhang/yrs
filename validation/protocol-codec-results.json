@@ -1,0 +1,8 @@
+{
+  "upstream": "ac339600c712642e556895426113c3f9c117de39",
+  "custom_tags": 252,
+  "packets": 1512,
+  "rust_decoder_matches": 1512,
+  "reference_high_tag_encoder_differences": 768,
+  "status": "passed with explicit reference encoder exception"
+}
