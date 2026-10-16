@@ -644,19 +644,33 @@ fn Doc::settle(self : Doc) -> Unit {
   }
   for (client, ranges) in self.deletes.to_array() {
     for (start, end) in ranges {
-      let known = self.clients
-        .get(client)
-        .map(fn(items) { items[:].to_owned() })
-        .unwrap_or([])
+      guard self.clients.get(client) is Some(blocks) else { continue }
+      // Deletions are retained across updates, so scanning every block for every
+      // old range makes long editing sessions quadratic per incoming packet.
+      // Snapshot only overlapping blocks: splitting below changes the index.
+      let first = for lo = 0, hi = blocks.length(); lo < hi; {
+        let mid = lo + (hi - lo) / 2
+        let item = blocks[mid]
+        if item.id.clock + item.content.length().reinterpret_as_uint() <= start {
+          continue mid + 1, hi
+        } else {
+          continue lo, mid
+        }
+      } nobreak {
+        lo
+      }
+      let last = for lo = first, hi = blocks.length(); lo < hi; {
+        let mid = lo + (hi - lo) / 2
+        if blocks[mid].id.clock < end {
+          continue mid + 1, hi
+        } else {
+          continue lo, mid
+        }
+      } nobreak {
+        lo
+      }
+      let known = blocks[first:last].to_owned()
       for found in known {
-        let found_end = found.id.clock +
-          found.content.length().reinterpret_as_uint()
-        if found.id.clock >= end {
-          break
-        }
-        if found_end <= start {
-          continue
-        }
         let item = if found.id.clock < start {
           self.split(found, (start - found.id.clock).reinterpret_as_int())
         } else {
