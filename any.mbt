@@ -11,7 +11,40 @@ pub(all) enum Any {
   Array(ReadOnlyArray[Any])
   Object(ReadOnlyArray[(String, Any)])
   Buffer(Bytes)
-} derive(Eq, Debug)
+} derive(Debug)
+
+///|
+pub impl Eq for Any with fn equal(self, other) {
+  fn number(integer : Int64, floating : Double) -> Bool {
+    let converted = integer.to_double()
+    if converted != floating {
+      return false
+    }
+    // Match Rust's lossless integer conversion check, including its saturating
+    // float-to-i64 conversion at the upper endpoint.
+    if converted == 9223372036854775808.0 {
+      return integer == 9223372036854775807L
+    }
+    converted.to_int64() == integer
+  }
+  match (self, other) {
+    (Undefined, Undefined) | (Null, Null) => true
+    (Bool(a), Bool(b)) => a == b
+    (Integer(a), Integer(b)) => a == b
+    (Float(a), Float(b)) => a == b
+    (Integer(a), Float(b)) | (Float(b), Integer(a)) => number(a, b)
+    (String(a), String(b)) => a == b
+    (Buffer(a), Buffer(b)) => a == b
+    (Array(a), Array(b)) => a == b
+    (Object(a), Object(b)) => {
+      let left = Map::from_array(a.iter().to_array())
+      let right = Map::from_array(b.iter().to_array())
+      left.length() == right.length() &&
+      left.iter().all(fn(pair) { right.get(pair.0) == Some(pair.1) })
+    }
+    _ => false
+  }
+}
 
 ///|
 pub extend Any with Eq::{equal, not_equal}

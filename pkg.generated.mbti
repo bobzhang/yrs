@@ -55,7 +55,7 @@ pub(all) enum Any {
   Array(ReadOnlyArray[Any])
   Object(ReadOnlyArray[(String, Any)])
   Buffer(Bytes)
-} derive(Eq, @debug.Debug)
+} derive(@debug.Debug)
 pub fn Any::decode(Bytes) -> Self raise DecodeError
 pub fn Any::encode(Self) -> Bytes
 pub fn Any::equal(Self, Self) -> Bool
@@ -64,6 +64,7 @@ pub fn Any::not_equal(Self, Self) -> Bool
 pub fn Any::to_json(Self) -> Json
 pub fn Any::to_repr(Self) -> @debug.Repr
 pub fn Any::to_string(Self) -> String
+pub impl Eq for Any
 
 pub struct ArrayEvent {
   // private fields
