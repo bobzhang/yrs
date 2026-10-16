@@ -88,6 +88,38 @@ fn main() {
             };
             json!({"retained":retained,"missing":tx.has_missing_updates(),"state":state(tx.state_vector()),"text":tx.get_text("text").map(|t|t.get_string(&tx)),"full":info(Update::decode_v1(&tx.encode_state_as_update_v1(&StateVector::default())).unwrap()),"diff":info(Update::decode_v1(&tx.encode_diff_v1(&StateVector::default())).unwrap()),"wire":tx.encode_diff_v1(&StateVector::default())})
         };
+        if input["replay_original"].as_bool() == Some(true) {
+            // Resolve the same original packets to a fixed point without using
+            // Yrs's merged pending store. Drop unready blocks before each packet;
+            // every original packet is offered again on the following pass.
+            let replay = Doc::with_options(Options {
+                client_id: ClientID::new(2),
+                skip_gc: true,
+                ..Options::default()
+            });
+            let mut rounds = 0;
+            loop {
+                let prior = replay.transact().encode_diff_v1(&StateVector::default());
+                for packet in input["packets"].as_array().unwrap() {
+                    let bytes: Vec<u8> = serde_json::from_value(packet.clone()).unwrap();
+                    let mut tx = replay.transact_mut();
+                    tx.prune_pending();
+                    tx.apply_update(Update::decode_v1(&bytes).unwrap()).unwrap();
+                }
+                replay.transact_mut().prune_pending();
+                rounds += 1;
+                let current = replay.transact().encode_diff_v1(&StateVector::default());
+                if current == prior {
+                    break;
+                }
+                assert!(rounds <= 49, "original packet replay failed to settle");
+            }
+            println!(
+                "{}",
+                json!({"replayed_original":view(&replay),"rounds":rounds})
+            );
+            continue;
+        }
         let before = view(&d);
         let pending = d.transact_mut().prune_pending();
         let saved = pending.as_ref().map(|u| u.encode_v1());

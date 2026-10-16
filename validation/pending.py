@@ -43,6 +43,14 @@ def main():
             cases.append({'packets': history, 'gc': [[1, start, length]]})
     a = execute(['validation/rust/target/release/pending'], cases)
     b = execute(['node', 'validation/pending.cjs'], cases)
+    # Separate item integration from pending-store scheduling. Retry each
+    # original packet, dropping unready buffered blocks before the next one,
+    # until the integrated wire stops changing. The unchanged Yrs integrator
+    # and the port must agree exactly on this independent schedule.
+    replay_cases = [dict(case, replay_original=True) for case in cases if 'gc' not in case]
+    raw_reference = execute(['validation/rust/target/release/pending'], replay_cases)
+    raw_port = execute(['node', 'validation/pending.cjs'], replay_cases)
+    assert raw_reference == raw_port, 'original-packet fixed-point integration'
     layouts = reference_encoding_errors = reference_roundtrip_errors = redundant_pending_deletes = 0
     reference_retry_stalls = 0
     sparse_integration_differences = 0
@@ -109,6 +117,8 @@ def main():
         'upstream': 'ac339600c712642e556895426113c3f9c117de39',
         'histories': 64, 'pending_cases': 512, 'scoped_gc_cases': 320,
         'snapshots': len(cases) * 5, 'source_packets_checked': len(packets),
+        'original_packet_fixed_point_cases': len(replay_cases),
+        'maximum_original_packet_passes': max(case['rounds'] for case in raw_reference),
         'different_block_encodings': layouts,
         'reference_full_encoding_identity_failures': reference_encoding_errors,
         'reference_pending_roundtrip_failures': reference_roundtrip_errors,
@@ -116,7 +126,8 @@ def main():
         'reference_pending_retry_stalls': reference_retry_stalls,
         'sparse_integration_differences': sparse_integration_differences,
         'reference_stale_pending_flags_after_complete_delivery': stale_pending_flags,
-        'checks': ['pending block and deletion pruning', 'integrated-only difference',
+        'checks': ['exact original-packet fixed-point integration including wire and pass count',
+                   'pending block and deletion pruning', 'integrated-only difference',
                    'exact port prune/reapply roundtrip', 'state-vector bounds', 'root text views',
                    'GC retained content via historical reconstruction',
                    'full insertion identities equal union of independently decoded source packets'],

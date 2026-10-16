@@ -81,6 +81,28 @@ fn run(input : String) -> String raise {
     }
     doc.gc(delete_set=set)
   }
+  if fields.get("replay_original") == Some(Json(true)) {
+    let replay = @yrs.Doc(client_id=2UL)
+    let mut rounds = 0
+    for ;; {
+      let previous = replay.encode_diff_v1(@yrs.StateVector())
+      for packet in packets {
+        replay.prune_pending() |> ignore
+        replay.apply_update_v1(bytes(packet))
+      }
+      replay.prune_pending() |> ignore
+      rounds += 1
+      if replay.encode_diff_v1(@yrs.StateVector()) == previous {
+        break
+      }
+      guard rounds <= 49 else {
+        abort("original packet replay failed to settle")
+      }
+    }
+    return (
+      { "replayed_original": view(replay, false), "rounds": Json(rounds) } :
+      Json).stringify()
+  }
   let before = view(doc, fields.contains("gc"))
   let saved = doc.prune_pending()
   let pending = saved.map(info).unwrap_or(Json::null())

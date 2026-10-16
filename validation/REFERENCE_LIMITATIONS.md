@@ -288,3 +288,16 @@ difference from the pinned document callback behavior. The generic public
 subscriber queries; generic keys replace Rust's `Into<Origin>` conversion. Like
 Rust, an unsubscribed key remains discoverable until the next dispatch or
 subscription drains it, so repeated unsubscribe can return true before that drain.
+
+## Sparse integration versus pending scheduling
+
+The pending oracle's `replay_original` diagnostic bypasses merged pending data:
+for each pass it drops unresolved blocks, reapplies each original packet, and
+continues until the integrated encoding is stable. It preserves integrated
+blocks and deletions between passes. This exercises exactly the same sparse
+integration schedule in each runtime without relying on pending retry triggers.
+All 512 sampled partial histories produce identical content, ranges, full and
+integrated encodings, and pass counts in both runtimes (at most nine passes).
+The fixture `pending-sparse-integration-difference.json` also agrees under this
+schedule. This narrows the remaining discrepancy to buffered-delivery behavior;
+it does not establish ordinary pending lifecycle parity, which remains partial.

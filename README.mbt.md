@@ -185,8 +185,8 @@ With GC enabled in both runtimes, all 641 core scenarios passed in v1/v2:
 182,284 independent operation snapshots, 273,408 identical-wire replay snapshots,
 54,700 local rich-text operations from identical state, and 7,692 cross-runtime
 document transfers. See `validation/gc-results.json`. This establishes the core
-GC interoperability matrix; concurrent undo and long-run memory/performance
-validation are still separate outstanding checks.
+GC interoperability matrix. Concurrent undo remains a separate audit item;
+long-run editing and memory observations are recorded below.
 
 
 `In` describes detached nested inputs for `ArrayRef::insert` and
@@ -415,3 +415,11 @@ histories, but also a major performance limitation. They are not throughput
 promises or evidence of full compatibility. The files record the tested revision
 and measurement boundaries; timings were collected alongside other validation
 work.
+
+The pending-update audit additionally replays each original packet to a fixed
+point, discarding unresolved buffering between packets. This isolates item
+integration from pending-store merge and retry decisions. Rust and MoonBit agree
+exactly on all 512 cases, including text, identities, deletions, serialized wire
+and pass counts (up to nine passes). Normal buffered delivery still has the
+44 intermediate-state differences reported above; the new check does not count
+those as compatible or change the production scheduler.
