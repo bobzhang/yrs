@@ -1,0 +1,25 @@
+{
+  "contract": "complete CRDT features with documented adaptations",
+  "reference": "ac339600c712642e556895426113c3f9c117de39",
+  "source_sha256": "352c5e7e9573d22d53959a648b47115c0852778a86c94bb3df3c4f07098e36e4",
+  "suite": "weak",
+  "commands": [
+    {
+      "command": [
+        "python3",
+        "validation/weak.py"
+      ],
+      "exit_code": 0,
+      "seconds": 68.478
+    },
+    {
+      "command": [
+        "python3",
+        "validation/weak_network.py"
+      ],
+      "exit_code": 0,
+      "seconds": 90.669
+    }
+  ],
+  "status": "passed"
+}

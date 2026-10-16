@@ -355,6 +355,6 @@
   ],
   "status": "passed",
   "replica_state_comparisons": 136704,
-  "undo_redo_actions": 10112,
-  "causal_state_comparisons": 136704
+  "causal_state_comparisons": 136704,
+  "undo_redo_actions": 10112
 }

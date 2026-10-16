@@ -1,0 +1,73 @@
+{
+  "contract": "complete CRDT features with documented adaptations",
+  "reference": "ac339600c712642e556895426113c3f9c117de39",
+  "source_sha256": "352c5e7e9573d22d53959a648b47115c0852778a86c94bb3df3c4f07098e36e4",
+  "suite": "wire",
+  "commands": [
+    {
+      "command": [
+        "python3",
+        "validation/updates.py"
+      ],
+      "exit_code": 0,
+      "seconds": 14.596
+    },
+    {
+      "command": [
+        "python3",
+        "validation/update_info.py"
+      ],
+      "exit_code": 0,
+      "seconds": 1.364
+    },
+    {
+      "command": [
+        "python3",
+        "validation/sparse_wire.py"
+      ],
+      "exit_code": 0,
+      "seconds": 16.661
+    },
+    {
+      "command": [
+        "python3",
+        "validation/pending.py"
+      ],
+      "exit_code": 0,
+      "seconds": 3.185
+    },
+    {
+      "command": [
+        "python3",
+        "validation/pending_scheduling.py"
+      ],
+      "exit_code": 0,
+      "seconds": 0.547
+    },
+    {
+      "command": [
+        "python3",
+        "validation/v2_clock_boundaries.py"
+      ],
+      "exit_code": 0,
+      "seconds": 1.201
+    },
+    {
+      "command": [
+        "python3",
+        "validation/large_ranges.py"
+      ],
+      "exit_code": 0,
+      "seconds": 12.464
+    },
+    {
+      "command": [
+        "python3",
+        "validation/legacy.py"
+      ],
+      "exit_code": 0,
+      "seconds": 12.569
+    }
+  ],
+  "status": "passed"
+}

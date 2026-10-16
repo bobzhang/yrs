@@ -1,0 +1,73 @@
+{
+  "contract": "complete CRDT features with documented adaptations",
+  "reference": "ac339600c712642e556895426113c3f9c117de39",
+  "source_sha256": "352c5e7e9573d22d53959a648b47115c0852778a86c94bb3df3c4f07098e36e4",
+  "suite": "contracts",
+  "commands": [
+    {
+      "command": [
+        "python3",
+        "validation/contracts.py"
+      ],
+      "exit_code": 0,
+      "seconds": 11.911
+    },
+    {
+      "command": [
+        "python3",
+        "validation/handles.py"
+      ],
+      "exit_code": 0,
+      "seconds": 0.827
+    },
+    {
+      "command": [
+        "python3",
+        "validation/attribution.py"
+      ],
+      "exit_code": 0,
+      "seconds": 5.102
+    },
+    {
+      "command": [
+        "python3",
+        "validation/block_ranges.py"
+      ],
+      "exit_code": 0,
+      "seconds": 0.52
+    },
+    {
+      "command": [
+        "python3",
+        "validation/type_refs.py"
+      ],
+      "exit_code": 0,
+      "seconds": 6.836
+    },
+    {
+      "command": [
+        "python3",
+        "validation/update_codecs.py"
+      ],
+      "exit_code": 0,
+      "seconds": 1.037
+    },
+    {
+      "command": [
+        "python3",
+        "validation/codec_updates.py"
+      ],
+      "exit_code": 0,
+      "seconds": 33.098
+    },
+    {
+      "command": [
+        "python3",
+        "validation/protocol_codec.py"
+      ],
+      "exit_code": 0,
+      "seconds": 2.772
+    }
+  ],
+  "status": "passed"
+}

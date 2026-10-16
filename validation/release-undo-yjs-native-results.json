@@ -1,0 +1,21 @@
+{
+  "contract": "complete CRDT features with documented adaptations",
+  "reference": "ac339600c712642e556895426113c3f9c117de39",
+  "source_sha256": "352c5e7e9573d22d53959a648b47115c0852778a86c94bb3df3c4f07098e36e4",
+  "suite": "undo-yjs-native",
+  "commands": [
+    {
+      "command": [
+        "python3",
+        "validation/undo_mixed.py",
+        "--reference",
+        "yjs",
+        "--target",
+        "native"
+      ],
+      "exit_code": 0,
+      "seconds": 111.024
+    }
+  ],
+  "status": "passed"
+}

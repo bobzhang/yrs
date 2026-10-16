@@ -5,7 +5,7 @@ Collaborative text, rich text, arrays, maps and XML in MoonBit, ported from
 of Yrs 0.28.0, including its weak-reference extension, with Yjs v1/v2 wire formats.
 The release target is **complete CRDT compatibility with documented adaptations**;
 Rust ownership/locking APIs and reproduced upstream bugs are not compatibility
-requirements. Final release validation is in progress.
+requirements. The implementation audit and all 13 release suites pass.
 
 ## Replicate concurrent edits
 
@@ -65,7 +65,8 @@ test "resolve a typed collection on another replica" {
 
 ## Integration contract
 
-Use a unique `Doc(client_id=...)` for each active writer. Transactions run within
+Use a unique `Doc(client_id=...)` for each active writer. For Rust/Yjs peers,
+keep client IDs in the 53-bit range (`0` through `2^53 - 1`). Transactions run within
 `doc.transact(fn(tx) { ... })`; direct collection methods also create transactions.
 Callbacks commit their edits even if the body raises: transactions do not roll back.
 Serialize access to a document in its host execution context.

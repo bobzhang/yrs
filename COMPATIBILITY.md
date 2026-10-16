@@ -7,7 +7,9 @@ public CRDT capabilities and wire interoperability with documented adaptations**
 It does not require Rust source/ABI compatibility, raw storage mutation, native
 lock/future APIs, identical allocation order, or reproducing upstream defects.
 Every discovered port correctness defect must be fixed and regression-tested.
-The implementation audit is complete; the final release run is in progress.
+The implementation audit and all 13 release suites pass for the recorded source
+hash. This is feature compatibility under the stated contract, not a claim of
+exhaustive correctness or performance parity.
 
 ## Public API inventory
 
@@ -107,7 +109,8 @@ Rust also exposes
 unique and explicit; `uuid_v4` accepts the host's entropy callback. The default offset mode is UTF-16 and deleted content is
 retained (`skip_gc=true`); Rust defaults to byte offsets and GC enabled. Pass
 `offset_kind=Bytes, skip_gc=false` to select those Rust defaults. A protocol peer
-must never reuse another active editor's client ID.
+must never reuse another active editor's client ID. Use IDs at most `2^53 - 1`
+when exchanging data with Rust/Yjs peers.
 
 Transactions run synchronously within a callback. They batch notifications and
 updates; they are not rollback transactions. The API does not expose a Rust-style

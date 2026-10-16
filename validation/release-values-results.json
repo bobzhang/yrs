@@ -1,0 +1,41 @@
+{
+  "contract": "complete CRDT features with documented adaptations",
+  "reference": "ac339600c712642e556895426113c3f9c117de39",
+  "source_sha256": "352c5e7e9573d22d53959a648b47115c0852778a86c94bb3df3c4f07098e36e4",
+  "suite": "values",
+  "commands": [
+    {
+      "command": [
+        "python3",
+        "validation/value_decode.py"
+      ],
+      "exit_code": 0,
+      "seconds": 0.865
+    },
+    {
+      "command": [
+        "python3",
+        "validation/value_encode.py"
+      ],
+      "exit_code": 0,
+      "seconds": 0.725
+    },
+    {
+      "command": [
+        "python3",
+        "validation/any_stream.py"
+      ],
+      "exit_code": 0,
+      "seconds": 0.551
+    },
+    {
+      "command": [
+        "python3",
+        "validation/streams.py"
+      ],
+      "exit_code": 0,
+      "seconds": 1.272
+    }
+  ],
+  "status": "passed"
+}
