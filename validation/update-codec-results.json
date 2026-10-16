@@ -1,0 +1,16 @@
+{
+  "upstream": "ac339600c712642e556895426113c3f9c117de39",
+  "field_streams": 270,
+  "fields": 38708,
+  "cross_runtime_streams": 540,
+  "valid_nonidentical_encodings": 0,
+  "raw_framing_cases": 2,
+  "checks": [
+    "all update codec fields",
+    "v2 RLE runs and increasing/decreasing clock deltas",
+    "repeated Unicode keys",
+    "delete-set clock resets and lengths",
+    "raw stream framing"
+  ],
+  "status": "passed"
+}

@@ -528,3 +528,15 @@ negative zero through `(value, negative)` signed pairs, and reject truncated or
 overflowing input. `validation/streams.py` checks 10,480 fields against Rust,
 2,032 cross-decoding cases and 10,723 truncated inputs. The port corrects Rust's
 minimum-i64 variable-encoding overflow; both decoders accept the lossless bytes.
+
+`EncoderV1()`, `EncoderV2()`, `DecoderV1(bytes)` and `DecoderV2(bytes)` expose
+update fields and compression columns. Implement `Encode` / `Decode` for
+application records, composing fields with state vectors, deletion sets and
+snapshots. Codec traits accept custom implementations. Encoder `to_bytes()`
+returns a reusable snapshot; decoder `read_to_end()` does not advance the cursor.
+
+The pinned Rust v2 codec has unusual raw framing: `write_all` adds a length, so
+`write_buf` adds two lengths, and fixed-width numeric writers add a length too.
+These public methods preserve that behavior; normal update fields use their
+dedicated methods. `validation/update_codecs.py` compares 38,708 fields in 270
+streams byte-for-byte, then cross-decodes 540 streams with Rust.

@@ -325,6 +325,76 @@ pub fn Cursor::read_var_uint(Self) -> UInt64 raise DecodeError
 pub fn Cursor::remaining(Self) -> Int
 pub impl Read for Cursor
 
+pub struct DecoderV1 {
+  // private fields
+}
+pub fn DecoderV1::DecoderV1(Bytes) -> Self
+pub fn DecoderV1::read_any(Self) -> Any raise DecodeError
+pub fn DecoderV1::read_buf(Self) -> Bytes raise DecodeError
+pub fn DecoderV1::read_client(Self) -> UInt64 raise DecodeError
+pub fn DecoderV1::read_ds_clock(Self) -> UInt raise DecodeError
+pub fn DecoderV1::read_ds_len(Self) -> UInt raise DecodeError
+pub fn DecoderV1::read_exact(Self, Int) -> Bytes raise DecodeError
+pub fn DecoderV1::read_f32(Self) -> Float raise DecodeError
+pub fn DecoderV1::read_f64(Self) -> Double raise DecodeError
+pub fn DecoderV1::read_i64(Self) -> Int64 raise DecodeError
+pub fn DecoderV1::read_info(Self) -> Byte raise DecodeError
+pub fn DecoderV1::read_json(Self) -> Any raise DecodeError
+pub fn DecoderV1::read_key(Self) -> String raise DecodeError
+pub fn DecoderV1::read_left_id(Self) -> Id raise DecodeError
+pub fn DecoderV1::read_len(Self) -> UInt raise DecodeError
+pub fn DecoderV1::read_parent_info(Self) -> Bool raise DecodeError
+pub fn DecoderV1::read_right_id(Self) -> Id raise DecodeError
+pub fn DecoderV1::read_string(Self) -> String raise DecodeError
+pub fn DecoderV1::read_to_end(Self) -> Bytes
+pub fn DecoderV1::read_type_ref(Self) -> Byte raise DecodeError
+pub fn DecoderV1::read_u16(Self) -> UInt16 raise DecodeError
+pub fn DecoderV1::read_u32(Self) -> UInt raise DecodeError
+pub fn DecoderV1::read_u32_be(Self) -> UInt raise DecodeError
+pub fn DecoderV1::read_u64(Self) -> UInt64 raise DecodeError
+pub fn DecoderV1::read_u8(Self) -> Byte raise DecodeError
+pub fn DecoderV1::read_var_int(Self) -> Int64 raise DecodeError
+pub fn DecoderV1::read_var_signed(Self) -> (Int64, Bool) raise DecodeError
+pub fn DecoderV1::read_var_uint(Self) -> UInt64 raise DecodeError
+pub fn DecoderV1::reset_ds_cur_val(Self) -> Unit
+pub impl Decoder for DecoderV1
+pub impl Read for DecoderV1
+
+pub struct DecoderV2 {
+  // private fields
+}
+pub fn DecoderV2::DecoderV2(Bytes) -> Self raise DecodeError
+pub fn DecoderV2::read_any(Self) -> Any raise DecodeError
+pub fn DecoderV2::read_buf(Self) -> Bytes raise DecodeError
+pub fn DecoderV2::read_client(Self) -> UInt64 raise DecodeError
+pub fn DecoderV2::read_ds_clock(Self) -> UInt raise DecodeError
+pub fn DecoderV2::read_ds_len(Self) -> UInt raise DecodeError
+pub fn DecoderV2::read_exact(Self, Int) -> Bytes raise DecodeError
+pub fn DecoderV2::read_f32(Self) -> Float raise DecodeError
+pub fn DecoderV2::read_f64(Self) -> Double raise DecodeError
+pub fn DecoderV2::read_i64(Self) -> Int64 raise DecodeError
+pub fn DecoderV2::read_info(Self) -> Byte raise DecodeError
+pub fn DecoderV2::read_json(Self) -> Any raise DecodeError
+pub fn DecoderV2::read_key(Self) -> String raise DecodeError
+pub fn DecoderV2::read_left_id(Self) -> Id raise DecodeError
+pub fn DecoderV2::read_len(Self) -> UInt raise DecodeError
+pub fn DecoderV2::read_parent_info(Self) -> Bool raise DecodeError
+pub fn DecoderV2::read_right_id(Self) -> Id raise DecodeError
+pub fn DecoderV2::read_string(Self) -> String raise DecodeError
+pub fn DecoderV2::read_to_end(Self) -> Bytes
+pub fn DecoderV2::read_type_ref(Self) -> Byte raise DecodeError
+pub fn DecoderV2::read_u16(Self) -> UInt16 raise DecodeError
+pub fn DecoderV2::read_u32(Self) -> UInt raise DecodeError
+pub fn DecoderV2::read_u32_be(Self) -> UInt raise DecodeError
+pub fn DecoderV2::read_u64(Self) -> UInt64 raise DecodeError
+pub fn DecoderV2::read_u8(Self) -> Byte raise DecodeError
+pub fn DecoderV2::read_var_int(Self) -> Int64 raise DecodeError
+pub fn DecoderV2::read_var_signed(Self) -> (Int64, Bool) raise DecodeError
+pub fn DecoderV2::read_var_uint(Self) -> UInt64 raise DecodeError
+pub fn DecoderV2::reset_ds_cur_val(Self) -> Unit
+pub impl Decoder for DecoderV2
+pub impl Read for DecoderV2
+
 pub struct DefaultProtocol {
 }
 pub fn DefaultProtocol::DefaultProtocol() -> Self
@@ -424,6 +494,76 @@ pub fn Doc::unobserve_update_v2(Self, String) -> Bool
 pub impl FromOut for Doc
 pub impl Eq for Doc
 
+pub struct EncoderV1 {
+  // private fields
+}
+pub fn EncoderV1::EncoderV1() -> Self
+pub fn EncoderV1::reset_ds_cur_val(Self) -> Unit
+pub fn EncoderV1::to_bytes(Self) -> Bytes raise DecodeError
+pub fn EncoderV1::write_all(Self, Bytes) -> Unit
+pub fn EncoderV1::write_any(Self, Any) -> Unit
+pub fn EncoderV1::write_buf(Self, Bytes) -> Unit
+pub fn EncoderV1::write_client(Self, UInt64) -> Unit
+pub fn EncoderV1::write_ds_clock(Self, UInt) -> Unit
+pub fn EncoderV1::write_ds_len(Self, UInt) -> Unit
+pub fn EncoderV1::write_f32(Self, Float) -> Unit
+pub fn EncoderV1::write_f64(Self, Double) -> Unit
+pub fn EncoderV1::write_i64(Self, Int64) -> Unit
+pub fn EncoderV1::write_info(Self, Byte) -> Unit
+pub fn EncoderV1::write_json(Self, Any) -> Unit
+pub fn EncoderV1::write_key(Self, String) -> Unit
+pub fn EncoderV1::write_left_id(Self, Id) -> Unit
+pub fn EncoderV1::write_len(Self, UInt) -> Unit
+pub fn EncoderV1::write_parent_info(Self, Bool) -> Unit
+pub fn EncoderV1::write_right_id(Self, Id) -> Unit
+pub fn EncoderV1::write_string(Self, String) -> Unit
+pub fn EncoderV1::write_type_ref(Self, Byte) -> Unit
+pub fn EncoderV1::write_u16(Self, UInt16) -> Unit
+pub fn EncoderV1::write_u32(Self, UInt) -> Unit
+pub fn EncoderV1::write_u32_be(Self, UInt) -> Unit
+pub fn EncoderV1::write_u64(Self, UInt64) -> Unit
+pub fn EncoderV1::write_u8(Self, Byte) -> Unit
+pub fn EncoderV1::write_var_int(Self, Int64) -> Unit
+pub fn EncoderV1::write_var_signed(Self, (Int64, Bool)) -> Unit
+pub fn EncoderV1::write_var_uint(Self, UInt64) -> Unit
+pub impl Encoder for EncoderV1
+pub impl Write for EncoderV1
+
+pub struct EncoderV2 {
+  // private fields
+}
+pub fn EncoderV2::EncoderV2() -> Self
+pub fn EncoderV2::reset_ds_cur_val(Self) -> Unit
+pub fn EncoderV2::to_bytes(Self) -> Bytes raise DecodeError
+pub fn EncoderV2::write_all(Self, Bytes) -> Unit
+pub fn EncoderV2::write_any(Self, Any) -> Unit
+pub fn EncoderV2::write_buf(Self, Bytes) -> Unit
+pub fn EncoderV2::write_client(Self, UInt64) -> Unit
+pub fn EncoderV2::write_ds_clock(Self, UInt) -> Unit
+pub fn EncoderV2::write_ds_len(Self, UInt) -> Unit
+pub fn EncoderV2::write_f32(Self, Float) -> Unit
+pub fn EncoderV2::write_f64(Self, Double) -> Unit
+pub fn EncoderV2::write_i64(Self, Int64) -> Unit
+pub fn EncoderV2::write_info(Self, Byte) -> Unit
+pub fn EncoderV2::write_json(Self, Any) -> Unit
+pub fn EncoderV2::write_key(Self, String) -> Unit
+pub fn EncoderV2::write_left_id(Self, Id) -> Unit
+pub fn EncoderV2::write_len(Self, UInt) -> Unit
+pub fn EncoderV2::write_parent_info(Self, Bool) -> Unit
+pub fn EncoderV2::write_right_id(Self, Id) -> Unit
+pub fn EncoderV2::write_string(Self, String) -> Unit
+pub fn EncoderV2::write_type_ref(Self, Byte) -> Unit
+pub fn EncoderV2::write_u16(Self, UInt16) -> Unit
+pub fn EncoderV2::write_u32(Self, UInt) -> Unit
+pub fn EncoderV2::write_u32_be(Self, UInt) -> Unit
+pub fn EncoderV2::write_u64(Self, UInt64) -> Unit
+pub fn EncoderV2::write_u8(Self, Byte) -> Unit
+pub fn EncoderV2::write_var_int(Self, Int64) -> Unit
+pub fn EncoderV2::write_var_signed(Self, (Int64, Bool)) -> Unit
+pub fn EncoderV2::write_var_uint(Self, UInt64) -> Unit
+pub impl Encoder for EncoderV2
+pub impl Write for EncoderV2
+
 pub(all) enum EntryChange {
   Inserted(Out)
   Updated(Out, Out)
@@ -511,10 +651,12 @@ pub struct IdSet {
 pub fn IdSet::IdSet(ranges? : Array[(UInt64, UInt, UInt)]) -> Self
 pub fn IdSet::client_ids(Self) -> Array[UInt64]
 pub fn IdSet::contains(Self, Id) -> Bool
+pub fn IdSet::decode(&Decoder) -> Self raise DecodeError
 pub fn IdSet::decode_v1(Bytes) -> Self raise DecodeError
 pub fn IdSet::decode_v2(Bytes) -> Self raise DecodeError
 pub fn IdSet::diff(Self, Self) -> Self
 pub fn IdSet::diff_with(Self, Self) -> Unit
+pub fn IdSet::encode(Self, &Encoder) -> Unit
 pub fn IdSet::encode_v1(Self) -> Bytes
 pub fn IdSet::encode_v2(Self) -> Bytes raise DecodeError
 pub fn IdSet::from_json(Json) -> Self raise DecodeError
@@ -529,6 +671,8 @@ pub fn IdSet::merge_with(Self, Self) -> Unit
 pub fn IdSet::ranges(Self) -> Array[(UInt64, UInt, UInt)]
 pub fn IdSet::remove_range(Self, Id, UInt) -> Unit
 pub fn IdSet::to_json(Self) -> Json
+pub impl Decode for IdSet
+pub impl Encode for IdSet
 
 pub(all) enum In {
   Value(Any)
@@ -738,10 +882,12 @@ pub struct Snapshot {
   // private fields
 } derive(@debug.Debug)
 pub fn Snapshot::Snapshot(state? : StateVector, deletions? : Array[(UInt64, UInt, UInt)], delete_set? : IdSet) -> Self
+pub fn Snapshot::decode(&Decoder) -> Self raise DecodeError
 pub fn Snapshot::decode_v1(Bytes) -> Self raise DecodeError
 pub fn Snapshot::decode_v2(Bytes) -> Self raise DecodeError
 pub fn Snapshot::delete_set(Self) -> IdSet
 pub fn Snapshot::deletions(Self) -> Array[(UInt64, UInt, UInt)]
+pub fn Snapshot::encode(Self, &Encoder) -> Unit
 pub fn Snapshot::encode_v1(Self) -> Bytes
 pub fn Snapshot::encode_v2(Self) -> Bytes raise DecodeError
 pub fn Snapshot::equal(Self, Self) -> Bool
@@ -749,6 +895,8 @@ pub fn Snapshot::is_visible(Self, Id) -> Bool
 pub fn Snapshot::not_equal(Self, Self) -> Bool
 pub fn Snapshot::state_vector(Self) -> StateVector
 pub fn Snapshot::to_repr(Self) -> @debug.Repr
+pub impl Decode for Snapshot
+pub impl Encode for Snapshot
 pub impl Eq for Snapshot
 
 pub struct StackItem[M] {
@@ -770,8 +918,10 @@ pub struct StateVector {
 pub fn StateVector::StateVector(entries? : Array[(UInt64, UInt)]) -> Self
 pub fn StateVector::contains(Self, Id) -> Bool
 pub fn StateVector::contains_client(Self, UInt64) -> Bool
+pub fn StateVector::decode(&Decoder) -> Self raise DecodeError
 pub fn StateVector::decode_v1(Bytes) -> Self raise DecodeError
 pub fn StateVector::decode_v2(Bytes) -> Self raise DecodeError
+pub fn StateVector::encode(Self, &Encoder) -> Unit
 pub fn StateVector::encode_v1(Self) -> Bytes
 pub fn StateVector::encode_v2(Self) -> Bytes raise DecodeError
 pub fn StateVector::entries(Self) -> Array[(UInt64, UInt)]
@@ -787,6 +937,8 @@ pub fn StateVector::partial_compare(Self, Self) -> Int?
 pub fn StateVector::set_max(Self, UInt64, UInt) -> Unit
 pub fn StateVector::set_min(Self, UInt64, UInt) -> Unit
 pub fn StateVector::to_repr(Self) -> @debug.Repr
+pub impl Decode for StateVector
+pub impl Encode for StateVector
 pub impl Eq for StateVector
 
 pub(all) struct StickyIndex {
@@ -1183,9 +1335,55 @@ pub(open) trait AsyncProtocol {
   async fn missing_handle(Self, Awareness, Byte, Bytes) -> Message? = _
 }
 
+pub(open) trait Decode {
+  fn decode(&Decoder) -> Self raise DecodeError
+  fn decode_v1(Bytes) -> Self raise DecodeError = _
+  fn decode_v2(Bytes) -> Self raise DecodeError = _
+}
+
+pub(open) trait Decoder : Read {
+  fn reset_ds_cur_val(Self) -> Unit
+  fn read_to_end(Self) -> Bytes
+  fn read_ds_clock(Self) -> UInt raise DecodeError
+  fn read_ds_len(Self) -> UInt raise DecodeError
+  fn read_left_id(Self) -> Id raise DecodeError
+  fn read_right_id(Self) -> Id raise DecodeError
+  fn read_client(Self) -> UInt64 raise DecodeError
+  fn read_info(Self) -> Byte raise DecodeError
+  fn read_parent_info(Self) -> Bool raise DecodeError
+  fn read_type_ref(Self) -> Byte raise DecodeError
+  fn read_len(Self) -> UInt raise DecodeError
+  fn read_any(Self) -> Any raise DecodeError
+  fn read_json(Self) -> Any raise DecodeError
+  fn read_key(Self) -> String raise DecodeError
+}
+
 pub(open) trait DefaultPrelim : SharedRef {
   fn default_prelim() -> In
   fn from_out(Out) -> Self?
+}
+
+pub(open) trait Encode {
+  fn encode(Self, &Encoder) -> Unit
+  fn encode_v1(Self) -> Bytes raise DecodeError = _
+  fn encode_v2(Self) -> Bytes raise DecodeError = _
+}
+
+pub(open) trait Encoder : Write {
+  fn to_bytes(Self) -> Bytes raise DecodeError
+  fn reset_ds_cur_val(Self) -> Unit
+  fn write_ds_clock(Self, UInt) -> Unit
+  fn write_ds_len(Self, UInt) -> Unit
+  fn write_left_id(Self, Id) -> Unit
+  fn write_right_id(Self, Id) -> Unit
+  fn write_client(Self, UInt64) -> Unit
+  fn write_info(Self, Byte) -> Unit
+  fn write_parent_info(Self, Bool) -> Unit
+  fn write_type_ref(Self, Byte) -> Unit
+  fn write_len(Self, UInt) -> Unit
+  fn write_any(Self, Any) -> Unit
+  fn write_json(Self, Any) -> Unit
+  fn write_key(Self, String) -> Unit
 }
 
 pub(open) trait FromAny {
