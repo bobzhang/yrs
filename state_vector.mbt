@@ -20,7 +20,7 @@ pub extend Id with Debug::{to_repr}
 /// Next expected clock for each client; clocks count UTF-16 units for text.
 pub struct StateVector {
   priv clocks : Map[UInt64, UInt32]
-}
+} derive(Debug)
 
 ///|
 pub fn StateVector::StateVector(

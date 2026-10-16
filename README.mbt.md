@@ -272,3 +272,16 @@ and slices retain their order. Unicode classes are generated from the pinned
 Rust 1.97.1 toolchain's Unicode 17.0 tables by
 `validation/generate_path_unicode.py`. Unit tests also exercise live-handle edits,
 untyped imported roots, XML queries and a 1,000-level recursive traversal.
+
+
+`Update::decode_v1` / `decode_v2` expose state-vector bounds, insertion identities,
+delete sets and whether a packet extends a replica's state. Updates can be merged,
+differenced against a state vector, re-encoded and applied with `Doc::apply_update`.
+Decoded deleted-content items count as insertions until integration; GC blocks
+are included only when requested. State vectors support causal partial ordering,
+and state vectors and sticky indices support both metadata encoding versions.
+
+`python3 validation/update_info.py` compares 5,122 distinct Rust-produced packets
+from 64 histories with garbage collection enabled and disabled, plus a retained
+deleted-content regression. Another 96 cases compare exact v2 state-vector and
+sticky-index bytes, including Unicode root names and both cursor associations.

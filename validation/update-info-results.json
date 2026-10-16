@@ -1,0 +1,19 @@
+{
+  "upstream": "ac339600c712642e556895426113c3f9c117de39",
+  "histories": 64,
+  "gc_modes": [
+    false,
+    true
+  ],
+  "packets": 5122,
+  "v2_metadata_cases": 96,
+  "checks": [
+    "empty and skip-only",
+    "contiguous upper vector",
+    "lower vector",
+    "insertions including GC",
+    "delete sets",
+    "state extension"
+  ],
+  "status": "passed"
+}

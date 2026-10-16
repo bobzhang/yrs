@@ -4,7 +4,7 @@
 pub struct Snapshot {
   priv state : StateVector
   priv deletes : Map[UInt64, Array[(UInt32, UInt32)]]
-}
+} derive(Debug)
 
 ///|
 /// Deletion tuples contain client ID, inclusive start and exclusive end.
