@@ -22,8 +22,8 @@ test "weak map links follow replacements removals and wire replay" {
   assert_true(link.try_deref_value() is None)
   map.insert("source", Integer(3L))
   assert_eq(link.try_deref_value().unwrap().to_json(), Json(3))
-  // Once a linked entry is deleted, upstream detaches its observation edges.
-  assert_eq(events, [Some(Json(2)), None])
+  // A live link continues observing the key after its old value is deleted.
+  assert_eq(events, [Some(Json(2)), None, Some(Json(3))])
   for v2 in [false, true] {
     let peer = @yrs.Doc(client_id=2UL, skip_gc=false)
     if v2 {

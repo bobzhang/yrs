@@ -71,6 +71,11 @@ def main():
  port=execute(['node','validation/weak.cjs','v1','gc'],[fixture])[0]
  assert reference[-1]['links']==port[-1]['links']==port[-2]['links']
  assert reference[-1]['events']==[] and port[-1]['events']==['t2']
+ fixture=json.loads((ROOT/'validation/fixtures/upstream-weak-map-reinsert-observers.json').read_text())
+ reference=execute(['validation/rust/target/release/weak','v1'],[fixture])[0]
+ port=execute(['node','validation/weak.cjs','v1'],[fixture])[0]
+ assert reference[-1]['links']==port[-1]['links']
+ assert reference[-1]['events']==[] and port[-1]['events']==['mref']
  cases=[]
  for seed in range(64):
   rng=random.Random(22000+seed);ops=[['i',0,'abcdefghijklmnop'],*[['ai',i,i] for i in range(12)],['m','key',0],['ml','m0','key']]

@@ -636,7 +636,7 @@ fn Doc::integrate_missing(self : Doc, raw : RawItem) -> Bool {
       self.mark_deleted(item)
     }
   }
-  if item.parent_sub is None && !item.deleted {
+  if !item.deleted {
     self.join_weak_links(item)
   }
   if item.content is Shared(SharedWeak(source)) {

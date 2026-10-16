@@ -12,6 +12,9 @@ fn Doc::materialize_weak(self : Doc, link : Id, source : LinkSource) -> Unit {
       tx.weak_changes.add(Nested(link))
     }
   }
+  if source.parent(self) is Some(parent) {
+    self.branch(parent).weak_quotes.add(link)
+  }
   if source.start.scope is Relative(id) &&
     self.find(id) is Some(item) &&
     item.parent_sub is Some(_) {
@@ -22,9 +25,6 @@ fn Doc::materialize_weak(self : Doc, link : Id, source : LinkSource) -> Unit {
     last.links.add(link)
     last.linked = true
     return
-  }
-  if source.parent(self) is Some(parent) {
-    self.branch(parent).weak_quotes.add(link)
   }
   let segments = source.segments(self)
   for (original, start, end) in segments {
@@ -61,14 +61,29 @@ fn Doc::unlink_weak(self : Doc, link : Id) -> Unit {
 
 ///|
 fn Doc::join_weak_links(self : Doc, item : Item) -> Unit {
-  self.join_weak_neighbor_links(item)
+  if item.parent_sub is None {
+    self.join_weak_neighbor_links(item)
+  }
   guard item.parent is Some(parent) else { return }
-  // Neighbor edges disappear when the last quoted item is deleted, and there
-  // is no neighbor at an unbounded endpoint. Retain quotation subscriptions at
-  // the branch so these cases still notify and propagate deep changes.
+  // Item edges disappear on deletion. Retain subscriptions at the branch so
+  // reinserting a map key and repopulating a quotation both reconnect them.
   for link in self.branch(parent).weak_quotes {
     if self.find(link)
       is Some({ content: Shared(SharedWeak(source)), deleted: false, .. }) {
+      if item.parent_sub is Some(key) {
+        if source.start.scope is Relative(anchor) &&
+          self.find(anchor) is Some({ parent_sub: Some(linked_key), .. }) &&
+          key == linked_key {
+          item.linked = true
+          item.links.add(link)
+        }
+        continue
+      }
+      // Map links do not quote their containing branch's sequence.
+      if source.start.scope is Relative(anchor) &&
+        self.find(anchor) is Some({ parent_sub: Some(_), .. }) {
+        continue
+      }
       for (quoted, start, end) in source.segments(self) {
         if quoted.id == item.id && start < end {
           item.linked = true
