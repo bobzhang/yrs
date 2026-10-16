@@ -24,6 +24,7 @@ fn event(e:&Event,tx:&TransactionMut)->Value{
  let path:Vec<_>=e.path().iter().map(|p|match p{PathSegment::Key(k)=>json!(k.as_ref()),PathSegment::Index(i)=>json!(i)}).collect();
  let mut out=json!({"path":path,"target":e.target().to_json(tx)});
  match e {
+ Event::Weak(_)=>{out["kind"]=json!("weak");},
  Event::Text(e)=>{out["kind"]=json!("text");out["delta"]=delta(e.delta(tx),tx)},
  Event::Array(e)=>{out["kind"]=json!("array");out["delta"]=changes(e.delta(tx),tx)},
  Event::Map(e)=>{out["kind"]=json!("map");out["keys"]=keys(e.keys(tx),tx)},
