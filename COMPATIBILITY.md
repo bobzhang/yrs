@@ -2,9 +2,12 @@
 
 The reference is Yrs 0.28.0 at
 `ac339600c712642e556895426113c3f9c117de39`, with its `weak` feature enabled.
-Yjs 13.6.27 is a second wire-format reference. **This port is still in development;
-full upstream compatibility is not established.** Passing the core suite is one
-part of that work, not a release certification.
+Yjs 13.6.27 is a second wire-format reference. The agreed contract is **complete
+public CRDT capabilities and wire interoperability with documented adaptations**.
+It does not require Rust source/ABI compatibility, raw storage mutation, native
+lock/future APIs, identical allocation order, or reproducing upstream defects.
+Every discovered port correctness defect must be fixed and regression-tested.
+The implementation audit is complete; the final release run is in progress.
 
 ## Public API inventory
 
@@ -28,7 +31,7 @@ The generated `pkg.generated.mbti` is the authoritative MoonBit API.
 | `XmlFragment`, `XmlFragmentRef`, `XmlFragmentPrelim` | `XmlFragment`, `In.XmlFragment` |
 | `XmlTextRef`, `XmlTextPrelim` | `XmlText`, `In.XmlText` |
 | `GetString`, `Observable`, `DeepObservable` | Concrete `get_string`, `observe`, `observe_deep`, and keyed `unobserve` methods |
-| `Quotable`, `WeakPrelim`, `WeakRef` | Concrete `quote` methods, `WeakPrelim`, `WeakRef`; query/event differences remain open |
+| `Quotable`, `WeakPrelim`, `WeakRef` | Concrete `quote` methods, `WeakPrelim`, `WeakRef`; corrected visible boundaries, queries and subscriptions described below |
 | `SharedRef`, `RootRef`, `Root`, `Nested`, `Hook` | Open traits, generic hook creation, typed collection resolution and identity serialization |
 | `StateVector`, `Snapshot`, `Update`, `IdSet` | Implemented, including owned empty-client metadata and v1/v2 round-trips |
 | `BlockRange` | Identity endpoints, half-open interval, slice and membership checked against Rust |
@@ -52,7 +55,11 @@ The compiler-derived [public API inventory](validation/public-api-inventory.json
 now records 225 reachable declarations and 802 inherent methods, trait members,
 fields and variants, including public module paths and reexports. Regenerate it
 with `python3 validation/public_api.py`; `--check` detects inventory drift. It is
-a declaration inventory, **not a completed semantic audit** or a coverage percentage.
+a declaration inventory, not a coverage percentage. The reviewed
+[`api-contract.json`](validation/api-contract.json) assigns all 225 declarations
+and 802 members to 23 capability/adaptation groups with implementation descriptions
+and test evidence. `python3 validation/api_contract.py` rejects omissions or member
+drift; it does not substitute for semantic tests.
 Rust also exposes
 `block`, `doc`, `types`, `updates`, `any`, `atomic`, `branch`, `encoding`, `error`,
 `iter`, `json_path`, `observer`, `sync`, and `undo` modules. In particular:
@@ -77,8 +84,8 @@ Rust also exposes
   Rust, including 906 unsigned-overflow rejections. Application enum/record
   representations are explicitly implemented with the open trait; MoonBit
   compiler-derived serde attributes are not provided. `get_json_as` is a separate MoonBit JSON adapter.
-- `types` / `undo`: concrete editing and observation are implemented; method-level
-  edge cases, generic conversions and event equivalence remain under audit.
+- `types` / `undo`: concrete editing, generic conversions and observation are implemented.
+  The capability audit maps the complete pinned member surface to portable APIs.
   The open `AsPrelim` trait exposes `to_input` for generic deep-copy builders
   across shared collections, output values, XML nodes and weak links. Rust's
   associated preliminary types are represented by the `In` enum; application
@@ -118,20 +125,35 @@ Observers use explicit keys and cancellation instead of Rust RAII subscription
 guards. Iterator-returning convenience methods may snapshot collections. These
 are API/lifetime adaptations, not claims of identical Rust ownership behavior.
 
-## Behavioral gates still open
+## Behavioral contract and evidence
 
-| Area | Current evidence | Work remaining |
+| Area | Required behavior and evidence | Deliberate difference |
 | --- | --- | --- |
-| Unsigned clock boundaries | Full-width GC/deleted ranges and v2 deltas validated; 7,042 persisted-state reloads and 16,400 exact Yjs codec fields pass | Pinned Rust overflows large v2 origin deltas; these packets use Yjs as the independent reference |
-| Ordinary sparse pending delivery | Complete histories and scoped GC agree; original-packet fixed-point replay agrees in all 512 cases | Ordinary buffering intentionally differs in 44 cases; a reduced retry-watermark/head-blocking fixture explains how the 14 persistent cases arise. Exact buffered-state parity remains unclaimed |
-| Weak references | Mixed-runtime concurrent editing converges; broad query/event oracles retained | Resolve query inconsistencies and additional port notifications; do not label partial event comparisons as passes |
-| Concurrent undo | Mixed Yjs/MoonBit authors pass 96 histories in v1/v2 with GC on/off on both JS and native, including notifications and 205,056 document and causal-state comparisons per backend. Rust mirrors validate GC-enabled port authors; 9,984 post-undo reloads pass. Restored-parent persistence and inferred-GC deletion propagation defects corrected | Expanded mixed Rust-author gate encounters a Rust panic, reproduced by seven Rust-only operations. Strict independent histories differ because pinned Rust loses restored map entries and independently allocated restoration identities affect conflicts |
-| Observer-packet synchronization | 128 mixed Yjs/MoonBit histories per backend converge using only emitted packets; shuffled delivery, duplicates and 768 reloads checked | Does not resolve the separate Rust-owned GC undo crash |
-| Public API | Root exports inventoried above; main editing and protocol APIs implemented | Finish method/module audit and resolve or explicitly define the portability boundary for unimplemented APIs |
-| Performance | All five real editing traces pass on JS/native with GC on/off | Clock-index and position-cache changes remeasured on both backends; address the substantial large-trace runtime gap |
-| Release packaging | Local small commits and reproducible oracle scripts | Pinned CI and reproduction instructions are prepared locally; finish the supported-feature contract and regression gates, then create the public GitHub repository |
+| Core shared types | Text, rich text, arrays, maps, nested values and XML; 641 randomized scenarios in both formats and GC modes, with independent operations and wire replay | Attribute iteration can allocate different IDs; comparisons of conflict-sensitive edits use identical wire histories |
+| Unsigned clock boundaries | Full-width GC/deleted ranges, 7,042 reloads and 16,400 exact Yjs clock fields | Corrects pinned Rust's large v2 delta overflow |
+| Sparse delivery | All 512 sparse cases immediately equal the unchanged Rust original-packet causal fixed point; 320 scoped-GC cases pass | Ready blocks are not stalled behind unrelated missing dependencies. Corrupt pending encodings and stale pending flags are not reproduced |
+| Weak references | All current visible range combinations, 9,004 positional quote checks, 74,240 identical-wire query/event snapshots and mixed-author convergence | Skip tombstones/format markers when constructing ranges; preserve subscriptions through splits, empty quotations and key reinsertion; reject Rust's internally inconsistent query results |
+| Concurrent undo | Mixed Yjs/MoonBit authors in v1/v2 with both GC modes on JS/native; structured documents, causal state, notifications, high clocks and reloads | Restoration IDs may differ across independently authored undo. Correct restored-parent persistence; retain the seven-operation Rust GC panic witness |
+| Observer transport | 128 mixed Yjs/MoonBit histories per backend converge using emitted packets alone, with shuffled delivery, duplicates and 768 reloads | Applications must forward updates produced by remote transactions too |
+| History and positions | Snapshots, annotated diffs, attribution, cursor identities and byte/UTF-16 offset conversion | Correct malformed Rust snapshot output and byte-mode cursor units |
+| Lifecycle and protocols | Subdocuments, transaction/deep events, awareness and custom synchronous/asynchronous sync handlers | Correct stale subdocument registry entries after destroy; transport/time/scheduling belong to the host |
+
+The release suites in `validation/release.py` execute the supported contract.
+Expected upstream failures are asserted by focused reproductions, never silently
+converted to ordinary passing comparisons. The unmodified strict `undo.py` and
+Rust-owned GC `undo_mixed.py` diagnostics remain available; independently
+allocated undo IDs and the known upstream panic make those unsuitable as release
+success criteria. The release instead tests mixed Yjs authors under both GC modes,
+GC-disabled mixed Rust authors, GC-enabled port authors with Rust mirrors, and
+saved-state roundtrips in both runtimes.
+
+The port does not promise equal runtime/memory use: the largest measured native
+editing trace is approximately nine times slower than Rust. This is a performance
+limitation, not missing CRDT functionality. See the versioned benchmark reports.
 
 Known reference defects and deliberate corrections are recorded in
 [`validation/REFERENCE_LIMITATIONS.md`](validation/REFERENCE_LIMITATIONS.md).
-Individual `validation/*-results.json` files describe the exact scope of each
-comparison. They must not be combined into a blanket percentage of compatibility.
+Individual `validation/*-results.json` files describe their exact scope. Historical
+reports saying “partial compatibility” refer to exact pinned Rust behavior; read
+their exception details and the current contract rather than treating them as a
+percentage. Release reports identify the exact library source hash tested.
