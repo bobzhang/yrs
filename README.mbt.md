@@ -491,3 +491,10 @@ including update/snapshot codecs, and 4,416 saved undo-stack operations.
 version/variant bits as Rust's `uuid_v4_from(u128)`. `uuid_v4(entropy)` calls the
 host's 16-byte entropy provider once, without a hidden deterministic fallback.
 The identity oracle compares 512 UUID inputs against unchanged Rust.
+
+`MapRef.get_or_init[T : DefaultPrelim](key)` reuses a matching collection and
+replaces a missing or differently typed value with an empty one. It supports
+text, arrays, maps, XML fragments and XML text, with concrete convenience methods
+for each. `SharedRef`, `RootRef`, and `DefaultPrelim` are open traits, so an
+application can wrap a shared collection in its own type and still initialize,
+save a typed hook, and resolve it on another replica.

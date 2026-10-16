@@ -93,7 +93,9 @@ pub fn ArrayEvent::target(Self) -> ArrayRef
 pub struct ArrayRef {
   // private fields
 }
+pub fn ArrayRef::default_prelim() -> In
 pub fn ArrayRef::from_branch(Doc, BranchId) -> Self?
+pub fn ArrayRef::from_out(Out) -> Self?
 pub fn ArrayRef::get(Self, Int) -> Out?
 pub fn ArrayRef::get_or_insert_root(Doc, String) -> Self
 pub fn ArrayRef::hook(Self) -> Hook[Self]
@@ -118,6 +120,7 @@ pub fn ArrayRef::to_array(Self) -> Array[Out]
 pub fn ArrayRef::to_json(Self) -> Json
 pub fn ArrayRef::unobserve(Self, String) -> Bool
 pub fn ArrayRef::unobserve_deep(Self, String) -> Bool
+pub impl DefaultPrelim for ArrayRef
 pub impl RootRef for ArrayRef
 pub impl SharedRef for ArrayRef
 
@@ -511,12 +514,17 @@ pub struct MapRef {
 }
 pub fn MapRef::clear(Self) -> Unit
 pub fn MapRef::contains_key(Self, String) -> Bool
+pub fn MapRef::default_prelim() -> In
 pub fn MapRef::entries(Self) -> Array[(String, Out)]
 pub fn MapRef::from_branch(Doc, BranchId) -> Self?
+pub fn MapRef::from_out(Out) -> Self?
 pub fn MapRef::get(Self, String) -> Out?
+pub fn[T : DefaultPrelim] MapRef::get_or_init(Self, String) -> T
 pub fn MapRef::get_or_init_array(Self, String) -> ArrayRef
 pub fn MapRef::get_or_init_map(Self, String) -> Self
 pub fn MapRef::get_or_init_text(Self, String) -> Text
+pub fn MapRef::get_or_init_xml_fragment(Self, String) -> XmlFragment
+pub fn MapRef::get_or_init_xml_text(Self, String) -> XmlText
 pub fn MapRef::get_or_insert_root(Doc, String) -> Self
 pub fn MapRef::hook(Self) -> Hook[Self]
 pub fn MapRef::insert(Self, String, Any) -> Unit
@@ -538,6 +546,7 @@ pub fn MapRef::try_update(Self, String, Any) -> Bool
 pub fn MapRef::unobserve(Self, String) -> Bool
 pub fn MapRef::unobserve_deep(Self, String) -> Bool
 pub fn MapRef::values(Self) -> Iter[Out]
+pub impl DefaultPrelim for MapRef
 pub impl RootRef for MapRef
 pub impl SharedRef for MapRef
 
@@ -736,10 +745,12 @@ pub struct Text {
   // private fields
 }
 pub fn Text::apply_delta(Self, Array[TextDelta]) -> Unit
+pub fn Text::default_prelim() -> In
 pub fn[M] Text::diff(Self, (YChange) -> M) -> Array[Diff[M]]
 pub fn[M] Text::diff_range(Self, (YChange) -> M, hi? : Snapshot, lo? : Snapshot) -> Array[Diff[M]]
 pub fn Text::format(Self, Int, Int, Array[(String, Any)]) -> Unit
 pub fn Text::from_branch(Doc, BranchId) -> Self?
+pub fn Text::from_out(Out) -> Self?
 pub fn Text::get_or_insert_root(Doc, String) -> Self
 pub fn Text::get_string(Self) -> String
 pub fn Text::hook(Self) -> Hook[Self]
@@ -757,6 +768,7 @@ pub fn Text::sticky_index(Self, Int, assoc? : Assoc) -> StickyIndex?
 pub fn Text::to_delta(Self) -> Array[TextChunk]
 pub fn Text::unobserve(Self, String) -> Bool
 pub fn Text::unobserve_deep(Self, String) -> Bool
+pub impl DefaultPrelim for Text
 pub impl RootRef for Text
 pub impl SharedRef for Text
 
@@ -948,8 +960,10 @@ pub struct XmlFragment {
 pub fn XmlFragment::as_map(Self) -> MapRef
 pub fn XmlFragment::attributes(Self) -> Array[(String, Out)]
 pub fn XmlFragment::children(Self) -> Array[XmlNode]
+pub fn XmlFragment::default_prelim() -> In
 pub fn XmlFragment::first_child(Self) -> XmlNode?
 pub fn XmlFragment::from_branch(Doc, BranchId) -> Self?
+pub fn XmlFragment::from_out(Out) -> Self?
 pub fn XmlFragment::get(Self, Int) -> XmlNode?
 pub fn XmlFragment::get_attribute(Self, String) -> Out?
 pub fn XmlFragment::get_or_insert_root(Doc, String) -> Self
@@ -975,6 +989,7 @@ pub fn XmlFragment::sticky_index(Self, Int, assoc? : Assoc) -> StickyIndex?
 pub fn XmlFragment::successors(Self) -> Iter[XmlNode]
 pub fn XmlFragment::unobserve(Self, String) -> Bool
 pub fn XmlFragment::unobserve_deep(Self, String) -> Bool
+pub impl DefaultPrelim for XmlFragment
 pub impl RootRef for XmlFragment
 pub impl SharedRef for XmlFragment
 
@@ -998,9 +1013,11 @@ pub struct XmlText {
 pub fn XmlText::as_map(Self) -> MapRef
 pub fn XmlText::as_text(Self) -> Text
 pub fn XmlText::attributes(Self) -> Array[(String, Out)]
+pub fn XmlText::default_prelim() -> In
 pub fn[M] XmlText::diff(Self, (YChange) -> M) -> Array[Diff[M]]
 pub fn[M] XmlText::diff_range(Self, (YChange) -> M, hi? : Snapshot, lo? : Snapshot) -> Array[Diff[M]]
 pub fn XmlText::from_branch(Doc, BranchId) -> Self?
+pub fn XmlText::from_out(Out) -> Self?
 pub fn XmlText::get_attribute(Self, String) -> Out?
 pub fn XmlText::get_string(Self) -> String
 pub fn XmlText::hook(Self) -> Hook[Self]
@@ -1014,6 +1031,7 @@ pub fn XmlText::sticky_boundary(Self, assoc? : Assoc) -> StickyIndex
 pub fn XmlText::sticky_index(Self, Int, assoc? : Assoc) -> StickyIndex?
 pub fn XmlText::unobserve(Self, String) -> Bool
 pub fn XmlText::unobserve_deep(Self, String) -> Bool
+pub impl DefaultPrelim for XmlText
 pub impl SharedRef for XmlText
 
 pub struct XmlTextEvent {
@@ -1049,6 +1067,11 @@ pub(open) trait AsyncProtocol {
   async fn missing_handle(Self, Awareness, Byte, Bytes) -> Message? = _
 }
 
+pub(open) trait DefaultPrelim : SharedRef {
+  fn default_prelim() -> In
+  fn from_out(Out) -> Self?
+}
+
 pub(open) trait Protocol {
   fn start(Self, Awareness) -> Bytes raise = _
   fn handle(Self, Awareness, Bytes) -> Array[Message] raise = _
@@ -1062,10 +1085,11 @@ pub(open) trait Protocol {
   fn missing_handle(Self, Awareness, Byte, Bytes) -> Message? raise = _
 }
 
-pub trait RootRef : SharedRef {
+pub(open) trait RootRef : SharedRef {
   fn get_or_insert_root(Doc, String) -> Self
 }
 
-pub trait SharedRef {
+pub(open) trait SharedRef {
   fn from_branch(Doc, BranchId) -> Self?
+  fn hook(Self) -> Hook[Self]
 }

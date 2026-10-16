@@ -1,13 +1,14 @@
 ///|
 /// Typed resolution of a live shared collection from a logical identity.
 /// Descriptors contain no document reference and can resolve on any replica.
-pub trait SharedRef {
+pub(open) trait SharedRef {
   fn from_branch(Doc, BranchId) -> Self?
+  fn hook(Self) -> Hook[Self]
 }
 
 ///|
 /// Shared collections that can be created at the document root.
-pub trait RootRef: SharedRef {
+pub(open) trait RootRef: SharedRef {
   fn get_or_insert_root(Doc, String) -> Self
 }
 
@@ -312,3 +313,38 @@ pub impl[S] Hash for Nested[S] with fn hash_combine(self, hasher) {
 
 ///|
 pub extend Nested with Hash::{hash, hash_combine}
+
+///|
+pub impl SharedRef for Text with fn hook(self) {
+  Hook(self.name.branch_id())
+}
+
+///|
+pub impl SharedRef for ArrayRef with fn hook(self) {
+  Hook(self.name.branch_id())
+}
+
+///|
+pub impl SharedRef for MapRef with fn hook(self) {
+  Hook(self.name.branch_id())
+}
+
+///|
+pub impl SharedRef for XmlFragment with fn hook(self) {
+  Hook(self.name.branch_id())
+}
+
+///|
+pub impl SharedRef for XmlText with fn hook(self) {
+  Hook(self.name.branch_id())
+}
+
+///|
+pub impl SharedRef for XmlElement with fn hook(self) {
+  Hook(self.name.branch_id())
+}
+
+///|
+pub impl SharedRef for WeakRef with fn hook(self) {
+  Hook(self.name.branch_id())
+}

@@ -103,24 +103,28 @@ pub fn MapRef::try_update(self : MapRef, key : String, value : Any) -> Bool {
 
 ///|
 pub fn MapRef::get_or_init_array(self : MapRef, key : String) -> ArrayRef {
-  match self.get(key) {
-    Some(Array(value)) => value
-    _ => self.insert_array(key)
-  }
+  self.get_or_init(key)
 }
 
 ///|
 pub fn MapRef::get_or_init_map(self : MapRef, key : String) -> MapRef {
-  match self.get(key) {
-    Some(Map(value)) => value
-    _ => self.insert_map(key)
-  }
+  self.get_or_init(key)
 }
 
 ///|
 pub fn MapRef::get_or_init_text(self : MapRef, key : String) -> Text {
-  match self.get(key) {
-    Some(Text(value)) => value
-    _ => self.insert_text(key)
-  }
+  self.get_or_init(key)
+}
+
+///|
+pub fn MapRef::get_or_init_xml_fragment(
+  self : MapRef,
+  key : String,
+) -> XmlFragment {
+  self.get_or_init(key)
+}
+
+///|
+pub fn MapRef::get_or_init_xml_text(self : MapRef, key : String) -> XmlText {
+  self.get_or_init(key)
 }

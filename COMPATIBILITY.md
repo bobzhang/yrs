@@ -21,7 +21,7 @@ The generated `pkg.generated.mbti` is the authoritative MoonBit API.
 | `Any`, `Number` | `Any`; numeric variants are `Integer(Int64)` and `Float(Double)` |
 | `In`, `Out`, deprecated `Value` | `In`, `Out`; no deprecated `Value` alias |
 | `Array`, `ArrayRef`, `ArrayPrelim` | `ArrayRef` methods and `In.Array` preliminary values |
-| `Map`, `MapRef`, `MapPrelim` | `MapRef` methods and `In.Map` preliminary values; generic `get_or_init` has concrete helpers |
+| `Map`, `MapRef`, `MapPrelim` | `MapRef` methods, generic `get_or_init[T : DefaultPrelim]`, concrete helpers and `In.Map` preliminary values |
 | `Text`, `TextRef`, `TextPrelim` | `Text` methods and `In.Text` preliminary values |
 | `Xml`, `XmlOut` | `XmlNode`, concrete XML methods and `In` constructors |
 | `XmlElementRef`, `XmlElementPrelim` | `XmlElement`, `In.XmlElement` |
@@ -29,7 +29,7 @@ The generated `pkg.generated.mbti` is the authoritative MoonBit API.
 | `XmlTextRef`, `XmlTextPrelim` | `XmlText`, `In.XmlText` |
 | `GetString`, `Observable`, `DeepObservable` | Concrete `get_string`, `observe`, `observe_deep`, and keyed `unobserve` methods |
 | `Quotable`, `WeakPrelim`, `WeakRef` | Concrete `quote` methods, `WeakPrelim`, `WeakRef`; query/event differences remain open |
-| `SharedRef`, `RootRef`, `Root`, `Nested`, `Hook` | Typed collection resolution and identity serialization; generic trait surface is being audited |
+| `SharedRef`, `RootRef`, `Root`, `Nested`, `Hook` | Open traits, generic hook creation, typed collection resolution and identity serialization |
 | `StateVector`, `Snapshot`, `Update`, `IdSet` | Implemented, including owned empty-client metadata and v1/v2 round-trips |
 | `IdMap`, `AttrRange`, `ContentAttribute`, `ContentAttributes`, `Diff` | Generic attribution types and operations; `Diff` is used for text history results |
 | `Assoc`, `IndexScope`, `Offset`, `StickyIndex`, `IndexedSequence` | Cursor types plus concrete collection `sticky_index` / `sticky_boundary` methods |
