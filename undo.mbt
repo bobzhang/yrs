@@ -405,6 +405,12 @@ fn[M] UndoManager::redo_item(
     } else {
       left = doc.branch(parent).values.get(key)
     }
+    // A restored parent has a new branch identity. An origin from the old
+    // branch would make a remote decoder infer that deleted parent, because
+    // item updates omit the explicit parent when an origin is present.
+    if left is Some(id) && doc.items[id].parent != Some(parent) {
+      left = doc.branch(parent).values.get(key)
+    }
   } else {
     left = item.left
     right = Some(item.id)

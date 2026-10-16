@@ -371,3 +371,24 @@ port computes an unsigned magnitude and emits all ten bytes. The unchanged Rust
 decoder accepts those bytes and returns `i64::MIN`. `validation/streams.py`
 retains both exceptions separately from 2,032 exact encoding/decoding cases;
 fixed-width `write_i64` has no such issue.
+
+## Undo restoration references the deleted parent
+
+`fixtures/upstream-undo-restored-attribute-parent.json` creates XML attributes,
+clears the initial undo history, overwrites attributes, removes the element, and
+undoes that capture group. The restored element and text have their attributes
+in memory. Encoding that document and importing it into a fresh unchanged Rust
+instance loses those attributes. The same defect existed in the port.
+
+When restoring a map entry, `ItemPtr::redo` can retain a left origin in the old,
+deleted parent even after restoring the parent under a new ID. Item encoding
+omits the explicit parent when an origin is present. A receiving replica thus
+infers the old parent and deletes the restored entry. The port now anchors a
+restored map entry in the new parent's map chain whenever the old origin belongs
+to a different branch. This deliberately corrects the pinned reference behavior;
+it also applies to ordinary nested maps, not just XML attributes.
+
+`undo_restore_attributes_test.mbt` checks XML attributes and repeated nested-map
+undo/redo through both update formats, including GC-enabled documents. The undo
+oracles now compare structured XML trees and text attributes as well as rendered
+XML, which alone did not expose every lost attribute.

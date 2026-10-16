@@ -1,0 +1,1 @@
+[["batch", 0, [["xnew", 0], ["xedit", 0]]], ["clear", 0], ["batch", 0, [["xedit", 1]]], ["batch", 0, [["xremove", 0]]], ["undo", 0]]
