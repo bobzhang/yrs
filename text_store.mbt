@@ -392,7 +392,22 @@ fn Doc::integrate(self : Doc, raw : RawItem) -> Bool {
   let end = raw.id.clock + raw.content.length().reinterpret_as_uint()
   let mut start = raw.id.clock
   let missing : Array[RawItem] = []
-  for item in self.clients.get(raw.id.client).unwrap_or([]) {
+  let blocks = self.clients.get(raw.id.client).unwrap_or([])
+  // Most incoming packets append or overlap the recent end of a client's
+  // history. Locate the first overlap instead of rescanning its entire past.
+  let first = for lo = 0, hi = blocks.length(); lo < hi; {
+    let mid = lo + (hi - lo) / 2
+    let item = blocks[mid]
+    if item.id.clock + item.content.length().reinterpret_as_uint() <= start {
+      continue mid + 1, hi
+    } else {
+      continue lo, mid
+    }
+  } nobreak {
+    lo
+  }
+  for index in first..<blocks.length() {
+    let item = blocks[index]
     let item_end = item.id.clock + item.content.length().reinterpret_as_uint()
     if item_end <= start {
       continue

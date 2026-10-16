@@ -147,16 +147,34 @@ fn Doc::notify_collections(self : Doc, transaction : Transaction) -> Unit {
     maps[event.map.name] = event
     parents.add(event.map.name) |> ignore
   }
+  // Transaction metadata and undo still need changed ancestors without type
+  // observers. Event deltas, however, can scan the whole sequence and nobody
+  // consumes them when all collection registries are empty.
+  let materialize_events = !self.weak_observers.is_empty() ||
+    !self.deep_observers.is_empty() ||
+    !self.text_observers.is_empty() ||
+    !self.array_observers.is_empty() ||
+    !self.map_observers.is_empty() ||
+    !self.xml_observers.is_empty() ||
+    !self.xml_text_observers.is_empty()
   let events : Array[(Parent, Event)] = []
   for parent in parents {
     if !transaction.observable(parent) {
+      continue
+    }
+    let kind = self.event_kind(parent)
+    if kind is None || kind is Some(SharedOpaque(_)) {
+      continue
+    }
+    if !materialize_events {
+      self.record_changed_ancestors(transaction, parent)
       continue
     }
     let entries = match maps.get(parent) {
       Some(event) => event.changes
       None => []
     }
-    let event : Event = match self.event_kind(parent) {
+    let event : Event = match kind {
       Some(SharedText) =>
         Text({
           text: { doc: self, name: parent, },
@@ -236,11 +254,7 @@ fn Doc::notify_collections(self : Doc, transaction : Transaction) -> Unit {
           observers.trigger(fn(callback) { callback(event, transaction) })
         }
     }
-    for location in self.event_ancestors(parent) {
-      if location.branch_id().get(self) is Some(value) {
-        transaction.changed_parents.push(value)
-      }
-    }
+    self.record_changed_ancestors(transaction, parent)
     events.push((parent, event))
   }
   for (ancestor, observers) in self.deep_observers.to_array() {
@@ -644,4 +658,17 @@ pub fn XmlEvent::added(self : XmlEvent) -> ReadOnlyArray[Id] {
 /// Removed child block identities, excluding transient new children.
 pub fn XmlEvent::deleted(self : XmlEvent) -> ReadOnlyArray[Id] {
   self.deleted_ids
+}
+
+///|
+fn Doc::record_changed_ancestors(
+  self : Doc,
+  transaction : Transaction,
+  parent : Parent,
+) -> Unit {
+  for location in self.event_ancestors(parent) {
+    if location.branch_id().get(self) is Some(value) {
+      transaction.changed_parents.push(value)
+    }
+  }
 }

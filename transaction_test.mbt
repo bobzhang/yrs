@@ -132,3 +132,69 @@ test "after-transaction hook may add edits to the same emitted update" {
   peer.apply_update_v1(updates[0])
   assert_eq(peer.get_or_insert_text("note").get_string(), "hello!")
 }
+
+///|
+test "unobserved edits retain the same ancestor metadata and undo history" {
+  fn exercise(
+    observed : Bool,
+  ) -> (Array[Array[@yrs.BranchId]], Array[Bytes], Json) raise {
+    let doc = @yrs.Doc(client_id=1UL)
+    let root = doc.get_or_insert_map("root")
+    let text = root.insert_text("text")
+    let array = root.insert_array("array")
+    if observed {
+      // Force the event path without observing one of the edited collections.
+      doc.get_or_insert_text("unrelated").observe("noop", fn(_, _) { () })
+    }
+    let ancestors = []
+    let updates = []
+    doc.observe_after_transaction("metadata", fn(tx) {
+      ancestors.push(
+        tx
+        .changed_parent_types()
+        .iter()
+        .map(fn(o) { o.branch_id().unwrap() })
+        .to_array(),
+      )
+    })
+    doc.observe_update_v1("packets", fn(bytes, _) { updates.push(bytes) })
+    let undo : @yrs.UndoManager[Unit] = UndoManager(clock=fn() { 100UL })
+    undo.expand_scope(Map(root))
+    doc.transact(fn(_) {
+      text.insert_with_attributes(0, "a🌙b", [("bold", Bool(true))])
+      array.insert_range(0, [Integer(1L), Integer(2L)])
+      root.insert("name", String("draft"))
+    })
+    undo.reset()
+    text.remove_range(1, 2)
+    assert_true(undo.undo())
+    let result = root.to_json()
+    assert_true(undo.redo())
+    assert_true(undo.undo())
+    (ancestors, updates, result)
+  }
+  let without = exercise(false)
+  let observed = exercise(true)
+  assert_eq(without, observed)
+  assert_true(without.0.all(fn(parents) { !parents.is_empty() }))
+}
+
+///|
+test "before-phase registration observes this commit and after-phase registration the next" {
+  let doc = @yrs.Doc(client_id=1UL)
+  let text = doc.get_or_insert_text("text")
+  let before = Ref(0)
+  let after = Ref(0)
+  doc.observe_before_observer_calls("install", fn(_) {
+    text.observe("before", fn(_, _) { before.val += 1 })
+  })
+  doc.observe_after_transaction("install", fn(_) {
+    text.observe("after", fn(_, _) { after.val += 1 })
+  })
+  text.insert(0, "a")
+  assert_eq(before.val, 1)
+  assert_eq(after.val, 0)
+  text.insert(0, "b")
+  assert_eq(before.val, 2)
+  assert_eq(after.val, 1)
+}
