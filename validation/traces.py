@@ -7,6 +7,7 @@ encoding, duplicate/reversed delivery, two restarts and serialization. They are
 process-level stress measurements, not a microbenchmark of local edits.
 """
 import argparse
+from datetime import datetime, timezone
 import gzip
 import hashlib
 import json
@@ -54,12 +55,37 @@ def measured(command, request, directory):
     return result.stdout, {'elapsed_seconds': round(elapsed, 4), 'peak_rss_bytes': rss}
 
 
+def provenance():
+    paths = sorted(set(
+        list(ROOT.glob('*.mbt')) + [ROOT/'moon.mod', ROOT/'moon.pkg',
+        ROOT/'validation/traces.py', ROOT/'validation/traces.cjs',
+        ROOT/'validation/rust/Cargo.toml', ROOT/'validation/rust/Cargo.lock',
+        ROOT/'validation/rust/src/bin/traces.rs'] +
+        [p for package in ['traces', 'traces_native'] for p in (ROOT/'validation'/package).iterdir()
+         if p.suffix in ['.mbt', '.c'] or p.name == 'moon.pkg']
+    ))
+    digest = hashlib.sha256()
+    relative = []
+    for path in paths:
+        name = str(path.relative_to(ROOT))
+        relative.append(name)
+        digest.update(name.encode() + b'\0' + path.read_bytes() + b'\0')
+    return {
+        'port_revision': subprocess.check_output(['git', 'rev-parse', 'HEAD'], cwd=ROOT, text=True).strip(),
+        'source_dirty': bool(subprocess.check_output(['git', 'status', '--porcelain', '--', *relative], cwd=ROOT, text=True).strip()),
+        'source_sha256': digest.hexdigest(),
+        'started_utc': datetime.now(timezone.utc).isoformat(),
+        'moon_toolchain': subprocess.check_output(['moon', 'version', '--all'], text=True).strip(),
+    }
+
+
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument('--traces', nargs='+', choices=NAMES, default=NAMES)
     parser.add_argument('--target', choices=['js', 'native'], default='js')
     parser.add_argument('--gc', choices=['both', 'on', 'off'], default='both')
     args = parser.parse_args()
+    source = provenance()
     assert platform.system() == 'Darwin', 'RSS wrapper currently uses macOS /usr/bin/time -l'
     run(['cargo', '+1.97.1', 'build', '--release', '--locked', '--manifest-path',
          'validation/rust/Cargo.toml', '--bin', 'traces'])
@@ -70,8 +96,11 @@ def main():
                     if args.target == 'native' else ['node', 'validation/traces.cjs'])
     commands = {'rust': ['validation/rust/target/release/traces'], moon_runtime: moon_command}
     result_path = ROOT / ('validation/trace-native-results.json' if args.target == 'native' else 'validation/trace-results.json')
-    prior = json.loads(result_path.read_text())['cases'] if result_path.exists() else []
-    records = {(row['trace'], row['gc']): row for row in prior}
+    prior = json.loads(result_path.read_text()) if result_path.exists() else {}
+    records = {}
+    for row in prior.get('cases', []):
+        row.setdefault('port_revision', prior.get('port_revision', 'unknown'))
+        records[(row['trace'], row['gc'])] = row
     with tempfile.TemporaryDirectory(prefix='yrs-traces-') as directory:
         directory = Path(directory)
         for name in args.traces:
@@ -96,11 +125,13 @@ def main():
                         'encoded_v2_bytes': len(row['wire_v2']) // 2,
                     })
                 row = {key: rows['rust'][key] for key in ['clock', 'patches', 'transactions', 'deliveries', 'checkpoints']}
-                row.update({'trace': name, 'gc': gc, 'source_sha256': digest,
+                row.update({'port_revision': source['port_revision'], 'provenance': source, 'trace': name, 'gc': gc, 'source_sha256': digest,
                             'final_utf8_sha256': hashlib.sha256(expected.encode()).hexdigest(),
                             'measurements': measurements, 'status': 'passed'})
                 records[(name, gc)] = row
                 result = {'upstream': 'ac339600c712642e556895426113c3f9c117de39',
+                          'port_revisions': sorted({r['port_revision'] for r in records.values()}),
+                          'latest_run': source,
                           'platform': platform.platform(),
                           'node': subprocess.check_output(['node', '--version'], text=True).strip(),
                           'moon': subprocess.check_output(['moon', 'version'], text=True).strip(),
