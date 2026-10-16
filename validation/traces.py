@@ -13,6 +13,7 @@ import hashlib
 import json
 import platform
 import re
+import shutil
 import subprocess
 import tempfile
 import time
@@ -92,9 +93,6 @@ def main():
     package = 'validation/traces_native' if args.target == 'native' else 'validation/traces'
     run(['moon', 'build', package, '--target', args.target, '--release'])
     moon_runtime = 'moonbit_' + args.target
-    moon_command = (['_build/native/release/build/validation/traces_native/traces_native.exe']
-                    if args.target == 'native' else ['node', 'validation/traces.cjs'])
-    commands = {'rust': ['validation/rust/target/release/traces'], moon_runtime: moon_command}
     result_path = ROOT / ('validation/trace-native-results.json' if args.target == 'native' else 'validation/trace-results.json')
     prior = json.loads(result_path.read_text()) if result_path.exists() else {}
     records = {}
@@ -103,6 +101,27 @@ def main():
         records[(row['trace'], row['gc'])] = row
     with tempfile.TemporaryDirectory(prefix='yrs-traces-') as directory:
         directory = Path(directory)
+        # Freeze both executables for the entire matrix. Later rebuilds in this
+        # checkout must not silently change the implementation between cases.
+        rust_binary = directory / 'rust-traces'
+        shutil.copy2(ROOT/'validation/rust/target/release/traces', rust_binary)
+        if args.target == 'native':
+            artifact = directory / 'moonbit-traces'
+            shutil.copy2(ROOT/'_build/native/release/build/validation/traces_native/traces_native.exe', artifact)
+            moon_command = [str(artifact)]
+        else:
+            artifact = directory / 'moonbit.js'
+            shutil.copy2(ROOT/'_build/js/release/build/validation/traces/traces.js', artifact)
+            runner = directory / 'runner.cjs'
+            runner.write_text("const fs=require('node:fs'); const {evaluate}=require('./moonbit.js'); "
+                              "console.log(evaluate(fs.readFileSync(process.argv[2],'utf8')));\n")
+            moon_command = ['node', str(runner)]
+        assert provenance()['source_sha256'] == source['source_sha256'], 'source changed while building benchmark'
+        source['artifact_sha256'] = {
+            'rust': hashlib.sha256(rust_binary.read_bytes()).hexdigest(),
+            moon_runtime: hashlib.sha256(artifact.read_bytes()).hexdigest(),
+        }
+        commands = {'rust': [str(rust_binary)], moon_runtime: moon_command}
         for name in args.traces:
             txns, expected, digest = prepare(name)
             for gc in ([False, True] if args.gc == 'both' else [args.gc == 'on']):
