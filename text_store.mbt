@@ -639,7 +639,7 @@ fn Doc::integrate_missing(self : Doc, raw : RawItem) -> Bool {
   if !item.deleted {
     self.join_weak_links(item)
   }
-  if item.content is Shared(SharedWeak(source)) {
+  if !item.deleted && item.content is Shared(SharedWeak(source)) {
     self.materialize_weak(item.id, source)
   }
   if self.active_transaction is Some(txn) {
