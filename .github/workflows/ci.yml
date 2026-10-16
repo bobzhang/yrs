@@ -38,6 +38,7 @@ jobs:
       - run: moon version --all
       - run: moon fmt --check
       - run: moon check --target all --deny-warn
+      - run: moon build --target all --release
       - run: moon test --target all
       - name: Verify generated public interfaces
         run: |

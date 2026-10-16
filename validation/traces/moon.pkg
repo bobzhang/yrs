@@ -1,6 +1,7 @@
 import {
-  "bobzhang/yrs",
-  "moonbitlang/core/json",
+  "bobzhang/yrs/validation/traces_core",
 }
 
 pkgtype(kind: "foreign_library")
+
+supported_targets = "js"

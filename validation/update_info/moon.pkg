@@ -4,3 +4,5 @@ import {
 }
 
 pkgtype(kind: "foreign_library")
+
+supported_targets = "js"

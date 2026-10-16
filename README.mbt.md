@@ -41,7 +41,9 @@ XML fragments, elements, attributes, formatted XML text and parent navigation no
 
 Current limitations: full compatibility is not yet established for sparse intermediate states, weak-reference queries/events, and independently allocated concurrent undo histories. Real editing traces now pass on JavaScript and native, with a substantial speed gap versus Rust; results are below. The core shared types, undo, transactions and protocols described below are implemented. This is not a production release or a completed port.
 
-Run `moon test --target all` and `python3 validation/compare.py`. The oracle uses the installed Rust 1.97.1 toolchain and the exact reference checkout under `.repos/y-crdt`; its Cargo dependencies are locked. Clone `https://github.com/y-crdt/y-crdt.git` there and check out `ac339600c712642e556895426113c3f9c117de39` before running it.
+Run `moon build --target all --release`, `moon test --target all` and
+`python3 validation/compare.py`. JavaScript oracle bridges are restricted to the
+JS target; the native trace executable shares a portable trace implementation. The oracle uses the installed Rust 1.97.1 toolchain and the exact reference checkout under `.repos/y-crdt`; its Cargo dependencies are locked. Clone `https://github.com/y-crdt/y-crdt.git` there and check out `ac339600c712642e556895426113c3f9c117de39` before running it.
 
 Binary v2 currently uses a checked conversion layer around the common v1 integration path. It implements unsigned, difference and byte RLE columns, UTF-16 string lengths, key dictionaries and delta delete sets. This favors one integration implementation over minimum intermediate allocation. `convert_update_v2_to_v1` defaults to a configurable 1,000,000-item expansion budget; lib0 nesting is bounded at 256.
 

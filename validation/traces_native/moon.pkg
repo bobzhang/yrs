@@ -1,5 +1,5 @@
 import {
-  "bobzhang/yrs/validation/traces",
+  "bobzhang/yrs/validation/traces_core" @traces,
   "moonbitlang/core/env",
   "moonbitlang/core/encoding/utf8",
 }
@@ -10,3 +10,5 @@ options(
   "native-stub": [ "read_file.c" ],
   targets: { "ffi.mbt": [ "native" ], "other.mbt": [ "not", "native" ] },
 )
+
+supported_targets = "native"
