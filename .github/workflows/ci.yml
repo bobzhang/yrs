@@ -36,6 +36,7 @@ jobs:
           bash "$RUNNER_TEMP/install-moon.sh"
           echo "$HOME/.moon/bin" >> "$GITHUB_PATH"
       - run: moon version --all
+      - run: python3 validation/api_contract.py
       - run: moon fmt --check
       - run: moon check --target all --deny-warn
       - run: moon build --target all --release
@@ -53,7 +54,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        suite: [core, contracts, wire, lifecycle, undo, undo-persistence, undo-yjs, undo-yjs-native, undo-high-clocks, undo-observer, undo-observer-native]
+        suite: [core, values, contracts, wire, history, lifecycle, weak, undo, undo-yjs, undo-yjs-native, undo-high-clocks, undo-observer, undo-observer-native]
     steps:
       - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5
       - name: Check out the unchanged pinned Rust reference
@@ -75,62 +76,7 @@ jobs:
       - name: Run interoperability checks
         env:
           SUITE: ${{ matrix.suite }}
-        run: |
-          case "$SUITE" in
-            core)
-              python3 validation/compare.py
-              ;;
-            contracts)
-              python3 validation/contracts.py
-              python3 validation/handles.py
-              python3 validation/streams.py
-              python3 validation/update_codecs.py
-              python3 validation/type_refs.py
-              python3 validation/block_ranges.py
-              python3 validation/v2_clock_boundaries.py
-              python3 validation/large_ranges.py
-              python3 validation/codec_updates.py
-              python3 validation/value_decode.py
-              python3 validation/value_encode.py
-              python3 validation/any_stream.py
-              python3 validation/embeds.py
-              python3 validation/prelims.py
-              python3 validation/protocol_codec.py
-              ;;
-            wire)
-              python3 validation/sparse_wire.py
-              python3 validation/pending.py
-              python3 validation/pending_scheduling.py
-              ;;
-            undo)
-              python3 validation/undo_mixed.py
-              ;;
-            undo-yjs)
-              python3 validation/undo_mixed.py --reference yjs
-              ;;
-            undo-observer)
-              python3 validation/undo_observer_network.py
-              ;;
-            undo-observer-native)
-              python3 validation/undo_observer_network.py --target native
-              ;;
-            undo-high-clocks)
-              python3 validation/undo_high_clocks.py
-              ;;
-            undo-yjs-native)
-              python3 validation/undo_mixed.py --reference yjs --target native
-              ;;
-            undo-persistence)
-              python3 validation/undo_gc.py
-              python3 validation/undo_mixed.py --gc on --owner moon --report validation/undo-gc-port-results.json
-              python3 validation/undo_persistence.py
-              ;;
-            lifecycle)
-              python3 validation/transactions.py
-              python3 validation/presence.py
-              python3 validation/traces.py --traces friendsforever_flat --target native
-              ;;
-          esac
+        run: python3 validation/release.py --suite "$SUITE"
       - name: Preserve reports and any failing fixtures
         if: always()
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
@@ -139,4 +85,5 @@ jobs:
           path: |
             validation/*results.json
             validation/fixtures/
+            _build/release-logs/
             /tmp/yrs-undo-mixed-*.json

@@ -1,0 +1,1453 @@
+{
+  "reference": "ac339600c712642e556895426113c3f9c117de39",
+  "scope": "Complete public CRDT capabilities with documented language and correctness adaptations; not Rust source/ABI/bug parity.",
+  "groups": {
+    "values": {
+      "surface": "Any, Out, In, FromOut, FromAny, ToAny, AsPrelim",
+      "adaptation": "Typed casts and open serialization traits replace Rust serde and associated preliminary types. Explicit constructors/patterns replace unchecked conversions and deprecated aliases. Any immutable iterators use MoonBit Iter.",
+      "evidence": [
+        "any_test.mbt",
+        "out_cast_test.mbt",
+        "as_prelim_test.mbt",
+        "validation/value_decode.py",
+        "validation/value_encode.py",
+        "validation/any_stream.py"
+      ],
+      "declarations": {
+        "yrs::Any": [
+          "cast",
+          "decode",
+          "encode",
+          "from_json",
+          "to_json",
+          "try_into_iter",
+          "try_iter",
+          "Array",
+          "Bool",
+          "Buffer",
+          "Map",
+          "Null",
+          "Number",
+          "String",
+          "Undefined"
+        ],
+        "yrs::In": [
+          "Any",
+          "Array",
+          "Doc",
+          "Map",
+          "Text",
+          "WeakLink",
+          "XmlElement",
+          "XmlFragment",
+          "XmlText"
+        ],
+        "yrs::Number": [
+          "F64_MAX_SAFE_INTEGER",
+          "F64_MIN_SAFE_INTEGER",
+          "I64_MAX_SAFE_INTEGER",
+          "I64_MIN_SAFE_INTEGER",
+          "as_f64",
+          "as_i64",
+          "try_i64",
+          "Float",
+          "Int"
+        ],
+        "yrs::Out": [
+          "cast",
+          "to_string",
+          "try_branch",
+          "Any",
+          "UndefinedRef",
+          "YArray",
+          "YDoc",
+          "YMap",
+          "YText",
+          "YWeakLink",
+          "YXmlElement",
+          "YXmlFragment",
+          "YXmlText"
+        ],
+        "yrs::Value": [],
+        "yrs::any::AnyArrayIter": [
+          "new"
+        ],
+        "yrs::any::AnyIntoIter": [
+          "Array",
+          "Map"
+        ],
+        "yrs::any::AnyIter": [
+          "Array",
+          "Map"
+        ],
+        "yrs::any::F64_MAX_SAFE_INTEGER": [],
+        "yrs::any::F64_MIN_SAFE_INTEGER": [],
+        "yrs::encoding::serde::from_any": [],
+        "yrs::encoding::serde::to_any": [],
+        "yrs::types::AsPrelim": [
+          "Prelim",
+          "as_prelim"
+        ],
+        "yrs::types::DefaultPrelim": [
+          "Prelim",
+          "default_prelim"
+        ],
+        "yrs::types::ToJson": [
+          "to_json"
+        ]
+      }
+    },
+    "documents": {
+      "surface": "Doc, Transaction, Root, Nested, Hook, SharedRef, RootRef, BranchId",
+      "adaptation": "Doc methods replace transaction read/write forwarding. Callback transactions commit at callback exit; no separate commit operation or raw mutable event/store access. Constructors use labeled options; host supplies identity.",
+      "evidence": [
+        "document_access_test.mbt",
+        "hook_test.mbt",
+        "transaction_test.mbt",
+        "validation/contracts.py",
+        "validation/handles.py",
+        "validation/transactions.py"
+      ],
+      "declarations": {
+        "yrs::BranchID": [
+          "get_branch",
+          "get_nested",
+          "get_root",
+          "Nested",
+          "Root"
+        ],
+        "yrs::Doc": [
+          "auto_load",
+          "branch_id",
+          "client_id",
+          "collection_id",
+          "destroy",
+          "get_or_insert_array",
+          "get_or_insert_map",
+          "get_or_insert_text",
+          "get_or_insert_xml_fragment",
+          "guid",
+          "load",
+          "new",
+          "observe_after_transaction",
+          "observe_before_observer_calls",
+          "observe_destroy",
+          "observe_subdocs",
+          "observe_transaction_cleanup",
+          "observe_update_v1",
+          "observe_update_v2",
+          "offset_kind",
+          "parent_doc",
+          "ptr_eq",
+          "should_load",
+          "skip_gc",
+          "unobserve_after_transaction",
+          "unobserve_before_observer_calls",
+          "unobserve_destroy",
+          "unobserve_subdocs",
+          "unobserve_transaction_cleanup",
+          "unobserve_update_v1",
+          "unobserve_update_v2",
+          "with_client_id",
+          "with_options"
+        ],
+        "yrs::Hook": [
+          "get",
+          "id",
+          "into_nested",
+          "into_root"
+        ],
+        "yrs::Nested": [
+          "id",
+          "get",
+          "new"
+        ],
+        "yrs::Options": [
+          "auto_load",
+          "cleanup_formatting",
+          "client_id",
+          "collection_id",
+          "guid",
+          "offset_kind",
+          "should_load",
+          "skip_gc",
+          "with_client_id",
+          "with_guid_and_client_id"
+        ],
+        "yrs::Origin": [],
+        "yrs::ReadTxn": [
+          "branch_id",
+          "encode_diff",
+          "encode_diff_v1",
+          "encode_diff_v2",
+          "encode_state_as_update",
+          "encode_state_as_update_v1",
+          "encode_state_as_update_v2",
+          "encode_state_from_snapshot",
+          "get",
+          "get_array",
+          "get_map",
+          "get_text",
+          "get_xml_fragment",
+          "has_missing_updates",
+          "parent_doc",
+          "root_refs",
+          "snapshot",
+          "state_vector",
+          "store",
+          "subdoc_guids",
+          "subdocs"
+        ],
+        "yrs::Root": [
+          "name",
+          "get",
+          "get_or_create",
+          "new"
+        ],
+        "yrs::RootRef": [
+          "root",
+          "type_ref"
+        ],
+        "yrs::RootRefs": [],
+        "yrs::SharedRef": [
+          "hook"
+        ],
+        "yrs::Store": [
+          "encode_diff",
+          "encode_state_from_snapshot",
+          "get_local_state",
+          "get_type_from_path",
+          "is_subdoc",
+          "pending_ds",
+          "pending_ds_mut",
+          "pending_update",
+          "pending_update_mut",
+          "subdoc_guids",
+          "subdocs"
+        ],
+        "yrs::Transact": [
+          "transact",
+          "transact_mut",
+          "transact_mut_with",
+          "try_transact",
+          "try_transact_mut",
+          "try_transact_mut_with"
+        ],
+        "yrs::Transaction": [],
+        "yrs::TransactionCleanupEvent": [
+          "after_state",
+          "before_state",
+          "delete_set",
+          "new"
+        ],
+        "yrs::TransactionMut": [
+          "after_state",
+          "apply_update",
+          "before_state",
+          "changed_parent_types",
+          "cleanups",
+          "commit",
+          "delete_set",
+          "doc",
+          "encode_update",
+          "encode_update_v1",
+          "encode_update_v2",
+          "events",
+          "events_mut",
+          "gc",
+          "has_changes",
+          "insert_set",
+          "observe_after_transaction",
+          "observe_before_observer_calls",
+          "observe_destroy",
+          "observe_subdocs",
+          "observe_transaction_cleanup",
+          "observe_update_v1",
+          "observe_update_v2",
+          "origin",
+          "unobserve_after_transaction",
+          "unobserve_before_observer_calls",
+          "unobserve_destroy",
+          "unobserve_subdocs",
+          "unobserve_transaction_cleanup",
+          "unobserve_update_v1",
+          "unobserve_update_v2"
+        ],
+        "yrs::UpdateEvent": [
+          "update"
+        ],
+        "yrs::WriteTxn": [
+          "get_or_insert_array",
+          "get_or_insert_map",
+          "get_or_insert_text",
+          "get_or_insert_xml_fragment",
+          "prune_pending",
+          "store_mut",
+          "subdocs_mut"
+        ]
+      }
+    },
+    "host-concurrency": {
+      "surface": "Synchronous host-serialized Doc access",
+      "adaptation": "Rust lock guards, atomic containers, Send/Sync and acquisition futures are not portable CRDT operations. Async protocol handlers use the host scheduler; shared Doc mutation must be serialized.",
+      "evidence": [
+        "async_protocol_test.mbt",
+        "transaction_test.mbt"
+      ],
+      "declarations": {
+        "yrs::AcquireTransaction": [],
+        "yrs::AcquireTransactionMut": [],
+        "yrs::AsyncTransact": [
+          "Read",
+          "Write",
+          "transact",
+          "transact_mut",
+          "transact_mut_with"
+        ],
+        "yrs::TransactionAcqError": [
+          "DocumentDropped",
+          "ExclusiveAcqFailed",
+          "SharedAcqFailed"
+        ],
+        "yrs::atomic::AtomicRef": [
+          "get",
+          "get_owned",
+          "new",
+          "swap",
+          "take",
+          "update"
+        ]
+      }
+    },
+    "identity": {
+      "surface": "Id, UInt64 client IDs, String GUIDs, uuid_v4, uuid_v4_from",
+      "adaptation": "Host-provided client IDs/entropy replace implicit RNG; UUID helpers preserve network byte order.",
+      "evidence": [
+        "uuid_test.mbt",
+        "state_vector_test.mbt"
+      ],
+      "declarations": {
+        "yrs::ClientID": [
+          "get",
+          "new",
+          "random"
+        ],
+        "yrs::ID": [
+          "client",
+          "clock",
+          "new"
+        ],
+        "yrs::Uuid": [],
+        "yrs::uuid_v4": [],
+        "yrs::uuid_v4_from": []
+      }
+    },
+    "arrays": {
+      "surface": "ArrayRef and In.Array",
+      "adaptation": "Concrete methods and detached In values replace trait/associated preliminary dispatch; length replaces len.",
+      "evidence": [
+        "collections_test.mbt",
+        "collection_access_test.mbt",
+        "validation/compare.py"
+      ],
+      "declarations": {
+        "yrs::Array": [
+          "get",
+          "get_as",
+          "insert",
+          "insert_range",
+          "iter",
+          "len",
+          "push_back",
+          "push_front",
+          "remove",
+          "remove_range"
+        ],
+        "yrs::ArrayPrelim": [],
+        "yrs::ArrayRef": []
+      }
+    },
+    "maps": {
+      "surface": "MapRef and In.Map",
+      "adaptation": "Concrete methods, insert_input, entries/iter, length and typed get_or_init; pattern matching replaces raw branch casts.",
+      "evidence": [
+        "collection_access_test.mbt",
+        "default_prelim_test.mbt",
+        "validation/compare.py"
+      ],
+      "declarations": {
+        "yrs::Map": [
+          "clear",
+          "contains_key",
+          "get",
+          "get_as",
+          "get_or_init",
+          "insert",
+          "into_iter",
+          "iter",
+          "keys",
+          "len",
+          "link",
+          "remove",
+          "try_update",
+          "values"
+        ],
+        "yrs::MapPrelim": [],
+        "yrs::MapRef": []
+      }
+    },
+    "text": {
+      "surface": "Text, In.Text, In.XmlText, DeltaOf, TextDelta, Diff, YChange",
+      "adaptation": "apply_delta uses detached In values; generic map transforms inserts. Empty attributes replace None/Some(empty). XmlText.as_text exposes text editing. Historical diffs preserve logical clock spans.",
+      "evidence": [
+        "delta_test.mbt",
+        "rich_text_test.mbt",
+        "text_diff_test.mbt",
+        "validation/embeds.py",
+        "validation/offsets.py",
+        "validation/diffs.py"
+      ],
+      "declarations": {
+        "yrs::GetString": [
+          "get_string"
+        ],
+        "yrs::OffsetKind": [
+          "Bytes",
+          "Utf16"
+        ],
+        "yrs::Text": [
+          "apply_delta",
+          "diff",
+          "diff_range",
+          "format",
+          "insert",
+          "insert_embed",
+          "insert_embed_with_attributes",
+          "insert_with_attributes",
+          "len",
+          "push",
+          "remove_range"
+        ],
+        "yrs::TextPrelim": [
+          "new"
+        ],
+        "yrs::TextRef": [],
+        "yrs::types::Delta": [
+          "delete",
+          "insert",
+          "insert_with",
+          "map",
+          "retain",
+          "Deleted",
+          "Inserted",
+          "Retain"
+        ],
+        "yrs::types::text::ChangeKind": [
+          "Added",
+          "Removed"
+        ],
+        "yrs::types::text::DeltaPrelim": [],
+        "yrs::types::text::Diff": [
+          "attributes",
+          "insert",
+          "ychange",
+          "new",
+          "with_change"
+        ],
+        "yrs::types::text::TextEvent": [
+          "delta",
+          "path",
+          "target"
+        ],
+        "yrs::types::text::YChange": [
+          "id",
+          "kind",
+          "identity",
+          "new"
+        ]
+      }
+    },
+    "xml": {
+      "surface": "XmlFragment, XmlElement, XmlText, XmlNode, In XML constructors",
+      "adaptation": "XmlElement.as_fragment exposes child sequence operations; as_map exposes typed attributes. XmlNode patterns replace pointer casts and into_* conveniences. Unsupported-kind casts return None rather than exposing invalid handles. Legacy XmlHook uses UndefinedRef.",
+      "evidence": [
+        "xml_test.mbt",
+        "xml_traversal_test.mbt",
+        "input_test.mbt",
+        "validation/prelims.py",
+        "validation/legacy.py"
+      ],
+      "declarations": {
+        "yrs::Xml": [
+          "attributes",
+          "get_attribute",
+          "insert_attribute",
+          "parent",
+          "remove_attribute",
+          "siblings"
+        ],
+        "yrs::XmlElementPrelim": [
+          "attributes",
+          "children",
+          "tag",
+          "empty",
+          "new"
+        ],
+        "yrs::XmlElementRef": [
+          "tag",
+          "try_tag"
+        ],
+        "yrs::XmlFragment": [
+          "children",
+          "first_child",
+          "get",
+          "insert",
+          "len",
+          "push_back",
+          "push_front",
+          "remove",
+          "remove_range",
+          "successors"
+        ],
+        "yrs::XmlFragmentPrelim": [
+          "new"
+        ],
+        "yrs::XmlFragmentRef": [
+          "parent"
+        ],
+        "yrs::XmlOut": [
+          "as_ptr",
+          "id",
+          "into_xml_element",
+          "into_xml_fragment",
+          "into_xml_text",
+          "Element",
+          "Fragment",
+          "Text"
+        ],
+        "yrs::XmlTextPrelim": [
+          "new"
+        ],
+        "yrs::XmlTextRef": [],
+        "yrs::types::xml::Attributes": [
+          "new"
+        ],
+        "yrs::types::xml::Siblings": [],
+        "yrs::types::xml::TreeWalker": [
+          "new"
+        ],
+        "yrs::types::xml::XmlDeltaPrelim": [
+          "attributes",
+          "delta"
+        ],
+        "yrs::types::xml::XmlEvent": [
+          "added",
+          "children_changed",
+          "deleted",
+          "delta",
+          "keys",
+          "path",
+          "target"
+        ],
+        "yrs::types::xml::XmlHookRef": [],
+        "yrs::types::xml::XmlIn": [
+          "Element",
+          "Fragment",
+          "Text"
+        ],
+        "yrs::types::xml::XmlNodes": [],
+        "yrs::types::xml::XmlPrelim": [],
+        "yrs::types::xml::XmlTextEvent": [
+          "delta",
+          "keys",
+          "path",
+          "target"
+        ]
+      }
+    },
+    "weak": {
+      "surface": "WeakRef, WeakPrelim, LinkSource, QuoteBound",
+      "adaptation": "One runtime checked weak handle replaces Rust type parameters. Source/branch identity replaces into_inner raw-pointer access. Current visible bounds, retained subscriptions and coherent quoted views deliberately correct pinned defects.",
+      "evidence": [
+        "weak_test.mbt",
+        "weak_map_reinsert_test.mbt",
+        "weak_range_test.mbt",
+        "validation/weak.py",
+        "validation/weak_network.py"
+      ],
+      "declarations": {
+        "yrs::Quotable": [
+          "quote"
+        ],
+        "yrs::WeakPrelim": [
+          "into_inner",
+          "source",
+          "try_deref",
+          "try_deref_raw",
+          "unquote",
+          "upcast"
+        ],
+        "yrs::WeakRef": [
+          "end_id",
+          "into_inner",
+          "source",
+          "start_id",
+          "try_deref",
+          "try_deref_value",
+          "try_source",
+          "unquote"
+        ],
+        "yrs::types::weak::LinkSource": [
+          "is_single",
+          "new",
+          "to_string",
+          "to_xml_string"
+        ],
+        "yrs::types::weak::QuoteError": [
+          "OutOfBounds"
+        ],
+        "yrs::types::weak::Unquote": [],
+        "yrs::types::weak::WeakEvent": [
+          "as_target",
+          "path"
+        ]
+      }
+    },
+    "observers": {
+      "surface": "Observer, concrete observe/observe_deep, Event",
+      "adaptation": "Keyed explicit cancellation replaces RAII subscription guards. ReadOnlyArray events, paths and logical identity sets replace borrowed collections. Block boundaries may differ while logical membership agrees.",
+      "evidence": [
+        "observer_test.mbt",
+        "deep_event_test.mbt",
+        "validation/events.py",
+        "validation/transactions.py"
+      ],
+      "declarations": {
+        "yrs::DeepObservable": [
+          "observe_deep",
+          "unobserve_deep"
+        ],
+        "yrs::Observable": [
+          "Event",
+          "observe",
+          "unobserve"
+        ],
+        "yrs::Observer": [
+          "has_subscribers",
+          "new",
+          "subscribe",
+          "trigger",
+          "unsubscribe"
+        ],
+        "yrs::types::Change": [
+          "Added",
+          "Removed",
+          "Retain"
+        ],
+        "yrs::types::EntryChange": [
+          "Inserted",
+          "Removed",
+          "Updated"
+        ],
+        "yrs::types::Event": [
+          "path",
+          "target",
+          "Array",
+          "Map",
+          "Text",
+          "Weak",
+          "XmlFragment",
+          "XmlText"
+        ],
+        "yrs::types::Events": [
+          "iter"
+        ],
+        "yrs::types::EventsIter": [],
+        "yrs::types::Path": [],
+        "yrs::types::PathSegment": [
+          "Index",
+          "Key"
+        ],
+        "yrs::types::array::ArrayEvent": [
+          "delta",
+          "inserts",
+          "path",
+          "removes",
+          "target"
+        ],
+        "yrs::types::map::MapEvent": [
+          "keys",
+          "path",
+          "target"
+        ]
+      }
+    },
+    "iterators": {
+      "surface": "Core Iter and snapshot arrays",
+      "adaptation": "Collection iterators and reverse traversal replace borrowed TxnIterator/TxnDoubleEndedIterator and adapter constructors. Raw block iteration is an internal implementation detail.",
+      "evidence": [
+        "collection_access_test.mbt",
+        "xml_traversal_test.mbt"
+      ],
+      "declarations": {
+        "yrs::iter::AsIter": [
+          "new"
+        ],
+        "yrs::iter::BlockIter": [
+          "new"
+        ],
+        "yrs::iter::IntoBlockIter": [
+          "to_iter"
+        ],
+        "yrs::iter::TxnDoubleEndedIterator": [
+          "next_back"
+        ],
+        "yrs::iter::TxnIterator": [
+          "Item",
+          "collect",
+          "next"
+        ],
+        "yrs::types::array::ArrayIter": [
+          "from",
+          "from_ref"
+        ],
+        "yrs::types::map::Keys": [
+          "new"
+        ],
+        "yrs::types::map::MapIntoIter": [],
+        "yrs::types::map::MapIter": [
+          "new"
+        ],
+        "yrs::types::map::Values": [
+          "new"
+        ]
+      }
+    },
+    "updates": {
+      "surface": "Update, StateVector, IdSet, Snapshot and v1/v2 utilities",
+      "adaptation": "Owned range methods replace mutable borrowed intervals. Sparse imports integrate all ready explicit dependencies. Raw pending mutation is replaced by owned inspection, prune/reapply and scoped GC. Decode errors replace panics on invalid input.",
+      "evidence": [
+        "state_vector_test.mbt",
+        "id_set_test.mbt",
+        "history_test.mbt",
+        "large_range_test.mbt",
+        "pending_progress_test.mbt",
+        "validation/pending.py",
+        "validation/updates.py",
+        "validation/sparse_wire.py",
+        "validation/large_ranges.py"
+      ],
+      "declarations": {
+        "yrs::IdSet": [
+          "client_ids",
+          "contains",
+          "diff",
+          "diff_with",
+          "from_iter",
+          "get",
+          "insert",
+          "insert_range",
+          "intersect",
+          "intersect_with",
+          "is_empty",
+          "iter",
+          "len",
+          "merge",
+          "merge_with",
+          "new",
+          "range_mut",
+          "remove_range"
+        ],
+        "yrs::Snapshot": [
+          "delete_set",
+          "state_map",
+          "new"
+        ],
+        "yrs::StateVector": [
+          "contains",
+          "contains_client",
+          "get",
+          "inc_by",
+          "is_empty",
+          "iter",
+          "len",
+          "merge",
+          "new",
+          "set_max",
+          "set_min"
+        ],
+        "yrs::Update": [
+          "EMPTY_V1",
+          "EMPTY_V2",
+          "delete_set",
+          "extends",
+          "insertions",
+          "is_empty",
+          "merge",
+          "merge_updates",
+          "new",
+          "state_vector",
+          "state_vector_lower"
+        ],
+        "yrs::diff_updates_v1": [],
+        "yrs::diff_updates_v2": [],
+        "yrs::encode_state_vector_from_update_v1": [],
+        "yrs::encode_state_vector_from_update_v2": [],
+        "yrs::merge_updates_v1": [],
+        "yrs::merge_updates_v2": []
+      }
+    },
+    "attribution": {
+      "surface": "IdMap, ContentAttribute, ContentAttributes, AttrRange, BlockRange",
+      "adaptation": "Public fields and constructors replace trivial getters/with_attrs. IdMap.diff_with and diff_map_with implement set/map subtraction.",
+      "evidence": [
+        "id_map_test.mbt",
+        "block_range_test.mbt",
+        "validation/attribution.py",
+        "validation/block_ranges.py"
+      ],
+      "declarations": {
+        "yrs::AttrRange": [
+          "attrs",
+          "range",
+          "new",
+          "with_attrs"
+        ],
+        "yrs::ContentAttribute": [
+          "name",
+          "new",
+          "value"
+        ],
+        "yrs::ContentAttributes": [
+          "0",
+          "from_attrs",
+          "new"
+        ],
+        "yrs::Diff": [
+          "diff_with"
+        ],
+        "yrs::IdMap": [
+          "as_id_set",
+          "attributions",
+          "contains",
+          "filter",
+          "from_set",
+          "insert",
+          "intersect_with",
+          "is_empty",
+          "iter",
+          "merge_many",
+          "merge_with",
+          "new",
+          "remove"
+        ],
+        "yrs::block::BlockRange": [
+          "client",
+          "clock",
+          "len",
+          "clock_end",
+          "clock_range",
+          "contains",
+          "id",
+          "last_id",
+          "new",
+          "slice"
+        ]
+      }
+    },
+    "positions": {
+      "surface": "StickyIndex, IndexScope, Offset, Assoc and collection cursor methods",
+      "adaptation": "Owned IDs and branch variants replace raw branch lookup. UTF-8 byte positions convert to UTF-16 operation clocks; invalid byte boundaries return None.",
+      "evidence": [
+        "cursor_offset_test.mbt",
+        "history_test.mbt",
+        "validation/cursor_offsets.py",
+        "validation/history.py"
+      ],
+      "declarations": {
+        "yrs::Assoc": [
+          "After",
+          "Before"
+        ],
+        "yrs::IndexScope": [
+          "from_branch",
+          "Nested",
+          "Relative",
+          "Root"
+        ],
+        "yrs::IndexedSequence": [
+          "sticky_index"
+        ],
+        "yrs::Offset": [
+          "assoc",
+          "branch",
+          "index"
+        ],
+        "yrs::StickyIndex": [
+          "assoc",
+          "at",
+          "from_id",
+          "from_type",
+          "get_offset",
+          "id",
+          "is_nested",
+          "is_relative",
+          "is_root",
+          "new",
+          "scope"
+        ]
+      }
+    },
+    "queries": {
+      "surface": "JsonPath, Doc.json_path, Any.json_path",
+      "adaptation": "Core Iter results and typed errors replace borrowed query iterators.",
+      "evidence": [
+        "json_path_test.mbt",
+        "validation/queries.py"
+      ],
+      "declarations": {
+        "yrs::JsonPath": [
+          "parse"
+        ],
+        "yrs::JsonPathEval": [
+          "Iter",
+          "json_path"
+        ],
+        "yrs::json_path::JsonPathIter": [],
+        "yrs::json_path::ParseError": [
+          "InvalidJsonPath"
+        ]
+      }
+    },
+    "subdocuments": {
+      "surface": "Doc lifecycle, SubdocsEvent, arrays of child Docs",
+      "adaptation": "Child replication is separate from parent metadata, as upstream. Registry identity is corrected after destroy; explicit GUIDs/host lifecycle replace implicit host facilities.",
+      "evidence": [
+        "subdocument_test.mbt",
+        "validation/subdocs.py"
+      ],
+      "declarations": {
+        "yrs::SubdocsEvent": [
+          "added",
+          "loaded",
+          "removed"
+        ],
+        "yrs::SubdocsEventIter": []
+      }
+    },
+    "undo": {
+      "surface": "UndoManager[M], StackItem[M], UndoEvent[M]",
+      "adaptation": "Host-injected clock and synchronous undo/redo replace async/blocking lock variants. Metadata uses owned values. Wire-equivalent histories, rather than independently allocated restoration IDs, define interoperability. Restored parent and GC bugs are corrected.",
+      "evidence": [
+        "undo_test.mbt",
+        "undo_restore_attributes_test.mbt",
+        "undo_gc_test.mbt",
+        "validation/undo_persistence.py",
+        "validation/undo_mixed.py",
+        "validation/undo_observer_network.py"
+      ],
+      "declarations": {
+        "yrs::UndoManager": [],
+        "yrs::undo::CaptureTransactionFn": [],
+        "yrs::undo::Event": [
+          "changed_parent_types",
+          "has_changed",
+          "kind",
+          "meta",
+          "meta_mut",
+          "origin"
+        ],
+        "yrs::undo::EventKind": [
+          "Redo",
+          "Undo"
+        ],
+        "yrs::undo::Meta": [],
+        "yrs::undo::Options": [
+          "capture_timeout_millis",
+          "capture_transaction",
+          "init_redo_stack",
+          "init_undo_stack",
+          "timestamp",
+          "tracked_origins"
+        ],
+        "yrs::undo::StackClearedEvent": [
+          "redo_stack_cleared",
+          "undo_stack_cleared",
+          "new"
+        ],
+        "yrs::undo::StackItem": [
+          "meta",
+          "deletions",
+          "insertions",
+          "merge",
+          "meta",
+          "new",
+          "with_meta"
+        ],
+        "yrs::undo::UndoManager": [
+          "as_origin",
+          "can_redo",
+          "can_undo",
+          "clear_all",
+          "clear_redo",
+          "clear_undo",
+          "docs",
+          "exclude_origin",
+          "expand_scope",
+          "include_origin",
+          "new",
+          "observe_item_added",
+          "observe_item_popped",
+          "observe_item_updated",
+          "observe_stack_cleared",
+          "redo",
+          "redo_blocking",
+          "redo_stack",
+          "reset",
+          "undo",
+          "undo_blocking",
+          "undo_stack",
+          "unobserve_item_added",
+          "unobserve_item_popped",
+          "unobserve_item_updated",
+          "unobserve_stack_cleared",
+          "with_options"
+        ]
+      }
+    },
+    "codecs": {
+      "surface": "Read, Write, Cursor, ByteWriter, Encoder/Decoder, Encode/Decode, EncoderV1/V2, DecoderV1/V2",
+      "adaptation": "Generic integer read/write specialization uses explicit widths up to 64 bits. Signed varints use (Int64,Bool), preserving negative zero. Rust u128 and a wrapper Signed.map are expressed with host tuples/operations, not wire fields.",
+      "evidence": [
+        "binary_stream_test.mbt",
+        "codec_traits_test.mbt",
+        "codec_document_test.mbt",
+        "validation/streams.py",
+        "validation/update_codecs.py",
+        "validation/codec_updates.py",
+        "validation/v2_clock_boundaries.py"
+      ],
+      "declarations": {
+        "yrs::encoding::read::Cursor": [
+          "buf",
+          "next",
+          "has_content",
+          "new"
+        ],
+        "yrs::encoding::read::Error": [
+          "type_mismatch",
+          "Custom",
+          "EndOfBuffer",
+          "InvalidJSON",
+          "InvalidVarInt",
+          "NotEnoughMemory",
+          "TypeMismatch",
+          "UnexpectedValue"
+        ],
+        "yrs::encoding::read::Read": [
+          "read_buf",
+          "read_exact",
+          "read_f32",
+          "read_f64",
+          "read_i64",
+          "read_string",
+          "read_u16",
+          "read_u32",
+          "read_u32_be",
+          "read_u64",
+          "read_u8",
+          "read_var",
+          "read_var_signed"
+        ],
+        "yrs::encoding::varint::Signed": [
+          "is_negative",
+          "is_positive",
+          "map",
+          "new",
+          "value"
+        ],
+        "yrs::encoding::varint::SignedVarInt": [
+          "read_signed",
+          "write_signed"
+        ],
+        "yrs::encoding::varint::VarInt": [
+          "read",
+          "write"
+        ],
+        "yrs::encoding::write::Write": [
+          "write_all",
+          "write_buf",
+          "write_f32",
+          "write_f64",
+          "write_i64",
+          "write_string",
+          "write_u16",
+          "write_u32",
+          "write_u32_be",
+          "write_u64",
+          "write_u8",
+          "write_var",
+          "write_var_signed"
+        ],
+        "yrs::updates::decoder::Decode": [
+          "decode",
+          "decode_v1",
+          "decode_v2"
+        ],
+        "yrs::updates::decoder::Decoder": [
+          "read_any",
+          "read_client",
+          "read_ds_clock",
+          "read_ds_len",
+          "read_info",
+          "read_json",
+          "read_key",
+          "read_left_id",
+          "read_len",
+          "read_parent_info",
+          "read_right_id",
+          "read_to_end",
+          "read_type_ref",
+          "reset_ds_cur_val"
+        ],
+        "yrs::updates::decoder::DecoderV1": [
+          "new"
+        ],
+        "yrs::updates::decoder::DecoderV2": [
+          "new"
+        ],
+        "yrs::updates::encoder::Encode": [
+          "encode",
+          "encode_v1",
+          "encode_v2"
+        ],
+        "yrs::updates::encoder::Encoder": [
+          "reset_ds_cur_val",
+          "to_vec",
+          "write_any",
+          "write_client",
+          "write_ds_clock",
+          "write_ds_len",
+          "write_info",
+          "write_json",
+          "write_key",
+          "write_left_id",
+          "write_len",
+          "write_parent_info",
+          "write_right_id",
+          "write_type_ref"
+        ],
+        "yrs::updates::encoder::EncoderV1": [
+          "new"
+        ],
+        "yrs::updates::encoder::EncoderV2": [
+          "new"
+        ]
+      }
+    },
+    "protocol": {
+      "surface": "Awareness, AwarenessUpdate, AwarenessSummary, Protocol, AsyncProtocol, DefaultProtocol, Message",
+      "adaptation": "Clock and transport are host injected. Observer keys replace subscription objects; application message handlers and authentication remain customizable. doc_mut uses the same managed Doc handle. Constructors and records replace iterator/event wrappers.",
+      "evidence": [
+        "sync_test.mbt",
+        "protocol_test.mbt",
+        "async_protocol_test.mbt",
+        "validation/presence.py",
+        "validation/protocol_codec.py"
+      ],
+      "declarations": {
+        "yrs::sync::Awareness": [
+          "apply_update",
+          "apply_update_summary",
+          "apply_update_summary_with",
+          "apply_update_with",
+          "clean_local_state",
+          "client_id",
+          "doc",
+          "doc_mut",
+          "iter",
+          "local_state",
+          "local_state_raw",
+          "meta",
+          "new",
+          "on_change",
+          "on_update",
+          "remove_state",
+          "set_local_state",
+          "set_local_state_raw",
+          "state",
+          "unobserve_change",
+          "unobserve_update",
+          "update",
+          "update_with_clients",
+          "with_clock"
+        ],
+        "yrs::sync::AwarenessUpdate": [
+          "clients"
+        ],
+        "yrs::sync::Clock": [
+          "now"
+        ],
+        "yrs::sync::DefaultProtocol": [],
+        "yrs::sync::Error": [
+          "AwarenessEncoding",
+          "DecodingError",
+          "IO",
+          "Other",
+          "PermissionDenied",
+          "Unsupported",
+          "Update"
+        ],
+        "yrs::sync::Message": [
+          "Auth",
+          "Awareness",
+          "AwarenessQuery",
+          "Custom",
+          "Sync"
+        ],
+        "yrs::sync::MessageReader": [
+          "new"
+        ],
+        "yrs::sync::Protocol": [
+          "handle",
+          "handle_auth",
+          "handle_awareness_query",
+          "handle_awareness_update",
+          "handle_message",
+          "handle_sync_step1",
+          "handle_sync_step2",
+          "handle_update",
+          "missing_handle",
+          "start"
+        ],
+        "yrs::sync::SyncMessage": [
+          "SyncStep1",
+          "SyncStep2",
+          "Update"
+        ],
+        "yrs::sync::Timestamp": [],
+        "yrs::sync::awareness::AwarenessIter": [],
+        "yrs::sync::awareness::AwarenessUpdateEntry": [
+          "clock",
+          "json"
+        ],
+        "yrs::sync::awareness::AwarenessUpdateSummary": [
+          "added",
+          "removed",
+          "updated",
+          "all_changes"
+        ],
+        "yrs::sync::awareness::ClientState": [
+          "clock",
+          "data",
+          "last_updated"
+        ],
+        "yrs::sync::awareness::Error": [
+          "ClientNotFound",
+          "Serde"
+        ],
+        "yrs::sync::awareness::Event": [
+          "added",
+          "all_changes",
+          "new",
+          "removed",
+          "summary",
+          "updated"
+        ],
+        "yrs::sync::protocol::AsyncProtocol": [
+          "handle",
+          "handle_auth",
+          "handle_awareness_query",
+          "handle_awareness_update",
+          "handle_message",
+          "handle_sync_step1",
+          "handle_sync_step2",
+          "handle_update",
+          "missing_handle",
+          "start"
+        ],
+        "yrs::sync::protocol::MSG_AUTH": [],
+        "yrs::sync::protocol::MSG_AWARENESS": [],
+        "yrs::sync::protocol::MSG_QUERY_AWARENESS": [],
+        "yrs::sync::protocol::MSG_SYNC": [],
+        "yrs::sync::protocol::MSG_SYNC_STEP_1": [],
+        "yrs::sync::protocol::MSG_SYNC_STEP_2": [],
+        "yrs::sync::protocol::MSG_SYNC_UPDATE": [],
+        "yrs::sync::protocol::PERMISSION_DENIED": [],
+        "yrs::sync::protocol::PERMISSION_GRANTED": [],
+        "yrs::sync::time::SystemClock": []
+      }
+    },
+    "type-descriptors": {
+      "surface": "TypeRef and public enum variants",
+      "adaptation": "Kind and boundary information has exact codec support; enum variants replace public numeric constants.",
+      "evidence": [
+        "type_ref_test.mbt",
+        "validation/type_refs.py"
+      ],
+      "declarations": {
+        "yrs::types::Attrs": [],
+        "yrs::types::TYPE_REFS_ARRAY": [],
+        "yrs::types::TYPE_REFS_DOC": [],
+        "yrs::types::TYPE_REFS_MAP": [],
+        "yrs::types::TYPE_REFS_TEXT": [],
+        "yrs::types::TYPE_REFS_UNDEFINED": [],
+        "yrs::types::TYPE_REFS_WEAK": [],
+        "yrs::types::TYPE_REFS_XML_ELEMENT": [],
+        "yrs::types::TYPE_REFS_XML_FRAGMENT": [],
+        "yrs::types::TYPE_REFS_XML_HOOK": [],
+        "yrs::types::TYPE_REFS_XML_TEXT": [],
+        "yrs::types::TypeRef": [
+          "kind",
+          "Array",
+          "Map",
+          "SubDoc",
+          "Text",
+          "Undefined",
+          "WeakLink",
+          "XmlElement",
+          "XmlFragment",
+          "XmlHook",
+          "XmlText"
+        ]
+      }
+    },
+    "storage-internals": {
+      "surface": "Private Item/Branch/Content and integration machinery",
+      "adaptation": "Raw pointers, mutable flags, splittable strings and custom raw Prelim integration are implementation details. Public shared handles, open AsPrelim, In and typed root metadata expose all supported CRDT values without bypassing invariants. Wire tag constants are represented by codecs and TypeRef.",
+      "evidence": [
+        "input_test.mbt",
+        "as_prelim_test.mbt",
+        "validation/legacy.py",
+        "validation/codec_updates.py"
+      ],
+      "declarations": {
+        "yrs::block::BLOCK_GC_REF_NUMBER": [],
+        "yrs::block::BLOCK_ITEM_ANY_REF_NUMBER": [],
+        "yrs::block::BLOCK_ITEM_BINARY_REF_NUMBER": [],
+        "yrs::block::BLOCK_ITEM_DELETED_REF_NUMBER": [],
+        "yrs::block::BLOCK_ITEM_DOC_REF_NUMBER": [],
+        "yrs::block::BLOCK_ITEM_EMBED_REF_NUMBER": [],
+        "yrs::block::BLOCK_ITEM_FORMAT_REF_NUMBER": [],
+        "yrs::block::BLOCK_ITEM_JSON_REF_NUMBER": [],
+        "yrs::block::BLOCK_ITEM_STRING_REF_NUMBER": [],
+        "yrs::block::BLOCK_ITEM_TYPE_REF_NUMBER": [],
+        "yrs::block::BLOCK_SKIP_REF_NUMBER": [],
+        "yrs::block::EmbedPrelim": [
+          "Primitive",
+          "Shared"
+        ],
+        "yrs::block::HAS_ORIGIN": [],
+        "yrs::block::HAS_PARENT_SUB": [],
+        "yrs::block::HAS_RIGHT_ORIGIN": [],
+        "yrs::block::Item": [
+          "block_range",
+          "contains",
+          "content_len",
+          "encode",
+          "id",
+          "info",
+          "is_countable",
+          "is_deleted",
+          "last_id",
+          "len",
+          "range"
+        ],
+        "yrs::block::ItemContent": [
+          "decode",
+          "encode",
+          "encode_slice",
+          "get_content",
+          "get_first",
+          "get_last",
+          "get_ref_number",
+          "is_countable",
+          "len",
+          "read",
+          "try_squash",
+          "Any",
+          "Binary",
+          "Deleted",
+          "Doc",
+          "Embed",
+          "Format",
+          "JSON",
+          "String",
+          "Type"
+        ],
+        "yrs::block::ItemFlags": [
+          "clear_countable",
+          "clear_keep",
+          "clear_linked",
+          "is_countable",
+          "is_deleted",
+          "is_keep",
+          "is_linked",
+          "is_marked",
+          "new",
+          "set_countable",
+          "set_deleted",
+          "set_keep",
+          "set_linked"
+        ],
+        "yrs::block::ItemPtr": [],
+        "yrs::block::Prelim": [
+          "Return",
+          "integrate",
+          "into_content"
+        ],
+        "yrs::block::SplittableString": [
+          "as_str",
+          "len",
+          "push_str",
+          "utf16_len"
+        ],
+        "yrs::block::Unused": [],
+        "yrs::branch::Branch": [
+          "block_len",
+          "content_len",
+          "as_subdoc",
+          "content_len",
+          "id",
+          "is_deleted",
+          "len",
+          "new",
+          "observe",
+          "observe_deep",
+          "type_ref",
+          "unobserve",
+          "unobserve_deep"
+        ],
+        "yrs::branch::BranchPtr": []
+      }
+    },
+    "errors": {
+      "surface": "DecodeError, QuoteError, JsonPathError, ProtocolError and value conversion errors",
+      "adaptation": "MoonBit checked errors replace Rust Result/panic enums; malformed input is validated before document mutation.",
+      "evidence": [
+        "malformed_fuzz_test.mbt",
+        "protocol_test.mbt"
+      ],
+      "declarations": {
+        "yrs::error::Error": [
+          "Gc",
+          "ReadError",
+          "UpdateError"
+        ],
+        "yrs::error::UpdateError": [
+          "InvalidParent"
+        ]
+      }
+    },
+    "module": {
+      "surface": "Root package namespace",
+      "adaptation": "MoonBit uses a flat owning package rather than Rust module paths.",
+      "evidence": [
+        "pkg.generated.mbti"
+      ],
+      "declarations": {
+        "yrs::any": []
+      }
+    }
+  }
+}

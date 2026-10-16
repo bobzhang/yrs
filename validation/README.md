@@ -34,10 +34,27 @@ python3 validation/transactions.py
 python3 validation/presence.py
 ```
 
-`.github/workflows/ci.yml` runs units on Linux/macOS and these oracle groups on
-macOS using pinned GitHub action revisions. The lifecycle job also runs the
-smallest real editing trace on native. The workflow has been prepared locally;
-it has not yet run in GitHub because the public repository is not created.
+The complete release gate is split into 13 suites, shared by local validation
+and `.github/workflows/ci.yml`. Run one with:
+
+```sh
+python3 validation/release.py --suite weak
+python3 validation/api_contract.py
+```
+
+Available suites: `core`, `values`, `contracts`, `wire`, `history`, `lifecycle`,
+`weak`, `undo`, `undo-yjs`, `undo-yjs-native`, `undo-high-clocks`, `undo-observer`,
+and `undo-observer-native`. After all suites finish,
+`python3 validation/release.py --verify` rejects missing/failed runs or library
+source hashes different from the current checkout. Per-command logs are saved
+under `_build/release-logs/`. CI retains these logs and the detailed JSON reports.
+Unit tests run on both Linux and macOS, across all four MoonBit targets.
+
+The Rust-owned GC failure is asserted by `undo_gc.py`; the ordinary Rust gate
+uses mixed authors with GC disabled and MoonBit authors with GC enabled. Mixed
+Yjs authors are checked in both GC modes on JS and native. These choices are
+explicit in the runner; unchanged strict Rust diagnostics remain available.
+
 
 For longer editing and memory checks on macOS:
 
@@ -83,3 +100,16 @@ and the recursive Undefined-to-Null normalization performed by serde.
 exactly one value, preserve application frame bytes, reject truncations, and
 that unchanged Rust decodes every port generic-writer output without loss.
 Large integer encoding may differ in size from Rust; it preserves all bits.
+
+The sparse relay oracle has an explicit `--eager-reference` harness mode. Pinned
+Yjs decodes and splits original updates into complete struct packets; unchanged
+Rust applies those original operations repeatedly with pending buffers pruned
+until its integrated state stops changing. It does not patch Rust's integration
+code or replace values with MoonBit results. Every MoonBit intermediate snapshot
+must equal that causal fixed point. Ordinary Rust scheduling remains exercised
+in the core suite, producer histories and the retained pending witnesses.
+
+The weak oracle separates construction from reads: new quotations must equal
+independently computed visible slices, while Rust- and MoonBit-authored wire
+histories are replayed into both engines for query/observer comparisons. This
+prevents corrected starting identities from concealing a query or event defect.
