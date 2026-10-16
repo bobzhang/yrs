@@ -1,0 +1,16 @@
+{
+  "upstream": "ac339600c712642e556895426113c3f9c117de39",
+  "documents": 64,
+  "queries": 3840,
+  "evaluations": 7680,
+  "checks": [
+    "shared types",
+    "immutable values",
+    "unions and negative indices",
+    "recursive descent",
+    "slices",
+    "Unicode names",
+    "invalid syntax"
+  ],
+  "status": "passed"
+}

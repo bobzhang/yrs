@@ -256,3 +256,19 @@ metadata; comparisons preserve text, embeds, attributes and every annotated
 character's CRDT identity. Only equivalent adjacent chunk boundaries are
 normalized. A separate pinned Yjs regression covers formatting inside a surrogate
 pair, where pinned Rust panics; see `validation/REFERENCE_LIMITATIONS.md`.
+
+
+`JsonPath::parse` supports the Yrs query subset: root/current selectors, Unicode
+member names, negative indices, wildcards, recursive descent, slices and unions.
+Use `Any::json_path` for immutable values or `Doc::json_path` for live CRDT
+handles, including imported roots and XML attributes/children. Predicates are
+unsupported upstream. The parser rejects unclosed brackets and zero-step slices
+rather than accepting malformed input or reaching upstream's iterator panic.
+
+`python3 validation/queries.py` compares 3,840 queries on 64 documents in both
+immutable and shared form (7,680 evaluations). Map traversal order is unspecified;
+only wildcard/recursive results are compared as multisets. Ordered index unions
+and slices retain their order. Unicode classes are generated from the pinned
+Rust 1.97.1 toolchain's Unicode 17.0 tables by
+`validation/generate_path_unicode.py`. Unit tests also exercise live-handle edits,
+untyped imported roots, XML queries and a 1,000-level recursive traversal.

@@ -38,6 +38,11 @@ pub suberror DecodeError {
 } derive(@debug.Debug)
 pub fn DecodeError::to_repr(Self) -> @debug.Repr
 
+pub suberror JsonPathError {
+  InvalidJsonPath(String)
+} derive(@debug.Debug)
+pub fn JsonPathError::to_repr(Self) -> @debug.Repr
+
 pub suberror ProtocolError {
   PermissionDenied(String)
   UnsupportedMessage(Byte)
@@ -60,6 +65,7 @@ pub fn Any::decode(Bytes) -> Self raise DecodeError
 pub fn Any::encode(Self) -> Bytes
 pub fn Any::equal(Self, Self) -> Bool
 pub fn Any::from_json(Json) -> Self
+pub fn Any::json_path(Self, JsonPath) -> Iter[Self]
 pub fn Any::not_equal(Self, Self) -> Bool
 pub fn Any::to_json(Self) -> Json
 pub fn Any::to_repr(Self) -> @debug.Repr
@@ -227,6 +233,7 @@ pub fn Doc::get_or_insert_text(Self, String) -> Text
 pub fn Doc::get_or_insert_xml_fragment(Self, String) -> XmlFragment
 pub fn Doc::guid(Self) -> String
 pub fn Doc::has_missing_updates(Self) -> Bool
+pub fn Doc::json_path(Self, JsonPath) -> Iter[Out]
 pub fn Doc::load(Self) -> Unit
 pub fn Doc::observe_after_transaction(Self, String, (Transaction) -> Unit) -> Unit
 pub fn Doc::observe_before_observer_calls(Self, String, (Transaction) -> Unit) -> Unit
@@ -330,6 +337,11 @@ pub(all) enum IndexScope {
 pub fn IndexScope::equal(Self, Self) -> Bool
 pub fn IndexScope::not_equal(Self, Self) -> Bool
 pub fn IndexScope::to_repr(Self) -> @debug.Repr
+
+pub struct JsonPath {
+  // private fields
+}
+pub fn JsonPath::parse(String) -> Self raise JsonPathError
 
 pub struct MapEvent {
   // private fields
