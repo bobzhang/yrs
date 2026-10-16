@@ -10,7 +10,7 @@
         "validation/compare.py"
       ],
       "exit_code": 0,
-      "seconds": 667.284
+      "seconds": 591.299
     }
   ],
   "status": "passed"

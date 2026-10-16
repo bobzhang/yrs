@@ -50,6 +50,15 @@ source hashes different from the current checkout. Per-command logs are saved
 under `_build/release-logs/`. CI retains these logs and the detailed JSON reports.
 Unit tests run on both Linux and macOS, across all four MoonBit targets.
 
+The core JavaScript bridge reads scenarios incrementally and writes results
+synchronously so pipe backpressure bounds queued output. The original buffered
+`console.log` loop exhausted the hosted Node heap on the full oracle run. To
+repeat the release check with the same 2 GiB heap bound:
+
+```sh
+NODE_OPTIONS=--max-old-space-size=2048 python3 validation/release.py --suite core
+```
+
 The Rust-owned GC failure is asserted by `undo_gc.py`; the ordinary Rust gate
 uses mixed authors with GC disabled and MoonBit authors with GC enabled. Mixed
 Yjs authors are checked in both GC modes on JS and native. These choices are
