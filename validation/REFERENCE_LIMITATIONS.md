@@ -349,3 +349,15 @@ This explains how an initial retry stall can cause a persistent difference even
 after retrying the merged pending update. The port intentionally retries ready
 dependencies eagerly. The oracle retains exact prefix-level evidence; it does
 not reclassify the ordinary buffered outputs as equal.
+
+The additional weak callbacks are now classified at every compared step:
+13,912 report a changed quoted view; 158 follow formatting operations without a
+view change; two follow deletion cleanup without a view change. None are
+unclassified, and none of Rust's notifications are missing. The retained
+`weak-empty-quote-format-events.json` and
+`weak-empty-quote-cleanup-events.json` fixtures exercise the latter categories.
+The cleanup regression also checks internal operation identities: the extra
+callback is caused by deleting a format marker attached to the empty quotation.
+Observers report changes to CRDT structure, so an empty rendered string alone
+does not imply that no quoted operation changed. These classifications explain
+the tested differences; they do not turn them into exact upstream event parity.

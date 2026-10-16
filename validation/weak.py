@@ -6,14 +6,23 @@ from compare import ROOT,run
 from updates import execute
 
 def view(row):return {k:v for k,v in row.items() if k!='wire'}
-exceptions={'xml_panics':0,'plain_disagrees_with_xml':0,'plain_unavailable_after_xml_panic':0,'observer_mismatch_snapshots':0,'xml_disagrees_with_plain':0,'extra_moon_events':0,'missing_moon_events':0}
-def equivalent(p,q):
+exceptions={'xml_panics':0,'plain_disagrees_with_xml':0,'plain_unavailable_after_xml_panic':0,'observer_mismatch_snapshots':0,'xml_disagrees_with_plain':0,'extra_moon_events':0,'missing_moon_events':0,'extra_events_with_changed_view':0,'extra_format_marker_events_without_view_change':0,'extra_cleanup_events_without_view_change':0,'unclassified_extra_events':0}
+def equivalent(p,q,previous=None,operation=None):
  p=json.loads(json.dumps(view(p)));q=json.loads(json.dumps(view(q)))
  p['events'].sort();q['events'].sort()
  if p['events']!=q['events']:
   exceptions['observer_mismatch_snapshots']+=1
   exceptions['extra_moon_events']+=sum((Counter(q['events'])-Counter(p['events'])).values())
   exceptions['missing_moon_events']+=sum((Counter(p['events'])-Counter(q['events'])).values())
+  for key,count in (Counter(q['events'])-Counter(p['events'])).items():
+   if previous is not None and previous['links'].get(key)!=q['links'].get(key):
+    exceptions['extra_events_with_changed_view']+=count
+   elif operation is not None and operation[0]=='f':
+    exceptions['extra_format_marker_events_without_view_change']+=count
+   elif operation is not None and operation[0]=='d':
+    exceptions['extra_cleanup_events_without_view_change']+=count
+   else:
+    exceptions['unclassified_extra_events']+=count
  p.pop('events');q.pop('events')
  if p['links'].keys()!=q['links'].keys():return False
  for key,value in p['links'].items():
@@ -51,6 +60,17 @@ def main():
  for i in [2,4]:
   assert reference[i]['events']==[] and port[i]['events']==['topen']
   assert reference[i]['links']==port[i]['links']
+ fixture=json.loads((ROOT/'validation/fixtures/weak-empty-quote-format-events.json').read_text())
+ reference=execute(['validation/rust/target/release/weak','v1'],[fixture])[0]
+ port=execute(['node','validation/weak.cjs','v1'],[fixture])[0]
+ assert reference[-1]['links']==port[-1]['links']==port[-2]['links']
+ assert reference[-1]['events']==[] and port[-1]['events']==['t2']
+ assert port[-1]['state']!=port[-2]['state']  # actual format operations were inserted
+ fixture=json.loads((ROOT/'validation/fixtures/weak-empty-quote-cleanup-events.json').read_text())
+ reference=execute(['validation/rust/target/release/weak','v1','gc'],[fixture])[0]
+ port=execute(['node','validation/weak.cjs','v1','gc'],[fixture])[0]
+ assert reference[-1]['links']==port[-1]['links']==port[-2]['links']
+ assert reference[-1]['events']==[] and port[-1]['events']==['t2']
  cases=[]
  for seed in range(64):
   rng=random.Random(22000+seed);ops=[['i',0,'abcdefghijklmnop'],*[['ai',i,i] for i in range(12)],['m','key',0],['ml','m0','key']]
@@ -77,7 +97,7 @@ def main():
     for j,(p,q) in enumerate(zip(x,y)):
      if Counter(p['events'])-Counter(q['events']) and not (ROOT/'validation/fixtures/weak-missing-observer.json').exists():
       (ROOT/'validation/fixtures/weak-missing-observer.json').write_text(json.dumps({'version':version,'gc':gc,'commands':cases[i][:j+1]}))
-     if not equivalent(p,q):
+     if not equivalent(p,q,y[j-1] if j else None,cases[i][j]):
       (ROOT/'validation/fixtures/weak-failure.json').write_text(json.dumps({'version':version,'gc':gc,'commands':cases[i][:j+1]}));print('Mismatch',i,j,view(p),view(q));raise AssertionError(i)
    total+=sum(map(len,a))
    packets=[[['load',row['wire']]] for rows in a+b for row in rows[::12]]
@@ -86,7 +106,7 @@ def main():
     if not all(equivalent(p,q) for p,q in zip(x,y)):
      (ROOT/'validation/fixtures/weak-import-failure.json').write_text(json.dumps({'version':version,'gc':gc,'commands':packets[i]}));print('Import mismatch',version,gc,i,view(x[0]),view(y[0]));raise AssertionError(i)
    imports+=len(packets)
- assert exceptions['missing_moon_events']==0, exceptions
+ assert exceptions['missing_moon_events']==0 and exceptions['unclassified_extra_events']==0, exceptions
  assert exceptions['plain_disagrees_with_xml']==40 and exceptions['xml_disagrees_with_plain']==8, exceptions
  result={'upstream':'ac339600c712642e556895426113c3f9c117de39','histories':64,'snapshots':total,'imports':imports,'versions':['v1','v2'],'gc_modes':[False,True],'reference_query_exceptions':exceptions.copy(),'view_status':'passed except reference-inconsistent queries','observer_status':'not compatible: recorded differences','status':'partial compatibility'}
  (ROOT/'validation/weak-results.json').write_text(json.dumps(result,indent=2)+'\n');print(result)

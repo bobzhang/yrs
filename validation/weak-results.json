@@ -18,7 +18,11 @@
     "observer_mismatch_snapshots": 7306,
     "xml_disagrees_with_plain": 8,
     "extra_moon_events": 14072,
-    "missing_moon_events": 0
+    "missing_moon_events": 0,
+    "extra_events_with_changed_view": 13912,
+    "extra_format_marker_events_without_view_change": 158,
+    "extra_cleanup_events_without_view_change": 2,
+    "unclassified_extra_events": 0
   },
   "view_status": "passed except reference-inconsistent queries",
   "observer_status": "not compatible: recorded differences",
