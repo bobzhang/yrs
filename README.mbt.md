@@ -55,7 +55,7 @@ protection. The explicit millisecond clock keeps the API portable and testable.
 `start_sync`, `handle_sync`, `Message`, and `encode_messages` implement the default
 y-sync handshake, incremental updates, awareness queries and authorization
 responses. A packet is processed in order, matching upstream partial application
-when a later message is invalid. Custom protocol dispatch can use decoded messages;
+when a later message is invalid. `Protocol` and `AsyncProtocol` allow overriding individual handlers;
 the default handler rejects unsupported custom tags.
 
 `python3 validation/presence.py` checks 128 randomized scenarios against pinned
@@ -449,3 +449,16 @@ test "resolve a typed collection on another replica" {
   assert_true(handle.get(peer) is None)
 }
 ```
+
+`Protocol` and `AsyncProtocol` expose the upstream extension points for startup,
+message dispatch, sync steps, continuous updates, authentication, awareness and
+custom messages. `DefaultProtocol()` implements both; use
+`AsyncProtocol::handle(protocol, awareness, packet)` from an async host. Update
+bytes are decoded before the application handler runs. Packet processing remains
+ordered across suspension and retains prior successful messages if a later one
+fails. No network transport or async runtime is imposed on the library.
+
+Tests exercise custom authentication, network transaction origins, delegated
+update handlers, malformed later messages, and authorization that suspends before
+allowing or rejecting edits. The existing Rust sync/presence comparison still
+passes all 33,024 snapshots and 768 cross-runtime transfers.

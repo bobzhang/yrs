@@ -43,7 +43,7 @@ pub suberror JsonPathError {
 } derive(@debug.Debug)
 pub fn JsonPathError::to_repr(Self) -> @debug.Repr
 
-pub suberror ProtocolError {
+pub(all) suberror ProtocolError {
   PermissionDenied(String)
   UnsupportedMessage(Byte)
 } derive(@debug.Debug)
@@ -255,6 +255,22 @@ pub fn[A : Eq] ContentAttributes::merge(Self[A], Self[A]) -> Self[A]
 pub fn[A : Eq] ContentAttributes::not_equal(Self[A], Self[A]) -> Bool
 pub fn[A : @debug.Debug] ContentAttributes::to_repr(Self[A]) -> @debug.Repr
 pub impl[A : Eq] Eq for ContentAttributes[A]
+
+pub struct DefaultProtocol {
+}
+pub fn DefaultProtocol::DefaultProtocol() -> Self
+pub fn DefaultProtocol::handle(Self, Awareness, Bytes) -> Array[Message] raise
+pub fn DefaultProtocol::handle_auth(Self, Awareness, String?) -> Message? raise
+pub fn DefaultProtocol::handle_awareness_query(Self, Awareness) -> Message? raise
+pub fn DefaultProtocol::handle_awareness_update(Self, Awareness, AwarenessUpdate) -> Message? raise
+pub fn DefaultProtocol::handle_message(Self, Awareness, Message) -> Message? raise
+pub fn DefaultProtocol::handle_sync_step1(Self, Awareness, StateVector) -> Message? raise
+pub fn DefaultProtocol::handle_sync_step2(Self, Awareness, Update) -> Message? raise
+pub fn DefaultProtocol::handle_update(Self, Awareness, Update) -> Message? raise
+pub fn DefaultProtocol::missing_handle(Self, Awareness, Byte, Bytes) -> Message? raise
+pub fn DefaultProtocol::start(Self, Awareness) -> Bytes raise
+pub impl AsyncProtocol for DefaultProtocol
+pub impl Protocol for DefaultProtocol
 
 pub(all) enum Delta {
   Inserted(Out, ReadOnlyArray[(String, Any)])
@@ -1015,6 +1031,32 @@ pub fn YChange::to_repr(Self) -> @debug.Repr
 // Type aliases
 
 // Traits
+pub(open) trait AsyncProtocol {
+  async fn start(Self, Awareness) -> Bytes = _
+  async fn handle(Self, Awareness, Bytes) -> Array[Message] = _
+  async fn handle_message(Self, Awareness, Message) -> Message? = _
+  async fn handle_sync_step1(Self, Awareness, StateVector) -> Message? = _
+  async fn handle_sync_step2(Self, Awareness, Update) -> Message? = _
+  async fn handle_update(Self, Awareness, Update) -> Message? = _
+  async fn handle_auth(Self, Awareness, String?) -> Message? = _
+  async fn handle_awareness_query(Self, Awareness) -> Message? = _
+  async fn handle_awareness_update(Self, Awareness, AwarenessUpdate) -> Message? = _
+  async fn missing_handle(Self, Awareness, Byte, Bytes) -> Message? = _
+}
+
+pub(open) trait Protocol {
+  fn start(Self, Awareness) -> Bytes raise = _
+  fn handle(Self, Awareness, Bytes) -> Array[Message] raise = _
+  fn handle_message(Self, Awareness, Message) -> Message? raise = _
+  fn handle_sync_step1(Self, Awareness, StateVector) -> Message? raise = _
+  fn handle_sync_step2(Self, Awareness, Update) -> Message? raise = _
+  fn handle_update(Self, Awareness, Update) -> Message? raise = _
+  fn handle_auth(Self, Awareness, String?) -> Message? raise = _
+  fn handle_awareness_query(Self, Awareness) -> Message? raise = _
+  fn handle_awareness_update(Self, Awareness, AwarenessUpdate) -> Message? raise = _
+  fn missing_handle(Self, Awareness, Byte, Bytes) -> Message? raise = _
+}
+
 pub trait RootRef : SharedRef {
   fn get_or_insert_root(Doc, String) -> Self
 }

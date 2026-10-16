@@ -116,7 +116,7 @@ pub fn decode_messages(bytes : Bytes) -> Array[Message] raise DecodeError {
 }
 
 ///|
-pub suberror ProtocolError {
+pub(all) suberror ProtocolError {
   PermissionDenied(String)
   UnsupportedMessage(Byte)
 } derive(Debug)
@@ -138,22 +138,7 @@ pub fn Awareness::handle_message(
   self : Awareness,
   message : Message,
 ) -> Message? raise {
-  match message {
-    Sync(SyncStep1(remote)) =>
-      Some(Sync(SyncStep2(self.document.encode_state_as_update_v1(remote~))))
-    Sync(SyncStep2(bytes) | Update(bytes)) => {
-      self.document.apply_update_v1(bytes)
-      None
-    }
-    AwarenessQuery => Some(Awareness(self.update()))
-    Awareness(update) => {
-      self.apply_update(update) |> ignore
-      None
-    }
-    Auth(Some(reason)) => raise PermissionDenied(reason)
-    Auth(None) => None
-    Custom(tag, _) => raise UnsupportedMessage(tag)
-  }
+  DefaultProtocol().handle_message(self, message)
 }
 
 ///|
@@ -163,12 +148,5 @@ pub fn Awareness::handle_sync(
   self : Awareness,
   bytes : Bytes,
 ) -> Array[Message] raise {
-  let reader : Reader = { bytes, offset: 0, }
-  let replies = []
-  while reader.offset < bytes.length() {
-    if self.handle_message(reader.message()) is Some(reply) {
-      replies.push(reply)
-    }
-  }
-  replies
+  DefaultProtocol().handle(self, bytes)
 }
