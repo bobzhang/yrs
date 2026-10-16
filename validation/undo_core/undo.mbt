@@ -358,7 +358,29 @@ fn run(
       ),
     )
   })
-  ({ "snapshots": Json(snapshots), "updates": Json(updates) } : Json).stringify()
+  let causal = docs.map(fn(d) {
+    let snapshot = d.snapshot()
+    (
+      {
+        "state": Json(
+          snapshot
+          .state_vector()
+          .entries()
+          .map(p => Json([Json(p.0.to_string()), Json(p.1)])),
+        ),
+        "deleted": Json(
+          snapshot
+          .deletions()
+          .map(p => Json([Json(p.0.to_string()), Json(p.1), Json(p.2)])),
+        ),
+      } : Json)
+  })
+  (
+    {
+      "snapshots": Json(snapshots),
+      "updates": Json(updates),
+      "causal": Json(causal),
+    } : Json).stringify()
 }
 
 ///|

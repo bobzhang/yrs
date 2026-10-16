@@ -32,6 +32,7 @@ def main():
                                    {'status': 'failed', 'command': command, 'exit_code': proc.returncode})
                     result = {'runs': results, 'status': 'passed' if proc.returncode == 0 else 'failed',
                               'replica_state_comparisons': sum(r.get('replica_state_comparisons', 0) for r in results),
+                              'causal_state_comparisons': sum(r.get('causal_state_comparisons', 0) for r in results),
                               'undo_redo_actions': sum(r.get('undo_redo_actions', 0) for r in results)}
                     path.write_text(json.dumps(result, indent=2)+'\n')
                     if proc.returncode:

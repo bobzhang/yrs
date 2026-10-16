@@ -1,6 +1,7 @@
 {
   "upstream": "ac339600c712642e556895426113c3f9c117de39",
   "reference": "yjs",
+  "moonbit_target": "js",
   "yjs_version": "13.6.27",
   "scenarios": 96,
   "seed_start": 0,
@@ -14,13 +15,20 @@
   ],
   "authorship": "mixed",
   "mixed_authorship": true,
+  "initial_clock": 0,
   "replica_state_comparisons": 205056,
+  "causal_state_comparisons": 205056,
+  "causal_metadata": [
+    "state vectors",
+    "normalized deletion intervals"
+  ],
   "duplicate_deliveries": 6528,
   "undo_redo_actions": 15124,
-  "reconciliation_rounds": 368,
+  "reconciliation_rounds": 838,
   "reconciliation_kinds": {
-    "rendered_content": 360,
-    "xml_attributes_only": 8
+    "rendered_content": 248,
+    "xml_attributes_only": 8,
+    "causal_state_only": 582
   },
   "independent_restoration_identity_equality_required": false,
   "structured_xml_attributes_compared": true,
@@ -32,6 +40,5 @@
   "port_local_deep_events": 22312,
   "notification_batches": 11476,
   "deep_events": 10148,
-  "status": "passed",
-  "moonbit_target": "js"
+  "status": "passed"
 }

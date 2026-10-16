@@ -19,12 +19,18 @@
       "mixed_authorship": true,
       "initial_clock": 2147483584,
       "replica_state_comparisons": 17088,
+      "causal_state_comparisons": 17088,
+      "causal_metadata": [
+        "state vectors",
+        "normalized deletion intervals"
+      ],
       "duplicate_deliveries": 544,
       "undo_redo_actions": 1272,
-      "reconciliation_rounds": 28,
+      "reconciliation_rounds": 96,
       "reconciliation_kinds": {
-        "rendered_content": 28,
-        "xml_attributes_only": 0
+        "rendered_content": 0,
+        "xml_attributes_only": 0,
+        "causal_state_only": 96
       },
       "independent_restoration_identity_equality_required": false,
       "structured_xml_attributes_compared": true,
@@ -57,12 +63,18 @@
       "mixed_authorship": true,
       "initial_clock": 2147483584,
       "replica_state_comparisons": 17088,
+      "causal_state_comparisons": 17088,
+      "causal_metadata": [
+        "state vectors",
+        "normalized deletion intervals"
+      ],
       "duplicate_deliveries": 544,
       "undo_redo_actions": 1256,
       "reconciliation_rounds": 72,
       "reconciliation_kinds": {
         "rendered_content": 72,
-        "xml_attributes_only": 0
+        "xml_attributes_only": 0,
+        "causal_state_only": 0
       },
       "independent_restoration_identity_equality_required": false,
       "structured_xml_attributes_compared": true,
@@ -95,12 +107,18 @@
       "mixed_authorship": true,
       "initial_clock": 4294836223,
       "replica_state_comparisons": 17088,
+      "causal_state_comparisons": 17088,
+      "causal_metadata": [
+        "state vectors",
+        "normalized deletion intervals"
+      ],
       "duplicate_deliveries": 544,
       "undo_redo_actions": 1272,
-      "reconciliation_rounds": 28,
+      "reconciliation_rounds": 96,
       "reconciliation_kinds": {
-        "rendered_content": 28,
-        "xml_attributes_only": 0
+        "rendered_content": 0,
+        "xml_attributes_only": 0,
+        "causal_state_only": 96
       },
       "independent_restoration_identity_equality_required": false,
       "structured_xml_attributes_compared": true,
@@ -133,12 +151,18 @@
       "mixed_authorship": true,
       "initial_clock": 4294836223,
       "replica_state_comparisons": 17088,
+      "causal_state_comparisons": 17088,
+      "causal_metadata": [
+        "state vectors",
+        "normalized deletion intervals"
+      ],
       "duplicate_deliveries": 544,
       "undo_redo_actions": 1256,
       "reconciliation_rounds": 72,
       "reconciliation_kinds": {
         "rendered_content": 72,
-        "xml_attributes_only": 0
+        "xml_attributes_only": 0,
+        "causal_state_only": 0
       },
       "independent_restoration_identity_equality_required": false,
       "structured_xml_attributes_compared": true,
@@ -171,12 +195,18 @@
       "mixed_authorship": true,
       "initial_clock": 2147483584,
       "replica_state_comparisons": 17088,
+      "causal_state_comparisons": 17088,
+      "causal_metadata": [
+        "state vectors",
+        "normalized deletion intervals"
+      ],
       "duplicate_deliveries": 544,
       "undo_redo_actions": 1272,
-      "reconciliation_rounds": 28,
+      "reconciliation_rounds": 96,
       "reconciliation_kinds": {
-        "rendered_content": 28,
-        "xml_attributes_only": 0
+        "rendered_content": 0,
+        "xml_attributes_only": 0,
+        "causal_state_only": 96
       },
       "independent_restoration_identity_equality_required": false,
       "structured_xml_attributes_compared": true,
@@ -209,12 +239,18 @@
       "mixed_authorship": true,
       "initial_clock": 2147483584,
       "replica_state_comparisons": 17088,
+      "causal_state_comparisons": 17088,
+      "causal_metadata": [
+        "state vectors",
+        "normalized deletion intervals"
+      ],
       "duplicate_deliveries": 544,
       "undo_redo_actions": 1256,
       "reconciliation_rounds": 72,
       "reconciliation_kinds": {
         "rendered_content": 72,
-        "xml_attributes_only": 0
+        "xml_attributes_only": 0,
+        "causal_state_only": 0
       },
       "independent_restoration_identity_equality_required": false,
       "structured_xml_attributes_compared": true,
@@ -247,12 +283,18 @@
       "mixed_authorship": true,
       "initial_clock": 4294836223,
       "replica_state_comparisons": 17088,
+      "causal_state_comparisons": 17088,
+      "causal_metadata": [
+        "state vectors",
+        "normalized deletion intervals"
+      ],
       "duplicate_deliveries": 544,
       "undo_redo_actions": 1272,
-      "reconciliation_rounds": 28,
+      "reconciliation_rounds": 96,
       "reconciliation_kinds": {
-        "rendered_content": 28,
-        "xml_attributes_only": 0
+        "rendered_content": 0,
+        "xml_attributes_only": 0,
+        "causal_state_only": 96
       },
       "independent_restoration_identity_equality_required": false,
       "structured_xml_attributes_compared": true,
@@ -285,12 +327,18 @@
       "mixed_authorship": true,
       "initial_clock": 4294836223,
       "replica_state_comparisons": 17088,
+      "causal_state_comparisons": 17088,
+      "causal_metadata": [
+        "state vectors",
+        "normalized deletion intervals"
+      ],
       "duplicate_deliveries": 544,
       "undo_redo_actions": 1256,
       "reconciliation_rounds": 72,
       "reconciliation_kinds": {
         "rendered_content": 72,
-        "xml_attributes_only": 0
+        "xml_attributes_only": 0,
+        "causal_state_only": 0
       },
       "independent_restoration_identity_equality_required": false,
       "structured_xml_attributes_compared": true,
@@ -307,5 +355,6 @@
   ],
   "status": "passed",
   "replica_state_comparisons": 136704,
-  "undo_redo_actions": 10112
+  "undo_redo_actions": 10112,
+  "causal_state_comparisons": 136704
 }

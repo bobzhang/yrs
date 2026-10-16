@@ -48,6 +48,14 @@ fn event(e:&Event,tx:&TransactionMut)->Value{
 }
 fn hex(bytes:&[u8])->String{bytes.iter().map(|b|format!("{b:02x}")).collect()}
 fn unhex(s:&str)->Vec<u8>{(0..s.len()).step_by(2).map(|i|u8::from_str_radix(&s[i..i+2],16).unwrap()).collect()}
+fn causal(docs: &[Doc]) -> Value {
+ json!(docs.iter().map(|doc| {
+  let snapshot=doc.transact().snapshot();
+  let state:Vec<_>=snapshot.state_map.iter().map(|(c,n)|json!([c.get().to_string(),n])).collect();
+  let deleted:Vec<_>=snapshot.delete_set.iter().flat_map(|(c,ranges)|ranges.into_iter().map(move |r|json!([c.get().to_string(),r.start,r.end]))).collect();
+  json!({"state":state,"deleted":deleted})
+ }).collect::<Vec<_>>())
+}
 fn main(){let gc=std::env::args().any(|s|s=="--gc");let v2=std::env::args().any(|s|s=="v2");let live=std::env::args().any(|s|s=="--live");let stdin=io::stdin();let mut lines=stdin.lock().lines();while let Some(line)=lines.next(){
  let mut commands:Vec<Value>=serde_json::from_str(&line.unwrap()).unwrap();
  let docs:Vec<_>=(1..=3).map(|i|{let mut o=Options::with_client_id(yrs::block::ClientID::new(i));o.skip_gc=!gc;o.offset_kind=OffsetKind::Utf16;Doc::with_options(o)}).collect();
@@ -87,11 +95,11 @@ fn main(){let gc=std::env::args().any(|s|s=="--gc");let v2=std::env::args().any(
  snapshots.push(json!({"docs":current,"notifications":*log.lock().unwrap(),"result":result,"stacks":managers.iter().map(|m|json!([m.undo_stack().len(),m.redo_stack().len()])).collect::<Vec<_>>()}));
  }
  if live {
- let updates:Vec<_>=docs.iter().map(|d|{let tx=d.transact();hex(&if v2{tx.encode_state_as_update_v2(&yrs::StateVector::default())}else{tx.encode_state_as_update_v1(&yrs::StateVector::default())})}).collect();println!("{}",json!({"snapshots":snapshots,"updates":updates}));io::stdout().flush().unwrap();snapshots.clear();
+ let updates:Vec<_>=docs.iter().map(|d|{let tx=d.transact();hex(&if v2{tx.encode_state_as_update_v2(&yrs::StateVector::default())}else{tx.encode_state_as_update_v1(&yrs::StateVector::default())})}).collect();println!("{}",json!({"snapshots":snapshots,"updates":updates,"causal":causal(&docs)}));io::stdout().flush().unwrap();snapshots.clear();
  match lines.next(){Some(line)=>{commands=serde_json::from_str(&line.unwrap()).unwrap();continue;},None=>break}
  } else { break; }
  }
  if !live {
- let updates:Vec<_>=docs.iter().map(|d|{let tx=d.transact();hex(&if v2{tx.encode_state_as_update_v2(&yrs::StateVector::default())}else{tx.encode_state_as_update_v1(&yrs::StateVector::default())})}).collect();println!("{}",json!({"snapshots":snapshots,"updates":updates}));
+ let updates:Vec<_>=docs.iter().map(|d|{let tx=d.transact();hex(&if v2{tx.encode_state_as_update_v2(&yrs::StateVector::default())}else{tx.encode_state_as_update_v1(&yrs::StateVector::default())})}).collect();println!("{}",json!({"snapshots":snapshots,"updates":updates,"causal":causal(&docs)}));
 }
 }}

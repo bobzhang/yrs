@@ -137,7 +137,12 @@ function run(commands) {
     snapshots.push(snapshot(result));
   }
   if (!snapshots.length) {notifications = []; snapshots.push(snapshot(null));}
-  return {snapshots, updates: docs.map(d => Buffer.from(encode(d)).toString('hex'))};
+  return {snapshots, updates: docs.map(d => Buffer.from(encode(d)).toString('hex')),
+    causal: docs.map(d => {
+      const s = Y.snapshot(d);
+      return {state: [...s.sv].map(([c, n]) => [String(c), n]),
+        deleted: [...s.ds.clients].flatMap(([c, ranges]) => ranges.map(r => [String(c), r.clock, r.clock + r.len]))};
+    })};
 }
 readline.createInterface({input: process.stdin}).on('line', line => {
   try {process.stdout.write(JSON.stringify(run(JSON.parse(line))) + '\n');}

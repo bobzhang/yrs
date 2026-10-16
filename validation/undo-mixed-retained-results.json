@@ -1,22 +1,37 @@
 {
   "upstream": "ac339600c712642e556895426113c3f9c117de39",
+  "reference": "rust",
+  "moonbit_target": "js",
+  "yjs_version": null,
   "scenarios": 96,
+  "seed_start": 0,
+  "gc_modes": [
+    false
+  ],
   "wire_versions": [
     "v1",
     "v2"
   ],
+  "authorship": "mixed",
   "mixed_authorship": true,
+  "initial_clock": 0,
   "replica_state_comparisons": 102528,
+  "causal_state_comparisons": 102528,
+  "causal_metadata": [
+    "state vectors",
+    "normalized deletion intervals"
+  ],
   "duplicate_deliveries": 3264,
   "undo_redo_actions": 7562,
-  "reconciliation_rounds": 254,
+  "reconciliation_rounds": 727,
   "reconciliation_kinds": {
-    "rendered_content": 250,
-    "xml_attributes_only": 4
+    "rendered_content": 122,
+    "xml_attributes_only": 4,
+    "causal_state_only": 601
   },
   "independent_restoration_identity_equality_required": false,
   "structured_xml_attributes_compared": true,
-  "observer_events_compared": "identical remote sync/duplicate transactions and port-owned local edits/undo/redo versus Rust wire mirrors, after prior state reconciliation",
+  "observer_events_compared": "identical remote sync/duplicate transactions and port-owned local edits/undo/redo versus reference wire mirrors, after prior state reconciliation",
   "observer_transaction_comparisons": 9186,
   "port_local_undo_redo_observer_comparisons": 3772,
   "port_local_edit_observer_comparisons": 7768,
@@ -24,9 +39,5 @@
   "port_local_deep_events": 11156,
   "notification_batches": 5738,
   "deep_events": 5074,
-  "status": "passed",
-  "gc_modes": [
-    false
-  ],
-  "scope_note": "Previously committed GC-disabled mixed-authorship run; not evidence for the expanded GC-enabled gate."
+  "status": "passed"
 }

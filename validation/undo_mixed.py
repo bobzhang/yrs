@@ -49,6 +49,17 @@ def history(seed):
 
 def state(row):return canonical({'docs':row['snapshots'][-1]['docs']})['docs']
 
+def causal(row):
+ result=[]
+ for doc in row['causal']:
+  ranges=[]
+  for client,start,end in sorted((int(c),s,e) for c,s,e in doc['deleted'] if s<e):
+   if ranges and ranges[-1][0]==client and start<=ranges[-1][2]:
+    ranges[-1][2]=max(ranges[-1][2],end)
+   else:ranges.append([client,start,end])
+  result.append({'state':sorted([int(c),n] for c,n in doc['state'] if n),'deleted':ranges})
+ return result
+
 def main():
  parser=argparse.ArgumentParser(description=__doc__)
  parser.add_argument('--gc',choices=['both','on','off'],default='both')
@@ -82,7 +93,7 @@ def main():
  checked=duplicates=undo_actions=reconciliations=0
  observer_checks=notification_batches=deep_events=0
  local_undo_checks=local_edit_checks=local_batches=local_events=0
- reconciliation_kinds={'rendered_content':0,'xml_attributes_only':0}
+ reconciliation_kinds={'rendered_content':0,'xml_attributes_only':0,'causal_state_only':0}
  def notifications(row):
   return canonical_events({'notifications':row['snapshots'][-1]['notifications']})['notifications']
  def compare_events(rows, version, seed, step, command):
@@ -133,29 +144,31 @@ def main():
      # attributes. Compare structured XML as well as rendered strings; exchange
      # generated operations before asserting convergence and count both causes.
      for round in range(3):
-      if a==b:break
+      if a==b and causal(last[0])==causal(last[1]):break
       for target in range(3):
-       if a[target]!=b[target]:
+       if a[target]!=b[target] or causal(last[0])[target]!=causal(last[1])[target]:
         last[0]=sessions[0].call([['apply',target,last[1]['updates'][target]]])
         last[1]=sessions[1].call([['apply',target,last[0]['updates'][target]]])
         reconciliations+=1
         rendered=lambda d:{k:v for k,v in d.items() if k!='xml_nodes'}
-        kind='xml_attributes_only' if rendered(a[target])==rendered(b[target]) else 'rendered_content'
+        kind='causal_state_only' if a[target]==b[target] else ('xml_attributes_only' if rendered(a[target])==rendered(b[target]) else 'rendered_content')
         reconciliation_kinds[kind]+=1
       a,b=state(last[0]),state(last[1])
-     if a!=b:
+     if a!=b or causal(last[0])!=causal(last[1]):
       Path('/tmp/yrs-undo-mixed-failure.json').write_text(json.dumps({'version':version,'gc':gc,'seed':seed,'commands':commands[:step+1],'reference_engine':args.reference,'reference':last[0],'moon':last[1]})+'\n')
       raise AssertionError((version,seed,step,c,a,b))
      checked+=3
      if step%11==0:
-      before=a;packet=last[owner]['updates'][x]
+      before=a;before_causal=causal(last[0]);packet=last[owner]['updates'][x]
       last=[s.call([['apply',x,packet]]) for s in sessions]
       assert state(last[0])==state(last[1])==before,(version,seed,step,'duplicate')
+      assert causal(last[0])==causal(last[1])==before_causal,(version,seed,step,'duplicate changed causal history')
       duplicates+=1
       batches,events=compare_events(last,version,seed,step,['duplicate',x])
       assert batches==0,(version,seed,step,'duplicate emitted events')
       observer_checks+=1
     final=state(last[0]);assert final[0]==final[1]==final[2],(version,seed,'convergence',final)
+    final_causal=causal(last[0]);assert final_causal[0]==final_causal[1]==final_causal[2],(version,seed,'causal convergence',final_causal)
    except Exception as error:
     failure={**scope,'version':version,'gc':gc,'seed':seed,'step':step,'error':str(error),'calls':[s.calls for s in sessions]}
     Path('/tmp/yrs-undo-mixed-execution-failure.json').write_text(json.dumps(failure)+'\n')
@@ -164,7 +177,7 @@ def main():
    finally:
     for s in sessions:s.close()
    if (seed-args.seed_start)%16==15:print(f'{version} gc={gc} owner={authorship}: {seed-args.seed_start+1}/{len(seeds)} histories passed',flush=True)
- result={**scope,'replica_state_comparisons':checked,'duplicate_deliveries':duplicates,'undo_redo_actions':undo_actions,'reconciliation_rounds':reconciliations,'reconciliation_kinds':reconciliation_kinds,'independent_restoration_identity_equality_required':False,'structured_xml_attributes_compared':True,'observer_events_compared':'identical remote sync/duplicate transactions and port-owned local edits/undo/redo versus reference wire mirrors, after prior state reconciliation','observer_transaction_comparisons':observer_checks,'port_local_undo_redo_observer_comparisons':local_undo_checks,'port_local_edit_observer_comparisons':local_edit_checks,'port_local_notification_batches':local_batches,'port_local_deep_events':local_events,'notification_batches':notification_batches,'deep_events':deep_events,'status':'passed'}
+ result={**scope,'replica_state_comparisons':checked,'causal_state_comparisons':checked,'causal_metadata':['state vectors','normalized deletion intervals'],'duplicate_deliveries':duplicates,'undo_redo_actions':undo_actions,'reconciliation_rounds':reconciliations,'reconciliation_kinds':reconciliation_kinds,'independent_restoration_identity_equality_required':False,'structured_xml_attributes_compared':True,'observer_events_compared':'identical remote sync/duplicate transactions and port-owned local edits/undo/redo versus reference wire mirrors, after prior state reconciliation','observer_transaction_comparisons':observer_checks,'port_local_undo_redo_observer_comparisons':local_undo_checks,'port_local_edit_observer_comparisons':local_edit_checks,'port_local_notification_batches':local_batches,'port_local_deep_events':local_events,'notification_batches':notification_batches,'deep_events':deep_events,'status':'passed'}
  save_report(result)
  print(json.dumps(result))
 if __name__=='__main__':main()

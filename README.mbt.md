@@ -216,11 +216,12 @@ cross-runtime decoding and truncated inputs against Rust.
 `python3 validation/undo_mixed.py` tests live networks with both Rust and MoonBit
 editing owners. Every replica has a mirror in the other runtime that receives
 identical wire history, and every generated cleanup deletion is synchronized
-before asserting convergence. The previous GC-disabled run passed both wire formats over 96 histories: 102,528
+before asserting convergence. The GC-disabled run passes both wire formats over 96 histories: 102,528
 replica comparisons, 7,562 undo/redo actions and 3,264 duplicate deliveries.
-The run required 254 reconciliation rounds: 250 involving rendered content and
-four exposing XML attributes absent from the rendered string. Structured XML is
-now compared throughout. All 9,186 remote synchronization/duplicate transactions
+The run requires 727 reconciliation rounds: 122 involving rendered content,
+four exposing XML attributes absent from the rendered string, and 601 involving
+only causal metadata. Every comparison checks state vectors and normalized
+deletion intervals as well as structured document contents. All 9,186 remote synchronization/duplicate transactions
 have matching observer notifications (5,738 batches and 5,074 deep events).
 A further 3,772 port-local undo/redo transactions and 7,768 port-local editing
 transactions match the notifications from Rust mirrors applying their updates
@@ -236,7 +237,7 @@ from the historical passing report. With MoonBit owning all three editing
 replicas and unchanged Rust checking their wire updates and observer events,
 the GC-enabled run passes both formats over all 96 histories: 102,528 replica
 comparisons, 7,562 local undo/redo observer comparisons and 15,450 local editing
-observer comparisons. It requires 126 deletion-reconciliation rounds; it does
+observer comparisons. It requires 608 reconciliation rounds involving only causal metadata; it does
 not establish immediate equality before those exchanges. Reproduce this scope
 with `python3 validation/undo_mixed.py --gc on --owner moon --report
 validation/undo-gc-port-results.json`. The Rust-owned GC failure remains a release
@@ -247,8 +248,10 @@ Yjs 13.6.27/MoonBit editing owners. All 96 histories pass both update formats
 with GC on and off: 205,056 replica-state comparisons, 15,124 undo/redo actions,
 6,528 duplicate deliveries and 18,372 remote observer transactions. A further
 7,544 port-local undo/redo and 15,536 local editing transactions have matching
-Yjs mirror notifications. The 368 reconciliation exchanges are counted
-explicitly; equality is required after generated deletions arrive. This tests
+Yjs mirror notifications. Each backend also passes 205,056 causal-state
+comparisons. The 838 reconciliation exchanges are counted explicitly: 248 for
+rendered content, eight for XML attributes, and 582 for causal metadata alone.
+Equality is required after generated deletions arrive. This tests
 concurrent undo against a browser implementation that completes the isolated
 Rust GC-crash scenario. It does not turn the separate Rust comparison into a
 pass. Results are in `validation/undo-yjs-results.json`.
