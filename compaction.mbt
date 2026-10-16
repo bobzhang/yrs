@@ -52,6 +52,14 @@ fn Doc::compact(self : Doc, transaction : Transaction) -> Unit {
         a.parent == b.parent &&
         a.parent_sub == b.parent_sub &&
         a.content.joined(b.content) is Some(content) {
+        if a.parent_sub is None && a.parent is Some(parent) {
+          let branch = self.branch(parent)
+          if branch.position_hint is Some((hint, offset)) && hint.id == b.id {
+            branch.position_hint = Some(
+              (a, offset - a.content.offset_length(self)),
+            )
+          }
+        }
         a.keep = a.keep || b.keep
         a.content = content
         a.right = b.right

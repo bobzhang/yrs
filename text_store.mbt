@@ -113,6 +113,7 @@ priv struct Item {
 
 ///|
 priv struct Branch {
+  mut position_hint : (Item, Int32)?
   weak_quotes : Set[Id]
   mut kind : SharedKind?
   mut head : Id?
@@ -287,6 +288,7 @@ fn Doc::branch(self : Doc, name : Parent) -> Branch {
     Some(b) => b
     None => {
       let b : Branch = {
+        position_hint: None,
         weak_quotes: Set([]),
         kind: None,
         head: None,
@@ -340,6 +342,9 @@ fn Doc::find(self : Doc, id : Id) -> Item? {
 fn Doc::split(self : Doc, item : Item, at : Int32) -> Item {
   if self.active_transaction is Some(transaction) {
     transaction.merge_clients.add(item.id.client) |> ignore
+  }
+  if item.parent_sub is None && item.parent is Some(parent) {
+    self.branch(parent).position_hint = None
   }
   let length = item.content.length()
   guard at > 0 && at < length else { abort("invalid item split") }
@@ -499,6 +504,9 @@ fn Doc::integrate_missing(self : Doc, raw : RawItem) -> Bool {
   }
   if parent is Some(name) {
     let branch = self.branch(name)
+    if parent_sub is None {
+      branch.position_hint = None
+    }
     if content is Format(_, _) {
       branch.formatted = true
     }
@@ -826,9 +834,10 @@ pub fn Text::length(self : Text) -> Int32 {
 ///|
 fn Text::position(self : Text, index : Int32) -> (Id?, Id?) {
   guard index >= 0 else { abort("negative text index") }
-  let mut remaining = index
-  let mut left = None
-  let mut cursor = self.doc.branch(self.name).head
+  let (start, previous, next) = self.position_start(index)
+  let mut remaining = index - start
+  let mut left = previous
+  let mut cursor = next
   while cursor is Some(id) {
     let item = self.doc.items[id]
     if !item.deleted {
@@ -881,6 +890,11 @@ pub fn Text::insert(self : Text, index : Int32, value : String) -> Unit {
     }
     guard self.doc.integrate(raw) else {
       abort("local insert has missing dependency")
+    }
+    let branch = self.doc.branch(self.name)
+    let item = self.doc.items[raw.id]
+    if !branch.formatted && !item.deleted {
+      branch.position_hint = Some((item, index))
     }
     self.doc.settle()
   })
@@ -948,6 +962,9 @@ fn Doc::mark_deleted(self : Doc, item : Item) -> Unit {
       }
     }
     item.links.clear()
+    if item.parent_sub is None && item.parent is Some(parent) {
+      self.branch(parent).position_hint = None
+    }
     item.deleted = true
     if self.active_transaction is Some(transaction) {
       transaction.removed.push(

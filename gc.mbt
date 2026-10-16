@@ -79,6 +79,7 @@ fn Doc::collect_garbage(
           cursor = child.left
         }
       }
+      branch.position_hint = None
       branch.head = None
       branch.values.clear()
       branch.heads.clear()

@@ -24,9 +24,10 @@ fn update_attribute(
 fn Text::rich_position(self : Text, index : Int32) -> RichPosition {
   guard index >= 0 else { abort("negative text index") }
   let attrs : Map[String, Any] = Map([])
-  let mut left = None
-  let mut right = self.doc.branch(self.name).head
-  let mut remaining = index
+  let (start, previous, next) = self.position_start(index)
+  let mut left = previous
+  let mut right = next
+  let mut remaining = index - start
   // Unlike plain insertion, rich-text positioning stops before tombstones
   // once the requested visible offset has been reached (Yrs find_position).
   while remaining > 0 && right is Some(id) {
