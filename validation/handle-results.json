@@ -1,0 +1,15 @@
+{
+  "upstream": "ac339600c712642e556895426113c3f9c117de39",
+  "cases": 256,
+  "checks": [
+    "non-creating root lookup",
+    "typed root creation",
+    "root and nested hook serde including phantom tag",
+    "53-bit client identifiers and Unicode root names",
+    "v2 replica resolution",
+    "v1 deletion and replacement propagation",
+    "deleted identities never resolve to replacements",
+    "both retained and garbage-collected deletions"
+  ],
+  "status": "passed"
+}

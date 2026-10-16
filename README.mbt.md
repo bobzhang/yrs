@@ -423,3 +423,29 @@ exactly on all 512 cases, including text, identities, deletions, serialized wire
 and pass counts (up to nine passes). Normal buffered delivery still has the
 44 intermediate-state differences reported above; the new check does not count
 those as compatible or change the production scheduler.
+
+Typed logical references are available as `Root[T]`, `Nested[T]` and `Hook[T]`.
+They store collection identity without retaining a document. A hook resolves on
+any replica, returns `None` for an absent or deleted child, and never silently
+redirects to a replacement under the same map key. `BranchId::get` remains the
+lower-level lookup that can inspect retained deleted collections. Hook JSON
+matches Rust serde, including its `_tag: null` field. `validation/handles.py`
+checks 256 cases with 53-bit client IDs, Unicode names and both GC modes.
+
+```mbt check
+///|
+test "resolve a typed collection on another replica" {
+  let source = @yrs.Doc(client_id=1UL)
+  let root : @yrs.Root[@yrs.MapRef] = Root("workspace")
+  let map = root.get_or_create(source)
+  let text = map.insert_text("title")
+  text.insert(0, "Hello")
+  let handle = text.hook()
+  let peer = @yrs.Doc(client_id=2UL)
+  peer.apply_update_v2(source.encode_state_as_update_v2())
+  assert_eq(handle.get(peer).unwrap().get_string(), "Hello")
+  map.remove("title")
+  peer.apply_update_v1(source.encode_state_as_update_v1())
+  assert_true(handle.get(peer) is None)
+}
+```

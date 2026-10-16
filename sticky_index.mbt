@@ -15,7 +15,7 @@ pub(all) enum IndexScope {
 pub(all) enum BranchId {
   Nested(Id)
   Root(String)
-} derive(Debug, Eq)
+} derive(Debug, Eq, Hash)
 
 ///|
 pub(all) struct StickyIndex {
@@ -315,15 +315,9 @@ pub fn StickyIndex::to_json(self : StickyIndex) -> Json {
   let result : Map[String, Json] = {
     "assoc": Json(if self.assoc == Before { -1 } else { 0 }),
   }
-  fn id_json(id : Id) -> Json {
-    {
-      "client": Json::number(id.client.to_double(), repr=id.client.to_string()),
-      "clock": Json::number(id.clock.to_double(), repr=id.clock.to_string()),
-    }
-  }
   match self.scope {
-    Relative(id) => result["item"] = id_json(id)
-    Nested(id) => result["type"] = id_json(id)
+    Relative(id) => result["item"] = id.to_json()
+    Nested(id) => result["type"] = id.to_json()
     Root(name) => result["tname"] = Json(name)
   }
   Json(result)
@@ -339,43 +333,13 @@ pub fn StickyIndex::from_json(value : Json) -> StickyIndex raise DecodeError {
       raise InvalidData("unknown sticky index field")
     }
   }
-  fn number(value : Json, maximum : UInt64) -> UInt64 raise DecodeError {
-    guard value is Number(_, repr~) else {
-      raise InvalidData("expected unsigned integer")
-    }
-    let repr = repr.unwrap_or(value.stringify())
-    guard !repr.is_empty() else { raise InvalidData("empty integer") }
-    let mut n = 0UL
-    for ch in repr {
-      guard ch >= '0' && ch <= '9' else {
-        raise InvalidData("invalid unsigned integer")
-      }
-      let digit = (ch.to_int() - 48).to_uint64()
-      guard n <= (maximum - digit) / 10UL else {
-        raise InvalidData("integer overflow")
-      }
-      n = n * 10UL + digit
-    }
-    n
-  }
-  fn id(value : Json) -> Id raise DecodeError {
-    guard value is Object(fields) &&
-      fields.get("client") is Some(client) &&
-      fields.get("clock") is Some(clock) else {
-      raise InvalidData("invalid item identity")
-    }
-    {
-      client: number(client, 0xffff_ffff_ffff_ffffUL),
-      clock: number(clock, 0xffff_ffffUL).to_uint(),
-    }
-  }
   let item = match fields.get("item") {
     None | Some(Null) => None
-    Some(value) => Some(id(value))
+    Some(value) => Some(Id::from_json(value))
   }
   let nested = match fields.get("type") {
     None | Some(Null) => None
-    Some(value) => Some(id(value))
+    Some(value) => Some(Id::from_json(value))
   }
   let name = match fields.get("tname") {
     None | Some(Null) => None
@@ -516,3 +480,6 @@ fn Doc::sticky_index_utf16(
     Some({ scope, assoc, })
   }
 }
+
+///|
+pub extend BranchId with Hash::{hash, hash_combine}

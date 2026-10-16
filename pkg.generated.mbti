@@ -89,7 +89,10 @@ pub fn ArrayEvent::target(Self) -> ArrayRef
 pub struct ArrayRef {
   // private fields
 }
+pub fn ArrayRef::from_branch(Doc, BranchId) -> Self?
 pub fn ArrayRef::get(Self, Int) -> Out?
+pub fn ArrayRef::get_or_insert_root(Doc, String) -> Self
+pub fn ArrayRef::hook(Self) -> Hook[Self]
 pub fn ArrayRef::insert(Self, Int, In) -> Out
 pub fn ArrayRef::insert_array(Self, Int) -> Self
 pub fn ArrayRef::insert_doc(Self, Int, Doc) -> Doc
@@ -111,6 +114,8 @@ pub fn ArrayRef::to_array(Self) -> Array[Out]
 pub fn ArrayRef::to_json(Self) -> Json
 pub fn ArrayRef::unobserve(Self, String) -> Bool
 pub fn ArrayRef::unobserve_deep(Self, String) -> Bool
+pub impl RootRef for ArrayRef
+pub impl SharedRef for ArrayRef
 
 pub(all) enum Assoc {
   Before
@@ -205,10 +210,14 @@ pub fn BlockRange::to_repr(Self) -> @debug.Repr
 pub(all) enum BranchId {
   Nested(Id)
   Root(String)
-} derive(Eq, @debug.Debug)
+} derive(Eq, Hash, @debug.Debug)
 pub fn BranchId::equal(Self, Self) -> Bool
+pub fn BranchId::from_json(Json) -> Self raise DecodeError
 pub fn BranchId::get(Self, Doc) -> Out?
+pub fn BranchId::hash(Self) -> Int
+pub fn BranchId::hash_combine(Self, Hasher) -> Unit
 pub fn BranchId::not_equal(Self, Self) -> Bool
+pub fn BranchId::to_json(Self) -> Json
 pub fn BranchId::to_repr(Self) -> @debug.Repr
 
 pub(all) enum Change {
@@ -340,12 +349,32 @@ pub(all) enum Event {
 pub fn Event::path(Self) -> ReadOnlyArray[PathSegment]
 pub fn Event::target(Self) -> Out
 
+pub struct Hook[S] {
+  // private fields
+}
+pub fn[S] Hook::Hook(BranchId) -> Self[S]
+pub fn[S] Hook::equal(Self[S], Self[S]) -> Bool
+pub fn[S] Hook::from_json(Json) -> Self[S] raise DecodeError
+pub fn[S : SharedRef] Hook::get(Self[S], Doc) -> S?
+pub fn[S] Hook::hash(Self[S]) -> Int
+pub fn[S] Hook::hash_combine(Self[S], Hasher) -> Unit
+pub fn[S] Hook::id(Self[S]) -> BranchId
+pub fn[S] Hook::into_nested(Self[S]) -> Nested[S]?
+pub fn[S : RootRef] Hook::into_root(Self[S]) -> Root[S]?
+pub fn[S] Hook::not_equal(Self[S], Self[S]) -> Bool
+pub fn[S] Hook::to_json(Self[S]) -> Json
+pub fn[S] Hook::to_repr(Self[S]) -> @debug.Repr
+pub impl[S] Eq for Hook[S]
+pub impl[S] Hash for Hook[S]
+pub impl[S] @debug.Debug for Hook[S]
+
 pub(all) struct Id {
   client : UInt64
   clock : UInt
 } derive(Compare, Eq, Hash, @debug.Debug)
 pub fn Id::compare(Self, Self) -> Int
 pub fn Id::equal(Self, Self) -> Bool
+pub fn Id::from_json(Json) -> Self raise DecodeError
 pub fn Id::hash(Self) -> Int
 pub fn Id::hash_combine(Self, Hasher) -> Unit
 pub fn Id::not_equal(Self, Self) -> Bool
@@ -353,6 +382,7 @@ pub fn Id::op_ge(Self, Self) -> Bool
 pub fn Id::op_gt(Self, Self) -> Bool
 pub fn Id::op_le(Self, Self) -> Bool
 pub fn Id::op_lt(Self, Self) -> Bool
+pub fn Id::to_json(Self) -> Json
 pub fn Id::to_repr(Self) -> @debug.Repr
 
 pub struct IdMap[A] {
@@ -462,10 +492,13 @@ pub struct MapRef {
 pub fn MapRef::clear(Self) -> Unit
 pub fn MapRef::contains_key(Self, String) -> Bool
 pub fn MapRef::entries(Self) -> Array[(String, Out)]
+pub fn MapRef::from_branch(Doc, BranchId) -> Self?
 pub fn MapRef::get(Self, String) -> Out?
 pub fn MapRef::get_or_init_array(Self, String) -> ArrayRef
 pub fn MapRef::get_or_init_map(Self, String) -> Self
 pub fn MapRef::get_or_init_text(Self, String) -> Text
+pub fn MapRef::get_or_insert_root(Doc, String) -> Self
+pub fn MapRef::hook(Self) -> Hook[Self]
 pub fn MapRef::insert(Self, String, Any) -> Unit
 pub fn MapRef::insert_array(Self, String) -> ArrayRef
 pub fn MapRef::insert_doc(Self, String, Doc) -> Doc
@@ -485,6 +518,8 @@ pub fn MapRef::try_update(Self, String, Any) -> Bool
 pub fn MapRef::unobserve(Self, String) -> Bool
 pub fn MapRef::unobserve_deep(Self, String) -> Bool
 pub fn MapRef::values(Self) -> Iter[Out]
+pub impl RootRef for MapRef
+pub impl SharedRef for MapRef
 
 pub(all) enum Message {
   Sync(SyncMessage)
@@ -495,6 +530,21 @@ pub(all) enum Message {
 }
 pub fn Message::decode_v1(Bytes) -> Self raise DecodeError
 pub fn Message::encode_v1(Self) -> Bytes
+
+pub struct Nested[S] {
+  id : Id
+}
+pub fn[S] Nested::Nested(Id) -> Self[S]
+pub fn[S] Nested::equal(Self[S], Self[S]) -> Bool
+pub fn[S : SharedRef] Nested::get(Self[S], Doc) -> S?
+pub fn[S] Nested::hash(Self[S]) -> Int
+pub fn[S] Nested::hash_combine(Self[S], Hasher) -> Unit
+pub fn[S] Nested::hook(Self[S]) -> Hook[S]
+pub fn[S] Nested::not_equal(Self[S], Self[S]) -> Bool
+pub fn[S] Nested::to_repr(Self[S]) -> @debug.Repr
+pub impl[S] Eq for Nested[S]
+pub impl[S] Hash for Nested[S]
+pub impl[S] @debug.Debug for Nested[S]
 
 pub struct Observer[K, F] {
   // private fields
@@ -557,6 +607,22 @@ pub(all) enum QuoteBound {
 pub fn QuoteBound::equal(Self, Self) -> Bool
 pub fn QuoteBound::not_equal(Self, Self) -> Bool
 pub fn QuoteBound::to_repr(Self) -> @debug.Repr
+
+pub struct Root[S] {
+  name : String
+}
+pub fn[S : RootRef] Root::Root(String) -> Self[S]
+pub fn[S] Root::equal(Self[S], Self[S]) -> Bool
+pub fn[S : SharedRef] Root::get(Self[S], Doc) -> S?
+pub fn[S : RootRef] Root::get_or_create(Self[S], Doc) -> S
+pub fn[S] Root::hash(Self[S]) -> Int
+pub fn[S] Root::hash_combine(Self[S], Hasher) -> Unit
+pub fn[S] Root::hook(Self[S]) -> Hook[S]
+pub fn[S] Root::not_equal(Self[S], Self[S]) -> Bool
+pub fn[S] Root::to_repr(Self[S]) -> @debug.Repr
+pub impl[S] Eq for Root[S]
+pub impl[S] Hash for Root[S]
+pub impl[S] @debug.Debug for Root[S]
 
 pub struct Snapshot {
   // private fields
@@ -652,7 +718,10 @@ pub fn Text::apply_delta(Self, Array[TextDelta]) -> Unit
 pub fn[M] Text::diff(Self, (YChange) -> M) -> Array[Diff[M]]
 pub fn[M] Text::diff_range(Self, (YChange) -> M, hi? : Snapshot, lo? : Snapshot) -> Array[Diff[M]]
 pub fn Text::format(Self, Int, Int, Array[(String, Any)]) -> Unit
+pub fn Text::from_branch(Doc, BranchId) -> Self?
+pub fn Text::get_or_insert_root(Doc, String) -> Self
 pub fn Text::get_string(Self) -> String
+pub fn Text::hook(Self) -> Hook[Self]
 pub fn Text::insert(Self, Int, String) -> Unit
 pub fn Text::insert_embed(Self, Int, Any, attributes? : Array[(String, Any)]) -> Unit
 pub fn Text::insert_with_attributes(Self, Int, String, Array[(String, Any)]) -> Unit
@@ -667,6 +736,8 @@ pub fn Text::sticky_index(Self, Int, assoc? : Assoc) -> StickyIndex?
 pub fn Text::to_delta(Self) -> Array[TextChunk]
 pub fn Text::unobserve(Self, String) -> Bool
 pub fn Text::unobserve_deep(Self, String) -> Bool
+pub impl RootRef for Text
+pub impl SharedRef for Text
 
 pub(all) struct TextChunk {
   insert : Out
@@ -800,8 +871,10 @@ pub struct WeakRef {
 pub fn WeakRef::as_prelim(Self) -> WeakPrelim
 pub fn WeakRef::branch_id(Self) -> BranchId
 pub fn WeakRef::end_id(Self) -> Id?
+pub fn WeakRef::from_branch(Doc, BranchId) -> Self?
 pub fn WeakRef::get_string(Self) -> String
 pub fn WeakRef::get_xml_string(Self) -> String
+pub fn WeakRef::hook(Self) -> Hook[Self]
 pub fn WeakRef::is_deleted(Self) -> Bool
 pub fn WeakRef::observe(Self, String, (WeakEvent, Transaction) -> Unit) -> Unit
 pub fn WeakRef::observe_deep(Self, String, (ReadOnlyArray[Event], Transaction) -> Unit) -> Unit
@@ -812,6 +885,7 @@ pub fn WeakRef::try_deref_value(Self) -> Out?
 pub fn WeakRef::unobserve(Self, String) -> Bool
 pub fn WeakRef::unobserve_deep(Self, String) -> Bool
 pub fn WeakRef::unquote(Self) -> Array[Out]
+pub impl SharedRef for WeakRef
 
 pub struct XmlElement {
   // private fields
@@ -819,8 +893,10 @@ pub struct XmlElement {
 pub fn XmlElement::as_fragment(Self) -> XmlFragment
 pub fn XmlElement::as_map(Self) -> MapRef
 pub fn XmlElement::attributes(Self) -> Array[(String, Out)]
+pub fn XmlElement::from_branch(Doc, BranchId) -> Self?
 pub fn XmlElement::get_attribute(Self, String) -> Out?
 pub fn XmlElement::get_string(Self) -> String
+pub fn XmlElement::hook(Self) -> Hook[Self]
 pub fn XmlElement::insert_attribute(Self, String, Any) -> Unit
 pub fn XmlElement::observe(Self, String, (XmlEvent, Transaction) -> Unit) -> Unit
 pub fn XmlElement::observe_deep(Self, String, (ReadOnlyArray[Event], Transaction) -> Unit) -> Unit
@@ -832,6 +908,7 @@ pub fn XmlElement::sticky_index(Self, Int, assoc? : Assoc) -> StickyIndex?
 pub fn XmlElement::tag(Self) -> String
 pub fn XmlElement::unobserve(Self, String) -> Bool
 pub fn XmlElement::unobserve_deep(Self, String) -> Bool
+pub impl SharedRef for XmlElement
 
 pub struct XmlEvent {
   // private fields
@@ -851,9 +928,12 @@ pub fn XmlFragment::as_map(Self) -> MapRef
 pub fn XmlFragment::attributes(Self) -> Array[(String, Out)]
 pub fn XmlFragment::children(Self) -> Array[XmlNode]
 pub fn XmlFragment::first_child(Self) -> XmlNode?
+pub fn XmlFragment::from_branch(Doc, BranchId) -> Self?
 pub fn XmlFragment::get(Self, Int) -> XmlNode?
 pub fn XmlFragment::get_attribute(Self, String) -> Out?
+pub fn XmlFragment::get_or_insert_root(Doc, String) -> Self
 pub fn XmlFragment::get_string(Self) -> String
+pub fn XmlFragment::hook(Self) -> Hook[Self]
 pub fn XmlFragment::insert(Self, Int, In) -> XmlNode
 pub fn XmlFragment::insert_attribute(Self, String, Any) -> Unit
 pub fn XmlFragment::insert_element(Self, Int, String) -> XmlElement
@@ -874,6 +954,8 @@ pub fn XmlFragment::sticky_index(Self, Int, assoc? : Assoc) -> StickyIndex?
 pub fn XmlFragment::successors(Self) -> Iter[XmlNode]
 pub fn XmlFragment::unobserve(Self, String) -> Bool
 pub fn XmlFragment::unobserve_deep(Self, String) -> Bool
+pub impl RootRef for XmlFragment
+pub impl SharedRef for XmlFragment
 
 pub(all) enum XmlNode {
   Element(XmlElement)
@@ -897,8 +979,10 @@ pub fn XmlText::as_text(Self) -> Text
 pub fn XmlText::attributes(Self) -> Array[(String, Out)]
 pub fn[M] XmlText::diff(Self, (YChange) -> M) -> Array[Diff[M]]
 pub fn[M] XmlText::diff_range(Self, (YChange) -> M, hi? : Snapshot, lo? : Snapshot) -> Array[Diff[M]]
+pub fn XmlText::from_branch(Doc, BranchId) -> Self?
 pub fn XmlText::get_attribute(Self, String) -> Out?
 pub fn XmlText::get_string(Self) -> String
+pub fn XmlText::hook(Self) -> Hook[Self]
 pub fn XmlText::insert_attribute(Self, String, Any) -> Unit
 pub fn XmlText::observe(Self, String, (XmlTextEvent, Transaction) -> Unit) -> Unit
 pub fn XmlText::observe_deep(Self, String, (ReadOnlyArray[Event], Transaction) -> Unit) -> Unit
@@ -909,6 +993,7 @@ pub fn XmlText::sticky_boundary(Self, assoc? : Assoc) -> StickyIndex
 pub fn XmlText::sticky_index(Self, Int, assoc? : Assoc) -> StickyIndex?
 pub fn XmlText::unobserve(Self, String) -> Bool
 pub fn XmlText::unobserve_deep(Self, String) -> Bool
+pub impl SharedRef for XmlText
 
 pub struct XmlTextEvent {
   // private fields
@@ -930,3 +1015,10 @@ pub fn YChange::to_repr(Self) -> @debug.Repr
 // Type aliases
 
 // Traits
+pub trait RootRef : SharedRef {
+  fn get_or_insert_root(Doc, String) -> Self
+}
+
+pub trait SharedRef {
+  fn from_branch(Doc, BranchId) -> Self?
+}
