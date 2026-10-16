@@ -91,3 +91,22 @@ destroy matrix compares child state and lifecycle events, excluding only the
 reference registry. It independently requires the MoonBit registry to contain
 exactly the live map slots, including duplicate GUIDs. Parent wire replays are
 checked against both runtimes; child contents are replicated separately.
+
+
+## Live mixed-runtime undo and formatting cleanup
+
+`undo_mixed.py` uses persistent, unchanged-reference Rust sessions and persistent
+MoonBit sessions. Each logical replica has one editing owner and a mirror in the
+other runtime; the mirror replays wire updates rather than independently running
+undo. This preserves the exact identities that drive conflict resolution. The
+96-history matrix passes both wire formats, including nested collections, XML,
+remote edits, undo/redo, duplicate delivery and final replica convergence.
+
+Importing rich text can generate additional formatting deletion operations. A
+mirror and its source therefore exchange those generated updates before their
+complete rendered states are compared. The result records the number of such
+reconciliation rounds; it does not omit formatting or normalize away attribute
+differences. This checks convergence after all generated operations have arrived,
+not equality before those additional deletions have been delivered. Observer
+notifications and independently allocated undo identities remain outside this
+matrix. The prior independent-history failure is not removed or marked passed.

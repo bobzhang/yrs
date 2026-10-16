@@ -82,8 +82,21 @@ fn event_json(event : @yrs.Event) -> Json {
 }
 
 ///|
-fn run(input : String, v2 : Bool) -> String raise {
-  guard @json.parse(input) is Array(commands) else { abort("commands") }
+priv struct Session {
+  docs : Array[@yrs.Doc]
+  roots : Array[@yrs.MapRef]
+  xmls : Array[@yrs.XmlFragment]
+  texts : Array[@yrs.Text]
+  tick : Array[UInt64]
+  managers : Array[@yrs.UndoManager[Unit]]
+  notifications : Array[Json]
+}
+
+///|
+let sessions : Array[Session] = []
+
+///|
+fn make_session() -> Session {
   let docs = Array::makei(3, fn(i) { @yrs.Doc(client_id=(i + 1).to_uint64()) })
   let roots = docs.map(fn(d) { d.get_or_insert_map("root") })
   let xmls = docs.map(fn(d) { d.get_or_insert_xml_fragment("xml") })
@@ -123,6 +136,27 @@ fn run(input : String, v2 : Bool) -> String raise {
       })
     })
   }
+  { docs, roots, xmls, texts, tick, managers, notifications, }
+}
+
+///|
+fn run(input : String, v2 : Bool, live~ : Bool = false) -> String raise {
+  guard @json.parse(input) is Array(commands) else { abort("commands") }
+  let session = if live {
+    if sessions.is_empty() {
+      sessions.push(make_session())
+    }
+    sessions[0]
+  } else {
+    make_session()
+  }
+  let docs = session.docs
+  let roots = session.roots
+  let xmls = session.xmls
+  let texts = session.texts
+  let tick = session.tick
+  let managers = session.managers
+  let notifications = session.notifications
   let snapshots : Array[Json] = []
   for command in commands {
     notifications.clear()
@@ -300,6 +334,14 @@ pub fn evaluate(input : String) -> String {
 #export_name("evaluate_v2")
 pub fn evaluate_v2(input : String) -> String {
   run(input, true) catch {
+    e => ({ "error": Json(e.to_string()) } : Json).stringify()
+  }
+}
+
+///|
+#export_name("evaluate_live")
+pub fn evaluate_live(input : String, v2 : Bool) -> String {
+  run(input, v2, live=true) catch {
     e => ({ "error": Json(e.to_string()) } : Json).stringify()
   }
 }

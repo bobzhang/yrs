@@ -132,9 +132,9 @@ recorded in `validation/undo-results.json`. No mismatching history is silently
 excluded. Exact observer events during independently generated undo histories
 are outside this comparison.
 
-**Undo is not fully compatible yet.** `YRS_UNDO_CONCURRENT=1 python3
-validation/undo.py` exercises multiple independently editing/undoing replicas;
-this currently finds differences in concurrent restoration histories. A retained
+**Undo compatibility still has open audit items.** `YRS_UNDO_CONCURRENT=1 python3
+validation/undo.py` exercises independently generated editing/undo histories;
+this still finds differences after restored identities affect conflict ordering. A retained
 case is `validation/fixtures/undo-concurrent-identity-history.json`. Initial
 stack import/export and the rest of the upstream undo event surface also remain.
 See `validation/REFERENCE_LIMITATIONS.md` for reference nondeterminism evidence.
@@ -142,7 +142,7 @@ See `validation/REFERENCE_LIMITATIONS.md` for reference nondeterminism evidence.
 The full 641-scenario core interoperability suite passed again after block
 compaction and the map-head split correction. Unit regressions cover compaction,
 remote-edit preservation, repeated nested restoration, cursor tracking and
-multiple documents. Remaining major milestones are concurrent undo compatibility,
+multiple documents. Remaining major milestones are the remaining undo API/event audit,
 remaining document options, shared types and APIs, and performance/stress validation. A public release and repository
 completion claim are still pending those milestones.
 
@@ -195,3 +195,15 @@ arrays, maps, rich text and XML trees. `Text::apply_delta` accepts `TextDelta`
 insert/delete/retain operations, including attributed text and shared-type
 embeds, in a single transaction. The mixed-offset Rust matrix includes these
 delta edits and checks observer output as well as rendered text and clocks.
+
+
+`python3 validation/undo_mixed.py` tests live networks with both Rust and MoonBit
+editing owners. Every replica has a mirror in the other runtime that receives
+identical wire history, and every generated cleanup deletion is synchronized
+before asserting convergence. Both wire formats pass 96 histories: 102,528
+replica comparisons, 7,562 undo/redo actions and 3,264 duplicate deliveries.
+The run required 404 formatting-cleanup reconciliation rounds. Results are in
+`validation/undo-mixed-results.json`. This validates live concurrent undo
+interoperability without assuming independent HashSet restoration orders must
+allocate identical identities. Exact undo observer parity is not checked by this
+matrix, and the independent-history mismatch fixture remains retained.

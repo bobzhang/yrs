@@ -1,0 +1,16 @@
+{
+  "upstream": "ac339600c712642e556895426113c3f9c117de39",
+  "scenarios": 96,
+  "wire_versions": [
+    "v1",
+    "v2"
+  ],
+  "mixed_authorship": true,
+  "replica_state_comparisons": 102528,
+  "duplicate_deliveries": 3264,
+  "undo_redo_actions": 7562,
+  "format_cleanup_reconciliation_rounds": 404,
+  "independent_restoration_identity_equality_required": false,
+  "observer_events_compared": false,
+  "status": "passed"
+}

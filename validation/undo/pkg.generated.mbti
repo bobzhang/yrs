@@ -4,6 +4,8 @@ package "bobzhang/yrs/validation/undo"
 // Values
 pub fn evaluate(String) -> String
 
+pub fn evaluate_live(String, Bool) -> String
+
 pub fn evaluate_v2(String) -> String
 
 // Errors

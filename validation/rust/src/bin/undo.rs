@@ -1,5 +1,5 @@
 
-use std::{io::{self,BufRead},sync::{Arc,Mutex}};
+use std::{io::{self,BufRead,Write},sync::{Arc,Mutex}};
 use serde_json::{Value,json};
 use yrs::{Array,Map,Text,Xml,XmlFragment,Doc,Options,OffsetKind,ReadTxn,Transact,Update,DeepObservable,Observable,GetString,TransactionMut,Out};
 use yrs::types::{Event,PathSegment,ToJson,Delta,Change,EntryChange};
@@ -34,8 +34,8 @@ fn event(e:&Event,tx:&TransactionMut)->Value{
 }
 fn hex(bytes:&[u8])->String{bytes.iter().map(|b|format!("{b:02x}")).collect()}
 fn unhex(s:&str)->Vec<u8>{(0..s.len()).step_by(2).map(|i|u8::from_str_radix(&s[i..i+2],16).unwrap()).collect()}
-fn main(){let v2=std::env::args().any(|s|s=="v2");for line in io::stdin().lock().lines(){
- let commands:Vec<Value>=serde_json::from_str(&line.unwrap()).unwrap();
+fn main(){let v2=std::env::args().any(|s|s=="v2");let live=std::env::args().any(|s|s=="--live");let stdin=io::stdin();let mut lines=stdin.lock().lines();while let Some(line)=lines.next(){
+ let mut commands:Vec<Value>=serde_json::from_str(&line.unwrap()).unwrap();
  let docs:Vec<_>=(1..=3).map(|i|{let mut o=Options::with_client_id(yrs::block::ClientID::new(i));o.skip_gc=true;o.offset_kind=OffsetKind::Utf16;Doc::with_options(o)}).collect();
  let roots:Vec<_>=docs.iter().map(|d|d.get_or_insert_map("root")).collect();let xmls:Vec<_>=docs.iter().map(|d|d.get_or_insert_xml_fragment("xml")).collect();
  let texts:Vec<_>=docs.iter().map(|d|d.get_or_insert_text("text")).collect();
@@ -46,7 +46,7 @@ fn main(){let v2=std::env::args().any(|s|s=="v2");for line in io::stdin().lock()
  let l=log.clone();xmls[i].observe_deep("deep",move|tx,es|{l.lock().unwrap().push(json!({"doc":i,"scope":"xml","events":es.iter().map(|e|event(e,tx)).collect::<Vec<_>>()}));});
  let l=log.clone();xmls[i].observe("shallow",move|tx,e|{l.lock().unwrap().push(json!({"doc":i,"scope":"shallow","delta":changes(e.delta(tx),tx),"keys":keys(e.keys(tx),tx),"children":e.children_changed()}));});}
  let mut snapshots=vec![];
- for command in commands{log.lock().unwrap().clear();let x=command[1].as_u64().unwrap() as usize;
+ loop { for command in commands{log.lock().unwrap().clear();let x=command[1].as_u64().unwrap() as usize;
  let mut result=Value::Null;
  if command[0]=="apply"{let bytes=unhex(command[2].as_str().unwrap());docs[x].transact_mut().apply_update(if v2{Update::decode_v2(&bytes)}else{Update::decode_v1(&bytes)}.unwrap()).unwrap();}
  else if command[0]=="undo"{result=json!(managers[x].undo_blocking());}
@@ -72,5 +72,12 @@ fn main(){let v2=std::env::args().any(|s|s=="v2");for line in io::stdin().lock()
  let current:Vec<_>=docs.iter().enumerate().map(|(i,d)|{let tx=d.transact();json!({"map":roots[i].to_json(&tx),"xml":xmls[i].get_string(&tx),"text":texts[i].get_string(&tx),"delta":texts[i].diff(&tx,yrs::types::text::YChange::identity).iter().map(|d|json!({"insert":d.insert.to_json(&tx),"attributes":d.attributes})).collect::<Vec<_>>()})}).collect();
  snapshots.push(json!({"docs":current,"notifications":*log.lock().unwrap(),"result":result,"stacks":managers.iter().map(|m|json!([m.undo_stack().len(),m.redo_stack().len()])).collect::<Vec<_>>()}));
  }
+ if live {
+ let updates:Vec<_>=docs.iter().map(|d|{let tx=d.transact();hex(&if v2{tx.encode_state_as_update_v2(&yrs::StateVector::default())}else{tx.encode_state_as_update_v1(&yrs::StateVector::default())})}).collect();println!("{}",json!({"snapshots":snapshots,"updates":updates}));io::stdout().flush().unwrap();snapshots.clear();
+ match lines.next(){Some(line)=>{commands=serde_json::from_str(&line.unwrap()).unwrap();continue;},None=>break}
+ } else { break; }
+ }
+ if !live {
  let updates:Vec<_>=docs.iter().map(|d|{let tx=d.transact();hex(&if v2{tx.encode_state_as_update_v2(&yrs::StateVector::default())}else{tx.encode_state_as_update_v1(&yrs::StateVector::default())})}).collect();println!("{}",json!({"snapshots":snapshots,"updates":updates}));
+}
 }}
