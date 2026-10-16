@@ -31,6 +31,7 @@ The generated `pkg.generated.mbti` is the authoritative MoonBit API.
 | `Quotable`, `WeakPrelim`, `WeakRef` | Concrete `quote` methods, `WeakPrelim`, `WeakRef`; query/event differences remain open |
 | `SharedRef`, `RootRef`, `Root`, `Nested`, `Hook` | Open traits, generic hook creation, typed collection resolution and identity serialization |
 | `StateVector`, `Snapshot`, `Update`, `IdSet` | Implemented, including owned empty-client metadata and v1/v2 round-trips |
+| `BlockRange` | Identity endpoints, half-open interval, slice and membership checked against Rust |
 | `IdMap`, `AttrRange`, `ContentAttribute`, `ContentAttributes`, `Diff` | Generic attribution types and operations; `Diff` is used for text history results |
 | `Assoc`, `IndexScope`, `Offset`, `StickyIndex`, `IndexedSequence` | Cursor types plus concrete collection `sticky_index` / `sticky_boundary` methods |
 | `JsonPath`, `JsonPathEval` | `JsonPath` and `Doc.json_path` |

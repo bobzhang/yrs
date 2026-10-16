@@ -345,6 +345,11 @@ regardless of their values. `attributions` covers a requested `BlockRange`, fill
 gaps with empty attributes. Maps support filtering, conversion to `IdSet`, snapshot
 iteration and v1/v2 codecs with caller-supplied value conversion through `Any`.
 
+`BlockRange` exposes identity endpoints, half-open clock intervals, slicing and
+membership. As in Rust, `last_id()` returns the exclusive endpoint.
+`python3 validation/block_ranges.py` checks 3,124 slices and 24,926 membership
+queries against Rust, including the full UInt32 clock boundary.
+
 `python3 validation/attribution.py` passes 20,680 snapshots from 128 randomized
 histories and two retained regressions, plus 10,344 cross-runtime imports. It checks
 range algebra, Unicode attribute dictionaries and both encoding formats. 17,561

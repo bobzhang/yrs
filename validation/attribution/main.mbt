@@ -70,7 +70,41 @@ fn report(m : @yrs.IdMap[String]) -> Json raise {
 
 ///|
 fn run(input : String) -> String raise {
-  guard @json.parse(input) is Array(commands) else { abort("commands") }
+  let request = @json.parse(input)
+  if request
+    is {
+      "range": Array([client, clock, length]),
+      "offset": offset,
+      "ids": Array(ids),
+      ..
+    } {
+    let r = @yrs.BlockRange(
+      @json.from_json(Json(client.stringify())),
+      @json.from_json(clock),
+      @json.from_json(length),
+    )
+    let s = r.slice(@json.from_json(offset))
+    fn id(value : @yrs.Id) -> Json {
+      [Json(value.client.to_string()), Json(value.clock)]
+    }
+    let contains = ids.map(v => {
+      guard v is Array([client, clock]) else { abort("id") }
+      r.contains({
+        client: @json.from_json(Json(client.stringify())),
+        clock: @json.from_json(clock),
+      })
+    })
+    return (
+      {
+        "id": id(r.id()),
+        "last": id(r.last_id()),
+        "end": Json(r.clock_end()),
+        "clocks": Json([r.clock_range().0, r.clock_range().1]),
+        "slice": Json([s.clock, s.length]),
+        "contains": Json(contains),
+      } : Json).stringify()
+  }
+  guard request is Array(commands) else { abort("commands") }
   let maps : Array[@yrs.IdMap[String]] = [
     @yrs.IdMap(),
     @yrs.IdMap(),

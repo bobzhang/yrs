@@ -257,8 +257,14 @@ pub(all) struct BlockRange {
   length : UInt
 } derive(Eq, @debug.Debug)
 pub fn BlockRange::BlockRange(UInt64, UInt, UInt) -> Self
+pub fn BlockRange::clock_end(Self) -> UInt
+pub fn BlockRange::clock_range(Self) -> (UInt, UInt)
+pub fn BlockRange::contains(Self, Id) -> Bool
 pub fn BlockRange::equal(Self, Self) -> Bool
+pub fn BlockRange::id(Self) -> Id
+pub fn BlockRange::last_id(Self) -> Id
 pub fn BlockRange::not_equal(Self, Self) -> Bool
+pub fn BlockRange::slice(Self, UInt) -> Self
 pub fn BlockRange::to_repr(Self) -> @debug.Repr
 
 pub(all) enum BranchId {
