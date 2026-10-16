@@ -198,3 +198,43 @@ The matrix covers 37,120 operation snapshots and 6,656 imports, both wire versio
 and both GC modes. It does not establish full weak-reference compatibility or
 exhaustive concurrent/deep-observer behavior. Focused MoonBit tests additionally
 cover chained deep observers, self-quotation cycles, Unicode and safe empty ranges.
+
+
+## Pending updates and sparse integration
+
+`pending.py` checks source packet metadata independently in both runtimes, then
+requires the union of source insertion identities to equal the MoonBit full
+encoding and the partition of integrated and pruned data. It also requires the
+MoonBit before/restore state to be identical and compares complete histories after
+all withheld packets arrive. Scoped GC is checked by reconstructing retained
+content with an empty historical deletion set, rather than only checking wire size.
+
+The pinned reference has several distinct behaviors in this matrix:
+
+- `fixtures/upstream-pending-skip-encoding.json` records a full update whose
+  insertion clocks differ from the original packets. There are 101 affected
+  encodings. `fixtures/upstream-pruned-skip-roundtrip.json` also reproduces a
+  prune/encode/reapply change; 23 cases change full-update metadata on roundtrip.
+- Pending deletion ranges can redundantly include already integrated identities.
+  `TransactionMut::apply_delete` uses the original Skip block length when a
+  deletion starts inside it, rather than subtracting the skipped prefix. In 50
+  cases the oracle verifies that every extra pending deletion is already applied,
+  and that no required pending deletion is lost.
+- `fixtures/upstream-pending-retry-stall.json` has ready dependencies that Rust
+  processes only after explicitly pruning and reapplying pending data. Thirty
+  sparse cases reach the MoonBit state after such retries.
+- `fixtures/pending-sparse-integration-difference.json` records the first of 14
+  further sparse intermediate-state differences. These remain a compatibility
+  gap; this suite does not classify all of them as reference bugs. Complete
+  histories converge after withheld packets arrive.
+- Three complete histories leave Rust's pending flag set even though all source
+  identities, deletion sets, state vectors and visible text match. MoonBit's flag
+  is clear. The flag difference is counted separately.
+
+All 832 cases remain in the results. The suite reports **partial compatibility**.
+It does not use reference-corrupted full-update identities as an expected result.
+Array event block-start IDs also depend on physical splitting: the expanded
+transaction matrix records 166 different layouts. It checks every reported ID's
+logical membership and requires each changed interval's start, while comparing
+deltas and transaction ranges. The first layout is retained in
+`fixtures/array-event-block-layout.json`.

@@ -94,10 +94,36 @@ fn Doc::collect_garbage(
 ///|
 /// Collect deleted content not retained for undo, even when skip_gc is true.
 /// Historical snapshots cannot reconstruct content once it has been collected.
-pub fn Transaction::gc(self : Transaction) -> Unit {
+pub fn Transaction::gc(self : Transaction, delete_set? : IdSet) -> Unit {
   guard !self.closed else { abort("transaction is already closed") }
   guard !self.document.notifying_transaction else {
     abort("cannot collect inside a read-only observer")
+  }
+  if delete_set is Some(set) {
+    let selected = []
+    for (client, start, end) in set.ranges() {
+      if self.document.find({ client, clock: start, }) is Some(first) {
+        let mut cursor = start.to_uint64()
+        for block in self.document.clients.get(client).unwrap_or([]) {
+          if block.id.clock < first.id.clock {
+            continue
+          }
+          cursor += block.content.length().to_uint64()
+          if cursor > end.to_uint64() {
+            break
+          }
+          selected.push(
+            (
+              client,
+              block.id.clock,
+              block.id.clock + block.content.length().reinterpret_as_uint(),
+            ),
+          )
+        }
+      }
+    }
+    self.document.collect_garbage(selected)
+    return
   }
   let ranges = []
   for client, blocks in self.document.clients {
@@ -117,6 +143,6 @@ pub fn Transaction::gc(self : Transaction) -> Unit {
 }
 
 ///|
-pub fn Doc::gc(self : Doc) -> Unit {
-  self.with_mutation(fn() { self.active_transaction.unwrap().gc() })
+pub fn Doc::gc(self : Doc, delete_set? : IdSet) -> Unit {
+  self.with_mutation(fn() { self.active_transaction.unwrap().gc(delete_set?) })
 }

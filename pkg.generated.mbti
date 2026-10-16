@@ -81,7 +81,9 @@ pub struct ArrayEvent {
   // private fields
 }
 pub fn ArrayEvent::delta(Self) -> ReadOnlyArray[Change]
+pub fn ArrayEvent::inserts(Self) -> ReadOnlyArray[Id]
 pub fn ArrayEvent::path(Self) -> ReadOnlyArray[PathSegment]
+pub fn ArrayEvent::removes(Self) -> ReadOnlyArray[Id]
 pub fn ArrayEvent::target(Self) -> ArrayRef
 
 pub struct ArrayRef {
@@ -270,17 +272,25 @@ pub fn Doc::cleanup_formatting_enabled(Self) -> Bool
 pub fn Doc::client_id(Self) -> UInt64
 pub fn Doc::collection_id(Self) -> String?
 pub fn Doc::destroy(Self) -> Unit
+pub fn Doc::encode_diff_v1(Self, StateVector) -> Bytes
+pub fn Doc::encode_diff_v2(Self, StateVector) -> Bytes raise DecodeError
 pub fn Doc::encode_state_as_update_v1(Self, remote? : StateVector) -> Bytes
 pub fn Doc::encode_state_as_update_v2(Self, remote? : StateVector) -> Bytes raise DecodeError
 pub fn Doc::encode_state_from_snapshot_v1(Self, Snapshot) -> Bytes raise DecodeError
 pub fn Doc::encode_state_from_snapshot_v2(Self, Snapshot) -> Bytes raise DecodeError
-pub fn Doc::gc(Self) -> Unit
+pub fn Doc::gc(Self, delete_set? : IdSet) -> Unit
+pub fn Doc::get(Self, String) -> Out?
+pub fn Doc::get_array(Self, String) -> ArrayRef?
+pub fn Doc::get_map(Self, String) -> MapRef?
 pub fn Doc::get_or_insert_array(Self, String) -> ArrayRef
 pub fn Doc::get_or_insert_map(Self, String) -> MapRef
 pub fn Doc::get_or_insert_text(Self, String) -> Text
 pub fn Doc::get_or_insert_xml_fragment(Self, String) -> XmlFragment
+pub fn Doc::get_text(Self, String) -> Text?
+pub fn Doc::get_xml_fragment(Self, String) -> XmlFragment?
 pub fn Doc::guid(Self) -> String
 pub fn Doc::has_missing_updates(Self) -> Bool
+pub fn Doc::has_pending_updates(Self) -> Bool
 pub fn Doc::json_path(Self, JsonPath) -> Iter[Out]
 pub fn Doc::load(Self) -> Unit
 pub fn Doc::observe_after_transaction(Self, String, (Transaction) -> Unit) -> Unit
@@ -293,6 +303,8 @@ pub fn Doc::observe_update_v2(Self, String, (Bytes, Transaction) -> Unit) -> Uni
 pub fn Doc::offset_kind(Self) -> OffsetKind
 pub fn Doc::parent_doc(Self) -> Self?
 pub fn Doc::pending_items(Self) -> Int
+pub fn Doc::prune_pending(Self) -> Update?
+pub fn Doc::ptr_eq(Self, Self) -> Bool
 pub fn Doc::root_refs(Self) -> Array[(String, Out)]
 pub fn Doc::should_load(Self) -> Bool
 pub fn Doc::skip_gc(Self) -> Bool
@@ -671,11 +683,15 @@ pub struct Transaction {
 pub fn Transaction::after_state(Self) -> StateVector
 pub fn Transaction::before_state(Self) -> StateVector
 pub fn Transaction::changed_parent_types(Self) -> ReadOnlyArray[Out]
+pub fn Transaction::cleanups(Self) -> IdSet
+pub fn Transaction::delete_set(Self) -> IdSet
 pub fn Transaction::deletions(Self) -> Array[(UInt64, UInt, UInt)]
 pub fn Transaction::doc(Self) -> Doc
 pub fn Transaction::encode_update_v1(Self) -> Bytes
 pub fn Transaction::encode_update_v2(Self) -> Bytes raise DecodeError
-pub fn Transaction::gc(Self) -> Unit
+pub fn Transaction::gc(Self, delete_set? : IdSet) -> Unit
+pub fn Transaction::has_changes(Self) -> Bool
+pub fn Transaction::insert_set(Self) -> IdSet
 pub fn Transaction::insertions(Self) -> Array[(UInt64, UInt, UInt)]
 pub fn Transaction::is_local(Self) -> Bool
 pub fn Transaction::origin(Self) -> Bytes?

@@ -2,6 +2,7 @@
 /// A grouped mutation scope. Metadata and encoded updates become stable when
 /// the scope closes. Use Doc::transact to commit even when the action raises.
 pub struct Transaction {
+  priv cleaned : IdSet
   priv weak_changes : Set[Parent]
   priv changed_parents : Array[Out]
   priv mut sub_changed : Bool
@@ -136,6 +137,7 @@ fn Doc::begin_transaction(
     abort("document already has an active transaction")
   }
   let transaction : Transaction = {
+    cleaned: IdSet(),
     weak_changes: Set([]),
     changed_parents: [],
     sub_changed: false,
@@ -171,7 +173,12 @@ fn Doc::commit_transaction(self : Doc, transaction : Transaction) -> Unit {
   self.notifying_transaction = false
   if self.collect_deletes {
     if self.cleanup_enabled {
+      let previous = transaction.removed.length()
       self.cleanup_formatting()
+      for i in previous..<transaction.removed.length() {
+        let (client, start, end) = transaction.removed[i]
+        transaction.cleaned.insert({ client, clock: start, }, end - start)
+      }
     }
     self.collect_deletes = false
     self.deleted_items.clear()

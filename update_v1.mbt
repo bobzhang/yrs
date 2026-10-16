@@ -165,6 +165,15 @@ pub fn Doc::encode_state_as_update_v1(
   self : Doc,
   remote~ : StateVector = StateVector(),
 ) -> Bytes {
+  self.encode_document(remote, true)
+}
+
+///|
+fn Doc::encode_document(
+  self : Doc,
+  remote : StateVector,
+  include_pending : Bool,
+) -> Bytes {
   let items = []
   for client, blocks in self.clients {
     if remote.clocks.contains(client) &&
@@ -190,10 +199,19 @@ pub fn Doc::encode_state_as_update_v1(
   }
   // Pending blocks must be forwarded even when a recipient's advertised state
   // is ahead of our integrated prefix. They may carry missing dependencies.
-  for item in self.pending {
-    items.push(item)
+  if include_pending {
+    for item in self.pending {
+      items.push(item)
+    }
   }
-  encode_raw_update(items, self.deletes)
+  encode_raw_update(
+    items,
+    if include_pending {
+      self.deletes
+    } else {
+      self.snapshot().deletes
+    },
+  )
 }
 
 ///|

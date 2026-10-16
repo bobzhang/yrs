@@ -39,7 +39,7 @@ Rich text supports attributed insertion, formatting, JSON embeds and formatted d
 
 XML fragments, elements, attributes, formatted XML text and parent navigation now share the CRDT store. A further 128 randomized XML histories pass in v1/v2 with Rust GC both enabled and disabled (91,136 operation snapshots and 3,072 cross-runtime document transfers). XML insertion preserves upstream tombstone boundary choices.
 
-Current limitations: unsupported content is rejected before applying an update. The remaining shared types, undo and some transaction/event APIs are still outstanding. Adjacent CRDT blocks are compacted; indexing and broader compatibility work remain. This is not a production release or a completed port.
+Current limitations: full compatibility is not yet established for sparse intermediate states, weak-reference queries/events, and independently allocated concurrent undo histories. Long-session stress and performance validation remain outstanding. The core shared types, undo, transactions and protocols described below are implemented. This is not a production release or a completed port.
 
 Run `moon test --target all` and `python3 validation/compare.py`. The oracle uses the installed Rust 1.97.1 toolchain and the exact reference checkout under `.repos/y-crdt`; its Cargo dependencies are locked. Clone `https://github.com/y-crdt/y-crdt.git` there and check out `ac339600c712642e556895426113c3f9c117de39` before running it.
 
@@ -142,8 +142,8 @@ See `validation/REFERENCE_LIMITATIONS.md` for reference nondeterminism evidence.
 The full 641-scenario core interoperability suite passed again after block
 compaction and the map-head split correction. Unit regressions cover compaction,
 remote-edit preservation, repeated nested restoration, cursor tracking and
-multiple documents. Remaining major milestones are the remaining undo API/event audit,
-remaining document options, shared types and APIs, and performance/stress validation. A public release and repository
+multiple documents. Remaining major milestones are closing the documented behavioral differences,
+completing the public API audit, and performance/stress validation. A public release and repository
 completion claim are still pending those milestones.
 
 Subdocuments can be inserted into maps and arrays using `insert_doc`. Supply an
@@ -326,3 +326,25 @@ each other. The same run records 3,746 observer mismatches (7,438 additional
 MoonBit notifications, zero missing reference notifications); it explicitly reports
 partial compatibility. Retained reference-crash fixtures are tested separately.
 See `validation/REFERENCE_LIMITATIONS.md` before relying on exact weak event parity.
+
+
+`Doc::get` and typed `get_*` methods look up existing roots without creating them.
+`encode_diff_v1/v2` encodes integrated state only; full-state encoding also forwards
+pending updates. `prune_pending` returns unresolved blocks and deletions for saving
+and later reapplication. `has_pending_updates` matches the pending-store concept;
+`has_missing_updates` additionally detects clock gaps in integrated sparse state.
+Explicit GC accepts an optional `IdSet` scope and follows upstream whole-block
+selection. Transaction metadata includes `insert_set`, `delete_set`, `cleanups`
+and `has_changes`. Array events expose inserted/removed block-start IDs.
+
+The expanded transaction matrix checks cleanup ranges and array identity coverage
+across 44,160 snapshots. Raw event block-start sets differ in 166 cases because
+internal splitting differs; logical ranges, deltas and document values still match.
+`python3 validation/pending.py` checks 512 sparse delivery cases and 320 scoped-GC
+cases (4,160 snapshots). MoonBit preserves every source insertion identity and its
+exact state across prune/reapply; all complete histories and GC-retained content
+agree with Rust. Intermediate sparse integration remains a compatibility gap:
+44 cases differ, including 30 resolved by explicitly retrying Rust's pending data.
+Pinned Rust also shifts identities in 101 full encodings and retains redundant
+pending deletions in 50 cases. These are recorded as partial compatibility, not
+removed from the test population; see `validation/pending-results.json`.

@@ -68,6 +68,8 @@ pub fn TextEvent::delta(self : TextEvent) -> ReadOnlyArray[Delta] {
 
 ///|
 pub struct ArrayEvent {
+  priv inserted_ids : ReadOnlyArray[Id]
+  priv removed_ids : ReadOnlyArray[Id]
   priv route : ReadOnlyArray[PathSegment]
   priv array : ArrayRef
   priv changes : ReadOnlyArray[Change]
@@ -357,4 +359,37 @@ pub fn ArrayRef::unobserve(self : ArrayRef, key : String) -> Bool {
     self.doc.array_observers.remove(self.name)
   }
   found
+}
+
+///|
+/// IDs of inserted blocks, before post-transaction block compaction.
+pub fn ArrayEvent::inserts(self : ArrayEvent) -> ReadOnlyArray[Id] {
+  self.inserted_ids
+}
+
+///|
+pub fn ArrayEvent::removes(self : ArrayEvent) -> ReadOnlyArray[Id] {
+  self.removed_ids
+}
+
+///|
+fn Transaction::sequence_ids(
+  self : Transaction,
+  parent : Parent,
+) -> (ReadOnlyArray[Id], ReadOnlyArray[Id]) {
+  let added = []
+  let removed = []
+  let mut cursor = self.document.branch(parent).head
+  while cursor is Some(id) {
+    let item = self.document.items[id]
+    if item.deleted {
+      if self.has_deleted(id) && !self.has_added(id) {
+        removed.push(id)
+      }
+    } else if self.has_added(id) {
+      added.push(id)
+    }
+    cursor = item.right
+  }
+  (ReadOnlyArray::from_array(added[:]), ReadOnlyArray::from_array(removed[:]))
 }

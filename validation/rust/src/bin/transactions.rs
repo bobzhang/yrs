@@ -7,7 +7,7 @@ fn ranges(set:&yrs::IdSet)->Vec<(u64,u32,u32)>{let mut r=vec![];for (id,rs) in s
 fn meta(tx:&TransactionMut, doc:usize, phase:&str)->Value{
  let mut before=tx.before_state().iter().map(|(c,n)|(c.get(),*n)).collect::<Vec<_>>();before.sort();
  let mut after=tx.after_state().iter().map(|(c,n)|(c.get(),*n)).collect::<Vec<_>>();after.sort();
- json!({"doc":doc,"phase":phase,"before":before,"after":after,"inserted":ranges(tx.insert_set()),"deleted":ranges(tx.delete_set()),"origin":tx.origin().map(|o|hex(o.as_ref()))})
+ json!({"doc":doc,"phase":phase,"before":before,"after":after,"inserted":ranges(tx.insert_set()),"deleted":ranges(tx.delete_set()),"cleanups":ranges(tx.cleanups()),"has_changes":tx.has_changes(),"origin":tx.origin().map(|o|hex(o.as_ref()))})
 }
 fn main(){
  let v2=std::env::args().any(|s|s=="v2");
@@ -62,7 +62,7 @@ fn main(){
       Change::Added(values)=>json!({"insert":values.iter().map(|v|v.to_json(tx)).collect::<Vec<_>>()}),
       Change::Removed(n)=>json!({"delete":n}),Change::Retain(n)=>json!({"retain":n})
     }).collect();
-    log.lock().unwrap().push(json!({"doc":i,"phase":"array","delta":delta}));
+    let mut added=event.inserts(tx).iter().map(|id|(id.client.get(),id.clock)).collect::<Vec<_>>();added.sort();let mut removed=event.removes(tx).iter().map(|id|(id.client.get(),id.clock)).collect::<Vec<_>>();removed.sort();log.lock().unwrap().push(json!({"doc":i,"phase":"array","delta":delta,"added":added,"removed":removed}));
    });
   }
   let shadows:Vec<_>=(0..6).map(|i|{let mut o=Options::with_client_id(yrs::block::ClientID::new(100+i));o.skip_gc=true;Doc::with_options(o)}).collect();

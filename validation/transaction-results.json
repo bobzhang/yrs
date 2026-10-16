@@ -11,5 +11,11 @@
   "map_event_comparisons": 10718,
   "text_event_comparisons": 16782,
   "array_event_comparisons": 12182,
-  "status": "passed"
+  "array_block_layout_differences": 166,
+  "new_checks": [
+    "cleanup identity ranges",
+    "has_changes",
+    "array identity membership and interval starts"
+  ],
+  "status": "passed for logical changes; block layouts may differ"
 }

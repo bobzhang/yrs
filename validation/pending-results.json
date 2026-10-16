@@ -1,0 +1,25 @@
+{
+  "upstream": "ac339600c712642e556895426113c3f9c117de39",
+  "histories": 64,
+  "pending_cases": 512,
+  "scoped_gc_cases": 320,
+  "snapshots": 4160,
+  "source_packets_checked": 2114,
+  "different_block_encodings": 116,
+  "reference_full_encoding_identity_failures": 101,
+  "reference_pending_roundtrip_failures": 23,
+  "reference_redundant_pending_deletions": 50,
+  "reference_pending_retry_stalls": 30,
+  "sparse_integration_differences": 14,
+  "reference_stale_pending_flags_after_complete_delivery": 3,
+  "checks": [
+    "pending block and deletion pruning",
+    "integrated-only difference",
+    "exact port prune/reapply roundtrip",
+    "state-vector bounds",
+    "root text views",
+    "GC retained content via historical reconstruction",
+    "full insertion identities equal union of independently decoded source packets"
+  ],
+  "status": "partial: port invariants, complete histories and scoped GC passed; sparse pending lifecycle parity differs"
+}

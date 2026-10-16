@@ -161,12 +161,16 @@ fn Doc::notify_collections(self : Doc, transaction : Transaction) -> Unit {
           route: [],
           changes: transaction.text_delta(parent),
         })
-      Some(SharedArray) =>
+      Some(SharedArray) => {
+        let (inserted_ids, removed_ids) = transaction.sequence_ids(parent)
         Array({
+          inserted_ids,
+          removed_ids,
           array: { doc: self, name: parent, },
           route: [],
           changes: transaction.array_delta(parent),
         })
+      }
       Some(SharedMap) =>
         Map({ map: { doc: self, name: parent, }, route: [], changes: entries, })
       Some(SharedXmlText) =>
@@ -321,7 +325,13 @@ fn Event::with_path(self : Event, path : ReadOnlyArray[PathSegment]) -> Event {
     Text(event) =>
       Text({ text: event.text, changes: event.changes, route: path, })
     Array(event) =>
-      Array({ array: event.array, changes: event.changes, route: path, })
+      Array({
+        inserted_ids: event.inserted_ids,
+        removed_ids: event.removed_ids,
+        array: event.array,
+        changes: event.changes,
+        route: path,
+      })
     Map(event) => Map({ map: event.map, changes: event.changes, route: path, })
     XmlFragment(event) =>
       XmlFragment({

@@ -55,6 +55,8 @@ fn meta(tx : @yrs.Transaction, doc : Int32, phase : String) -> Json {
     "after": state_json(tx.after_state()),
     "inserted": ranges_json(tx.insertions()),
     "deleted": ranges_json(tx.deletions()),
+    "cleanups": ranges_json(tx.cleanups().ranges()),
+    "has_changes": Json(tx.has_changes()),
     "origin": tx.origin().map(fn(b) { Json(hex(b)) }).unwrap_or(Json::null()),
   }
 }
@@ -115,6 +117,8 @@ fn run(input : String, v2 : Bool) -> String raise {
           {
             "doc": Json(i),
             "phase": "array",
+            "added": ids_json(event.inserts()),
+            "removed": ids_json(event.removes()),
             "delta": Json(
               event.delta().iter().map(@yrs.Change::to_json).to_array(),
             ),
@@ -256,4 +260,11 @@ pub fn evaluate_v2(input : String) -> String {
   run(input, true) catch {
     error => ({ "error": Json(error.to_string()) } : Json).stringify()
   }
+}
+
+///|
+fn ids_json(ids : ReadOnlyArray[@yrs.Id]) -> Json {
+  let values = ids.iter().to_array()
+  values.sort()
+  Json(values.map(fn(id) { Json([Json(id.client.to_int()), Json(id.clock)]) }))
 }

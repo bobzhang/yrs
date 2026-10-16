@@ -12,9 +12,27 @@ def execute(cmd,cases):
   if 'error' in row:Path('/tmp/yrs-transactions-failure.json').write_text(json.dumps(cases[i])+'\n');raise RuntimeError(row)
  return rows
 
+def difference(ranges, removed):
+ result=[]
+ for client,start,end in ranges:
+  pieces=[(start,end)]
+  for c,a,b in removed:
+   if c!=client:continue
+   pieces=[piece for lo,hi in pieces for piece in [(lo,min(hi,a)),(max(lo,b),hi)] if piece[0]<piece[1]]
+  result.extend((client,a,b) for a,b in pieces)
+ return result
+
+def check_array_ids(snapshot,event):
+ meta=next(e for e in snapshot['events'] if e['phase']=='before' and e['doc']==event['doc'])
+ for key,ranges in [('added',difference(meta['inserted'],meta['deleted'])),('removed',difference(meta['deleted'],meta['inserted']))]:
+  ids=event.pop(key)
+  assert all(any(c==client and start<=clock<end for c,start,end in ranges) for client,clock in ids)
+  assert all([client,start] in ids for client,start,end in ranges)
+
 def canonical(snapshot):
  snapshot=json.loads(json.dumps(snapshot));result=[];pending=[]
  for event in snapshot['events']+[{'phase':'sentinel'}]:
+  if event['phase']=='array':check_array_ids(snapshot,event)
   if event['phase'] in ['map','text','array']:
    if 'delta' in event:
     merged=[]
@@ -64,16 +82,18 @@ def main():
     commands.append(['batch',x,ops,'array'])
   commands += [['sync',x,y] for _ in range(3) for x in range(3) for y in range(3) if x!=y]
   cases.append(commands)
- checks=events=updates=map_events=text_events=array_events=0
+ checks=events=updates=map_events=text_events=array_events=block_layout_differences=0
  for version in ['v1','v2']:
   print('checking '+version,flush=True)
   a,b=execute(['validation/rust/target/release/transactions',version],cases),execute(['node','validation/transactions.cjs',version],cases)
   for seed,(r,m) in enumerate(zip(a,b)):
    for step,(x,y) in enumerate(zip(r['snapshots'],m['snapshots'])):
     checks+=1;events+=sum(e['phase'] not in ['map','text','array'] for e in x['events']);text_events+=sum(e['phase']=='text' for e in x['events']);array_events+=sum(e['phase']=='array' for e in x['events']);map_events+=sum(e['phase']=='map' for e in x['events']);updates+=sum(e['phase'] in ['v1','v2'] for e in x['events'])
+    xr=[(e['added'],e['removed']) for e in x['events'] if e['phase']=='array'];yr=[(e['added'],e['removed']) for e in y['events'] if e['phase']=='array']
+    block_layout_differences+=xr!=yr
     x,y=canonical(x),canonical(y)
     if x!=y:
      Path('/tmp/yrs-transactions-failure.json').write_text(json.dumps(cases[seed][:step+1])+'\n');raise AssertionError(f'{version} seed={seed} step={step} op={cases[seed][step]} Rust={x!r} Moon={y!r}')
- result={'upstream':'ac339600c712642e556895426113c3f9c117de39','scenarios':len(cases),'wire_versions':['v1','v2'],'transaction_snapshots':checks,'lifecycle_event_comparisons':events,'emitted_updates_replayed':updates,'map_event_comparisons':map_events,'text_event_comparisons':text_events,'array_event_comparisons':array_events,'status':'passed'}
+ result={'upstream':'ac339600c712642e556895426113c3f9c117de39','scenarios':len(cases),'wire_versions':['v1','v2'],'transaction_snapshots':checks,'lifecycle_event_comparisons':events,'emitted_updates_replayed':updates,'map_event_comparisons':map_events,'text_event_comparisons':text_events,'array_event_comparisons':array_events,'array_block_layout_differences':block_layout_differences,'new_checks':['cleanup identity ranges','has_changes','array identity membership and interval starts'],'status':'passed for logical changes; block layouts may differ'}
  (ROOT/'validation/transaction-results.json').write_text(json.dumps(result,indent=2)+'\n');print(json.dumps(result))
 if __name__=='__main__':main()
