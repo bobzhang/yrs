@@ -101,6 +101,29 @@ pub fn evaluate(input : String) -> String {
   guard (try! @json.parse(input)) is Array([String(kind), value]) else {
     abort("request")
   }
+  if kind == "stream" {
+    let numbers : Array[Int32] = try! @json.from_json(value)
+    let bytes = Bytes::from_array(numbers.map(fn(n) { n.to_byte() }))
+    let reader = @yrs.Cursor(bytes)
+    let result : Json = try {
+      let value = @yrs.Any::decode_from(reader)
+      let writer = @yrs.ByteWriter()
+      value.encode_to(writer)
+      {
+        "value": view(value),
+        "tail": Json(
+          reader
+          .read_exact(reader.remaining())
+          .to_array()
+          .map(fn(b) { b.to_int() }),
+        ),
+        "encoded": Json(writer.to_bytes().to_array().map(fn(b) { b.to_int() })),
+      }
+    } catch {
+      _ => { "rejected": Json(true) }
+    }
+    return result.stringify()
+  }
   let result : Json = { "ok": Json(true), "value": view(convert(kind, value)) } catch {
     _ => { "ok": Json(false) }
   }

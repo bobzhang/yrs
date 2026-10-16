@@ -20,6 +20,17 @@ macro_rules! cast {
         }
     };
 }
+macro_rules! anycast {
+    ($value:expr, $ty:ty, $encode:expr) => {
+        match $value.clone().cast::<$ty>() {
+            Ok(value) => json!({"ok":true,"value":($encode)(value)}),
+            Err(original) => {
+                assert_eq!(format!("{:?}", original), format!("{:?}", $value.clone()));
+                json!({"ok":false})
+            }
+        }
+    };
+}
 fn main() {
     for line in io::stdin().lock().lines() {
         let input: Value = serde_json::from_str(&line.unwrap()).unwrap();
@@ -48,6 +59,14 @@ fn main() {
             "cast/bool" => cast!(value, bool, |n: bool| n),
             "cast/string" => cast!(value, String, |n: String| n),
             "cast/bytes" => cast!(value, Vec<u8>, |n: Vec<u8>| n),
+            "anycast/i64" => anycast!(value, i64, |n: i64| n.to_string()),
+            "anycast/i32" => anycast!(value, i32, |n: i32| n.to_string()),
+            "anycast/u32" => anycast!(value, u32, |n: u32| n.to_string()),
+            "anycast/f64" => anycast!(value, f64, |n: f64| n.to_bits().to_string()),
+            "anycast/f32" => anycast!(value, f32, |n: f32| n.to_bits().to_string()),
+            "anycast/bool" => anycast!(value, bool, |n: bool| n),
+            "anycast/string" => anycast!(value, String, |n: String| n),
+            "anycast/bytes" => anycast!(value, Vec<u8>, |n: Vec<u8>| n),
             _ => panic!("kind"),
         };
         println!("{}", result);

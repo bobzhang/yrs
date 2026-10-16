@@ -1,0 +1,13 @@
+{
+  "upstream": "ac339600c712642e556895426113c3f9c117de39",
+  "framed_values": 1047,
+  "port_writer_to_rust_decodes": 1047,
+  "rejected_truncations": 404,
+  "checks": [
+    "nested arrays and objects",
+    "exact numeric variants and bit patterns",
+    "custom trailing frame bytes",
+    "lossless integer endpoints"
+  ],
+  "status": "passed; writer byte equality is not required"
+}

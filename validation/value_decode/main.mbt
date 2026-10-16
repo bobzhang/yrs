@@ -14,6 +14,14 @@ fn[T : @yrs.FromOut] cast(value : @yrs.Any, encode : (T) -> Json) -> Json {
 }
 
 ///|
+fn[T : @yrs.FromOut] anycast(value : @yrs.Any, encode : (T) -> Json) -> Json {
+  match value.cast() {
+    Ok(result) => { "ok": Json(true), "value": encode(result) }
+    Err(_) => { "ok": Json(false) }
+  }
+}
+
+///|
 #export_name("evaluate")
 pub fn evaluate(input : String) -> String {
   guard (try! @json.parse(input)) is Array([String(kind), Array(encoded)]) else {
@@ -58,6 +66,21 @@ pub fn evaluate(input : String) -> String {
     "cast/string" => cast(value, fn(n : String) { Json(n) })
     "cast/bytes" =>
       cast(value, fn(n : Bytes) {
+        Json(n.to_array().map(fn(b) { Json(b.to_int()) }))
+      })
+    "anycast/i64" => anycast(value, fn(n : Int64) { Json(n.to_string()) })
+    "anycast/i32" => anycast(value, fn(n : Int32) { Json(n.to_string()) })
+    "anycast/u32" => anycast(value, fn(n : UInt32) { Json(n.to_string()) })
+    "anycast/f64" =>
+      anycast(value, fn(n : Double) {
+        Json(n.reinterpret_as_uint64().to_string())
+      })
+    "anycast/f32" =>
+      anycast(value, fn(n : Float) { Json(n.reinterpret_as_uint().to_string()) })
+    "anycast/bool" => anycast(value, fn(n : Bool) { Json(n) })
+    "anycast/string" => anycast(value, fn(n : String) { Json(n) })
+    "anycast/bytes" =>
+      anycast(value, fn(n : Bytes) {
         Json(n.to_array().map(fn(b) { Json(b.to_int()) }))
       })
     _ => abort("kind")

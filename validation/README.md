@@ -78,3 +78,8 @@ uses the previously generated rustdoc JSON.
 with Rust serde serialization, retaining exact numeric variants and float bits.
 It covers custom records, nested unsigned overflow, byte buffers, optional values
 and the recursive Undefined-to-Null normalization performed by serde.
+
+`python3 validation/any_stream.py` checks that generic lib0 value readers consume
+exactly one value, preserve application frame bytes, reject truncations, and
+that unchanged Rust decodes every port generic-writer output without loss.
+Large integer encoding may differ in size from Rust; it preserves all bits.

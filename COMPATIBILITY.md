@@ -18,7 +18,7 @@ The generated `pkg.generated.mbti` is the authoritative MoonBit API.
 | `Doc`, `OffsetKind` | Implemented; explicit constructor options and defaults below |
 | `Options` | Adapted to labeled `Doc(...)` arguments |
 | `ClientID`, `ID`, `BranchID` | `UInt64`, `Id`, `BranchId`; the port also accepts client IDs beyond Rust's 53-bit domain |
-| `Any`, `Number` | `Any`; numeric variants are `Integer(Int64)` and `Float(Double)` |
+| `Any`, `Number` | `Any`, direct casts, optional collection iterators and composable byte-stream codecs; numeric variants are `Integer(Int64)` and `Float(Double)` |
 | `In`, `Out`, deprecated `Value` | `In`, `Out`, generic `Out.cast[T : FromOut]` with original-value errors; no deprecated `Value` alias |
 | `Array`, `ArrayRef`, `ArrayPrelim` | `ArrayRef` methods, typed `get_as`, and `In.Array` preliminary values |
 | `Map`, `MapRef`, `MapPrelim` | `MapRef` methods, typed `get_as`, generic `get_or_init[T : DefaultPrelim]`, concrete helpers and `In.Map` preliminary values |

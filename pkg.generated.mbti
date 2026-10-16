@@ -87,8 +87,11 @@ pub(all) enum Any {
   Object(ReadOnlyArray[(String, Any)])
   Buffer(Bytes)
 } derive(@debug.Debug)
+pub fn[T : FromOut] Any::cast(Self) -> Result[T, Self]
 pub fn Any::decode(Bytes) -> Self raise DecodeError
+pub fn Any::decode_from(&Read, max_values? : Int) -> Self raise DecodeError
 pub fn Any::encode(Self) -> Bytes
+pub fn Any::encode_to(Self, &Write) -> Unit
 pub fn Any::equal(Self, Self) -> Bool
 pub fn Any::from_any(Self) -> Self raise ValueDecodeError
 pub fn Any::from_json(Json) -> Self
@@ -98,6 +101,8 @@ pub fn Any::to_any(Self) -> Self raise ValueEncodeError
 pub fn Any::to_json(Self) -> Json
 pub fn Any::to_repr(Self) -> @debug.Repr
 pub fn Any::to_string(Self) -> String
+pub fn Any::try_into_iter(Self) -> Iter[(String?, Self)]?
+pub fn Any::try_iter(Self) -> Iter[(String?, Self)]?
 pub impl FromAny for Any
 pub impl ToAny for Any
 pub impl Eq for Any

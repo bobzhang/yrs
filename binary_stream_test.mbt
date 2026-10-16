@@ -45,6 +45,10 @@ test "application streams inherit lib0 defaults across chunk boundaries" {
   @yrs.Write::write_string(sink, "\u{feff}Moon🌙\u{0}")
   @yrs.Write::write_f64(sink, -0.0)
   @yrs.Write::write_f32(sink, 1.5)
+  let nested : @yrs.Any = Object([
+    ("array", Array([Null, Integer(9223372036854775807L), String("🌙")])),
+  ])
+  nested.encode_to(sink)
   let reader = ChunkSource::{ chunks: sink.chunks, chunk: 0, offset: 0, }
   assert_eq(@yrs.Read::read_u16(reader), 0xcafe)
   assert_eq(@yrs.Read::read_u32(reader), 0x89abcdefU)
@@ -58,6 +62,7 @@ test "application streams inherit lib0 defaults across chunk boundaries" {
     0x8000_0000_0000_0000UL,
   )
   assert_eq(@yrs.Read::read_f32(reader), 1.5)
+  assert_eq(@yrs.Any::decode_from(reader), nested)
 }
 
 ///|

@@ -39,6 +39,15 @@ fn convert(kind: &str, v: &Value) -> Result<Any, String> {
 fn main() {
     for line in io::stdin().lock().lines() {
         let request: Value = serde_json::from_str(&line.unwrap()).unwrap();
+        if request[0] == "stream" {
+            let bytes: Vec<u8> = serde_json::from_value(request[1].clone()).unwrap();
+            let mut cursor = Cursor::new(&bytes);
+            let value = Any::decode(&mut cursor).unwrap();
+            let tail = &bytes[cursor.next..];
+            let mut encoded = Vec::new(); value.encode(&mut encoded);
+            println!("{}", json!({"value": view(value), "tail": tail, "encoded": encoded}));
+            continue;
+        }
         let result = match convert(request[0].as_str().unwrap(), &request[1]) {
             Ok(value) => json!({"ok": true, "value": view(value)}),
             Err(_) => json!({"ok": false}),
