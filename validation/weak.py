@@ -81,6 +81,12 @@ def main():
  port=execute(['node','validation/weak.cjs','v1'],[fixture])[0][-1]
  assert reference['links']['tbad'][1]==['ab','ab']
  assert port['links']['tbad'][1]==['b','b']
+ fixture=json.loads((ROOT/'validation/fixtures/weak-deleted-map-history-events.json').read_text())
+ reference=execute(['validation/rust/target/release/weak','v1'],[fixture])[0]
+ port=execute(['node','validation/weak.cjs','v1'],[fixture])[0]
+ assert reference[-1]['links']==port[-1]['links']==port[-2]['links']
+ assert reference[-1]['events']==[] and port[-1]['events']==['mref']
+ assert port[-1]['state']!=port[-2]['state']
  cases=[]
  for seed in range(64):
   rng=random.Random(22000+seed);ops=[['i',0,'abcdefghijklmnop'],*[['ai',i,i] for i in range(12)],['m','key',0],['ml','m0','key']]

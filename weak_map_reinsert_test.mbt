@@ -64,3 +64,31 @@ test "reinserted map links reconnect deep events without observing other keys" {
   map.insert_map("other").insert("nested", Bool(false))
   assert_eq(events.val, before + 1)
 }
+
+///|
+test "weak map events can report imported deleted versions without a visible change" {
+  let source = @yrs.Doc(client_id=1UL)
+  let map = source.get_or_insert_map("map")
+  map.insert("key", Integer(0L))
+  map.insert_input("mref", WeakLink(map.link("key").unwrap())) |> ignore
+  map.remove("key")
+  let peer = @yrs.Doc(client_id=2UL)
+  peer.apply_update_v1(source.encode_state_as_update_v1())
+  let link = weak(peer.get_or_insert_map("map").get("mref").unwrap())
+  let events = Ref(0)
+  link.observe("versions", fn(_, _) { events.val += 1 })
+  let old = peer.state_vector()
+  map.insert("key", Integer(1L))
+  map.remove("key")
+  // The packet contains a new version of the linked key and its deletion.
+  let packet = source.encode_diff_v1(old)
+  let update = @yrs.Update::decode_v1(packet)
+  let added = @yrs.Id::{ client: 1UL, clock: old.get(1UL), }
+  assert_true(update.insertions().contains(added))
+  assert_true(update.delete_set().contains(added))
+  peer.apply_update_v1(packet)
+  assert_true(link.try_deref_value() is None)
+  assert_eq(events.val, 1)
+  peer.apply_update_v1(packet)
+  assert_eq(events.val, 1)
+}

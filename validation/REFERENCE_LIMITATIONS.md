@@ -551,3 +551,21 @@ document states and 6,656 reloads. The remaining 40 plain/eight XML query
 exceptions require a demonstrated internal inconsistency in Rust. All 27,744
 extra notifications are classified (27,576 changed views, 168 format markers);
 zero Rust notifications are missing. Counts supersede previous weak matrices.
+
+## Weak events for imported deleted map versions
+
+`fixtures/weak-deleted-map-history-events.json` contains two Rust-authored packets.
+The first leaves a linked map key absent. The second adds an already-deleted new
+version of that same key, leaving its visible value absent. The corrected port
+reports this structural change once and ignores duplicates. A public API
+regression checks that the new identity appears in both insertion and deletion
+sets. Pinned Rust omits the event because it dropped the link subscription.
+
+The concurrent weak matrix now compares each extra notification with its prior
+view: 2,490 accompany changed views, two formatting changes and six imports of
+deleted map history. No notifications are missing and none remain unclassified.
+The bounded classification requires an absent map link, remote import and changed
+causal state, with the six occurrences fixed by the deterministic corpus. This
+is an operation-change observer contract, not a promise to notify only when the
+rendered value differs. Unrelated map keys and duplicate packets are separately
+required not to notify the link.
