@@ -27,6 +27,10 @@ pub fn merge_updates_v1(Array[Bytes]) -> Bytes raise DecodeError
 
 pub fn merge_updates_v2(Array[Bytes]) -> Bytes raise DecodeError
 
+pub fn uuid_v4(() -> Bytes) -> String
+
+pub fn uuid_v4_from(Bytes) -> String
+
 // Errors
 pub suberror AwarenessError {
   ClientNotFound(UInt64)

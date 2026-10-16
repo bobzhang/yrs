@@ -42,7 +42,7 @@ The generated `pkg.generated.mbti` is the authoritative MoonBit API.
 | `UndoManager` | `UndoManager[M]`, with injectable clock and metadata |
 | `AcquireTransaction`, `AcquireTransactionMut`, `AsyncTransact`, `TransactionAcqError` | Rust lock-acquisition/future types have no implementation; the portable document is confined to its host execution context |
 | `Store` | Partially exposed through `Doc`: state, roots, pending pruning and scoped GC; no public raw mutable store or lock interface |
-| `Uuid`, `uuid_v4`, `uuid_v4_from` | GUIDs are strings supplied by the host; UUID generator/formatter not implemented |
+| `Uuid`, `uuid_v4`, `uuid_v4_from` | GUIDs are strings; `uuid_v4_from(Bytes)` formats 16 network-order bytes and `uuid_v4(entropy)` uses a host-provided entropy callback |
 | `merge_updates_v1`, `merge_updates_v2` | Implemented stateless update union |
 | `diff_updates_v1`, `diff_updates_v2` | Implemented stateless state-vector clipping |
 | `encode_state_vector_from_update_v1`, `encode_state_vector_from_update_v2` | Implemented contiguous-prefix extraction |
@@ -65,7 +65,7 @@ This root inventory is **not a complete public-module audit**. Rust also exposes
 ## Host and language adaptations
 
 `Doc(client_id=...)` requires a host-provided client ID. Subdocument GUIDs must be
-unique and explicit. The default offset mode is UTF-16 and deleted content is
+unique and explicit; `uuid_v4` accepts the host's entropy callback. The default offset mode is UTF-16 and deleted content is
 retained (`skip_gc=true`); Rust defaults to byte offsets and GC enabled. Pass
 `offset_kind=Bytes, skip_gc=false` to select those Rust defaults. A protocol peer
 must never reuse another active editor's client ID.

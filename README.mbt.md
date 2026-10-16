@@ -486,3 +486,8 @@ Rust does. Updates and snapshots retain this metadata too. Use
 `Snapshot(delete_set=...)` and `snapshot.delete_set()` for owned copies. The
 expanded contracts oracle passes 256 set cases (128 exercising empty clients),
 including update/snapshot codecs, and 4,416 saved undo-stack operations.
+
+`uuid_v4_from(bytes)` formats exactly 16 network-order bytes with the same
+version/variant bits as Rust's `uuid_v4_from(u128)`. `uuid_v4(entropy)` calls the
+host's 16-byte entropy provider once, without a hidden deterministic fallback.
+The identity oracle compares 512 UUID inputs against unchanged Rust.

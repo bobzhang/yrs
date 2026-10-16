@@ -1,6 +1,16 @@
 ///|
 fn run(input : String) -> String raise {
-  guard @json.parse(input) is Array([Number(client, ..), String(name), gc]) else {
+  let request = @json.parse(input)
+  if request is { "uuid": Array(values), .. } {
+    let value = Bytes::from_array(
+      values.map(fn(v) {
+        guard v is Number(n, ..) else { abort("byte") }
+        n.to_int().to_byte()
+      }),
+    )
+    return Json(@yrs.uuid_v4_from(value)).stringify()
+  }
+  guard request is Array([Number(client, ..), String(name), gc]) else {
     abort("input")
   }
   let doc = @yrs.Doc(client_id=client.to_uint64(), skip_gc=gc != Json(true))

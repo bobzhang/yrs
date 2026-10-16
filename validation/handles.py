@@ -16,9 +16,12 @@ def main():
     reference = execute(['validation/rust/target/release/handles'], cases)
     actual = execute(['node', 'validation/handles.cjs'], cases)
     assert reference == actual, 'logical handle results differ'
+    uuids = [{'uuid': [0]*16}, {'uuid': [255]*16}]
+    uuids += [{'uuid': [rng.randrange(256) for _ in range(16)]} for _ in range(510)]
+    assert execute(['validation/rust/target/release/handles'], uuids) == execute(['node', 'validation/handles.cjs'], uuids)
     result = {
         'upstream': 'ac339600c712642e556895426113c3f9c117de39',
-        'cases': len(cases), 'checks': [
+        'cases': len(cases), 'uuid_cases': len(uuids), 'checks': ['512 UUID formatter inputs including all-zero and all-one bytes',
             'non-creating root lookup', 'typed root creation',
             'root and nested hook serde including phantom tag',
             '53-bit client identifiers and Unicode root names',

@@ -1,7 +1,9 @@
 {
   "upstream": "ac339600c712642e556895426113c3f9c117de39",
   "cases": 256,
+  "uuid_cases": 512,
   "checks": [
+    "512 UUID formatter inputs including all-zero and all-one bytes",
     "non-creating root lookup",
     "typed root creation",
     "root and nested hook serde including phantom tag",

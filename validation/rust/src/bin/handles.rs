@@ -11,6 +11,11 @@ fn serialized<S>(hook: &Hook<S>) -> Value {
 fn main() {
     for line in io::stdin().lock().lines() {
         let input: Value = serde_json::from_str(&line.unwrap()).unwrap();
+        if let Some(value) = input.get("uuid") {
+            let value: [u8; 16] = serde_json::from_value(value.clone()).unwrap();
+            println!("{}", json!(yrs::uuid_v4_from(u128::from_be_bytes(value))));
+            continue;
+        }
         let client = input[0].as_u64().unwrap();
         let name = input[1].as_str().unwrap();
         let gc = input[2].as_bool().unwrap();
