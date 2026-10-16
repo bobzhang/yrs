@@ -177,7 +177,10 @@ integrated anchors. `Doc.snapshot` instead records the highest integrated clock
 and excludes missing ranges in its snapshot delete set. This preserves the
 observed historical view after gaps later arrive. These exclusions are historical
 metadata only: ordinary document updates never delete unseen ranges on that basis.
-Use `Doc.state_vector`, not a sparse snapshot's vector, for replication.
+An excluded map overwrite must not hide the earlier visible value during replay;
+its clock is represented by an inert GC block in the historical update, including
+when its replacement owned nested content. Use `Doc.state_vector`, not a sparse
+snapshot's vector, for replication.
 
 Transactions exposed through every observer family freeze their metadata and v1/v2
 bytes at commit. Reusing a decoded update creates independent local subdocuments;

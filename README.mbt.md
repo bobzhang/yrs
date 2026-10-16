@@ -100,7 +100,7 @@ retained observer transactions. See the [review and issue dispositions](validati
 
 ## Validation
 
-189 tests pass on all four backends. Differential tests use unchanged Yrs at
+194 tests pass on all four backends. Differential tests use unchanged Yrs at
 `ac339600c712642e556895426113c3f9c117de39` and pinned Yjs 13.6.27.
 The core matrix covers 641 scenarios across both wire formats and GC modes.
 Mixed MoonBit/Yjs undo tests check rendered content, state vectors, deletion ranges,

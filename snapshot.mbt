@@ -182,6 +182,26 @@ fn Doc::encode_snapshot(
   guard self.skip_gc() else {
     raise InvalidData("snapshot encoding requires skip_gc=true")
   }
+  // A sparse cut may exclude a map overwrite that arrived only later. Even
+  // a deleted map version would hide its predecessor during replay. Replace
+  // versions after the snapshot's visible winner with structural GC blocks;
+  // they still cover their clocks but cannot overwrite that historical value.
+  let excluded_versions : Set[Id] = Set([])
+  for branch in self.roots.values() {
+    for head in branch.heads.values() {
+      let mut current = Some(head)
+      let mut visible_winner = false
+      while current is Some(id) {
+        let item = self.items[id]
+        if snapshot.is_visible(id) {
+          visible_winner = true
+        } else if visible_winner {
+          excluded_versions.add(id)
+        }
+        current = item.right
+      }
+    }
+  }
   let items = []
   for client, blocks in self.clients {
     let end = snapshot.state.get(client)
@@ -202,7 +222,11 @@ fn Doc::encode_snapshot(
             right_origin: item.right_origin,
             parent: item.parent,
             parent_sub: item.parent_sub,
-            content: item.content.slice(0, length),
+            content: if excluded_versions.contains(item.id) {
+              Garbage(length)
+            } else {
+              item.content.slice(0, length)
+            },
           } : RawItem),
       )
     }
