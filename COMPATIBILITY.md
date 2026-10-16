@@ -84,7 +84,7 @@ are API/lifetime adaptations, not claims of identical Rust ownership behavior.
 
 | Area | Current evidence | Work remaining |
 | --- | --- | --- |
-| Ordinary sparse pending delivery | Complete histories and scoped GC agree; original-packet fixed-point replay agrees in all 512 cases | Explain or resolve 44 intermediate differences under ordinary buffering, including 14 not resolved by reapplying Rust's merged pending update |
+| Ordinary sparse pending delivery | Complete histories and scoped GC agree; original-packet fixed-point replay agrees in all 512 cases | Ordinary buffering intentionally differs in 44 cases; a reduced retry-watermark/head-blocking fixture explains how the 14 persistent cases arise. Exact buffered-state parity remains unclaimed |
 | Weak references | Mixed-runtime concurrent editing converges; broad query/event oracles retained | Resolve query inconsistencies and additional port notifications; do not label partial event comparisons as passes |
 | Concurrent undo | Mixed-runtime networks and restored stack tests pass | Separate nondeterministic restored identities from actual event/behavior mismatches in independently generated histories |
 | Public API | Root exports inventoried above; main editing and protocol APIs implemented | Finish method/module audit and resolve or explicitly define the portability boundary for unimplemented APIs |

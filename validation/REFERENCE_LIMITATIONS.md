@@ -328,3 +328,24 @@ this Yjs surrogate replacement, requires the port's completed text/arrays/maps t
 match the original history, and checks insertion identities and deletion ranges
 independently. All observed-state-vector cases agree. The exception is counted
 explicitly; arbitrary-clock text mismatches are not reported as parity passes.
+
+### Reduced retry-watermark and head-blocking sequence
+
+`python3 validation/pending_scheduling.py` checks the eight-packet reduction in
+`fixtures/upstream-pending-watermark-blocking.json`. All packets belong to client
+1. An independent item at clocks 30–33 raises Rust's store high-water clock while
+clocks 6–9 are still absent. Delivering 6–9 later makes queued 9–12, 18–21 and
+33–36 ready, but does not increase that high-water clock. Rust's
+`TransactionMut::apply_update` retries only when the stored missing-clock
+threshold is less than the current high-water clock, so those items stay queued.
+
+A final 42–45 item then joins the pending batch. Pruning and reapplying the batch
+unblocks the earlier items, but `BlockPicker::switch` stops at 36–39, whose
+dependency 27–30 is still absent. That also blocks the later, now-ready 42–45 item
+from the same client. Reapplying each original packet separately integrates it
+in both runtimes. No insertion identities are lost from the pending partition.
+
+This explains how an initial retry stall can cause a persistent difference even
+after retrying the merged pending update. The port intentionally retries ready
+dependencies eagerly. The oracle retains exact prefix-level evidence; it does
+not reclassify the ordinary buffered outputs as equal.
