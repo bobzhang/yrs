@@ -87,6 +87,8 @@ jobs:
               python3 validation/update_codecs.py
               python3 validation/type_refs.py
               python3 validation/block_ranges.py
+              python3 validation/v2_clock_boundaries.py
+              python3 validation/large_ranges.py
               python3 validation/codec_updates.py
               python3 validation/value_decode.py
               python3 validation/value_encode.py

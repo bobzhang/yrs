@@ -18,8 +18,8 @@ fn Content::joined(self : Content, other : Content) -> Content? {
           ),
         ),
       )
-    (Deleted(a), Deleted(b)) => Some(Deleted(a + b))
-    (Garbage(a), Garbage(b)) => Some(Garbage(a + b))
+    (Deleted(a), Deleted(b)) if a <= 0x7fff_ffff - b => Some(Deleted(a + b))
+    (Garbage(a), Garbage(b)) if a <= 0x7fff_ffff - b => Some(Garbage(a + b))
     _ => None
   }
 }

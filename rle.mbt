@@ -31,7 +31,7 @@ fn Column::next(self : Column) -> UInt64 raise DecodeError {
       }
       1 => {
         let value = self.reader.signed()
-        guard value >= -2147483648L && value <= 2147483647L else {
+        guard value >= -8589934590L && value <= 8589934591L else {
           raise InvalidData("difference column overflow")
         }
         self.delta = value >> 1
@@ -52,9 +52,11 @@ fn Column::next(self : Column) -> UInt64 raise DecodeError {
     }
   }
   if self.kind == 1 {
-    self.last = (self.last.to_uint().reinterpret_as_int() + self.delta.to_int())
-      .reinterpret_as_uint()
-      .to_uint64()
+    let next = self.last.reinterpret_as_int64() + self.delta
+    guard next >= 0L && next <= 4294967295L else {
+      raise InvalidData("difference column clock overflow")
+    }
+    self.last = next.reinterpret_as_uint64()
   }
   if self.count != 0xffff_ffff_ffff_ffffUL {
     self.count -= 1UL
@@ -69,16 +71,15 @@ fn encode_column(
 ) -> Bytes raise DecodeError {
   let writer : Writer = { bytes: [], }
   let mut i = 0
-  let mut previous = 0U
+  let mut previous = 0UL
   while i < values.length() {
     let value = values[i]
-    let delta = value.to_uint().reinterpret_as_int() -
-      previous.reinterpret_as_int()
+    let delta = value.reinterpret_as_int64() - previous.reinterpret_as_int64()
     let mut count = 1
     while i + count < values.length() {
       let same = if kind == 1 {
-        values[i + count].to_uint().reinterpret_as_int() -
-        values[i + count - 1].to_uint().reinterpret_as_int() ==
+        values[i + count].reinterpret_as_int64() -
+        values[i + count - 1].reinterpret_as_int64() ==
         delta
       } else {
         values[i + count] == value
@@ -109,9 +110,7 @@ fn encode_column(
         }
       }
       1 => {
-        writer.signed(
-          ((delta << 1) | (if count > 1 { 1 } else { 0 })).to_int64(),
-        )
+        writer.signed((delta << 1) | (if count > 1 { 1L } else { 0L }))
         if count > 1 {
           writer.uint((count - 2).to_uint64())
         }
@@ -123,7 +122,7 @@ fn encode_column(
         }
       }
     }
-    previous = values[i + count - 1].to_uint()
+    previous = values[i + count - 1]
     i += count
   }
   writer.finish()

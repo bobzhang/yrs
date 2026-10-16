@@ -448,3 +448,27 @@ Rust mirrors passes 96 histories in each wire format. The report explicitly
 labels this ownership scope and counts 126 required reconciliation exchanges.
 It validates port-generated edits, undo/redo, notifications and convergence
 under GC; it does not replace the unfinished Rust-owned undo comparison.
+
+## Full-width v2 clock deltas
+
+`python3 validation/v2_clock_boundaries.py` isolates a signed-width bug in the
+unchanged pinned Rust v2 codec. Writing one left origin at client 7, clock
+1,073,741,824 and reading its own output returns clock 3,221,225,472. Rust rejects
+the corresponding valid Yjs encoding. `IntDiffOptRleEncoder` shifts an `i32` delta
+before widening it, and its decoder reads that packed delta as `i32`. Packing a
+full UInt32 clock difference requires up to 34 signed bits.
+
+MoonBit now computes and reads these packed deltas with Int64, validates the
+resulting UInt32 clock, and matches Yjs exactly across 144 streams containing
+16,400 clock fields. This deliberately corrects the pinned Rust overflow.
+`validation/v2-clock-boundary-results.json` retains the self-contained Rust-only
+witness and its failed import of the valid packet.
+
+`python3 validation/large_ranges.py` separately checks compressed GC and deleted
+runs through UINT32_MAX: 74 v1 cases across Rust/MoonBit/Yjs, 49 v2 cases across
+all three, and 25 v2 cases with large item origins across MoonBit/Yjs. These last
+cases cannot claim Rust interoperability because of the reproduced clock codec
+defect. Across both GC modes, 7,661 state checks and 7,042 persisted-state reloads
+pass. The Rust harness translates its common v1 state-vector input into the v2
+state-vector framing required by Rust's v2 utility API; Yjs and MoonBit use v1
+state vectors for these utilities.

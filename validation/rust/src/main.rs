@@ -1,6 +1,6 @@
 use std::io::{self, BufRead};
 use yrs::{Doc, Text, GetString, ReadTxn, Transact, Options, OffsetKind, Update};
-use yrs::updates::decoder::Decode;
+use yrs::updates::{decoder::Decode, encoder::Encode};
 use yrs::{Array, Map, Xml, XmlFragment};
 use yrs::types::{ToJson,AsPrelim};
 use serde_json::{Value, json};
@@ -33,11 +33,14 @@ fn main() {
   if utilities {
     let args:Value=serde_json::from_str(&line).unwrap();
     let updates:Vec<Vec<u8>>=args["updates"].as_array().unwrap().iter().map(|v|unhex(v.as_str().unwrap())).collect();
+    // Harness inputs use Yjs's v1 state vectors. Yrs's v2 utility expects
+    // and returns state vectors wrapped in a v2 encoder instead.
     let remote=unhex(args["remote"].as_str().unwrap());
+    let remote=if v2 { yrs::StateVector::decode_v1(&remote).unwrap().encode_v2() } else { remote };
     let merged=if v2 {yrs::merge_updates_v2(&updates)}else{yrs::merge_updates_v1(&updates)}.unwrap();
     let diff=if v2 {yrs::diff_updates_v2(&merged,&remote)}else{yrs::diff_updates_v1(&merged,&remote)}.unwrap();
     let sv=if v2 {yrs::encode_state_vector_from_update_v2(&merged)}else{yrs::encode_state_vector_from_update_v1(&merged)}.unwrap();
-    let sv=yrs::StateVector::decode_v1(&sv).unwrap();
+    let sv=if v2 {yrs::StateVector::decode_v2(&sv)}else{yrs::StateVector::decode_v1(&sv)}.unwrap();
     let mut entries=sv.iter().map(|(c,n)|(c.get(),*n)).collect::<Vec<_>>();entries.sort();
     println!("{}",json!({"merged":hex(&merged),"diff":hex(&diff),"states":entries}));
     continue;

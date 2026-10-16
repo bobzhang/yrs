@@ -36,6 +36,38 @@ fn read_update(reader : Reader) -> (Array[RawItem], IdSet) raise DecodeError {
       } else {
         None
       }
+      // Deleted runs carry no per-clock payload. Keep each internal block within
+      // signed indexing bounds while accepting the full unsigned wire range.
+      if kind == 0 || kind == 1 {
+        let length = reader.clock()
+        guard clock.to_uint64() + length.to_uint64() <= 0xffff_ffffUL else {
+          raise InvalidData("clock overflow")
+        }
+        let end = clock + length
+        let mut left = origin
+        while clock < end {
+          let count = (end - clock).min(0x7fff_ffffU)
+          items.push({
+            id: { client, clock, },
+            origin: if kind == 0 {
+              None
+            } else {
+              left
+            },
+            right_origin,
+            parent,
+            parent_sub,
+            content: if kind == 0 {
+              Garbage(count.reinterpret_as_int())
+            } else {
+              Deleted(count.reinterpret_as_int())
+            },
+          })
+          clock += count
+          left = Some({ client, clock: clock - 1U, })
+        }
+        continue
+      }
       let content = match kind {
         2 => {
           let values = []
@@ -83,17 +115,6 @@ fn read_update(reader : Reader) -> (Array[RawItem], IdSet) raise DecodeError {
           Values(ReadOnlyArray::from_array(values[:]))
         }
         4 => Characters(reader.string())
-        0 | 1 | 10 => {
-          let length = reader.clock()
-          guard length <= 0x7fff_ffffU else {
-            raise InvalidData("block too large")
-          }
-          if kind == 1 {
-            Deleted(length.reinterpret_as_int())
-          } else {
-            Garbage(length.reinterpret_as_int())
-          }
-        }
         _ => raise InvalidData("unsupported item content")
       }
       let length = content.length()

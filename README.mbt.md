@@ -332,6 +332,14 @@ Decoded deleted-content items count as insertions until integration; GC blocks
 are included only when requested. State vectors support causal partial ordering,
 and state vectors and sticky indices support both metadata encoding versions.
 
+Compressed deleted/GC ranges accept the full UInt32 clock domain without
+allocating one element per clock. Large runs are stored in bounded internal
+blocks; compaction preserves that bound. `validation/large_ranges.py` checks
+merge, diff, duplicate delivery and persistence across Rust, MoonBit and Yjs.
+The v2 clock columns use full-width differences and match Yjs at unsigned
+boundaries. The pinned Rust codec overflows on some of those differences;
+`validation/v2_clock_boundaries.py` preserves that reference failure explicitly.
+
 `python3 validation/update_info.py` compares 5,122 distinct Rust-produced packets
 from 64 histories with garbage collection enabled and disabled, plus a retained
 deleted-content regression. Another 96 cases compare exact v2 state-vector and

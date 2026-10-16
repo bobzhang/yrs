@@ -1,0 +1,32 @@
+{
+  "upstream": "ac339600c712642e556895426113c3f9c117de39",
+  "yjs_version": "13.6.27",
+  "streams": 144,
+  "clock_fields": 16400,
+  "moonbit_yjs_exact_bytes_and_values": true,
+  "rust_only_witness": {
+    "input": {
+      "v2": true,
+      "ops": [
+        [
+          "left",
+          [
+            "7",
+            1073741824
+          ]
+        ]
+      ]
+    },
+    "self_decoded": {
+      "tail": [],
+      "values": [
+        [
+          "7",
+          3221225472
+        ]
+      ]
+    },
+    "valid_yjs_packet_decode": "error"
+  },
+  "status": "passed with reproduced pinned Rust overflow"
+}

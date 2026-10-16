@@ -1,0 +1,43 @@
+{
+  "upstream": "ac339600c712642e556895426113c3f9c117de39",
+  "yjs_version": "13.6.27",
+  "groups": [
+    {
+      "format": "v1",
+      "group": "all-ranges",
+      "cases": 74,
+      "engines": [
+        "rust",
+        "moonbit",
+        "yjs"
+      ]
+    },
+    {
+      "format": "v2",
+      "group": "rust-supported-ranges",
+      "cases": 49,
+      "engines": [
+        "rust",
+        "moonbit",
+        "yjs"
+      ]
+    },
+    {
+      "format": "v2",
+      "group": "large-item-origins",
+      "cases": 25,
+      "engines": [
+        "moonbit",
+        "yjs"
+      ]
+    }
+  ],
+  "gc_modes": [
+    false,
+    true
+  ],
+  "rust_v2_large_item_origin_limitation": "See v2_clock_boundaries.py: pinned signed delta overflow",
+  "state_checks": 7661,
+  "cross_runtime_reloads": 7042,
+  "status": "passed"
+}

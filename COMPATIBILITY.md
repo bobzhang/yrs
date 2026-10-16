@@ -118,6 +118,7 @@ are API/lifetime adaptations, not claims of identical Rust ownership behavior.
 
 | Area | Current evidence | Work remaining |
 | --- | --- | --- |
+| Unsigned clock boundaries | Full-width GC/deleted ranges and v2 deltas validated; 7,042 persisted-state reloads and 16,400 exact Yjs codec fields pass | Pinned Rust overflows large v2 origin deltas; these packets use Yjs as the independent reference |
 | Ordinary sparse pending delivery | Complete histories and scoped GC agree; original-packet fixed-point replay agrees in all 512 cases | Ordinary buffering intentionally differs in 44 cases; a reduced retry-watermark/head-blocking fixture explains how the 14 persistent cases arise. Exact buffered-state parity remains unclaimed |
 | Weak references | Mixed-runtime concurrent editing converges; broad query/event oracles retained | Resolve query inconsistencies and additional port notifications; do not label partial event comparisons as passes |
 | Concurrent undo | Mixed Yjs/MoonBit authors pass 96 histories in v1/v2 with GC on/off on both JS and native, including notifications and 205,056 replica comparisons per backend. Rust mirrors validate GC-enabled port authors; 9,984 post-undo reloads pass. Restored-parent persistence and inferred-GC deletion propagation defects corrected | Expanded mixed Rust-author gate encounters a Rust panic, reproduced by seven Rust-only operations. Strict independent histories differ because pinned Rust loses restored map entries and independently allocated restoration identities affect conflicts |
