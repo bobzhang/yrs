@@ -333,6 +333,7 @@ pub fn Doc::get_or_insert_map(Self, String) -> MapRef
 pub fn Doc::get_or_insert_text(Self, String) -> Text
 pub fn Doc::get_or_insert_xml_fragment(Self, String) -> XmlFragment
 pub fn Doc::get_text(Self, String) -> Text?
+pub fn Doc::get_type_from_path(Self, Array[PathSegment]) -> Out?
 pub fn Doc::get_xml_fragment(Self, String) -> XmlFragment?
 pub fn Doc::guid(Self) -> String
 pub fn Doc::has_missing_updates(Self) -> Bool
@@ -348,7 +349,9 @@ pub fn Doc::observe_update_v1(Self, String, (Bytes, Transaction) -> Unit) -> Uni
 pub fn Doc::observe_update_v2(Self, String, (Bytes, Transaction) -> Unit) -> Unit
 pub fn Doc::offset_kind(Self) -> OffsetKind
 pub fn Doc::parent_doc(Self) -> Self?
+pub fn Doc::pending_delete_set(Self) -> IdSet?
 pub fn Doc::pending_items(Self) -> Int
+pub fn Doc::pending_update(Self) -> Update?
 pub fn Doc::prune_pending(Self) -> Update?
 pub fn Doc::ptr_eq(Self, Self) -> Bool
 pub fn Doc::root_refs(Self) -> Array[(String, Out)]

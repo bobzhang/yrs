@@ -127,3 +127,82 @@ test "early deletions apply to local inserts and delayed nested descendants" {
   assert_eq(peer.get_or_insert_map("root").to_json(), {})
   assert_eq(peer.snapshot(), source.snapshot())
 }
+
+///|
+test "root-key paths resolve nested shared collections and distinguish retained deleted map entries" {
+  let doc = @yrs.Doc(client_id=1UL)
+  let root = doc.get_or_insert_map("root")
+  let array = root.insert_array("items")
+  array.push_back(Value(Integer(1L))) |> ignore
+  let map = array.insert_map(1)
+  let text = map.insert_text("note")
+  text.insert(0, "Moon")
+  let path : Array[@yrs.PathSegment] = [
+    Key("root"),
+    Key("items"),
+    Index(1),
+    Key("note"),
+  ]
+  assert_eq(
+    doc.get_type_from_path(path).unwrap().branch_id(),
+    Some(text.hook().id()),
+  )
+  assert_true(doc.get_type_from_path([]) is None)
+  assert_true(doc.get_type_from_path([Index(0)]) is None)
+  assert_true(
+    doc.get_type_from_path([Key("root"), Key("items"), Index(0)]) is None,
+  )
+  assert_true(doc.get_type_from_path([Key("missing")]) is None)
+  array.remove(0)
+  assert_true(doc.get_type_from_path(path) is None)
+  assert_eq(
+    doc
+    .get_type_from_path([Key("root"), Key("items"), Index(0), Key("note")])
+    .unwrap()
+    .branch_id(),
+    Some(text.hook().id()),
+  )
+  root.remove("items")
+  let retained = doc.get_type_from_path([Key("root"), Key("items")]).unwrap()
+  assert_true(retained.is_deleted())
+  assert_true(
+    doc.get_type_from_path([Key("root"), Key("items"), Index(0)]) is None,
+  )
+  doc.gc()
+  assert_true(doc.get_type_from_path([Key("root"), Key("items")]) is None)
+}
+
+///|
+test "pending inspection is owned read-only metadata and resolves after prefix delivery" {
+  let source = @yrs.Doc(client_id=1UL)
+  let text = source.get_or_insert_text("note")
+  text.insert(0, "A")
+  let prefix = source.encode_state_as_update_v1()
+  let known = source.state_vector()
+  text.insert(1, "B")
+  let suffix = source.encode_state_as_update_v1(remote=known)
+  text.remove_range(0, 1)
+  let deletion = source.encode_state_as_update_v1(remote=source.state_vector())
+  let peer = @yrs.Doc(client_id=2UL)
+  peer.apply_update_v1(suffix)
+  peer.apply_update_v1(deletion)
+  let mut notifications = 0
+  peer.observe_after_transaction("reads", fn(_) { notifications += 1 })
+  let pending = peer.pending_update().unwrap()
+  assert_eq(pending.insertions().ranges(), [(1UL, 1U, 2U)])
+  assert_true(pending.delete_set().is_empty())
+  let deleted = peer.pending_delete_set().unwrap()
+  assert_eq(deleted.ranges(), [(1UL, 0U, 1U)])
+  deleted.remove_range({ client: 1UL, clock: 0U, }, 1U)
+  pending.merge(@yrs.Update::decode_v1(prefix))
+  assert_eq(peer.pending_delete_set().unwrap().ranges(), [(1UL, 0U, 1U)])
+  assert_eq(peer.pending_update().unwrap().insertions().ranges(), [
+    (1UL, 1U, 2U),
+  ])
+  assert_eq(notifications, 0)
+  peer.apply_update_v1(prefix)
+  assert_true(peer.pending_update() is None)
+  assert_true(peer.pending_delete_set() is None)
+  assert_eq(peer.get_text("note").unwrap().get_string(), "B")
+  assert_eq(notifications, 1)
+}

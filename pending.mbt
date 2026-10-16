@@ -76,3 +76,31 @@ pub fn Doc::has_pending_updates(self : Doc) -> Bool {
   }
   !IdSet(ranges=deleted).diff(self.integrated_ids()).is_empty()
 }
+
+///|
+/// Inspect unresolved item blocks without draining or retrying them. Pending
+/// deletions are exposed separately by pending_delete_set, as in Yrs Store.
+pub fn Doc::pending_update(self : Doc) -> Update? {
+  if self.pending.is_empty() {
+    return None
+  }
+  Some(try! Update::decode_v1(encode_raw_update(self.pending, Map([]))))
+}
+
+///|
+/// Return an owned copy of deletion ranges whose items have not arrived yet.
+/// Reading this metadata does not start a transaction or notify observers.
+pub fn Doc::pending_delete_set(self : Doc) -> IdSet? {
+  let ranges = []
+  for client, entries in self.deletes {
+    for (start, end) in entries {
+      ranges.push((client, start, end))
+    }
+  }
+  let pending = IdSet(ranges~).diff(self.integrated_ids())
+  if pending.is_empty() {
+    None
+  } else {
+    Some(pending)
+  }
+}

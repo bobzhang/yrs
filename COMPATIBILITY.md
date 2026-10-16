@@ -41,7 +41,7 @@ The generated `pkg.generated.mbti` is the authoritative MoonBit API.
 | `SubdocsEvent`, `TransactionCleanupEvent`, `UpdateEvent` | `SubdocsEvent`, `Transaction`, and update bytes passed to callbacks |
 | `UndoManager` | `UndoManager[M]`, with injectable clock and metadata |
 | `AcquireTransaction`, `AcquireTransactionMut`, `AsyncTransact`, `TransactionAcqError` | Rust lock-acquisition/future types have no implementation; the portable document is confined to its host execution context |
-| `Store` | Partially exposed through `Doc`: state, roots, pending pruning and scoped GC; no public raw mutable store or lock interface |
+| `Store` | Exposed through `Doc`: state, roots, root-key paths, owned pending block/deletion inspection, pending pruning and scoped GC; no public raw mutable store or lock interface |
 | `Uuid`, `uuid_v4`, `uuid_v4_from` | GUIDs are strings; `uuid_v4_from(Bytes)` formats 16 network-order bytes and `uuid_v4(entropy)` uses a host-provided entropy callback |
 | `merge_updates_v1`, `merge_updates_v2` | Implemented stateless update union |
 | `diff_updates_v1`, `diff_updates_v2` | Implemented stateless state-vector clipping |

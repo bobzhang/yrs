@@ -506,3 +506,9 @@ application records, or use `get_json_as[T : @json.FromJson]` for MoonBit's JSON
 conventions (which represent `Int64` as a string). `Out.to_any()` and `from_any`
 are also public. The Rust serde oracle checks 7,250 conversions, including
 lossless numeric boundaries, nonfinite floats, signed zero, options and arrays.
+
+`Doc.get_type_from_path` resolves root-key paths through nested shared maps and
+sequences. Like Rust's store lookup, map-key traversal can inspect retained
+deleted branches; sequence indices refer to visible values. `pending_update()`
+and `pending_delete_set()` return owned snapshots of unresolved blocks and early
+deletions without draining them, retrying integration, or notifying observers.

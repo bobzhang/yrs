@@ -67,3 +67,35 @@ pub fn Transaction::delete_set(self : Transaction) -> IdSet {
 pub fn Transaction::cleanups(self : Transaction) -> IdSet {
   IdSet(ranges=self.cleaned.ranges())
 }
+
+///|
+/// Resolve a root-key path through shared maps and sequences, as Yrs Store does.
+/// Primitive values and subdocuments are not shared branches. Retained deleted
+/// map values can resolve; sequence indices count only visible values.
+pub fn Doc::get_type_from_path(self : Doc, path : Array[PathSegment]) -> Out? {
+  guard path.get(0) is Some(Key(root)) else { return None }
+  let mut parent : Parent = Root(root)
+  guard self.roots.contains(parent) else { return None }
+  for i in 1..<path.length() {
+    match path[i] {
+      Key(key) => {
+        guard self.roots.get(parent) is Some(branch) &&
+          branch.values.get(key) is Some(id) &&
+          self.items.get(id) is Some({ content: Shared(_), .. }) else {
+          return None
+        }
+        parent = Nested(id)
+      }
+      Index(index) => {
+        let sequence : ArrayRef = { doc: self, name: parent, }
+        guard sequence.get(index.reinterpret_as_int()).bind(Out::branch_id)
+          is Some(Nested(id)) &&
+          self.find(id) is Some({ content: Shared(_), .. }) else {
+          return None
+        }
+        parent = Nested(id)
+      }
+    }
+  }
+  parent.branch_id().get(self)
+}
