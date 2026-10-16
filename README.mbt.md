@@ -531,8 +531,8 @@ minimum-i64 variable-encoding overflow; both decoders accept the lossless bytes.
 
 `EncoderV1()`, `EncoderV2()`, `DecoderV1(bytes)` and `DecoderV2(bytes)` expose
 update fields and compression columns. Implement `Encode` / `Decode` for
-application records, composing fields with state vectors, deletion sets and
-snapshots. Codec traits accept custom implementations. Encoder `to_bytes()`
+application records, composing fields with complete updates, state vectors,
+deletion sets, snapshots and cursor metadata. Codec traits accept custom implementations. Encoder `to_bytes()`
 returns a reusable snapshot; decoder `read_to_end()` does not advance the cursor.
 
 The pinned Rust v2 codec has unusual raw framing: `write_all` adds a length, so
@@ -540,3 +540,10 @@ The pinned Rust v2 codec has unusual raw framing: `write_all` adds a length, so
 These public methods preserve that behavior; normal update fields use their
 dedicated methods. `validation/update_codecs.py` compares 38,708 fields in 270
 streams byte-for-byte, then cross-decodes 540 streams with Rust.
+
+`validation/codec_updates.py` converts 3,458 Rust/MoonBit update packets through
+the generic codecs and replays 320 histories on both runtimes. All 53,952
+document snapshots match, covering both wire versions and GC modes. Complete
+updates can be followed by metadata in the same codec stream; decoding consumes
+one value at a time. The generic update decoder caps expansion at one million
+items, matching the default document update budget.

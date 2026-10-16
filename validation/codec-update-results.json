@@ -1,0 +1,22 @@
+{
+  "upstream": "ac339600c712642e556895426113c3f9c117de39",
+  "source_histories": 10,
+  "generic_decoded_updates": 3458,
+  "complete_history_replays": 320,
+  "cross_runtime_snapshots": 53952,
+  "wire_versions": [
+    1,
+    2
+  ],
+  "gc_modes": [
+    false,
+    true
+  ],
+  "checks": [
+    "Rust and MoonBit produced updates",
+    "both generic input and output codecs",
+    "interleaved compressed fields across multiple values",
+    "full rich text, shared embeds and XML documents"
+  ],
+  "status": "passed"
+}

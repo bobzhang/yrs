@@ -105,6 +105,21 @@ fn decode(ops : Array[Json], decoder : &@yrs.Decoder) -> Json raise {
 ///|
 fn run(input : String) -> String raise {
   let request = @json.parse(input)
+  if request is { "update": data, "v2": version, .. } {
+    let packet = bytes(data)
+    let update : @yrs.Update = if version == Json(true) {
+      @yrs.Decode::decode_v2(packet)
+    } else {
+      @yrs.Decode::decode_v1(packet)
+    }
+    let v1 = @yrs.Encode::encode_v1(update)
+    let v2 = @yrs.Encode::encode_v2(update)
+    return (
+      {
+        "v1": Json(v1.to_array().map(fn(b) { b.to_int() })),
+        "v2": Json(v2.to_array().map(fn(b) { b.to_int() })),
+      } : Json).stringify()
+  }
   guard request is { "ops": Array(ops), "v2": version, .. } else {
     abort("input")
   }

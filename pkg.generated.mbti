@@ -146,9 +146,17 @@ pub(all) enum Assoc {
   Before
   After
 } derive(Eq, @debug.Debug)
+pub fn Assoc::decode(&Decoder) -> Self raise DecodeError
+pub fn Assoc::decode_v1(Bytes) -> Self raise DecodeError
+pub fn Assoc::decode_v2(Bytes) -> Self raise DecodeError
+pub fn Assoc::encode(Self, &Encoder) -> Unit
+pub fn Assoc::encode_v1(Self) -> Bytes raise DecodeError
+pub fn Assoc::encode_v2(Self) -> Bytes raise DecodeError
 pub fn Assoc::equal(Self, Self) -> Bool
 pub fn Assoc::not_equal(Self, Self) -> Bool
 pub fn Assoc::to_repr(Self) -> @debug.Repr
+pub impl Decode for Assoc
+pub impl Encode for Assoc
 
 pub(all) struct AttrRange[A] {
   start : UInt
@@ -691,9 +699,17 @@ pub(all) enum IndexScope {
   Nested(Id)
   Root(String)
 } derive(Eq, @debug.Debug)
+pub fn IndexScope::decode(&Decoder) -> Self raise DecodeError
+pub fn IndexScope::decode_v1(Bytes) -> Self raise DecodeError
+pub fn IndexScope::decode_v2(Bytes) -> Self raise DecodeError
+pub fn IndexScope::encode(Self, &Encoder) -> Unit
+pub fn IndexScope::encode_v1(Self) -> Bytes raise DecodeError
+pub fn IndexScope::encode_v2(Self) -> Bytes raise DecodeError
 pub fn IndexScope::equal(Self, Self) -> Bool
 pub fn IndexScope::not_equal(Self, Self) -> Bool
 pub fn IndexScope::to_repr(Self) -> @debug.Repr
+pub impl Decode for IndexScope
+pub impl Encode for IndexScope
 
 pub struct JsonPath {
   // private fields
@@ -946,8 +962,10 @@ pub(all) struct StickyIndex {
   assoc : Assoc
 } derive(Eq, @debug.Debug)
 pub fn StickyIndex::StickyIndex(scope~ : IndexScope, assoc? : Assoc) -> Self
+pub fn StickyIndex::decode(&Decoder) -> Self raise DecodeError
 pub fn StickyIndex::decode_v1(Bytes) -> Self raise DecodeError
 pub fn StickyIndex::decode_v2(Bytes) -> Self raise DecodeError
+pub fn StickyIndex::encode(Self, &Encoder) -> Unit
 pub fn StickyIndex::encode_v1(Self) -> Bytes
 pub fn StickyIndex::encode_v2(Self) -> Bytes raise DecodeError
 pub fn StickyIndex::equal(Self, Self) -> Bool
@@ -960,6 +978,8 @@ pub fn StickyIndex::is_root(Self) -> Bool
 pub fn StickyIndex::not_equal(Self, Self) -> Bool
 pub fn StickyIndex::to_json(Self) -> Json
 pub fn StickyIndex::to_repr(Self) -> @debug.Repr
+pub impl Decode for StickyIndex
+pub impl Encode for StickyIndex
 
 pub struct SubdocsEvent {
   // private fields
@@ -1111,9 +1131,11 @@ pub struct Update {
   // private fields
 }
 pub fn Update::Update() -> Self
+pub fn Update::decode(&Decoder) -> Self raise DecodeError
 pub fn Update::decode_v1(Bytes) -> Self raise DecodeError
 pub fn Update::decode_v2(Bytes, max_items? : Int) -> Self raise DecodeError
 pub fn Update::delete_set(Self) -> IdSet
+pub fn Update::encode(Self, &Encoder) -> Unit
 pub fn Update::encode_diff_v1(Self, StateVector) -> Bytes
 pub fn Update::encode_diff_v2(Self, StateVector) -> Bytes raise DecodeError
 pub fn Update::encode_v1(Self) -> Bytes
@@ -1124,6 +1146,8 @@ pub fn Update::is_empty(Self) -> Bool
 pub fn Update::merge(Self, Self) -> Unit
 pub fn Update::state_vector(Self) -> StateVector
 pub fn Update::state_vector_lower(Self) -> StateVector
+pub impl Decode for Update
+pub impl Encode for Update
 
 pub struct WeakEvent {
   // private fields
