@@ -7,6 +7,14 @@ The release target is **complete CRDT compatibility with documented adaptations*
 Rust ownership/locking APIs and reproduced upstream bugs are not compatibility
 requirements. The implementation audit and all 13 release suites pass.
 
+## Installation
+
+```sh
+moon add bobzhang/yrs@0.1.0
+```
+
+[GitHub](https://github.com/bobzhang/yrs) · [Mooncakes](https://mooncakes.io/docs/bobzhang/yrs)
+
 ## Replicate concurrent edits
 
 ```mbt check
