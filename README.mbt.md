@@ -318,3 +318,11 @@ subscriptions when a referenced item splits; the pinned Rust implementation can
 lose those subscriptions. Its weak plain-text and XML readers also disagree on
 some imported boundaries. These differences are tracked separately from passing
 core document and wire checks; this feature is not yet a claim of full Yrs parity.
+
+`python3 validation/weak.py` records 37,120 weak-link snapshots and 6,656 binary
+imports in v1/v2 with GC enabled and disabled. Document values, identities and
+quotations agree apart from 48 queries where Rust's plain/XML readers contradict
+each other. The same run records 3,746 observer mismatches (7,438 additional
+MoonBit notifications, zero missing reference notifications); it explicitly reports
+partial compatibility. Retained reference-crash fixtures are tested separately.
+See `validation/REFERENCE_LIMITATIONS.md` before relying on exact weak event parity.

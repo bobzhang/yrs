@@ -1,0 +1,26 @@
+{
+  "upstream": "ac339600c712642e556895426113c3f9c117de39",
+  "histories": 64,
+  "snapshots": 37120,
+  "imports": 6656,
+  "versions": [
+    "v1",
+    "v2"
+  ],
+  "gc_modes": [
+    false,
+    true
+  ],
+  "reference_query_exceptions": {
+    "xml_panics": 0,
+    "plain_disagrees_with_xml": 40,
+    "plain_unavailable_after_xml_panic": 0,
+    "observer_mismatch_snapshots": 3746,
+    "xml_disagrees_with_plain": 8,
+    "extra_moon_events": 7438,
+    "missing_moon_events": 0
+  },
+  "view_status": "passed except reference-inconsistent queries",
+  "observer_status": "not compatible: recorded differences",
+  "status": "partial compatibility"
+}

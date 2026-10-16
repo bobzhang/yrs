@@ -3,5 +3,5 @@ name = "yrs-reference"
 version = "0.1.0"
 edition = "2021"
 [dependencies]
-yrs = { path = "../../.repos/y-crdt/yrs" }
+yrs = { path = "../../.repos/y-crdt/yrs", features = ["weak"] }
 serde_json = "1"

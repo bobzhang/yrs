@@ -159,3 +159,42 @@ queries is unsuitable for comparing annotation identities: Rust queries split
 internal blocks and can change subsequent formatting-marker allocation. Diff
 chunks are merged only when attributes match and their annotated CRDT clock
 spans are contiguous; this preserves the identity of every annotated character.
+
+## Weak quotations and observer propagation
+
+The reference build now enables Yrs's `weak` feature. The weak-link oracle
+(`python3 validation/weak.py`) records partial compatibility, not a blanket pass.
+It compares document values, quoted arrays, boundary identities, map references,
+plain/XML text and v1/v2 cross-runtime imports. Text quotations are created before
+random edits; arrays can be requoted during edits. Equal bounded positions are
+made inclusive in this matrix, with raw empty ranges checked separately.
+
+Retained reproductions:
+
+- `fixtures/upstream-weak-empty-range-panic.json`: an empty excluded/included range
+  reaches an `Option::unwrap()` panic in upstream `store.rs:342`. The MoonBit
+  quotation stays empty. The oracle runs this fixture with `raw-bounds` and asserts
+  the exact reference failure.
+- `fixtures/upstream-weak-xml-panic.json` and
+  `fixtures/upstream-weak-deleted-start.json`: creating a text quotation after
+  deletions can produce a Rust XML slice out of bounds. The deleted-start fixture
+  also exhibits a plain-string range mismatch. These cases are retained and are
+  outside the passing randomized view matrix; the XML panic is reproduced by the
+  script rather than silently ignored.
+- `fixtures/upstream-weak-plain-prefix.json` and
+  `fixtures/upstream-weak-xml-prefix.json`: Rust's plain and XML queries disagree on
+  the same imported quotation's characters. The oracle accepts a differing query
+  only when the other query agrees exactly and stripping the test's XML formatting
+  confirms the reference's own inconsistency. Forty plain reads and eight XML reads
+  have this exception across the matrix; these counts are asserted.
+- `fixtures/upstream-weak-split-observers.json`: Rust drops link subscriptions on a
+  split item. MoonBit copies those subscriptions to both pieces. Across the matrix,
+  3,746 snapshots have observer differences: MoonBit produces 7,438 additional
+  events and misses zero reference events. Values still agree. Exact observer
+  parity is **not established**; every event mismatch is counted, and any missing
+  MoonBit event fails the run.
+
+The matrix covers 37,120 operation snapshots and 6,656 imports, both wire versions
+and both GC modes. It does not establish full weak-reference compatibility or
+exhaustive concurrent/deep-observer behavior. Focused MoonBit tests additionally
+cover chained deep observers, self-quotation cycles, Unicode and safe empty ranges.

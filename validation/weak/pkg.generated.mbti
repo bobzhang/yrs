@@ -1,0 +1,13 @@
+// Generated using `moon info`, DON'T EDIT IT
+package "bobzhang/yrs/validation/weak"
+
+// Values
+pub fn evaluate(String, Bool, Bool, Bool) -> String
+
+// Errors
+
+// Types and methods
+
+// Type aliases
+
+// Traits
