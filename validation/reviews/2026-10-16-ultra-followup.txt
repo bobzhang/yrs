@@ -1,0 +1,93 @@
+Fresh CRDT fixes review
+
+Reviewed main after 7573c893ee92f45791e365a989dbbecda368af69 through
+1aa3bd7adfec14038688e6ea837fff86bf1c19f1. The executable changes were tested from
+an isolated copy of 0f43477; 1aa3bd7 changes documentation only.
+
+One actionable finding exists in committed main. A concurrent, uncommitted
+workspace patch addresses it and passes the isolated regression tests below.
+No additional actionable findings were identified in the requested areas.
+
+[P1] Sparse snapshot restoration loses a visible map value after a hole fills
+
+Location: snapshot.mbt:187-210 at 1aa3bd7, especially the unconditional item
+export at lines 197-207 and application of snapshot.deletes at line 210.
+Related: snapshot.mbt:92-97 records missing ranges as historical deletions;
+text_store.mbt:624-637 makes an integrated map overwrite delete its predecessor.
+
+Reproduction, using default skip_gc=true:
+1. Client 1 writes map["key"] = "old" at clock 0; save the base update.
+2. It writes map["key"] = "new" at clock 1, but withhold that update.
+3. It appends "suffix" to an independent text root. Deliver only this
+   transaction's emitted update, plus the base, to client 2. Use the emitted
+   transaction packet here: a full state diff would also carry the earlier
+   deletion of "old".
+4. Client 2 sees map["key"] == "old" and text == "suffix". Save and binary
+   round-trip its snapshot. Its historical deletion set excludes clock 1.
+5. Deliver the withheld overwrite, then encode the saved snapshot and apply it
+   to a fresh document.
+
+Expected: the restored map contains "old", and the text contains "suffix".
+Actual: the map key is absent; the text is correct. Restoring the identical
+snapshot before step 5's gap filling succeeds. Both v1 and v2 fail, on both
+JavaScript and native backends.
+
+The exporter now includes the later-arriving overwrite because its clock lies
+below the sparse snapshot's upper bound. Marking that version deleted is
+insufficient: map integration still makes it replace/delete the historical
+winner before applying the deletion set. The snapshot's represented value
+therefore changes solely because additional history arrived. This is silent
+historical data loss under the newly supported sparse snapshot behavior.
+
+Executable repro:
+  _build/fixes-review/probe/fixes_review_test.mbt:2
+Failing cases:
+  fixes_review_test.mbt:41 (v1 after gap fill)
+  fixes_review_test.mbt:51 (v2 after gap fill)
+Failure:
+  None != Some(String("old"))
+
+Run from _build/fixes-review/probe:
+  moon test fixes_review_test.mbt fixes_review_controls_test.mbt --target js -j 1
+  moon test fixes_review_test.mbt fixes_review_controls_test.mbt --target native -j 1
+Each backend: 6 tests, 4 passed, 2 failed. JavaScript output is retained in
+  _build/fixes-review/probes-js.log
+
+Concurrent fix status
+
+During the final check, another workspace operation added an uncommitted
+snapshot.mbt patch and sparse_map_history_test.mbt. I did not edit those files.
+The patch emits structural GC blocks for map versions excluded after the
+snapshot's visible winner. I copied it into a second isolated module at
+_build/fixes-review/candidate. All 21 selected tests passed there, including
+both previously failing cases and the before-gap controls. The tested
+snapshot.mbt SHA-256 is:
+  1477537cefbb1082e2cbb37bb2e404c46d0ceac6412eb9e14fa79c82d36a4ac7
+Output: _build/fixes-review/candidate-js.log
+This finding is resolved by that tested working-tree patch, but the patch was
+not yet committed to main at the review cutoff above.
+
+Other review evidence
+
+Read the direct typed v2 reader/writer, generic Update/document/transaction
+codecs, merge/diff and pending paths, subdocument descriptor copying, sparse
+relay/cursor selection, snapshot exclusions, transaction byte retention, weak
+subscription lifecycle, and awareness restoration change.
+
+All 15 targeted existing tests passed in the original isolated copy:
+v2_typed_values_test, sparse_history_test, sparse_transport_test,
+transaction_retention_test, weak_conflict_test, awareness_restore_test,
+codec_update_test, and codec_document_test.
+
+Two extra ownership/retention controls passed on JavaScript and native:
+pending subdocument snapshots remain detached after dependency delivery and
+child destruction; retained subdocument transaction v1/v2/generic bytes remain
+stable through load, destroy, deletion, and GC. These controls are in
+_build/fixes-review/probe/fixes_review_controls_test.mbt.
+
+All review-created files and build products are under _build/fixes-review.
+No tracked files, commits, issues, upstream files, or release reports were
+changed by this review; no release builds or processes were controlled.
+The upstream .repos/y-crdt working tree was clean at the final check.
+No output-file path was present in the request or supplied in response to the
+clarification, so this report uses _build/fixes-review/review.txt.
