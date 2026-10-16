@@ -53,7 +53,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        suite: [core, contracts, wire, lifecycle, undo, undo-persistence, undo-yjs]
+        suite: [core, contracts, wire, lifecycle, undo, undo-persistence, undo-yjs, undo-yjs-native]
     steps:
       - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5
       - name: Check out the unchanged pinned Rust reference
@@ -104,6 +104,9 @@ jobs:
               ;;
             undo-yjs)
               python3 validation/undo_mixed.py --reference yjs
+              ;;
+            undo-yjs-native)
+              python3 validation/undo_mixed.py --reference yjs --target native
               ;;
             undo-persistence)
               python3 validation/undo_gc.py

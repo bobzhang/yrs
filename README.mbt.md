@@ -253,6 +253,12 @@ concurrent undo against a browser implementation that completes the isolated
 Rust GC-crash scenario. It does not turn the separate Rust comparison into a
 pass. Results are in `validation/undo-yjs-results.json`.
 
+The same full matrix also passes the native MoonBit executable with
+`--reference yjs --target native`, with the same comparison and event counts.
+JavaScript and native runners share the validation implementation; the native
+runner adds only a JSON-lines transport. Its results are recorded separately in
+`validation/undo-yjs-native-results.json`.
+
 
 Legacy JSON content and opaque shared-type references are preserved on the wire.
 `UndefinedRef` exposes retained compatibility branches through map, array and

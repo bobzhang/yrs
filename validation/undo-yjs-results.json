@@ -32,5 +32,6 @@
   "port_local_deep_events": 22312,
   "notification_batches": 11476,
   "deep_events": 10148,
-  "status": "passed"
+  "status": "passed",
+  "moonbit_target": "js"
 }

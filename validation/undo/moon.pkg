@@ -1,6 +1,5 @@
 import {
-  "bobzhang/yrs",
-  "moonbitlang/core/json",
+  "bobzhang/yrs/validation/undo_core",
 }
 
 pkgtype(kind: "foreign_library")

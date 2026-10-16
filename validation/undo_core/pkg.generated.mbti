@@ -1,0 +1,19 @@
+// Generated using `moon info`, DON'T EDIT IT
+package "bobzhang/yrs/validation/undo_core"
+
+// Values
+pub fn evaluate(String) -> String
+
+pub fn evaluate_gc(String, Bool) -> String
+
+pub fn evaluate_live(String, Bool, Bool) -> String
+
+pub fn evaluate_v2(String) -> String
+
+// Errors
+
+// Types and methods
+
+// Type aliases
+
+// Traits

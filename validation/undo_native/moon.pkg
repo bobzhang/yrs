@@ -1,0 +1,13 @@
+import {
+  "bobzhang/yrs/validation/undo_core",
+  "moonbitlang/core/env",
+  "moonbitlang/core/encoding/utf8",
+}
+
+pkgtype(kind: "executable")
+
+options(
+  "native-stub": [ "stdio.c" ],
+)
+
+supported_targets = "native"

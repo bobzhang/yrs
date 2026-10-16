@@ -53,6 +53,7 @@ def main():
  parser.add_argument('--gc',choices=['both','on','off'],default='both')
  parser.add_argument('--owner',choices=['mixed','moon','rust'],default='mixed')
  parser.add_argument('--reference',choices=['rust','yjs'],default='rust')
+ parser.add_argument('--target',choices=['js','native'],default='js')
  parser.add_argument('--seeds',type=int,default=96)
  parser.add_argument('--seed-start',type=int,default=0)
  parser.add_argument('--report',type=Path,help='write this scoped run, including failures, to a separate report')
@@ -63,15 +64,17 @@ def main():
  seeds=list(range(args.seed_start,args.seed_start+args.seeds))
  report=args.report
  if report is None and args.gc=='both' and authorship=='mixed' and args.seeds==96 and args.seed_start==0:
-  report=ROOT/('validation/undo-mixed-results.json' if args.reference=='rust' else 'validation/undo-yjs-results.json')
+  name='undo-mixed' if args.reference=='rust' else 'undo-yjs'
+  report=ROOT/('validation/'+name+('-native' if args.target=='native' else '')+'-results.json')
  if args.reference=='yjs':
   assert authorship!='rust','Use --owner mixed or moon with the Yjs reference'
   assert json.loads((ROOT/'validation/yjs/node_modules/yjs/package.json').read_text())['version']=='13.6.27'
- scope={'upstream':'ac339600c712642e556895426113c3f9c117de39','reference':args.reference,'yjs_version':'13.6.27' if args.reference=='yjs' else None,'scenarios':len(seeds),'seed_start':args.seed_start,'gc_modes':gc_modes,'wire_versions':['v1','v2'],'authorship':authorship,'mixed_authorship':authorship=='mixed'}
+ scope={'upstream':'ac339600c712642e556895426113c3f9c117de39','reference':args.reference,'moonbit_target':args.target,'yjs_version':'13.6.27' if args.reference=='yjs' else None,'scenarios':len(seeds),'seed_start':args.seed_start,'gc_modes':gc_modes,'wire_versions':['v1','v2'],'authorship':authorship,'mixed_authorship':authorship=='mixed'}
  def save_report(result):
   if report is not None:report.write_text(json.dumps(result,indent=2)+'\n')
  if args.reference=='rust':subprocess.run(['cargo','+1.97.1','build','--release','--locked','--manifest-path','validation/rust/Cargo.toml','--bin','undo'],cwd=ROOT,check=True)
- subprocess.run(['moon','build','validation/undo','--release','--target','js'],cwd=ROOT,check=True)
+ package='validation/undo_native' if args.target=='native' else 'validation/undo'
+ subprocess.run(['moon','build',package,'--release','--target',args.target],cwd=ROOT,check=True)
  checked=duplicates=undo_actions=reconciliations=0
  observer_checks=notification_batches=deep_events=0
  local_undo_checks=local_edit_checks=local_batches=local_events=0
@@ -88,7 +91,8 @@ def main():
   flags=['--gc'] if gc else []
   for seed in seeds:
    reference=['validation/rust/target/release/undo',version,'--live'] if args.reference=='rust' else ['node','validation/yjs/undo-live.cjs',version]
-   sessions=[Session(reference+flags),Session(['node','validation/undo-live.cjs',version]+flags)]
+   port=['_build/native/release/build/validation/undo_native/undo_native.exe',version,'--live'] if args.target=='native' else ['node','validation/undo-live.cjs',version]
+   sessions=[Session(reference+flags),Session(port+flags)]
    commands=history(seed)
    step=-1
    try:
