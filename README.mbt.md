@@ -206,7 +206,7 @@ delta edits and checks observer output as well as rendered text and clocks.
 `python3 validation/undo_mixed.py` tests live networks with both Rust and MoonBit
 editing owners. Every replica has a mirror in the other runtime that receives
 identical wire history, and every generated cleanup deletion is synchronized
-before asserting convergence. Both wire formats pass 96 histories: 102,528
+before asserting convergence. The previous GC-disabled run passed both wire formats over 96 histories: 102,528
 replica comparisons, 7,562 undo/redo actions and 3,264 duplicate deliveries.
 The run required 254 reconciliation rounds: 250 involving rendered content and
 four exposing XML attributes absent from the rendered string. Structured XML is
@@ -217,7 +217,20 @@ transactions match the notifications from Rust mirrors applying their updates
 (10,058 batches and 11,156 deep events). Comparisons occur after prior state
 reconciliation. Independently allocated Rust undo identities remain a separate
 audit item. Results are in
-`validation/undo-mixed-results.json`.
+`validation/undo-mixed-retained-results.json`.
+
+The default mixed-author test now also enables GC, and that expanded gate is
+still open: an unchanged Rust process panics during a GC-enabled nested undo
+history. `validation/undo-mixed-results.json` records the expanded run separately
+from the historical passing report. With MoonBit owning all three editing
+replicas and unchanged Rust checking their wire updates and observer events,
+the GC-enabled run passes both formats over all 96 histories: 102,528 replica
+comparisons, 7,562 local undo/redo observer comparisons and 15,450 local editing
+observer comparisons. It requires 126 deletion-reconciliation rounds; it does
+not establish immediate equality before those exchanges. Reproduce this scope
+with `python3 validation/undo_mixed.py --gc on --owner moon --report
+validation/undo-gc-port-results.json`. The Rust-owned GC failure remains a release
+gate rather than an excluded passing case.
 
 
 Legacy JSON content and opaque shared-type references are preserved on the wire.

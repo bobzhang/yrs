@@ -1,0 +1,32 @@
+{
+  "upstream": "ac339600c712642e556895426113c3f9c117de39",
+  "scenarios": 96,
+  "wire_versions": [
+    "v1",
+    "v2"
+  ],
+  "mixed_authorship": true,
+  "replica_state_comparisons": 102528,
+  "duplicate_deliveries": 3264,
+  "undo_redo_actions": 7562,
+  "reconciliation_rounds": 254,
+  "reconciliation_kinds": {
+    "rendered_content": 250,
+    "xml_attributes_only": 4
+  },
+  "independent_restoration_identity_equality_required": false,
+  "structured_xml_attributes_compared": true,
+  "observer_events_compared": "identical remote sync/duplicate transactions and port-owned local edits/undo/redo versus Rust wire mirrors, after prior state reconciliation",
+  "observer_transaction_comparisons": 9186,
+  "port_local_undo_redo_observer_comparisons": 3772,
+  "port_local_edit_observer_comparisons": 7768,
+  "port_local_notification_batches": 10058,
+  "port_local_deep_events": 11156,
+  "notification_batches": 5738,
+  "deep_events": 5074,
+  "status": "passed",
+  "gc_modes": [
+    false
+  ],
+  "scope_note": "Previously committed GC-disabled mixed-authorship run; not evidence for the expanded GC-enabled gate."
+}

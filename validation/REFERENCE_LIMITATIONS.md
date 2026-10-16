@@ -401,3 +401,29 @@ it also applies to ordinary nested maps, not just XML attributes.
 undo/redo through both update formats, including GC-enabled documents. The undo
 oracles now compare structured XML trees and text attributes as well as rendered
 XML, which alone did not expose every lost attribute.
+
+## GC-enabled mixed-author undo
+
+The expanded `undo_mixed.py` defaults to both GC modes and both wire versions.
+A GC-enabled v1 mixed-author run at seed 49, step 165 panicked in unchanged
+Rust at `yrs/src/slice.rs:217`: `Could not get parent branch info for item`.
+The command was an update import followed by document encoding in a process
+that had performed local undo. The final imported packet loads successfully
+into fresh Rust documents with either GC mode; replaying only the received
+packets also succeeds. This implicates the retained local undo/GC state, but
+does not yet establish the precise cause or prove the port free of related bugs.
+
+The harness records both processes' complete call streams on failure in
+`/tmp/yrs-undo-mixed-execution-failure.json`. These are diagnostic evidence, not
+a deterministic standalone replay: rerunning Rust local undo may allocate
+different restoration identities from those embedded in captured remote
+packets. Reproduce the live comparison with `python3 validation/undo_mixed.py
+--gc on --owner mixed`; Rust's restoration order can change the first failure.
+The default suite still fails on an exception or mismatch; there is no waived
+GC-enabled mixed-author case.
+
+A separate GC-enabled run with MoonBit authoring every replica and unchanged
+Rust mirrors passes 96 histories in each wire format. The report explicitly
+labels this ownership scope and counts 126 required reconciliation exchanges.
+It validates port-generated edits, undo/redo, notifications and convergence
+under GC; it does not replace the unfinished Rust-owned undo comparison.

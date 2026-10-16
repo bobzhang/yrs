@@ -1,0 +1,35 @@
+{
+  "upstream": "ac339600c712642e556895426113c3f9c117de39",
+  "scenarios": 96,
+  "gc_modes": [
+    true
+  ],
+  "wire_versions": [
+    "v1",
+    "v2"
+  ],
+  "authorship": "moon",
+  "mixed_authorship": false,
+  "replica_state_comparisons": 102528,
+  "duplicate_deliveries": 3264,
+  "undo_redo_actions": 7562,
+  "reconciliation_rounds": 126,
+  "reconciliation_kinds": {
+    "rendered_content": 126,
+    "xml_attributes_only": 0
+  },
+  "independent_restoration_identity_equality_required": false,
+  "structured_xml_attributes_compared": true,
+  "observer_events_compared": "identical remote sync/duplicate transactions and port-owned local edits/undo/redo versus Rust wire mirrors, after prior state reconciliation",
+  "observer_transaction_comparisons": 9186,
+  "port_local_undo_redo_observer_comparisons": 7562,
+  "port_local_edit_observer_comparisons": 15450,
+  "port_local_notification_batches": 20134,
+  "port_local_deep_events": 22668,
+  "notification_batches": 5738,
+  "deep_events": 5078,
+  "status": "passed",
+  "seed_start": 0,
+  "port_revision": "4d3008b0389ffd37d87a5ba10179936cac381ea9",
+  "reproduce": "python3 validation/undo_mixed.py --gc on --owner moon --report validation/undo-gc-port-results.json"
+}
