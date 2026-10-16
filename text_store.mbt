@@ -152,6 +152,7 @@ pub struct Doc {
   priv mut collection : String?
   priv auto_loading : Bool
   priv mut loading : Bool
+  priv cleanup_enabled : Bool
   priv wire_gc : Bool
   priv wire_encoding : Int32
   priv mut owner : (Doc, Id)?
@@ -179,6 +180,7 @@ pub fn Doc::Doc(
   should_load~ : Bool = true,
   offset_kind~ : OffsetKind = Utf16,
   skip_gc~ : Bool = true,
+  cleanup_formatting~ : Bool = true,
 ) -> Doc {
   make_doc(
     client_id,
@@ -192,6 +194,7 @@ pub fn Doc::Doc(
     } else {
       0
     },
+    cleanup_enabled=cleanup_formatting,
   )
 }
 
@@ -204,6 +207,7 @@ fn make_doc(
   should_load : Bool,
   wire_gc : Bool,
   wire_encoding : Int32,
+  cleanup_enabled~ : Bool = true,
 ) -> Doc {
   {
     identity: allocate_identity(),
@@ -227,6 +231,7 @@ fn make_doc(
     loading: should_load,
     wire_gc,
     wire_encoding,
+    cleanup_enabled,
     owner: None,
     children_docs: {},
     undo_retention: {},
@@ -885,4 +890,10 @@ pub fn Doc::has_missing_updates(self : Doc) -> Bool {
     }
   }
   false
+}
+
+///|
+/// Whether remote transactions remove redundant rich-text format markers.
+pub fn Doc::cleanup_formatting_enabled(self : Doc) -> Bool {
+  self.cleanup_enabled
 }

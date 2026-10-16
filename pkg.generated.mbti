@@ -184,6 +184,14 @@ pub(all) enum Change {
 }
 pub fn Change::to_json(Self) -> Json
 
+pub(all) enum ChangeKind {
+  Added
+  Removed
+} derive(Eq, @debug.Debug)
+pub fn ChangeKind::equal(Self, Self) -> Bool
+pub fn ChangeKind::not_equal(Self, Self) -> Bool
+pub fn ChangeKind::to_repr(Self) -> @debug.Repr
+
 pub(all) enum Delta {
   Inserted(Out, ReadOnlyArray[(String, Any)])
   Deleted(Int)
@@ -191,13 +199,20 @@ pub(all) enum Delta {
 }
 pub fn Delta::to_json(Self) -> Json
 
+pub(all) struct Diff[M] {
+  insert : Out
+  attributes : ReadOnlyArray[(String, Any)]
+  ychange : M?
+}
+
 pub struct Doc {
   // private fields
 }
-pub fn Doc::Doc(client_id~ : UInt64, guid? : String, collection_id? : String, auto_load? : Bool, should_load? : Bool, offset_kind? : OffsetKind, skip_gc? : Bool) -> Self
+pub fn Doc::Doc(client_id~ : UInt64, guid? : String, collection_id? : String, auto_load? : Bool, should_load? : Bool, offset_kind? : OffsetKind, skip_gc? : Bool, cleanup_formatting? : Bool) -> Self
 pub fn Doc::apply_update_v1(Self, Bytes) -> Unit raise DecodeError
 pub fn Doc::apply_update_v2(Self, Bytes, max_items? : Int) -> Unit raise DecodeError
 pub fn Doc::auto_load(Self) -> Bool
+pub fn Doc::cleanup_formatting_enabled(Self) -> Bool
 pub fn Doc::client_id(Self) -> UInt64
 pub fn Doc::collection_id(Self) -> String?
 pub fn Doc::destroy(Self) -> Unit
@@ -476,6 +491,8 @@ pub struct Text {
   // private fields
 }
 pub fn Text::apply_delta(Self, Array[TextDelta]) -> Unit
+pub fn[M] Text::diff(Self, (YChange) -> M) -> Array[Diff[M]]
+pub fn[M] Text::diff_range(Self, (YChange) -> M, hi? : Snapshot, lo? : Snapshot) -> Array[Diff[M]]
 pub fn Text::format(Self, Int, Int, Array[(String, Any)]) -> Unit
 pub fn Text::get_string(Self) -> String
 pub fn Text::insert(Self, Int, String) -> Unit
@@ -484,6 +501,7 @@ pub fn Text::insert_with_attributes(Self, Int, String, Array[(String, Any)]) -> 
 pub fn Text::length(Self) -> Int
 pub fn Text::observe(Self, String, (TextEvent, Transaction) -> Unit) -> Unit
 pub fn Text::observe_deep(Self, String, (ReadOnlyArray[Event], Transaction) -> Unit) -> Unit
+pub fn Text::push(Self, String) -> Unit
 pub fn Text::remove_range(Self, Int, Int) -> Unit
 pub fn Text::sticky_boundary(Self, assoc? : Assoc) -> StickyIndex
 pub fn Text::sticky_index(Self, Int, assoc? : Assoc) -> StickyIndex?
@@ -658,6 +676,8 @@ pub struct XmlText {
 pub fn XmlText::as_map(Self) -> MapRef
 pub fn XmlText::as_text(Self) -> Text
 pub fn XmlText::attributes(Self) -> Array[(String, Out)]
+pub fn[M] XmlText::diff(Self, (YChange) -> M) -> Array[Diff[M]]
+pub fn[M] XmlText::diff_range(Self, (YChange) -> M, hi? : Snapshot, lo? : Snapshot) -> Array[Diff[M]]
 pub fn XmlText::get_attribute(Self, String) -> Out?
 pub fn XmlText::get_string(Self) -> String
 pub fn XmlText::insert_attribute(Self, String, Any) -> Unit
@@ -677,6 +697,15 @@ pub fn XmlTextEvent::delta(Self) -> ReadOnlyArray[Delta]
 pub fn XmlTextEvent::keys(Self) -> Map[String, EntryChange]
 pub fn XmlTextEvent::path(Self) -> ReadOnlyArray[PathSegment]
 pub fn XmlTextEvent::target(Self) -> XmlText
+
+pub(all) struct YChange {
+  kind : ChangeKind
+  id : Id
+} derive(Eq, @debug.Debug)
+pub fn YChange::equal(Self, Self) -> Bool
+pub fn YChange::identity(Self) -> Self
+pub fn YChange::not_equal(Self, Self) -> Bool
+pub fn YChange::to_repr(Self) -> @debug.Repr
 
 // Type aliases
 

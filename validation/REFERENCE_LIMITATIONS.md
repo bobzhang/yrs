@@ -141,3 +141,21 @@ output stack records and metadata, undo/redo results, and event parent multisets
 This validates cross-runtime stack restoration rather than requiring identical
 allocation from independently generated histories. It does not resolve the
 previously documented independent-history limitation.
+
+
+## Formatting inside a UTF-16 surrogate pair
+
+`fixtures/upstream-format-surrogate.json` inserts `🦀`, formats index 1 with
+length 1, then deletes index 1. Pinned Rust leaves an inconsistent formatted
+sequence and panics when deleting. Yjs 13.6.27 replaces the split surrogate
+halves with U+FFFD, formats the second half, and deletes it successfully. The
+port follows Yjs; the behavior has a unit regression and a pinned Yjs probe.
+`diffs.py` requires the pinned Rust failure to remain reproducible. Its randomized
+Rust matrix uses BMP and combining characters, avoiding half-surrogate edits.
+
+Historical diff comparisons load identical document updates and binary snapshots
+in both runtimes. Running position-based edits independently after historical
+queries is unsuitable for comparing annotation identities: Rust queries split
+internal blocks and can change subsequent formatting-marker allocation. Diff
+chunks are merged only when attributes match and their annotated CRDT clock
+spans are contiguous; this preserves the identity of every annotated character.

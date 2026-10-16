@@ -65,6 +65,7 @@ fn Doc::unloaded_copy(self : Doc) -> Doc {
     false,
     self.wire_gc,
     self.wire_encoding,
+    cleanup_enabled=self.cleanup_enabled,
   )
 }
 
@@ -104,7 +105,16 @@ fn Reader::subdocument(self : Reader) -> Doc raise DecodeError {
   }
   // Like Yrs, receiving shouldLoad does not request a load. autoLoad does.
   // The parent assigns its client ID at commit, before providers can edit it.
-  make_doc(0UL, guid, collection, auto_load, auto_load, gc, encoding)
+  make_doc(
+    0UL,
+    guid,
+    collection,
+    auto_load,
+    auto_load,
+    gc,
+    encoding,
+    cleanup_enabled=false,
+  )
 }
 
 ///|

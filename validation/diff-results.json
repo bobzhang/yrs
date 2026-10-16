@@ -1,0 +1,19 @@
+{
+  "upstream": "ac339600c712642e556895426113c3f9c117de39",
+  "histories": 96,
+  "queries": 30720,
+  "cleanup_formatting_modes": [
+    false,
+    true
+  ],
+  "checks": [
+    "identical wire state and snapshot imports",
+    "historical content",
+    "attributes",
+    "embeds",
+    "added and removed annotation clock spans",
+    "BMP and combining Unicode"
+  ],
+  "reference_exception": "half-surrogate formatting panic retained separately",
+  "status": "passed"
+}

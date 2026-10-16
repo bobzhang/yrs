@@ -135,8 +135,8 @@ are outside this comparison.
 **Undo compatibility still has open audit items.** `YRS_UNDO_CONCURRENT=1 python3
 validation/undo.py` exercises independently generated editing/undo histories;
 this still finds differences after restored identities affect conflict ordering. A retained
-case is `validation/fixtures/undo-concurrent-identity-history.json`. Initial
-stack import/export and the rest of the upstream undo event surface also remain.
+case is `validation/fixtures/undo-concurrent-identity-history.json`. Saved stack import/export and changed-parent event metadata are implemented;
+exact concurrent undo observer parity remains under audit.
 See `validation/REFERENCE_LIMITATIONS.md` for reference nondeterminism evidence.
 
 The full 641-scenario core interoperability suite passed again after block
@@ -236,3 +236,23 @@ with 17,280 source snapshots. It compares stack JSON, metadata, results and
 changed-parent multisets. Independent undo allocations remain subject to the
 reference restoration-order limitation; this matrix does not assert that those
 independently generated identities are equal.
+
+
+`Text::diff_range` and `XmlText::diff_range` reconstruct rich text at an optional
+upper snapshot and annotate additions/removals against an optional lower
+snapshot. `Diff[M]` carries caller-defined change metadata computed from
+`YChange { kind, id }`. The query reads retained history without modifying the
+document. `diff` returns current rich text through the same interface.
+
+`cleanup_formatting=false` disables automatic remote formatting-marker cleanup.
+The default is enabled, matching Yjs and Rust's explicit-client constructor;
+Rust's generic default options disable it. Configure this option consistently
+when comparing retained history. Decoded subdocuments use Rust's disabled
+cleanup default because this option is not transmitted on the wire.
+
+`python3 validation/diffs.py` passes 30,720 historical queries across 96 histories
+and both cleanup settings. Both runtimes load identical wire state and snapshot
+metadata; comparisons preserve text, embeds, attributes and every annotated
+character's CRDT identity. Only equivalent adjacent chunk boundaries are
+normalized. A separate pinned Yjs regression covers formatting inside a surrogate
+pair, where pinned Rust panics; see `validation/REFERENCE_LIMITATIONS.md`.

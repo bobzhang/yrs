@@ -168,7 +168,9 @@ fn Doc::commit_transaction(self : Doc, transaction : Transaction) -> Unit {
   self.notify_collections(transaction)
   self.notifying_transaction = false
   if self.collect_deletes {
-    self.cleanup_formatting()
+    if self.cleanup_enabled {
+      self.cleanup_formatting()
+    }
     self.collect_deletes = false
     self.deleted_items.clear()
     self.inserted_items.clear()
