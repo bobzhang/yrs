@@ -6,15 +6,17 @@
   "snapshots": 4160,
   "source_packets_checked": 2114,
   "original_packet_fixed_point_cases": 512,
+  "eager_fixed_point_comparisons": 512,
   "maximum_original_packet_passes": 9,
-  "different_block_encodings": 116,
-  "reference_full_encoding_identity_failures": 101,
+  "different_block_encodings": 546,
+  "reference_full_encoding_identity_failures": 199,
   "reference_pending_roundtrip_failures": 23,
-  "reference_redundant_pending_deletions": 50,
-  "reference_pending_retry_stalls": 30,
-  "sparse_integration_differences": 14,
+  "reference_redundant_pending_deletions": 109,
+  "reference_pending_retry_stalls": 11,
+  "sparse_integration_differences": 131,
   "reference_stale_pending_flags_after_complete_delivery": 3,
   "checks": [
+    "eager integrated state equals independent Rust original-packet fixed point in all sparse cases",
     "exact original-packet fixed-point integration including wire and pass count",
     "pending block and deletion pruning",
     "integrated-only difference",
@@ -24,5 +26,5 @@
     "GC retained content via historical reconstruction",
     "full insertion identities equal union of independently decoded source packets"
   ],
-  "status": "partial: port invariants, complete histories and scoped GC passed; sparse pending lifecycle parity differs"
+  "status": "passed CRDT contract: eager causal fixed point, complete histories and scoped GC; exact Rust pending lifecycle intentionally differs"
 }

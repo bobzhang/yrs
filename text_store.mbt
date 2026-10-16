@@ -669,18 +669,14 @@ fn Doc::settle(
   for ;; {
     let mut progress = false
     let unresolved = []
-    let blocked : Set[UInt64] = Set([])
+    // Each block has explicit dependencies. A missing dependency in one
+    // block must not stall independent later blocks from the same client.
     for raw in normalize_items(self.pending) {
-      if blocked.contains(raw.id.client) {
-        unresolved.push(raw)
-        continue
-      }
       let before = self.items.length()
       if self.integrate(raw) {
         progress = true
       } else {
         unresolved.push(raw)
-        blocked.add(raw.id.client)
       }
       if self.items.length() != before {
         progress = true

@@ -508,3 +508,25 @@ The refreshed weak oracle checks 37,120 snapshots and 6,656 imports. It counts
 format-marker changes and two deletion cleanups. No Rust notifications are
 missing and no extra notifications are unclassified. These are corrected
 subscription semantics, not exact upstream callback parity.
+
+## Eager pending integration after the scheduling correction
+
+The strengthened pending oracle found a remaining port defect: a blocked block
+prevented independent later blocks from the same client from being attempted.
+The port now checks every pending block's explicit dependencies until no progress
+is possible. `pending_progress_test.mbt` retains a small example: a text edit
+waits for its missing origin while a later, independent map entry is immediately
+available. Duplicates do not re-emit that entry; delivering the origin drains the
+remaining pending state. Both wire versions and both GC modes are exercised.
+
+For all 512 randomized sparse cases, the port's integrated state **before any
+resend** now equals unchanged Rust's fixed point from replaying original packets
+and bypassing Rust's pending merge. The comparison includes exact integrated wire
+bytes, text, state vectors, insertion identities and deletion ranges. Thus the
+remaining scheduling differences have an independent expected result; they are
+not unexplained mismatches accepted merely because complete histories converge.
+The refreshed run records 11 Rust retry stalls, 131 further buffering differences,
+199 full-encoding identity mismatches, 23 pending roundtrip defects, 109 redundant
+pending deletion cases and three stale final pending flags. These counts supersede
+the earlier matrix above. All 320 scoped-GC cases also pass. Exact intermediate
+Rust pending metadata is deliberately not reproduced.

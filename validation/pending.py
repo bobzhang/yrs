@@ -60,6 +60,13 @@ def main():
     raw_reference = execute(['validation/rust/target/release/pending'], replay_cases)
     raw_port = execute(['node', 'validation/pending.cjs'], replay_cases)
     assert raw_reference == raw_port, 'original-packet fixed-point integration'
+    # An eager receiver must already contain exactly the causal fixed point,
+    # not merely converge after somebody resends the missing dependency later.
+    # Compare its integrated-only state with unchanged Rust replaying originals
+    # to exhaustion, bypassing Rust's lossy pending-update merge.
+    eager_cases = [row for case, row in zip(cases, b) if 'gc' not in case]
+    for i, (eager, replay) in enumerate(zip(eager_cases, raw_reference)):
+        assert eager['after'] == replay['replayed_original'], ('eager causal fixed point', i, eager['after'], replay['replayed_original'])
     layouts = reference_encoding_errors = reference_roundtrip_errors = redundant_pending_deletes = 0
     reference_retry_stalls = 0
     sparse_integration_differences = 0
@@ -127,6 +134,7 @@ def main():
         'histories': 64, 'pending_cases': 512, 'scoped_gc_cases': 320,
         'snapshots': len(cases) * 5, 'source_packets_checked': len(packets),
         'original_packet_fixed_point_cases': len(replay_cases),
+        'eager_fixed_point_comparisons': len(eager_cases),
         'maximum_original_packet_passes': max(case['rounds'] for case in raw_reference),
         'different_block_encodings': layouts,
         'reference_full_encoding_identity_failures': reference_encoding_errors,
@@ -135,12 +143,13 @@ def main():
         'reference_pending_retry_stalls': reference_retry_stalls,
         'sparse_integration_differences': sparse_integration_differences,
         'reference_stale_pending_flags_after_complete_delivery': stale_pending_flags,
-        'checks': ['exact original-packet fixed-point integration including wire and pass count',
+        'checks': ['eager integrated state equals independent Rust original-packet fixed point in all sparse cases',
+                   'exact original-packet fixed-point integration including wire and pass count',
                    'pending block and deletion pruning', 'integrated-only difference',
                    'exact port prune/reapply roundtrip', 'state-vector bounds', 'root text views',
                    'GC retained content via historical reconstruction',
                    'full insertion identities equal union of independently decoded source packets'],
-        'status': 'partial: port invariants, complete histories and scoped GC passed; sparse pending lifecycle parity differs',
+        'status': 'passed CRDT contract: eager causal fixed point, complete histories and scoped GC; exact Rust pending lifecycle intentionally differs',
     }
     (ROOT / 'validation/pending-results.json').write_text(json.dumps(result, indent=2) + '\n')
     print(result)
