@@ -26,15 +26,16 @@ def main():
     values += [bytes([127]), bytes([126]), bytes([120]), bytes([121]), bytes([116,2,0,255])]
     values += [bytes([119])+varuint(len(s.encode()))+s.encode() for s in ['', 'Moon🌙', '9223372036854775807']]
     values += [bytes([117])+varuint(len(items))+b''.join(items) for items in [[],values[:4],values[-3:],values[:32]]]
-    kinds = ['i64','i32','u32','u64','f64','f32','bool','string','optional','array']
+    cast_kinds = ['cast/'+kind for kind in ['i64','i32','u32','f64','f32','bool','string','bytes']]
+    kinds = cast_kinds + ['i64','i32','u32','u64','f64','f32','bool','string','optional','array']
     cases = [[kind, list(value)] for value in values for kind in kinds]
     rust = execute(['validation/rust/target/release/value_decode'], cases)
     moon = execute(['node', 'validation/value_decode.cjs'], cases)
     for i, (a,b) in enumerate(zip(rust,moon)):
         assert a == b, (i,cases[i],a,b)
     result = {'upstream':'ac339600c712642e556895426113c3f9c117de39',
-              'values':len(values),'conversions':len(cases),
-              'checks':['integer limits and lossless numeric conversion','floating-point bit patterns including NaN infinity and signed zero',
+              'values':len(values),'conversions':len(cases),'direct_casts':len(values)*len(cast_kinds),
+              'checks':['integer limits and lossless numeric conversion','direct Out casts including narrowing integer wrap and original-value rejection','floating-point bit patterns including NaN infinity and signed zero',
                         'null and undefined options','arrays','type rejection','Rust saturating float-to-integer endpoint'],
               'status':'passed'}
     (ROOT/'validation/value-decode-results.json').write_text(json.dumps(result,indent=2)+'\n')

@@ -9,6 +9,17 @@ macro_rules! convert {
         }
     };
 }
+macro_rules! cast {
+    ($value:expr, $ty:ty, $encode:expr) => {
+        match yrs::Out::Any($value.clone()).cast::<$ty>() {
+            Ok(value) => json!({"ok":true,"value":($encode)(value)}),
+            Err(original) => {
+                assert_eq!(format!("{:?}", original), format!("{:?}", yrs::Out::Any($value.clone())));
+                json!({"ok":false})
+            }
+        }
+    };
+}
 fn main() {
     for line in io::stdin().lock().lines() {
         let input: Value = serde_json::from_str(&line.unwrap()).unwrap();
@@ -29,6 +40,14 @@ fn main() {
                 .into_iter()
                 .map(|n| n.to_string())
                 .collect::<Vec<_>>()),
+            "cast/i64" => cast!(value, i64, |n: i64| n.to_string()),
+            "cast/i32" => cast!(value, i32, |n: i32| n.to_string()),
+            "cast/u32" => cast!(value, u32, |n: u32| n.to_string()),
+            "cast/f64" => cast!(value, f64, |n: f64| n.to_bits().to_string()),
+            "cast/f32" => cast!(value, f32, |n: f32| n.to_bits().to_string()),
+            "cast/bool" => cast!(value, bool, |n: bool| n),
+            "cast/string" => cast!(value, String, |n: String| n),
+            "cast/bytes" => cast!(value, Vec<u8>, |n: Vec<u8>| n),
             _ => panic!("kind"),
         };
         println!("{}", result);

@@ -131,9 +131,11 @@ pub fn ArrayRef::sticky_boundary(Self, assoc? : Assoc) -> StickyIndex
 pub fn ArrayRef::sticky_index(Self, Int, assoc? : Assoc) -> StickyIndex?
 pub fn ArrayRef::to_array(Self) -> Array[Out]
 pub fn ArrayRef::to_json(Self) -> Json
+pub fn ArrayRef::try_from_out(Out) -> Result[Self, Out]
 pub fn ArrayRef::unobserve(Self, String) -> Bool
 pub fn ArrayRef::unobserve_deep(Self, String) -> Bool
 pub impl DefaultPrelim for ArrayRef
+pub impl FromOut for ArrayRef
 pub impl RootRef for ArrayRef
 pub impl SharedRef for ArrayRef
 
@@ -362,6 +364,7 @@ pub fn Doc::state_vector(Self) -> StateVector
 pub fn Doc::subdoc_guids(Self) -> @set.Set[String]
 pub fn Doc::subdocs(Self) -> Array[Self]
 pub fn[T] Doc::transact(Self, (Transaction) -> T raise, origin? : Bytes) -> T raise
+pub fn Doc::try_from_out(Out) -> Result[Self, Out]
 pub fn Doc::unobserve_after_transaction(Self, String) -> Bool
 pub fn Doc::unobserve_before_observer_calls(Self, String) -> Bool
 pub fn Doc::unobserve_destroy(Self, String) -> Bool
@@ -369,6 +372,7 @@ pub fn Doc::unobserve_subdocs(Self, String) -> Bool
 pub fn Doc::unobserve_transaction_cleanup(Self, String) -> Bool
 pub fn Doc::unobserve_update_v1(Self, String) -> Bool
 pub fn Doc::unobserve_update_v2(Self, String) -> Bool
+pub impl FromOut for Doc
 
 pub(all) enum EntryChange {
   Inserted(Out)
@@ -560,11 +564,13 @@ pub fn MapRef::observe_deep(Self, String, (ReadOnlyArray[Event], Transaction) ->
 pub fn MapRef::remove(Self, String) -> Unit
 pub fn MapRef::remove_entry(Self, String) -> Out?
 pub fn MapRef::to_json(Self) -> Json
+pub fn MapRef::try_from_out(Out) -> Result[Self, Out]
 pub fn MapRef::try_update(Self, String, Any) -> Bool
 pub fn MapRef::unobserve(Self, String) -> Bool
 pub fn MapRef::unobserve_deep(Self, String) -> Bool
 pub fn MapRef::values(Self) -> Iter[Out]
 pub impl DefaultPrelim for MapRef
+pub impl FromOut for MapRef
 pub impl RootRef for MapRef
 pub impl SharedRef for MapRef
 
@@ -632,6 +638,7 @@ pub(all) enum Out {
   WeakLink(WeakRef)
 }
 pub fn Out::branch_id(Self) -> BranchId?
+pub fn[T : FromOut] Out::cast(Self) -> Result[T, Self]
 pub fn Out::is_deleted(Self) -> Bool
 pub fn Out::to_any(Self) -> Any
 pub fn Out::to_input(Self) -> In
@@ -785,9 +792,11 @@ pub fn Text::remove_range(Self, Int, Int) -> Unit
 pub fn Text::sticky_boundary(Self, assoc? : Assoc) -> StickyIndex
 pub fn Text::sticky_index(Self, Int, assoc? : Assoc) -> StickyIndex?
 pub fn Text::to_delta(Self) -> Array[TextChunk]
+pub fn Text::try_from_out(Out) -> Result[Self, Out]
 pub fn Text::unobserve(Self, String) -> Bool
 pub fn Text::unobserve_deep(Self, String) -> Bool
 pub impl DefaultPrelim for Text
+pub impl FromOut for Text
 pub impl RootRef for Text
 pub impl SharedRef for Text
 
@@ -914,6 +923,7 @@ pub struct WeakPrelim {
 pub fn WeakPrelim::WeakPrelim(LinkSource) -> Self
 pub fn WeakPrelim::get_string(Self, Doc) -> String
 pub fn WeakPrelim::source(Self) -> LinkSource
+pub fn[T : FromOut] WeakPrelim::try_deref(Self, Doc) -> Result[T, Out?]
 pub fn WeakPrelim::try_deref_value(Self, Doc) -> Out?
 pub fn WeakPrelim::unquote(Self, Doc) -> Array[Out]
 
@@ -933,10 +943,13 @@ pub fn WeakRef::observe_deep(Self, String, (ReadOnlyArray[Event], Transaction) -
 pub fn WeakRef::source(Self) -> LinkSource
 pub fn WeakRef::start_id(Self) -> Id?
 pub fn WeakRef::to_delta(Self) -> Array[TextChunk]
+pub fn[T : FromOut] WeakRef::try_deref(Self) -> Result[T, Out?]
 pub fn WeakRef::try_deref_value(Self) -> Out?
+pub fn WeakRef::try_from_out(Out) -> Result[Self, Out]
 pub fn WeakRef::unobserve(Self, String) -> Bool
 pub fn WeakRef::unobserve_deep(Self, String) -> Bool
 pub fn WeakRef::unquote(Self) -> Array[Out]
+pub impl FromOut for WeakRef
 pub impl SharedRef for WeakRef
 
 pub struct XmlElement {
@@ -958,8 +971,10 @@ pub fn XmlElement::remove_attribute(Self, String) -> Unit
 pub fn XmlElement::sticky_boundary(Self, assoc? : Assoc) -> StickyIndex
 pub fn XmlElement::sticky_index(Self, Int, assoc? : Assoc) -> StickyIndex?
 pub fn XmlElement::tag(Self) -> String
+pub fn XmlElement::try_from_out(Out) -> Result[Self, Out]
 pub fn XmlElement::unobserve(Self, String) -> Bool
 pub fn XmlElement::unobserve_deep(Self, String) -> Bool
+pub impl FromOut for XmlElement
 pub impl SharedRef for XmlElement
 
 pub struct XmlEvent {
@@ -1006,9 +1021,11 @@ pub fn XmlFragment::remove_range(Self, Int, Int) -> Unit
 pub fn XmlFragment::sticky_boundary(Self, assoc? : Assoc) -> StickyIndex
 pub fn XmlFragment::sticky_index(Self, Int, assoc? : Assoc) -> StickyIndex?
 pub fn XmlFragment::successors(Self) -> Iter[XmlNode]
+pub fn XmlFragment::try_from_out(Out) -> Result[Self, Out]
 pub fn XmlFragment::unobserve(Self, String) -> Bool
 pub fn XmlFragment::unobserve_deep(Self, String) -> Bool
 pub impl DefaultPrelim for XmlFragment
+pub impl FromOut for XmlFragment
 pub impl RootRef for XmlFragment
 pub impl SharedRef for XmlFragment
 
@@ -1025,6 +1042,8 @@ pub fn XmlNode::next_sibling(Self) -> Self?
 pub fn XmlNode::parent(Self) -> Self?
 pub fn XmlNode::prev_sibling(Self) -> Self?
 pub fn XmlNode::siblings(Self, backwards? : Bool) -> Iter[Self]
+pub fn XmlNode::try_from_out(Out) -> Result[Self, Out]
+pub impl FromOut for XmlNode
 
 pub struct XmlText {
   // private fields
@@ -1048,9 +1067,11 @@ pub fn XmlText::quote(Self, QuoteBound, QuoteBound) -> WeakPrelim raise QuoteErr
 pub fn XmlText::remove_attribute(Self, String) -> Unit
 pub fn XmlText::sticky_boundary(Self, assoc? : Assoc) -> StickyIndex
 pub fn XmlText::sticky_index(Self, Int, assoc? : Assoc) -> StickyIndex?
+pub fn XmlText::try_from_out(Out) -> Result[Self, Out]
 pub fn XmlText::unobserve(Self, String) -> Bool
 pub fn XmlText::unobserve_deep(Self, String) -> Bool
 pub impl DefaultPrelim for XmlText
+pub impl FromOut for XmlText
 pub impl SharedRef for XmlText
 
 pub struct XmlTextEvent {
@@ -1108,6 +1129,18 @@ pub impl FromAny for Bytes
 pub impl[T : FromAny] FromAny for Array[T]
 pub impl[T : FromAny] FromAny for Map[String, T]
 pub impl[A : FromAny, B : FromAny] FromAny for (A, B)
+
+pub(open) trait FromOut {
+  fn try_from_out(Out) -> Result[Self, Out]
+}
+pub impl FromOut for Bool
+pub impl FromOut for Int
+pub impl FromOut for Int64
+pub impl FromOut for UInt
+pub impl FromOut for Float
+pub impl FromOut for Double
+pub impl FromOut for String
+pub impl FromOut for Bytes
 
 pub(open) trait Protocol {
   fn start(Self, Awareness) -> Bytes raise = _

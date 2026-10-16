@@ -19,7 +19,7 @@ The generated `pkg.generated.mbti` is the authoritative MoonBit API.
 | `Options` | Adapted to labeled `Doc(...)` arguments |
 | `ClientID`, `ID`, `BranchID` | `UInt64`, `Id`, `BranchId`; the port also accepts client IDs beyond Rust's 53-bit domain |
 | `Any`, `Number` | `Any`; numeric variants are `Integer(Int64)` and `Float(Double)` |
-| `In`, `Out`, deprecated `Value` | `In`, `Out`; no deprecated `Value` alias |
+| `In`, `Out`, deprecated `Value` | `In`, `Out`, generic `Out.cast[T : FromOut]` with original-value errors; no deprecated `Value` alias |
 | `Array`, `ArrayRef`, `ArrayPrelim` | `ArrayRef` methods, typed `get_as`, and `In.Array` preliminary values |
 | `Map`, `MapRef`, `MapPrelim` | `MapRef` methods, typed `get_as`, generic `get_or_init[T : DefaultPrelim]`, concrete helpers and `In.Map` preliminary values |
 | `Text`, `TextRef`, `TextPrelim` | `Text` methods and `In.Text` preliminary values |
@@ -58,7 +58,7 @@ This root inventory is **not a complete public-module audit**. Rust also exposes
 - `block` / `branch` / `iter` / `atomic`: raw pointers, mutation internals,
   transaction-bound iterators and atomic storage are not ported as public APIs.
 - Value deserialization: `FromAny` / `from_any` expose a direct typed adapter;
-  application records implement the open trait. Built-in conversion rules are
+  application records implement the open trait. `FromOut` exposes direct handle/primitive casts separately, including Rust's narrowing integer conversion. Built-in conversion rules are
   compared with Rust serde. `get_json_as` is a separate MoonBit JSON adapter.
 - `types` / `undo`: concrete editing and observation are implemented; method-level
   edge cases, generic conversions and event equivalence remain under audit.

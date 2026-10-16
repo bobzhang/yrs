@@ -1,9 +1,11 @@
 {
   "upstream": "ac339600c712642e556895426113c3f9c117de39",
   "values": 725,
-  "conversions": 7250,
+  "conversions": 13050,
+  "direct_casts": 5800,
   "checks": [
     "integer limits and lossless numeric conversion",
+    "direct Out casts including narrowing integer wrap and original-value rejection",
     "floating-point bit patterns including NaN infinity and signed zero",
     "null and undefined options",
     "arrays",
