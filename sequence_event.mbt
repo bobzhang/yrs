@@ -16,11 +16,7 @@ pub fn Change::to_json(self : Change) -> Json {
 }
 
 ///|
-pub(all) enum Delta {
-  Inserted(Out, ReadOnlyArray[(String, Any)])
-  Deleted(Int32)
-  Retain(Int32, ReadOnlyArray[(String, Any)])
-}
+pub type Delta = DeltaOf[Out]
 
 ///|
 pub fn Delta::to_json(self : Delta) -> Json {

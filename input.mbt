@@ -15,11 +15,7 @@ pub(all) enum In {
 ///|
 /// Input delta for Text::apply_delta. Retain/delete lengths use the document's
 /// offset mode; inserted strings become text and other values become embeds.
-pub(all) enum TextDelta {
-  Inserted(In, ReadOnlyArray[(String, Any)])
-  Deleted(Int32)
-  Retain(Int32, ReadOnlyArray[(String, Any)])
-}
+pub type TextDelta = DeltaOf[In]
 
 ///|
 pub fn Out::to_input(self : Out) -> In {

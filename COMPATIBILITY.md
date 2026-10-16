@@ -83,6 +83,10 @@ Rust also exposes
   across shared collections, output values, XML nodes and weak links. Rust's
   associated preliminary types are represented by the `In` enum; application
   types can implement the trait without constructing an `Out` wrapper.
+  `DeltaOf[T]` supplies generic insertion mapping; `Delta` and `TextDelta`
+  specialize it to observed `Out` and preliminary `In` values. `Delta.to_input`
+  detaches inserted shared values for replay. Empty attribute arrays represent
+  both Rust `None` and `Some(empty)`; upstream `apply_delta` treats these equally.
   Public `TypeRef` descriptors expose every upstream kind, including legacy
   types and weak-link boundaries, and implement generic v1/v2 codecs. Typed root
   handles expose `RootRef.type_ref` and `RootRef.root`. The descriptor oracle

@@ -446,12 +446,18 @@ pub fn DefaultProtocol::start(Self, Awareness) -> Bytes raise
 pub impl AsyncProtocol for DefaultProtocol
 pub impl Protocol for DefaultProtocol
 
-pub(all) enum Delta {
-  Inserted(Out, ReadOnlyArray[(String, Any)])
+pub(all) enum DeltaOf[T] {
+  Inserted(T, ReadOnlyArray[(String, Any)])
   Deleted(Int)
   Retain(Int, ReadOnlyArray[(String, Any)])
 }
-pub fn Delta::to_json(Self) -> Json
+pub fn DeltaOf::delete(Int) -> Self[In]
+pub fn DeltaOf::insert(In) -> Self[In]
+pub fn DeltaOf::insert_with(In, ReadOnlyArray[(String, Any)]) -> Self[In]
+pub fn[A, B] DeltaOf::map(Self[A], (A) -> B raise?) -> Self[B] raise?
+pub fn DeltaOf::retain(Int) -> Self[In]
+pub fn DeltaOf::to_input(Self[Out]) -> Self[In]
+pub fn DeltaOf::to_json(Self[Out]) -> Json
 
 pub(all) struct Diff[M] {
   insert : Out
@@ -716,10 +722,10 @@ pub(all) enum In {
   Value(Any)
   Array(ReadOnlyArray[In])
   Map(ReadOnlyArray[(String, In)])
-  Text(ReadOnlyArray[TextDelta])
+  Text(ReadOnlyArray[DeltaOf[In]])
   XmlElement(String, ReadOnlyArray[(String, In)], ReadOnlyArray[In])
   XmlFragment(ReadOnlyArray[In])
-  XmlText(ReadOnlyArray[TextDelta], ReadOnlyArray[(String, In)])
+  XmlText(ReadOnlyArray[DeltaOf[In]], ReadOnlyArray[(String, In)])
   Subdoc(Doc)
   WeakLink(WeakPrelim)
 }
@@ -1033,7 +1039,7 @@ pub(all) enum SyncMessage {
 pub struct Text {
   // private fields
 }
-pub fn Text::apply_delta(Self, Array[TextDelta]) -> Unit
+pub fn Text::apply_delta(Self, Array[DeltaOf[In]]) -> Unit
 pub fn Text::default_prelim() -> In
 pub fn[M] Text::diff(Self, (YChange) -> M) -> Array[Diff[M]]
 pub fn[M] Text::diff_range(Self, (YChange) -> M, hi? : Snapshot, lo? : Snapshot) -> Array[Diff[M]]
@@ -1077,16 +1083,10 @@ pub(all) struct TextChunk {
 }
 pub fn TextChunk::to_json(Self) -> Json
 
-pub(all) enum TextDelta {
-  Inserted(In, ReadOnlyArray[(String, Any)])
-  Deleted(Int)
-  Retain(Int, ReadOnlyArray[(String, Any)])
-}
-
 pub struct TextEvent {
   // private fields
 }
-pub fn TextEvent::delta(Self) -> ReadOnlyArray[Delta]
+pub fn TextEvent::delta(Self) -> ReadOnlyArray[DeltaOf[Out]]
 pub fn TextEvent::path(Self) -> ReadOnlyArray[PathSegment]
 pub fn TextEvent::target(Self) -> Text
 
@@ -1409,7 +1409,7 @@ pub impl Eq for XmlText
 pub struct XmlTextEvent {
   // private fields
 }
-pub fn XmlTextEvent::delta(Self) -> ReadOnlyArray[Delta]
+pub fn XmlTextEvent::delta(Self) -> ReadOnlyArray[DeltaOf[Out]]
 pub fn XmlTextEvent::keys(Self) -> Map[String, EntryChange]
 pub fn XmlTextEvent::path(Self) -> ReadOnlyArray[PathSegment]
 pub fn XmlTextEvent::target(Self) -> XmlText
@@ -1424,6 +1424,9 @@ pub fn YChange::not_equal(Self, Self) -> Bool
 pub fn YChange::to_repr(Self) -> @debug.Repr
 
 // Type aliases
+pub type Delta = DeltaOf[Out]
+
+pub type TextDelta = DeltaOf[In]
 
 // Traits
 pub(open) trait AsPrelim {
