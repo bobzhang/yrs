@@ -13,6 +13,7 @@ priv enum SharedKind {
   SharedXmlFragment
   SharedXmlText
   SharedOpaque(Int32)
+  SharedWeak(LinkSource)
 }
 
 ///|
@@ -106,6 +107,8 @@ priv struct Item {
   mut redone : Id?
   mut deleted : Bool
   mut keep : Bool
+  mut linked : Bool
+  links : Set[Id]
 }
 
 ///|
@@ -121,6 +124,10 @@ priv struct Branch {
 /// A document replica. Each independently edited replica must use a distinct
 /// client ID. This initial API uses Yjs UTF-16 positions and retains tombstones.
 pub struct Doc {
+  priv weak_observers : Map[
+    Parent,
+    Map[String, (WeakEvent, Transaction) -> Unit],
+  ]
   priv identity : UInt64
   priv mut active_transaction : Transaction?
   priv mut notifying_transaction : Bool
@@ -213,6 +220,7 @@ fn make_doc(
     identity: allocate_identity(),
     active_transaction: None,
     notifying_transaction: false,
+    weak_observers: {},
     deep_observers: {},
     xml_observers: {},
     xml_text_observers: {},
@@ -326,6 +334,8 @@ fn Doc::split(self : Doc, item : Item, at : Int32) -> Item {
     }),
     deleted: item.deleted,
     keep: item.keep,
+    linked: item.linked,
+    links: Set::from_array(item.links.to_array()),
   }
   if item.right is Some(right) {
     self.items[right].left = Some(id)
@@ -451,6 +461,8 @@ fn Doc::integrate_missing(self : Doc, raw : RawItem) -> Bool {
     right,
     redone: None,
     keep: false,
+    linked: false,
+    links: Set([]),
     deleted: content is (Deleted(_) | Garbage(_)),
   }
   if parent is Some(name) && parent_sub is Some(key) {
@@ -560,10 +572,30 @@ fn Doc::integrate_missing(self : Doc, raw : RawItem) -> Bool {
     if item.right is None {
       self.branch(name).values[key] = item.id
       if item.left is Some(id) {
-        self.mark_deleted(self.items[id])
+        let previous = self.items[id]
+        if previous.linked {
+          item.linked = true
+          for link in previous.links {
+            item.links.add(link)
+          }
+          previous.links.clear()
+          previous.linked = false
+        }
+        self.mark_deleted(previous)
       }
     } else {
       self.mark_deleted(item)
+    }
+  }
+  if item.parent_sub is None && !item.deleted {
+    self.join_weak_links(item)
+  }
+  if item.content is Shared(SharedWeak(source)) {
+    self.materialize_weak(item.id, source)
+  }
+  if self.active_transaction is Some(txn) {
+    for link in item.links {
+      txn.weak_changes.add(Nested(link))
     }
   }
   if parent is Some(Nested(id)) && self.find(id).unwrap().deleted {
@@ -823,6 +855,15 @@ fn Doc::mark_deleted(self : Doc, item : Item) -> Unit {
         txn.sub_removed[child.identity] = child
       }
     }
+    if item.content is Shared(SharedWeak(_)) {
+      self.unlink_weak(item.id)
+    }
+    if self.active_transaction is Some(txn) {
+      for link in item.links {
+        txn.weak_changes.add(Nested(link))
+      }
+    }
+    item.links.clear()
     item.deleted = true
     if self.active_transaction is Some(transaction) {
       transaction.removed.push(

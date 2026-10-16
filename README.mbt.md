@@ -302,3 +302,19 @@ for equal attributes after merging separately allocated maps; MoonBit encodes a
 single dictionary entry per equal value. Both runtimes decode either representation
 to the same ranges and metadata. Attribute list order and duplicate-input behavior
 follow upstream; callers can provide unique attributes for ordinary set semantics.
+
+
+Weak references are available through `MapRef::link` and `quote` on sequences.
+Insert a `WeakPrelim` with `In::WeakLink`; retrieve the resulting `WeakRef` through
+`Out::WeakLink`. `QuoteBound` supports included, excluded and unbounded ends.
+A link follows CRDT identities, so edits within its quoted range remain visible.
+Map links follow replacement values without owning them. Removing a weak link
+does not delete its target. Weak references support plain/rich text queries,
+array unquoting, both wire formats, typed observers and deep observers through
+chains and cycles. `LinkSource` exposes the encoded boundary metadata.
+
+Weak-reference compatibility is still being audited. The port preserves observer
+subscriptions when a referenced item splits; the pinned Rust implementation can
+lose those subscriptions. Its weak plain-text and XML readers also disagree on
+some imported boundaries. These differences are tracked separately from passing
+core document and wire checks; this feature is not yet a claim of full Yrs parity.

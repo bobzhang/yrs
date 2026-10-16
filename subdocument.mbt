@@ -254,6 +254,7 @@ fn Doc::destroy_contents(self : Doc) -> Unit {
   }
   self.destroy_observers.clear()
   self.subdoc_observers.clear()
+  self.weak_observers.clear()
   self.deep_observers.clear()
   self.xml_observers.clear()
   self.xml_text_observers.clear()

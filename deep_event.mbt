@@ -19,6 +19,7 @@ pub(all) enum Event {
   Map(MapEvent)
   XmlFragment(XmlEvent)
   XmlText(XmlTextEvent)
+  Weak(WeakEvent)
 }
 
 ///|
@@ -134,6 +135,9 @@ fn Doc::event_path(
 fn Doc::notify_collections(self : Doc, transaction : Transaction) -> Unit {
   let parents : Set[Parent] = Set([])
   let maps : Map[Parent, MapEvent] = Map([])
+  for parent in transaction.weak_changes {
+    parents.add(parent)
+  }
   for parent in transaction.sequences {
     parents.add(parent) |> ignore
   }
@@ -188,9 +192,17 @@ fn Doc::notify_collections(self : Doc, transaction : Transaction) -> Unit {
           entries,
           changed_children: transaction.sequences.contains(parent),
         })
+      Some(SharedWeak(link)) =>
+        Weak({ weak: { doc: self, name: parent, link, }, route: [], })
       None | Some(SharedOpaque(_)) => continue
     }
     match event {
+      Weak(event) =>
+        if self.weak_observers.get(parent) is Some(observers) {
+          for (_, callback) in observers.to_array() {
+            callback(event, transaction)
+          }
+        }
       Text(event) =>
         if self.text_observers.get(parent) is Some(observers) {
           for (_, callback) in observers.to_array() {
@@ -222,18 +234,9 @@ fn Doc::notify_collections(self : Doc, transaction : Transaction) -> Unit {
           }
         }
     }
-    let mut current = Some(parent)
-    while current is Some(location) {
+    for location in self.event_ancestors(parent) {
       if location.branch_id().get(self) is Some(value) {
         transaction.changed_parents.push(value)
-      }
-      current = match location {
-        Root(_) => None
-        Nested(id) =>
-          match self.find(id) {
-            Some(item) => item.parent
-            None => None
-          }
       }
     }
     events.push((parent, event))
@@ -241,8 +244,10 @@ fn Doc::notify_collections(self : Doc, transaction : Transaction) -> Unit {
   for (ancestor, observers) in self.deep_observers.to_array() {
     let relevant : Array[Event] = []
     for (parent, event) in events {
-      if self.event_path(ancestor, parent) is Some(path) {
-        relevant.push(event.with_path(path))
+      if self.event_ancestors(parent).contains(ancestor) {
+        relevant.push(
+          event.with_path(self.physical_event_path(ancestor, parent)),
+        )
       }
     }
     if !relevant.is_empty() {
@@ -283,6 +288,7 @@ pub fn XmlTextEvent::path(self : XmlTextEvent) -> ReadOnlyArray[PathSegment] {
 ///|
 pub fn Event::path(self : Event) -> ReadOnlyArray[PathSegment] {
   match self {
+    Weak(event) => event.path()
     Text(event) => event.path()
     Array(event) => event.path()
     Map(event) => event.path()
@@ -294,6 +300,7 @@ pub fn Event::path(self : Event) -> ReadOnlyArray[PathSegment] {
 ///|
 pub fn Event::target(self : Event) -> Out {
   match self {
+    Weak(event) => WeakLink(event.weak)
     Text(event) => Text(event.text)
     Array(event) => Array(event.array)
     Map(event) => Map(event.map)
@@ -310,6 +317,7 @@ pub fn Event::target(self : Event) -> Out {
 ///|
 fn Event::with_path(self : Event, path : ReadOnlyArray[PathSegment]) -> Event {
   match self {
+    Weak(event) => Weak({ weak: event.weak, route: path, })
     Text(event) =>
       Text({ text: event.text, changes: event.changes, route: path, })
     Array(event) =>

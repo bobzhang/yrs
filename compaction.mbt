@@ -45,6 +45,8 @@ fn Doc::compact(self : Doc, transaction : Transaction) -> Unit {
         a.right_origin == b.right_origin &&
         a.right == Some(b.id) &&
         a.deleted == b.deleted &&
+        !a.linked &&
+        !b.linked &&
         a.redone is None &&
         b.redone is None &&
         a.parent == b.parent &&

@@ -316,6 +316,7 @@ fn transcode_update(
         7UL =>
           match field(7) {
             3UL => output.key(input.key())
+            7UL => LinkSource::read(input).write(output)
             0UL | 1UL | 2UL | 4UL | 5UL | 6UL | 9UL | 15UL => ()
             _ => raise InvalidData("unsupported shared type reference")
           }

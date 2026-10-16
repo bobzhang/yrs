@@ -140,8 +140,13 @@ pub fn XmlElement::get_string(self : XmlElement) -> String {
 
 ///|
 pub fn XmlText::get_string(self : XmlText) -> String {
+  xml_text_chunks(self.as_text().to_delta())
+}
+
+///|
+fn xml_text_chunks(chunks : Array[TextChunk]) -> String {
   let out = StringBuilder()
-  for chunk in self.as_text().to_delta() {
+  for chunk in chunks {
     for (tag, attrs) in chunk.attributes {
       out.write_string("<" + tag)
       if attrs is Object(fields) {
@@ -167,7 +172,7 @@ pub fn XmlText::get_string(self : XmlText) -> String {
 pub fn Out::to_string(self : Out) -> String {
   match self {
     Value(value) => value.to_string()
-    UndefinedRef(_) => ""
+    UndefinedRef(_) | WeakLink(_) => ""
     Subdoc(value) => "Doc(id: \{value.client_id()}, guid: \{value.guid()})"
     Text(value) => value.get_string()
     XmlElement(value) => value.get_string()

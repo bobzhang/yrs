@@ -27,6 +27,7 @@ fn event_json(event : @yrs.Event) -> Json {
   )
   out["target"] = event.target().to_json()
   match event {
+    Weak(_) => out["kind"] = "weak"
     Text(e) => {
       out["kind"] = "text"
       out["delta"] = Json(e.delta().iter().map(@yrs.Delta::to_json).to_array())

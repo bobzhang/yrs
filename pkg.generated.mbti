@@ -49,6 +49,11 @@ pub suberror ProtocolError {
 } derive(@debug.Debug)
 pub fn ProtocolError::to_repr(Self) -> @debug.Repr
 
+pub(all) suberror QuoteError {
+  OutOfBounds
+} derive(@debug.Debug)
+pub fn QuoteError::to_repr(Self) -> @debug.Repr
+
 // Types and methods
 pub(all) enum Any {
   Undefined
@@ -95,6 +100,7 @@ pub fn ArrayRef::observe(Self, String, (ArrayEvent, Transaction) -> Unit) -> Uni
 pub fn ArrayRef::observe_deep(Self, String, (ReadOnlyArray[Event], Transaction) -> Unit) -> Unit
 pub fn ArrayRef::push_back(Self, In) -> Out
 pub fn ArrayRef::push_front(Self, In) -> Out
+pub fn ArrayRef::quote(Self, QuoteBound, QuoteBound) -> WeakPrelim raise QuoteError
 pub fn ArrayRef::remove(Self, Int) -> Unit
 pub fn ArrayRef::remove_range(Self, Int, Int) -> Unit
 pub fn ArrayRef::sticky_boundary(Self, assoc? : Assoc) -> StickyIndex
@@ -316,6 +322,7 @@ pub(all) enum Event {
   Map(MapEvent)
   XmlFragment(XmlEvent)
   XmlText(XmlTextEvent)
+  Weak(WeakEvent)
 }
 pub fn Event::path(Self) -> ReadOnlyArray[PathSegment]
 pub fn Event::target(Self) -> Out
@@ -396,6 +403,7 @@ pub(all) enum In {
   XmlFragment(ReadOnlyArray[In])
   XmlText(ReadOnlyArray[TextDelta], ReadOnlyArray[(String, In)])
   Subdoc(Doc)
+  WeakLink(WeakPrelim)
 }
 
 pub(all) enum IndexScope {
@@ -411,6 +419,21 @@ pub struct JsonPath {
   // private fields
 }
 pub fn JsonPath::parse(String) -> Self raise JsonPathError
+
+pub(all) struct LinkSource {
+  start : StickyIndex
+  end : StickyIndex
+} derive(Eq, @debug.Debug)
+pub fn LinkSource::LinkSource(StickyIndex, StickyIndex) -> Self
+pub fn LinkSource::equal(Self, Self) -> Bool
+pub fn LinkSource::get_string(Self, Doc) -> String
+pub fn LinkSource::is_single(Self) -> Bool
+pub fn LinkSource::not_equal(Self, Self) -> Bool
+pub fn LinkSource::to_delta(Self, Doc) -> Array[TextChunk]
+pub fn LinkSource::to_repr(Self) -> @debug.Repr
+pub fn LinkSource::to_xml_string(Self, Doc) -> String
+pub fn LinkSource::try_deref_value(Self, Doc) -> Out?
+pub fn LinkSource::unquote(Self, Doc) -> Array[Out]
 
 pub struct MapEvent {
   // private fields
@@ -439,6 +462,7 @@ pub fn MapRef::insert_text(Self, String) -> Text
 pub fn MapRef::iter(Self) -> Iter[(String, Out)]
 pub fn MapRef::keys(Self) -> Iter[String]
 pub fn MapRef::length(Self) -> Int
+pub fn MapRef::link(Self, String) -> WeakPrelim?
 pub fn MapRef::observe(Self, String, (MapEvent, Transaction) -> Unit) -> Unit
 pub fn MapRef::observe_deep(Self, String, (ReadOnlyArray[Event], Transaction) -> Unit) -> Unit
 pub fn MapRef::remove(Self, String) -> Unit
@@ -486,6 +510,7 @@ pub(all) enum Out {
   XmlElement(XmlElement)
   XmlFragment(XmlFragment)
   XmlText(XmlText)
+  WeakLink(WeakRef)
 }
 pub fn Out::branch_id(Self) -> BranchId?
 pub fn Out::is_deleted(Self) -> Bool
@@ -501,6 +526,15 @@ pub fn PathSegment::equal(Self, Self) -> Bool
 pub fn PathSegment::not_equal(Self, Self) -> Bool
 pub fn PathSegment::to_json(Self) -> Json
 pub fn PathSegment::to_repr(Self) -> @debug.Repr
+
+pub(all) enum QuoteBound {
+  Included(Int)
+  Excluded(Int)
+  Unbounded
+} derive(Eq, @debug.Debug)
+pub fn QuoteBound::equal(Self, Self) -> Bool
+pub fn QuoteBound::not_equal(Self, Self) -> Bool
+pub fn QuoteBound::to_repr(Self) -> @debug.Repr
 
 pub struct Snapshot {
   // private fields
@@ -604,6 +638,7 @@ pub fn Text::length(Self) -> Int
 pub fn Text::observe(Self, String, (TextEvent, Transaction) -> Unit) -> Unit
 pub fn Text::observe_deep(Self, String, (ReadOnlyArray[Event], Transaction) -> Unit) -> Unit
 pub fn Text::push(Self, String) -> Unit
+pub fn Text::quote(Self, QuoteBound, QuoteBound) -> WeakPrelim raise QuoteError
 pub fn Text::remove_range(Self, Int, Int) -> Unit
 pub fn Text::sticky_boundary(Self, assoc? : Assoc) -> StickyIndex
 pub fn Text::sticky_index(Self, Int, assoc? : Assoc) -> StickyIndex?
@@ -718,6 +753,40 @@ pub fn Update::merge(Self, Self) -> Unit
 pub fn Update::state_vector(Self) -> StateVector
 pub fn Update::state_vector_lower(Self) -> StateVector
 
+pub struct WeakEvent {
+  // private fields
+}
+pub fn WeakEvent::path(Self) -> ReadOnlyArray[PathSegment]
+pub fn WeakEvent::target(Self) -> WeakRef
+
+pub struct WeakPrelim {
+  // private fields
+}
+pub fn WeakPrelim::WeakPrelim(LinkSource) -> Self
+pub fn WeakPrelim::get_string(Self, Doc) -> String
+pub fn WeakPrelim::source(Self) -> LinkSource
+pub fn WeakPrelim::try_deref_value(Self, Doc) -> Out?
+pub fn WeakPrelim::unquote(Self, Doc) -> Array[Out]
+
+pub struct WeakRef {
+  // private fields
+}
+pub fn WeakRef::as_prelim(Self) -> WeakPrelim
+pub fn WeakRef::branch_id(Self) -> BranchId
+pub fn WeakRef::end_id(Self) -> Id?
+pub fn WeakRef::get_string(Self) -> String
+pub fn WeakRef::get_xml_string(Self) -> String
+pub fn WeakRef::is_deleted(Self) -> Bool
+pub fn WeakRef::observe(Self, String, (WeakEvent, Transaction) -> Unit) -> Unit
+pub fn WeakRef::observe_deep(Self, String, (ReadOnlyArray[Event], Transaction) -> Unit) -> Unit
+pub fn WeakRef::source(Self) -> LinkSource
+pub fn WeakRef::start_id(Self) -> Id?
+pub fn WeakRef::to_delta(Self) -> Array[TextChunk]
+pub fn WeakRef::try_deref_value(Self) -> Out?
+pub fn WeakRef::unobserve(Self, String) -> Bool
+pub fn WeakRef::unobserve_deep(Self, String) -> Bool
+pub fn WeakRef::unquote(Self) -> Array[Out]
+
 pub struct XmlElement {
   // private fields
 }
@@ -730,6 +799,7 @@ pub fn XmlElement::insert_attribute(Self, String, Any) -> Unit
 pub fn XmlElement::observe(Self, String, (XmlEvent, Transaction) -> Unit) -> Unit
 pub fn XmlElement::observe_deep(Self, String, (ReadOnlyArray[Event], Transaction) -> Unit) -> Unit
 pub fn XmlElement::parent(Self) -> XmlNode?
+pub fn XmlElement::quote(Self, QuoteBound, QuoteBound) -> WeakPrelim raise QuoteError
 pub fn XmlElement::remove_attribute(Self, String) -> Unit
 pub fn XmlElement::sticky_boundary(Self, assoc? : Assoc) -> StickyIndex
 pub fn XmlElement::sticky_index(Self, Int, assoc? : Assoc) -> StickyIndex?
@@ -767,6 +837,7 @@ pub fn XmlFragment::observe_deep(Self, String, (ReadOnlyArray[Event], Transactio
 pub fn XmlFragment::parent(Self) -> XmlNode?
 pub fn XmlFragment::push_back(Self, In) -> XmlNode
 pub fn XmlFragment::push_front(Self, In) -> XmlNode
+pub fn XmlFragment::quote(Self, QuoteBound, QuoteBound) -> WeakPrelim raise QuoteError
 pub fn XmlFragment::remove(Self, Int) -> Unit
 pub fn XmlFragment::remove_attribute(Self, String) -> Unit
 pub fn XmlFragment::remove_range(Self, Int, Int) -> Unit
@@ -804,6 +875,7 @@ pub fn XmlText::insert_attribute(Self, String, Any) -> Unit
 pub fn XmlText::observe(Self, String, (XmlTextEvent, Transaction) -> Unit) -> Unit
 pub fn XmlText::observe_deep(Self, String, (ReadOnlyArray[Event], Transaction) -> Unit) -> Unit
 pub fn XmlText::parent(Self) -> XmlNode?
+pub fn XmlText::quote(Self, QuoteBound, QuoteBound) -> WeakPrelim raise QuoteError
 pub fn XmlText::remove_attribute(Self, String) -> Unit
 pub fn XmlText::sticky_boundary(Self, assoc? : Assoc) -> StickyIndex
 pub fn XmlText::sticky_index(Self, Int, assoc? : Assoc) -> StickyIndex?

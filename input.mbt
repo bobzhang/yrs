@@ -9,6 +9,7 @@ pub(all) enum In {
   XmlFragment(ReadOnlyArray[In])
   XmlText(ReadOnlyArray[TextDelta], ReadOnlyArray[(String, In)])
   Subdoc(Doc)
+  WeakLink(WeakPrelim)
 }
 
 ///|
@@ -63,6 +64,7 @@ pub fn Out::to_input(self : Out) -> In {
     XmlText(value) => XmlText(text(value.as_text()), entries(value.as_map()))
     Subdoc(value) => Subdoc(value.unloaded_copy())
     UndefinedRef(value) => value.infer_input()
+    WeakLink(value) => WeakLink(value.as_prelim())
   }
 }
 
@@ -78,6 +80,7 @@ fn In::content(self : In, text : Bool) -> Content {
     XmlFragment(_) => Shared(SharedXmlFragment)
     XmlText(_, _) => Shared(SharedXmlText)
     Subdoc(child) => Subdocument(child)
+    WeakLink(value) => Shared(SharedWeak(value.source()))
   }
 }
 
@@ -99,6 +102,7 @@ fn In::populate(self : In, doc : Doc, id : Id) -> Out {
   match self {
     Value(value) => Value(value)
     Subdoc(child) => Subdoc(child)
+    WeakLink(value) => WeakLink({ doc, name, link: value.source(), })
     Array(values) => {
       children(values)
       Array({ doc, name, })

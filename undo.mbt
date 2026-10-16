@@ -37,6 +37,7 @@ fn Out::location(self : Out) -> (Doc, Parent)? {
     XmlElement(v) => Some((v.doc, v.name))
     XmlFragment(v) => Some((v.doc, v.name))
     XmlText(v) => Some((v.doc, v.name))
+    WeakLink(v) => Some((v.doc, v.name))
   }
 }
 

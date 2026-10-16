@@ -70,6 +70,7 @@ fn read_update(
               3 => SharedXmlElement(reader.string())
               4 => SharedXmlFragment
               6 => SharedXmlText
+              7 => SharedWeak(reader.weak_link())
               5 | 9 | 15 as reference => SharedOpaque(reference)
               _ => raise InvalidData("unsupported shared type")
             },
@@ -266,6 +267,10 @@ fn Writer::raw_item(self : Writer, item : RawItem) -> Unit {
         }
         SharedXmlFragment => self.byte(4)
         SharedXmlText => self.byte(6)
+        SharedWeak(link) => {
+          self.byte(7)
+          self.weak_link(link)
+        }
         SharedOpaque(reference) => self.byte(reference)
       }
     LegacyJson(values) => {

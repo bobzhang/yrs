@@ -10,6 +10,7 @@ pub(all) enum Out {
   XmlElement(XmlElement)
   XmlFragment(XmlFragment)
   XmlText(XmlText)
+  WeakLink(WeakRef)
 }
 
 ///|
@@ -22,6 +23,7 @@ fn Doc::shared_output(self : Doc, id : Id, kind : SharedKind) -> Out {
     SharedXmlElement(tag) => XmlElement({ doc: self, name, tag, })
     SharedXmlFragment => XmlFragment({ doc: self, name, })
     SharedXmlText => XmlText({ doc: self, name, })
+    SharedWeak(link) => WeakLink({ doc: self, name, link, })
     SharedOpaque(reference) => UndefinedRef({ doc: self, name, reference, })
   }
 }
@@ -31,7 +33,7 @@ pub fn Out::to_json(self : Out) -> Json {
   match self {
     Value(value) => value.to_json()
     Subdoc(value) => { "guid": Json(value.guid()) }
-    UndefinedRef(_) => Json::null()
+    UndefinedRef(_) | WeakLink(_) => Json::null()
     Array(value) => value.to_json()
     Map(value) => value.to_json()
     Text(value) => Json(value.get_string())

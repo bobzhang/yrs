@@ -23,6 +23,7 @@ pub fn BranchId::get(self : BranchId, doc : Doc) -> Out? {
           Some(SharedXmlElement(tag)) => XmlElement({ doc, name: parent, tag, })
           Some(SharedXmlFragment) => XmlFragment({ doc, name: parent, })
           Some(SharedXmlText) => XmlText({ doc, name: parent, })
+          Some(SharedWeak(link)) => WeakLink({ doc, name: parent, link, })
           Some(SharedOpaque(reference)) =>
             UndefinedRef({ doc, name: parent, reference, })
           None => UndefinedRef({ doc, name: parent, reference: 15, })
