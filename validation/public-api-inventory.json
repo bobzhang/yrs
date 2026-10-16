@@ -1,0 +1,7045 @@
+{
+  "upstream": "ac339600c712642e556895426113c3f9c117de39",
+  "rust_version": "1.97.1",
+  "features": [
+    "weak"
+  ],
+  "scope": "Public declarations, inherent methods, trait members, public fields and variants; not a semantic compatibility report.",
+  "declarations": [
+    {
+      "path": "yrs::AcquireTransaction",
+      "aliases": [
+        "yrs::AcquireTransaction"
+      ],
+      "kind": "struct",
+      "source": "yrs/src/transact.rs:188",
+      "members": []
+    },
+    {
+      "path": "yrs::AcquireTransactionMut",
+      "aliases": [
+        "yrs::AcquireTransactionMut"
+      ],
+      "kind": "struct",
+      "source": "yrs/src/transact.rs:203",
+      "members": []
+    },
+    {
+      "path": "yrs::Any",
+      "aliases": [
+        "yrs::Any",
+        "yrs::any::Any"
+      ],
+      "kind": "enum",
+      "source": "yrs/src/any.rs:17",
+      "members": [
+        {
+          "name": "cast",
+          "kind": "function",
+          "context": "inherent",
+          "source": "yrs/src/any.rs:30"
+        },
+        {
+          "name": "decode",
+          "kind": "function",
+          "context": "inherent",
+          "source": "yrs/src/any.rs:39"
+        },
+        {
+          "name": "encode",
+          "kind": "function",
+          "context": "inherent",
+          "source": "yrs/src/any.rs:125"
+        },
+        {
+          "name": "from_json",
+          "kind": "function",
+          "context": "inherent",
+          "source": "yrs/src/any.rs:204"
+        },
+        {
+          "name": "to_json",
+          "kind": "function",
+          "context": "inherent",
+          "source": "yrs/src/any.rs:208"
+        },
+        {
+          "name": "try_into_iter",
+          "kind": "function",
+          "context": "inherent",
+          "source": "yrs/src/any.rs:228"
+        },
+        {
+          "name": "try_iter",
+          "kind": "function",
+          "context": "inherent",
+          "source": "yrs/src/any.rs:220"
+        },
+        {
+          "name": "Array",
+          "kind": "variant",
+          "context": "variant",
+          "source": "yrs/src/any.rs:24"
+        },
+        {
+          "name": "Bool",
+          "kind": "variant",
+          "context": "variant",
+          "source": "yrs/src/any.rs:20"
+        },
+        {
+          "name": "Buffer",
+          "kind": "variant",
+          "context": "variant",
+          "source": "yrs/src/any.rs:23"
+        },
+        {
+          "name": "Map",
+          "kind": "variant",
+          "context": "variant",
+          "source": "yrs/src/any.rs:25"
+        },
+        {
+          "name": "Null",
+          "kind": "variant",
+          "context": "variant",
+          "source": "yrs/src/any.rs:18"
+        },
+        {
+          "name": "Number",
+          "kind": "variant",
+          "context": "variant",
+          "source": "yrs/src/any.rs:21"
+        },
+        {
+          "name": "String",
+          "kind": "variant",
+          "context": "variant",
+          "source": "yrs/src/any.rs:22"
+        },
+        {
+          "name": "Undefined",
+          "kind": "variant",
+          "context": "variant",
+          "source": "yrs/src/any.rs:19"
+        }
+      ]
+    },
+    {
+      "path": "yrs::Array",
+      "aliases": [
+        "yrs::Array",
+        "yrs::types::array::Array"
+      ],
+      "kind": "trait",
+      "source": "yrs/src/types/array.rs:171",
+      "members": [
+        {
+          "name": "get",
+          "kind": "function",
+          "context": "trait",
+          "source": "yrs/src/types/array.rs:264"
+        },
+        {
+          "name": "get_as",
+          "kind": "function",
+          "context": "trait",
+          "source": "yrs/src/types/array.rs:326"
+        },
+        {
+          "name": "insert",
+          "kind": "function",
+          "context": "trait",
+          "source": "yrs/src/types/array.rs:186"
+        },
+        {
+          "name": "insert_range",
+          "kind": "function",
+          "context": "trait",
+          "source": "yrs/src/types/array.rs:212"
+        },
+        {
+          "name": "iter",
+          "kind": "function",
+          "context": "trait",
+          "source": "yrs/src/types/array.rs:339"
+        },
+        {
+          "name": "len",
+          "kind": "function",
+          "context": "trait",
+          "source": "yrs/src/types/array.rs:173"
+        },
+        {
+          "name": "push_back",
+          "kind": "function",
+          "context": "trait",
+          "source": "yrs/src/types/array.rs:226"
+        },
+        {
+          "name": "push_front",
+          "kind": "function",
+          "context": "trait",
+          "source": "yrs/src/types/array.rs:237"
+        },
+        {
+          "name": "remove",
+          "kind": "function",
+          "context": "trait",
+          "source": "yrs/src/types/array.rs:245"
+        },
+        {
+          "name": "remove_range",
+          "kind": "function",
+          "context": "trait",
+          "source": "yrs/src/types/array.rs:253"
+        }
+      ]
+    },
+    {
+      "path": "yrs::ArrayPrelim",
+      "aliases": [
+        "yrs::ArrayPrelim",
+        "yrs::types::array::ArrayPrelim"
+      ],
+      "kind": "struct",
+      "source": "yrs/src/types/array.rs:412",
+      "members": []
+    },
+    {
+      "path": "yrs::ArrayRef",
+      "aliases": [
+        "yrs::ArrayRef",
+        "yrs::types::array::ArrayRef"
+      ],
+      "kind": "struct",
+      "source": "yrs/src/types/array.rs:77",
+      "members": []
+    },
+    {
+      "path": "yrs::Assoc",
+      "aliases": [
+        "yrs::Assoc"
+      ],
+      "kind": "enum",
+      "source": "yrs/src/sticky_index.rs:522",
+      "members": [
+        {
+          "name": "After",
+          "kind": "variant",
+          "context": "variant",
+          "source": "yrs/src/sticky_index.rs:524"
+        },
+        {
+          "name": "Before",
+          "kind": "variant",
+          "context": "variant",
+          "source": "yrs/src/sticky_index.rs:526"
+        }
+      ]
+    },
+    {
+      "path": "yrs::AsyncTransact",
+      "aliases": [
+        "yrs::AsyncTransact"
+      ],
+      "kind": "trait",
+      "source": "yrs/src/transact.rs:139",
+      "members": [
+        {
+          "name": "Read",
+          "kind": "assoc_type",
+          "context": "trait",
+          "source": "yrs/src/transact.rs:140"
+        },
+        {
+          "name": "Write",
+          "kind": "assoc_type",
+          "context": "trait",
+          "source": "yrs/src/transact.rs:141"
+        },
+        {
+          "name": "transact",
+          "kind": "function",
+          "context": "trait",
+          "source": "yrs/src/transact.rs:143"
+        },
+        {
+          "name": "transact_mut",
+          "kind": "function",
+          "context": "trait",
+          "source": "yrs/src/transact.rs:144"
+        },
+        {
+          "name": "transact_mut_with",
+          "kind": "function",
+          "context": "trait",
+          "source": "yrs/src/transact.rs:152"
+        }
+      ]
+    },
+    {
+      "path": "yrs::AttrRange",
+      "aliases": [
+        "yrs::AttrRange"
+      ],
+      "kind": "struct",
+      "source": "yrs/src/id_map.rs:457",
+      "members": [
+        {
+          "name": "attrs",
+          "kind": "struct_field",
+          "context": "field",
+          "source": "yrs/src/id_map.rs:459"
+        },
+        {
+          "name": "range",
+          "kind": "struct_field",
+          "context": "field",
+          "source": "yrs/src/id_map.rs:458"
+        },
+        {
+          "name": "new",
+          "kind": "function",
+          "context": "inherent",
+          "source": "yrs/src/id_map.rs:463"
+        },
+        {
+          "name": "with_attrs",
+          "kind": "function",
+          "context": "inherent",
+          "source": "yrs/src/id_map.rs:470"
+        }
+      ]
+    },
+    {
+      "path": "yrs::BranchID",
+      "aliases": [
+        "yrs::BranchID",
+        "yrs::branch::BranchID"
+      ],
+      "kind": "enum",
+      "source": "yrs/src/branch.rs:861",
+      "members": [
+        {
+          "name": "get_branch",
+          "kind": "function",
+          "context": "inherent",
+          "source": "yrs/src/branch.rs:882"
+        },
+        {
+          "name": "get_nested",
+          "kind": "function",
+          "context": "inherent",
+          "source": "yrs/src/branch.rs:872"
+        },
+        {
+          "name": "get_root",
+          "kind": "function",
+          "context": "inherent",
+          "source": "yrs/src/branch.rs:868"
+        },
+        {
+          "name": "Nested",
+          "kind": "variant",
+          "context": "variant",
+          "source": "yrs/src/branch.rs:862"
+        },
+        {
+          "name": "Root",
+          "kind": "variant",
+          "context": "variant",
+          "source": "yrs/src/branch.rs:863"
+        }
+      ]
+    },
+    {
+      "path": "yrs::ClientID",
+      "aliases": [
+        "yrs::ClientID",
+        "yrs::block::ClientID"
+      ],
+      "kind": "struct",
+      "source": "yrs/src/block.rs:81",
+      "members": [
+        {
+          "name": "get",
+          "kind": "function",
+          "context": "inherent",
+          "source": "yrs/src/block.rs:104"
+        },
+        {
+          "name": "new",
+          "kind": "function",
+          "context": "inherent",
+          "source": "yrs/src/block.rs:87"
+        },
+        {
+          "name": "random",
+          "kind": "function",
+          "context": "inherent",
+          "source": "yrs/src/block.rs:118"
+        }
+      ]
+    },
+    {
+      "path": "yrs::ContentAttribute",
+      "aliases": [
+        "yrs::ContentAttribute"
+      ],
+      "kind": "struct",
+      "source": "yrs/src/id_map.rs:488",
+      "members": [
+        {
+          "name": "name",
+          "kind": "function",
+          "context": "inherent",
+          "source": "yrs/src/id_map.rs:504"
+        },
+        {
+          "name": "new",
+          "kind": "function",
+          "context": "inherent",
+          "source": "yrs/src/id_map.rs:497"
+        },
+        {
+          "name": "value",
+          "kind": "function",
+          "context": "inherent",
+          "source": "yrs/src/id_map.rs:508"
+        }
+      ]
+    },
+    {
+      "path": "yrs::ContentAttributes",
+      "aliases": [
+        "yrs::ContentAttributes"
+      ],
+      "kind": "struct",
+      "source": "yrs/src/id_map.rs:24",
+      "members": [
+        {
+          "name": "0",
+          "kind": "struct_field",
+          "context": "field",
+          "source": "yrs/src/id_map.rs:24"
+        },
+        {
+          "name": "from_attrs",
+          "kind": "function",
+          "context": "inherent",
+          "source": "yrs/src/id_map.rs:64"
+        },
+        {
+          "name": "new",
+          "kind": "function",
+          "context": "inherent",
+          "source": "yrs/src/id_map.rs:60"
+        }
+      ]
+    },
+    {
+      "path": "yrs::DeepObservable",
+      "aliases": [
+        "yrs::DeepObservable",
+        "yrs::types::DeepObservable"
+      ],
+      "kind": "trait",
+      "source": "yrs/src/types/mod.rs:415",
+      "members": [
+        {
+          "name": "observe_deep",
+          "kind": "function",
+          "context": "trait",
+          "source": "yrs/src/types/mod.rs:416"
+        },
+        {
+          "name": "unobserve_deep",
+          "kind": "function",
+          "context": "trait",
+          "source": "yrs/src/types/mod.rs:425"
+        }
+      ]
+    },
+    {
+      "path": "yrs::Diff",
+      "aliases": [
+        "yrs::Diff"
+      ],
+      "kind": "trait",
+      "source": "yrs/src/id_map.rs:17",
+      "members": [
+        {
+          "name": "diff_with",
+          "kind": "function",
+          "context": "trait",
+          "source": "yrs/src/id_map.rs:18"
+        }
+      ]
+    },
+    {
+      "path": "yrs::Doc",
+      "aliases": [
+        "yrs::Doc",
+        "yrs::doc::Doc"
+      ],
+      "kind": "struct",
+      "source": "yrs/src/doc.rs:55",
+      "members": [
+        {
+          "name": "auto_load",
+          "kind": "function",
+          "context": "inherent",
+          "source": "yrs/src/doc.rs:197"
+        },
+        {
+          "name": "branch_id",
+          "kind": "function",
+          "context": "inherent",
+          "source": "yrs/src/doc.rs:414"
+        },
+        {
+          "name": "client_id",
+          "kind": "function",
+          "context": "inherent",
+          "source": "yrs/src/doc.rs:167"
+        },
+        {
+          "name": "collection_id",
+          "kind": "function",
+          "context": "inherent",
+          "source": "yrs/src/doc.rs:182"
+        },
+        {
+          "name": "destroy",
+          "kind": "function",
+          "context": "inherent",
+          "source": "yrs/src/doc.rs:371"
+        },
+        {
+          "name": "get_or_insert_array",
+          "kind": "function",
+          "context": "inherent",
+          "source": "yrs/src/doc.rs:271"
+        },
+        {
+          "name": "get_or_insert_map",
+          "kind": "function",
+          "context": "inherent",
+          "source": "yrs/src/doc.rs:251"
+        },
+        {
+          "name": "get_or_insert_text",
+          "kind": "function",
+          "context": "inherent",
+          "source": "yrs/src/doc.rs:230"
+        },
+        {
+          "name": "get_or_insert_xml_fragment",
+          "kind": "function",
+          "context": "inherent",
+          "source": "yrs/src/doc.rs:293"
+        },
+        {
+          "name": "guid",
+          "kind": "function",
+          "context": "inherent",
+          "source": "yrs/src/doc.rs:175"
+        },
+        {
+          "name": "load",
+          "kind": "function",
+          "context": "inherent",
+          "source": "yrs/src/doc.rs:353"
+        },
+        {
+          "name": "new",
+          "kind": "function",
+          "context": "inherent",
+          "source": "yrs/src/doc.rs:115"
+        },
+        {
+          "name": "observe_after_transaction",
+          "kind": "function",
+          "context": "inherent",
+          "source": "yrs/src/doc.rs:322"
+        },
+        {
+          "name": "observe_before_observer_calls",
+          "kind": "function",
+          "context": "inherent",
+          "source": "yrs/src/doc.rs:329"
+        },
+        {
+          "name": "observe_destroy",
+          "kind": "function",
+          "context": "inherent",
+          "source": "yrs/src/doc.rs:344"
+        },
+        {
+          "name": "observe_subdocs",
+          "kind": "function",
+          "context": "inherent",
+          "source": "yrs/src/doc.rs:337"
+        },
+        {
+          "name": "observe_transaction_cleanup",
+          "kind": "function",
+          "context": "inherent",
+          "source": "yrs/src/doc.rs:315"
+        },
+        {
+          "name": "observe_update_v1",
+          "kind": "function",
+          "context": "inherent",
+          "source": "yrs/src/doc.rs:297"
+        },
+        {
+          "name": "observe_update_v2",
+          "kind": "function",
+          "context": "inherent",
+          "source": "yrs/src/doc.rs:306"
+        },
+        {
+          "name": "offset_kind",
+          "kind": "function",
+          "context": "inherent",
+          "source": "yrs/src/doc.rs:210"
+        },
+        {
+          "name": "parent_doc",
+          "kind": "function",
+          "context": "inherent",
+          "source": "yrs/src/doc.rs:409"
+        },
+        {
+          "name": "ptr_eq",
+          "kind": "function",
+          "context": "inherent",
+          "source": "yrs/src/doc.rs:419"
+        },
+        {
+          "name": "should_load",
+          "kind": "function",
+          "context": "inherent",
+          "source": "yrs/src/doc.rs:205"
+        },
+        {
+          "name": "skip_gc",
+          "kind": "function",
+          "context": "inherent",
+          "source": "yrs/src/doc.rs:190"
+        },
+        {
+          "name": "unobserve_after_transaction",
+          "kind": "function",
+          "context": "inherent",
+          "source": "yrs/src/doc.rs:322"
+        },
+        {
+          "name": "unobserve_before_observer_calls",
+          "kind": "function",
+          "context": "inherent",
+          "source": "yrs/src/doc.rs:329"
+        },
+        {
+          "name": "unobserve_destroy",
+          "kind": "function",
+          "context": "inherent",
+          "source": "yrs/src/doc.rs:344"
+        },
+        {
+          "name": "unobserve_subdocs",
+          "kind": "function",
+          "context": "inherent",
+          "source": "yrs/src/doc.rs:337"
+        },
+        {
+          "name": "unobserve_transaction_cleanup",
+          "kind": "function",
+          "context": "inherent",
+          "source": "yrs/src/doc.rs:315"
+        },
+        {
+          "name": "unobserve_update_v1",
+          "kind": "function",
+          "context": "inherent",
+          "source": "yrs/src/doc.rs:297"
+        },
+        {
+          "name": "unobserve_update_v2",
+          "kind": "function",
+          "context": "inherent",
+          "source": "yrs/src/doc.rs:306"
+        },
+        {
+          "name": "with_client_id",
+          "kind": "function",
+          "context": "inherent",
+          "source": "yrs/src/doc.rs:142"
+        },
+        {
+          "name": "with_options",
+          "kind": "function",
+          "context": "inherent",
+          "source": "yrs/src/doc.rs:147"
+        }
+      ]
+    },
+    {
+      "path": "yrs::GetString",
+      "aliases": [
+        "yrs::GetString",
+        "yrs::types::GetString"
+      ],
+      "kind": "trait",
+      "source": "yrs/src/types/mod.rs:342",
+      "members": [
+        {
+          "name": "get_string",
+          "kind": "function",
+          "context": "trait",
+          "source": "yrs/src/types/mod.rs:344"
+        }
+      ]
+    },
+    {
+      "path": "yrs::Hook",
+      "aliases": [
+        "yrs::Hook",
+        "yrs::branch::Hook"
+      ],
+      "kind": "struct",
+      "source": "yrs/src/branch.rs:736",
+      "members": [
+        {
+          "name": "get",
+          "kind": "function",
+          "context": "inherent",
+          "source": "yrs/src/branch.rs:796"
+        },
+        {
+          "name": "id",
+          "kind": "function",
+          "context": "inherent",
+          "source": "yrs/src/branch.rs:744"
+        },
+        {
+          "name": "into_nested",
+          "kind": "function",
+          "context": "inherent",
+          "source": "yrs/src/branch.rs:806"
+        },
+        {
+          "name": "into_root",
+          "kind": "function",
+          "context": "inherent",
+          "source": "yrs/src/branch.rs:817"
+        }
+      ]
+    },
+    {
+      "path": "yrs::ID",
+      "aliases": [
+        "yrs::ID",
+        "yrs::block::ID"
+      ],
+      "kind": "struct",
+      "source": "yrs/src/block.rs:160",
+      "members": [
+        {
+          "name": "client",
+          "kind": "struct_field",
+          "context": "field",
+          "source": "yrs/src/block.rs:162"
+        },
+        {
+          "name": "clock",
+          "kind": "struct_field",
+          "context": "field",
+          "source": "yrs/src/block.rs:168"
+        },
+        {
+          "name": "new",
+          "kind": "function",
+          "context": "inherent",
+          "source": "yrs/src/block.rs:172"
+        }
+      ]
+    },
+    {
+      "path": "yrs::IdMap",
+      "aliases": [
+        "yrs::IdMap"
+      ],
+      "kind": "struct",
+      "source": "yrs/src/id_map.rs:74",
+      "members": [
+        {
+          "name": "as_id_set",
+          "kind": "function",
+          "context": "inherent",
+          "source": "yrs/src/id_map.rs:252"
+        },
+        {
+          "name": "attributions",
+          "kind": "function",
+          "context": "inherent",
+          "source": "yrs/src/id_map.rs:123"
+        },
+        {
+          "name": "contains",
+          "kind": "function",
+          "context": "inherent",
+          "source": "yrs/src/id_map.rs:119"
+        },
+        {
+          "name": "filter",
+          "kind": "function",
+          "context": "inherent",
+          "source": "yrs/src/id_map.rs:221"
+        },
+        {
+          "name": "from_set",
+          "kind": "function",
+          "context": "inherent",
+          "source": "yrs/src/id_map.rs:95"
+        },
+        {
+          "name": "insert",
+          "kind": "function",
+          "context": "inherent",
+          "source": "yrs/src/id_map.rs:172"
+        },
+        {
+          "name": "intersect_with",
+          "kind": "function",
+          "context": "inherent",
+          "source": "yrs/src/id_map.rs:217"
+        },
+        {
+          "name": "is_empty",
+          "kind": "function",
+          "context": "inherent",
+          "source": "yrs/src/id_map.rs:115"
+        },
+        {
+          "name": "iter",
+          "kind": "function",
+          "context": "inherent",
+          "source": "yrs/src/id_map.rs:111"
+        },
+        {
+          "name": "merge_many",
+          "kind": "function",
+          "context": "inherent",
+          "source": "yrs/src/id_map.rs:206"
+        },
+        {
+          "name": "merge_with",
+          "kind": "function",
+          "context": "inherent",
+          "source": "yrs/src/id_map.rs:198"
+        },
+        {
+          "name": "new",
+          "kind": "function",
+          "context": "inherent",
+          "source": "yrs/src/id_map.rs:80"
+        },
+        {
+          "name": "remove",
+          "kind": "function",
+          "context": "inherent",
+          "source": "yrs/src/id_map.rs:184"
+        }
+      ]
+    },
+    {
+      "path": "yrs::IdSet",
+      "aliases": [
+        "yrs::IdSet"
+      ],
+      "kind": "struct",
+      "source": "yrs/src/id_set.rs:142",
+      "members": [
+        {
+          "name": "client_ids",
+          "kind": "function",
+          "context": "inherent",
+          "source": "yrs/src/id_set.rs:245"
+        },
+        {
+          "name": "contains",
+          "kind": "function",
+          "context": "inherent",
+          "source": "yrs/src/id_set.rs:262"
+        },
+        {
+          "name": "diff",
+          "kind": "function",
+          "context": "inherent",
+          "source": "yrs/src/id_set.rs:311"
+        },
+        {
+          "name": "diff_with",
+          "kind": "function",
+          "context": "inherent",
+          "source": "yrs/src/id_set.rs:304"
+        },
+        {
+          "name": "from_iter",
+          "kind": "function",
+          "context": "inherent",
+          "source": "yrs/src/id_set.rs:227"
+        },
+        {
+          "name": "get",
+          "kind": "function",
+          "context": "inherent",
+          "source": "yrs/src/id_set.rs:339"
+        },
+        {
+          "name": "insert",
+          "kind": "function",
+          "context": "inherent",
+          "source": "yrs/src/id_set.rs:271"
+        },
+        {
+          "name": "insert_range",
+          "kind": "function",
+          "context": "inherent",
+          "source": "yrs/src/id_set.rs:279"
+        },
+        {
+          "name": "intersect",
+          "kind": "function",
+          "context": "inherent",
+          "source": "yrs/src/id_set.rs:323"
+        },
+        {
+          "name": "intersect_with",
+          "kind": "function",
+          "context": "inherent",
+          "source": "yrs/src/id_set.rs:317"
+        },
+        {
+          "name": "is_empty",
+          "kind": "function",
+          "context": "inherent",
+          "source": "yrs/src/id_set.rs:267"
+        },
+        {
+          "name": "iter",
+          "kind": "function",
+          "context": "inherent",
+          "source": "yrs/src/id_set.rs:249"
+        },
+        {
+          "name": "len",
+          "kind": "function",
+          "context": "inherent",
+          "source": "yrs/src/id_set.rs:241"
+        },
+        {
+          "name": "merge",
+          "kind": "function",
+          "context": "inherent",
+          "source": "yrs/src/id_set.rs:298"
+        },
+        {
+          "name": "merge_with",
+          "kind": "function",
+          "context": "inherent",
+          "source": "yrs/src/id_set.rs:291"
+        },
+        {
+          "name": "new",
+          "kind": "function",
+          "context": "inherent",
+          "source": "yrs/src/id_set.rs:223"
+        },
+        {
+          "name": "range_mut",
+          "kind": "function",
+          "context": "inherent",
+          "source": "yrs/src/id_set.rs:257"
+        },
+        {
+          "name": "remove_range",
+          "kind": "function",
+          "context": "inherent",
+          "source": "yrs/src/id_set.rs:329"
+        }
+      ]
+    },
+    {
+      "path": "yrs::In",
+      "aliases": [
+        "yrs::In"
+      ],
+      "kind": "enum",
+      "source": "yrs/src/input.rs:15",
+      "members": [
+        {
+          "name": "Any",
+          "kind": "variant",
+          "context": "variant",
+          "source": "yrs/src/input.rs:16"
+        },
+        {
+          "name": "Array",
+          "kind": "variant",
+          "context": "variant",
+          "source": "yrs/src/input.rs:18"
+        },
+        {
+          "name": "Doc",
+          "kind": "variant",
+          "context": "variant",
+          "source": "yrs/src/input.rs:23"
+        },
+        {
+          "name": "Map",
+          "kind": "variant",
+          "context": "variant",
+          "source": "yrs/src/input.rs:19"
+        },
+        {
+          "name": "Text",
+          "kind": "variant",
+          "context": "variant",
+          "source": "yrs/src/input.rs:17"
+        },
+        {
+          "name": "WeakLink",
+          "kind": "variant",
+          "context": "variant",
+          "source": "yrs/src/input.rs:25"
+        },
+        {
+          "name": "XmlElement",
+          "kind": "variant",
+          "context": "variant",
+          "source": "yrs/src/input.rs:20"
+        },
+        {
+          "name": "XmlFragment",
+          "kind": "variant",
+          "context": "variant",
+          "source": "yrs/src/input.rs:21"
+        },
+        {
+          "name": "XmlText",
+          "kind": "variant",
+          "context": "variant",
+          "source": "yrs/src/input.rs:22"
+        }
+      ]
+    },
+    {
+      "path": "yrs::IndexScope",
+      "aliases": [
+        "yrs::IndexScope"
+      ],
+      "kind": "enum",
+      "source": "yrs/src/sticky_index.rs:450",
+      "members": [
+        {
+          "name": "from_branch",
+          "kind": "function",
+          "context": "inherent",
+          "source": "yrs/src/sticky_index.rs:463"
+        },
+        {
+          "name": "Nested",
+          "kind": "variant",
+          "context": "variant",
+          "source": "yrs/src/sticky_index.rs:456"
+        },
+        {
+          "name": "Relative",
+          "kind": "variant",
+          "context": "variant",
+          "source": "yrs/src/sticky_index.rs:453"
+        },
+        {
+          "name": "Root",
+          "kind": "variant",
+          "context": "variant",
+          "source": "yrs/src/sticky_index.rs:459"
+        }
+      ]
+    },
+    {
+      "path": "yrs::IndexedSequence",
+      "aliases": [
+        "yrs::IndexedSequence"
+      ],
+      "kind": "trait",
+      "source": "yrs/src/sticky_index.rs:608",
+      "members": [
+        {
+          "name": "sticky_index",
+          "kind": "function",
+          "context": "trait",
+          "source": "yrs/src/sticky_index.rs:611"
+        }
+      ]
+    },
+    {
+      "path": "yrs::JsonPath",
+      "aliases": [
+        "yrs::JsonPath",
+        "yrs::json_path::JsonPath"
+      ],
+      "kind": "struct",
+      "source": "yrs/src/json_path/mod.rs:18",
+      "members": [
+        {
+          "name": "parse",
+          "kind": "function",
+          "context": "inherent",
+          "source": "yrs/src/json_path/parse.rs:5"
+        }
+      ]
+    },
+    {
+      "path": "yrs::JsonPathEval",
+      "aliases": [
+        "yrs::JsonPathEval",
+        "yrs::json_path::JsonPathEval"
+      ],
+      "kind": "trait",
+      "source": "yrs/src/json_path/mod.rs:10",
+      "members": [
+        {
+          "name": "Iter",
+          "kind": "assoc_type",
+          "context": "trait",
+          "source": "yrs/src/json_path/mod.rs:11"
+        },
+        {
+          "name": "json_path",
+          "kind": "function",
+          "context": "trait",
+          "source": "yrs/src/json_path/mod.rs:14"
+        }
+      ]
+    },
+    {
+      "path": "yrs::Map",
+      "aliases": [
+        "yrs::Map",
+        "yrs::types::Map",
+        "yrs::types::map::Map"
+      ],
+      "kind": "trait",
+      "source": "yrs/src/types/map.rs:152",
+      "members": [
+        {
+          "name": "clear",
+          "kind": "function",
+          "context": "trait",
+          "source": "yrs/src/types/map.rs:388"
+        },
+        {
+          "name": "contains_key",
+          "kind": "function",
+          "context": "trait",
+          "source": "yrs/src/types/map.rs:379"
+        },
+        {
+          "name": "get",
+          "kind": "function",
+          "context": "trait",
+          "source": "yrs/src/types/map.rs:308"
+        },
+        {
+          "name": "get_as",
+          "kind": "function",
+          "context": "trait",
+          "source": "yrs/src/types/map.rs:366"
+        },
+        {
+          "name": "get_or_init",
+          "kind": "function",
+          "context": "trait",
+          "source": "yrs/src/types/map.rs:265"
+        },
+        {
+          "name": "insert",
+          "kind": "function",
+          "context": "trait",
+          "source": "yrs/src/types/map.rs:189"
+        },
+        {
+          "name": "into_iter",
+          "kind": "function",
+          "context": "trait",
+          "source": "yrs/src/types/map.rs:183"
+        },
+        {
+          "name": "iter",
+          "kind": "function",
+          "context": "trait",
+          "source": "yrs/src/types/map.rs:179"
+        },
+        {
+          "name": "keys",
+          "kind": "function",
+          "context": "trait",
+          "source": "yrs/src/types/map.rs:168"
+        },
+        {
+          "name": "len",
+          "kind": "function",
+          "context": "trait",
+          "source": "yrs/src/types/map.rs:154"
+        },
+        {
+          "name": "link",
+          "kind": "function",
+          "context": "trait",
+          "source": "yrs/src/types/map.rs:297"
+        },
+        {
+          "name": "remove",
+          "kind": "function",
+          "context": "trait",
+          "source": "yrs/src/types/map.rs:290"
+        },
+        {
+          "name": "try_update",
+          "kind": "function",
+          "context": "trait",
+          "source": "yrs/src/types/map.rs:238"
+        },
+        {
+          "name": "values",
+          "kind": "function",
+          "context": "trait",
+          "source": "yrs/src/types/map.rs:173"
+        }
+      ]
+    },
+    {
+      "path": "yrs::MapPrelim",
+      "aliases": [
+        "yrs::MapPrelim",
+        "yrs::types::map::MapPrelim"
+      ],
+      "kind": "struct",
+      "source": "yrs/src/types/map.rs:522",
+      "members": []
+    },
+    {
+      "path": "yrs::MapRef",
+      "aliases": [
+        "yrs::MapRef",
+        "yrs::types::MapRef",
+        "yrs::types::map::MapRef"
+      ],
+      "kind": "struct",
+      "source": "yrs/src/types/map.rs:62",
+      "members": []
+    },
+    {
+      "path": "yrs::Nested",
+      "aliases": [
+        "yrs::Nested",
+        "yrs::branch::Nested"
+      ],
+      "kind": "struct",
+      "source": "yrs/src/branch.rs:691",
+      "members": [
+        {
+          "name": "id",
+          "kind": "struct_field",
+          "context": "field",
+          "source": "yrs/src/branch.rs:692"
+        },
+        {
+          "name": "get",
+          "kind": "function",
+          "context": "inherent",
+          "source": "yrs/src/branch.rs:710"
+        },
+        {
+          "name": "new",
+          "kind": "function",
+          "context": "inherent",
+          "source": "yrs/src/branch.rs:697"
+        }
+      ]
+    },
+    {
+      "path": "yrs::Number",
+      "aliases": [
+        "yrs::Number",
+        "yrs::any::Number"
+      ],
+      "kind": "enum",
+      "source": "yrs/src/any.rs:280",
+      "members": [
+        {
+          "name": "F64_MAX_SAFE_INTEGER",
+          "kind": "assoc_const",
+          "context": "inherent",
+          "source": "yrs/src/any.rs:288"
+        },
+        {
+          "name": "F64_MIN_SAFE_INTEGER",
+          "kind": "assoc_const",
+          "context": "inherent",
+          "source": "yrs/src/any.rs:289"
+        },
+        {
+          "name": "I64_MAX_SAFE_INTEGER",
+          "kind": "assoc_const",
+          "context": "inherent",
+          "source": "yrs/src/any.rs:286"
+        },
+        {
+          "name": "I64_MIN_SAFE_INTEGER",
+          "kind": "assoc_const",
+          "context": "inherent",
+          "source": "yrs/src/any.rs:287"
+        },
+        {
+          "name": "as_f64",
+          "kind": "function",
+          "context": "inherent",
+          "source": "yrs/src/any.rs:317"
+        },
+        {
+          "name": "as_i64",
+          "kind": "function",
+          "context": "inherent",
+          "source": "yrs/src/any.rs:302"
+        },
+        {
+          "name": "try_i64",
+          "kind": "function",
+          "context": "inherent",
+          "source": "yrs/src/any.rs:291"
+        },
+        {
+          "name": "Float",
+          "kind": "variant",
+          "context": "variant",
+          "source": "yrs/src/any.rs:282"
+        },
+        {
+          "name": "Int",
+          "kind": "variant",
+          "context": "variant",
+          "source": "yrs/src/any.rs:281"
+        }
+      ]
+    },
+    {
+      "path": "yrs::Observable",
+      "aliases": [
+        "yrs::Observable",
+        "yrs::types::Observable"
+      ],
+      "kind": "trait",
+      "source": "yrs/src/types/mod.rs:319",
+      "members": [
+        {
+          "name": "Event",
+          "kind": "assoc_type",
+          "context": "trait",
+          "source": "yrs/src/types/mod.rs:320"
+        },
+        {
+          "name": "observe",
+          "kind": "function",
+          "context": "trait",
+          "source": "yrs/src/types/mod.rs:322"
+        },
+        {
+          "name": "unobserve",
+          "kind": "function",
+          "context": "trait",
+          "source": "yrs/src/types/mod.rs:335"
+        }
+      ]
+    },
+    {
+      "path": "yrs::Observer",
+      "aliases": [
+        "yrs::Observer",
+        "yrs::observer::Observer"
+      ],
+      "kind": "struct",
+      "source": "yrs/src/observer.rs:7",
+      "members": [
+        {
+          "name": "has_subscribers",
+          "kind": "function",
+          "context": "inherent",
+          "source": "yrs/src/observer.rs:20"
+        },
+        {
+          "name": "new",
+          "kind": "function",
+          "context": "inherent",
+          "source": "yrs/src/observer.rs:13"
+        },
+        {
+          "name": "subscribe",
+          "kind": "function",
+          "context": "inherent",
+          "source": "yrs/src/observer.rs:26"
+        },
+        {
+          "name": "trigger",
+          "kind": "function",
+          "context": "inherent",
+          "source": "yrs/src/observer.rs:43"
+        },
+        {
+          "name": "unsubscribe",
+          "kind": "function",
+          "context": "inherent",
+          "source": "yrs/src/observer.rs:33"
+        }
+      ]
+    },
+    {
+      "path": "yrs::Offset",
+      "aliases": [
+        "yrs::Offset"
+      ],
+      "kind": "struct",
+      "source": "yrs/src/sticky_index.rs:619",
+      "members": [
+        {
+          "name": "assoc",
+          "kind": "struct_field",
+          "context": "field",
+          "source": "yrs/src/sticky_index.rs:625"
+        },
+        {
+          "name": "branch",
+          "kind": "struct_field",
+          "context": "field",
+          "source": "yrs/src/sticky_index.rs:621"
+        },
+        {
+          "name": "index",
+          "kind": "struct_field",
+          "context": "field",
+          "source": "yrs/src/sticky_index.rs:623"
+        }
+      ]
+    },
+    {
+      "path": "yrs::OffsetKind",
+      "aliases": [
+        "yrs::OffsetKind",
+        "yrs::doc::OffsetKind"
+      ],
+      "kind": "enum",
+      "source": "yrs/src/doc.rs:602",
+      "members": [
+        {
+          "name": "Bytes",
+          "kind": "variant",
+          "context": "variant",
+          "source": "yrs/src/doc.rs:604"
+        },
+        {
+          "name": "Utf16",
+          "kind": "variant",
+          "context": "variant",
+          "source": "yrs/src/doc.rs:606"
+        }
+      ]
+    },
+    {
+      "path": "yrs::Options",
+      "aliases": [
+        "yrs::Options",
+        "yrs::doc::Options"
+      ],
+      "kind": "struct",
+      "source": "yrs/src/doc.rs:470",
+      "members": [
+        {
+          "name": "auto_load",
+          "kind": "struct_field",
+          "context": "field",
+          "source": "yrs/src/doc.rs:497"
+        },
+        {
+          "name": "cleanup_formatting",
+          "kind": "struct_field",
+          "context": "field",
+          "source": "yrs/src/doc.rs:509"
+        },
+        {
+          "name": "client_id",
+          "kind": "struct_field",
+          "context": "field",
+          "source": "yrs/src/doc.rs:475"
+        },
+        {
+          "name": "collection_id",
+          "kind": "struct_field",
+          "context": "field",
+          "source": "yrs/src/doc.rs:484"
+        },
+        {
+          "name": "guid",
+          "kind": "struct_field",
+          "context": "field",
+          "source": "yrs/src/doc.rs:479"
+        },
+        {
+          "name": "offset_kind",
+          "kind": "struct_field",
+          "context": "field",
+          "source": "yrs/src/doc.rs:488"
+        },
+        {
+          "name": "should_load",
+          "kind": "struct_field",
+          "context": "field",
+          "source": "yrs/src/doc.rs:502"
+        },
+        {
+          "name": "skip_gc",
+          "kind": "struct_field",
+          "context": "field",
+          "source": "yrs/src/doc.rs:492"
+        },
+        {
+          "name": "with_client_id",
+          "kind": "function",
+          "context": "inherent",
+          "source": "yrs/src/doc.rs:513"
+        },
+        {
+          "name": "with_guid_and_client_id",
+          "kind": "function",
+          "context": "inherent",
+          "source": "yrs/src/doc.rs:526"
+        }
+      ]
+    },
+    {
+      "path": "yrs::Origin",
+      "aliases": [
+        "yrs::Origin"
+      ],
+      "kind": "struct",
+      "source": "yrs/src/transaction.rs:1519",
+      "members": []
+    },
+    {
+      "path": "yrs::Out",
+      "aliases": [
+        "yrs::Out"
+      ],
+      "kind": "enum",
+      "source": "yrs/src/out.rs:15",
+      "members": [
+        {
+          "name": "cast",
+          "kind": "function",
+          "context": "inherent",
+          "source": "yrs/src/out.rs:51"
+        },
+        {
+          "name": "to_string",
+          "kind": "function",
+          "context": "inherent",
+          "source": "yrs/src/out.rs:59"
+        },
+        {
+          "name": "try_branch",
+          "kind": "function",
+          "context": "inherent",
+          "source": "yrs/src/out.rs:78"
+        },
+        {
+          "name": "Any",
+          "kind": "variant",
+          "context": "variant",
+          "source": "yrs/src/out.rs:17"
+        },
+        {
+          "name": "UndefinedRef",
+          "kind": "variant",
+          "context": "variant",
+          "source": "yrs/src/out.rs:38"
+        },
+        {
+          "name": "YArray",
+          "kind": "variant",
+          "context": "variant",
+          "source": "yrs/src/out.rs:21"
+        },
+        {
+          "name": "YDoc",
+          "kind": "variant",
+          "context": "variant",
+          "source": "yrs/src/out.rs:31"
+        },
+        {
+          "name": "YMap",
+          "kind": "variant",
+          "context": "variant",
+          "source": "yrs/src/out.rs:23"
+        },
+        {
+          "name": "YText",
+          "kind": "variant",
+          "context": "variant",
+          "source": "yrs/src/out.rs:19"
+        },
+        {
+          "name": "YWeakLink",
+          "kind": "variant",
+          "context": "variant",
+          "source": "yrs/src/out.rs:34"
+        },
+        {
+          "name": "YXmlElement",
+          "kind": "variant",
+          "context": "variant",
+          "source": "yrs/src/out.rs:25"
+        },
+        {
+          "name": "YXmlFragment",
+          "kind": "variant",
+          "context": "variant",
+          "source": "yrs/src/out.rs:27"
+        },
+        {
+          "name": "YXmlText",
+          "kind": "variant",
+          "context": "variant",
+          "source": "yrs/src/out.rs:29"
+        }
+      ]
+    },
+    {
+      "path": "yrs::Quotable",
+      "aliases": [
+        "yrs::Quotable",
+        "yrs::types::weak::Quotable"
+      ],
+      "kind": "trait",
+      "source": "yrs/src/types/weak.rs:654",
+      "members": [
+        {
+          "name": "quote",
+          "kind": "function",
+          "context": "trait",
+          "source": "yrs/src/types/weak.rs:689"
+        }
+      ]
+    },
+    {
+      "path": "yrs::ReadTxn",
+      "aliases": [
+        "yrs::ReadTxn"
+      ],
+      "kind": "trait",
+      "source": "yrs/src/transaction.rs:32",
+      "members": [
+        {
+          "name": "branch_id",
+          "kind": "function",
+          "context": "trait",
+          "source": "yrs/src/transaction.rs:276"
+        },
+        {
+          "name": "encode_diff",
+          "kind": "function",
+          "context": "trait",
+          "source": "yrs/src/transaction.rs:71"
+        },
+        {
+          "name": "encode_diff_v1",
+          "kind": "function",
+          "context": "trait",
+          "source": "yrs/src/transaction.rs:86"
+        },
+        {
+          "name": "encode_diff_v2",
+          "kind": "function",
+          "context": "trait",
+          "source": "yrs/src/transaction.rs:103"
+        },
+        {
+          "name": "encode_state_as_update",
+          "kind": "function",
+          "context": "trait",
+          "source": "yrs/src/transaction.rs:121"
+        },
+        {
+          "name": "encode_state_as_update_v1",
+          "kind": "function",
+          "context": "trait",
+          "source": "yrs/src/transaction.rs:140"
+        },
+        {
+          "name": "encode_state_as_update_v2",
+          "kind": "function",
+          "context": "trait",
+          "source": "yrs/src/transaction.rs:159"
+        },
+        {
+          "name": "encode_state_from_snapshot",
+          "kind": "function",
+          "context": "trait",
+          "source": "yrs/src/transaction.rs:52"
+        },
+        {
+          "name": "get",
+          "kind": "function",
+          "context": "trait",
+          "source": "yrs/src/transaction.rs:245"
+        },
+        {
+          "name": "get_array",
+          "kind": "function",
+          "context": "trait",
+          "source": "yrs/src/transaction.rs:210"
+        },
+        {
+          "name": "get_map",
+          "kind": "function",
+          "context": "trait",
+          "source": "yrs/src/transaction.rs:225"
+        },
+        {
+          "name": "get_text",
+          "kind": "function",
+          "context": "trait",
+          "source": "yrs/src/transaction.rs:196"
+        },
+        {
+          "name": "get_xml_fragment",
+          "kind": "function",
+          "context": "trait",
+          "source": "yrs/src/transaction.rs:241"
+        },
+        {
+          "name": "has_missing_updates",
+          "kind": "function",
+          "context": "trait",
+          "source": "yrs/src/transaction.rs:286"
+        },
+        {
+          "name": "parent_doc",
+          "kind": "function",
+          "context": "trait",
+          "source": "yrs/src/transaction.rs:265"
+        },
+        {
+          "name": "root_refs",
+          "kind": "function",
+          "context": "trait",
+          "source": "yrs/src/transaction.rs:168"
+        },
+        {
+          "name": "snapshot",
+          "kind": "function",
+          "context": "trait",
+          "source": "yrs/src/transaction.rs:42"
+        },
+        {
+          "name": "state_vector",
+          "kind": "function",
+          "context": "trait",
+          "source": "yrs/src/transaction.rs:36"
+        },
+        {
+          "name": "store",
+          "kind": "function",
+          "context": "trait",
+          "source": "yrs/src/transaction.rs:33"
+        },
+        {
+          "name": "subdoc_guids",
+          "kind": "function",
+          "context": "trait",
+          "source": "yrs/src/transaction.rs:175"
+        },
+        {
+          "name": "subdocs",
+          "kind": "function",
+          "context": "trait",
+          "source": "yrs/src/transaction.rs:181"
+        }
+      ]
+    },
+    {
+      "path": "yrs::Root",
+      "aliases": [
+        "yrs::Root",
+        "yrs::branch::Root"
+      ],
+      "kind": "struct",
+      "source": "yrs/src/branch.rs:620",
+      "members": [
+        {
+          "name": "name",
+          "kind": "struct_field",
+          "context": "field",
+          "source": "yrs/src/branch.rs:622"
+        },
+        {
+          "name": "get",
+          "kind": "function",
+          "context": "inherent",
+          "source": "yrs/src/branch.rs:649"
+        },
+        {
+          "name": "get_or_create",
+          "kind": "function",
+          "context": "inherent",
+          "source": "yrs/src/branch.rs:639"
+        },
+        {
+          "name": "new",
+          "kind": "function",
+          "context": "inherent",
+          "source": "yrs/src/branch.rs:630"
+        }
+      ]
+    },
+    {
+      "path": "yrs::RootRef",
+      "aliases": [
+        "yrs::RootRef",
+        "yrs::types::RootRef"
+      ],
+      "kind": "trait",
+      "source": "yrs/src/types/mod.rs:357",
+      "members": [
+        {
+          "name": "root",
+          "kind": "function",
+          "context": "trait",
+          "source": "yrs/src/types/mod.rs:361"
+        },
+        {
+          "name": "type_ref",
+          "kind": "function",
+          "context": "trait",
+          "source": "yrs/src/types/mod.rs:358"
+        }
+      ]
+    },
+    {
+      "path": "yrs::RootRefs",
+      "aliases": [
+        "yrs::RootRefs"
+      ],
+      "kind": "struct",
+      "source": "yrs/src/transaction.rs:1492",
+      "members": []
+    },
+    {
+      "path": "yrs::SharedRef",
+      "aliases": [
+        "yrs::SharedRef",
+        "yrs::types::SharedRef"
+      ],
+      "kind": "trait",
+      "source": "yrs/src/types/mod.rs:367",
+      "members": [
+        {
+          "name": "hook",
+          "kind": "function",
+          "context": "trait",
+          "source": "yrs/src/types/mod.rs:369"
+        }
+      ]
+    },
+    {
+      "path": "yrs::Snapshot",
+      "aliases": [
+        "yrs::Snapshot"
+      ],
+      "kind": "struct",
+      "source": "yrs/src/state_vector.rs:179",
+      "members": [
+        {
+          "name": "delete_set",
+          "kind": "struct_field",
+          "context": "field",
+          "source": "yrs/src/state_vector.rs:181"
+        },
+        {
+          "name": "state_map",
+          "kind": "struct_field",
+          "context": "field",
+          "source": "yrs/src/state_vector.rs:183"
+        },
+        {
+          "name": "new",
+          "kind": "function",
+          "context": "inherent",
+          "source": "yrs/src/state_vector.rs:187"
+        }
+      ]
+    },
+    {
+      "path": "yrs::StateVector",
+      "aliases": [
+        "yrs::StateVector"
+      ],
+      "kind": "struct",
+      "source": "yrs/src/state_vector.rs:21",
+      "members": [
+        {
+          "name": "contains",
+          "kind": "function",
+          "context": "inherent",
+          "source": "yrs/src/state_vector.rs:42"
+        },
+        {
+          "name": "contains_client",
+          "kind": "function",
+          "context": "inherent",
+          "source": "yrs/src/state_vector.rs:46"
+        },
+        {
+          "name": "get",
+          "kind": "function",
+          "context": "inherent",
+          "source": "yrs/src/state_vector.rs:52"
+        },
+        {
+          "name": "inc_by",
+          "kind": "function",
+          "context": "inherent",
+          "source": "yrs/src/state_vector.rs:61"
+        },
+        {
+          "name": "is_empty",
+          "kind": "function",
+          "context": "inherent",
+          "source": "yrs/src/state_vector.rs:25"
+        },
+        {
+          "name": "iter",
+          "kind": "function",
+          "context": "inherent",
+          "source": "yrs/src/state_vector.rs:93"
+        },
+        {
+          "name": "len",
+          "kind": "function",
+          "context": "inherent",
+          "source": "yrs/src/state_vector.rs:31"
+        },
+        {
+          "name": "merge",
+          "kind": "function",
+          "context": "inherent",
+          "source": "yrs/src/state_vector.rs:101"
+        },
+        {
+          "name": "new",
+          "kind": "function",
+          "context": "inherent",
+          "source": "yrs/src/state_vector.rs:35"
+        },
+        {
+          "name": "set_max",
+          "kind": "function",
+          "context": "inherent",
+          "source": "yrs/src/state_vector.rs:86"
+        },
+        {
+          "name": "set_min",
+          "kind": "function",
+          "context": "inherent",
+          "source": "yrs/src/state_vector.rs:71"
+        }
+      ]
+    },
+    {
+      "path": "yrs::StickyIndex",
+      "aliases": [
+        "yrs::StickyIndex"
+      ],
+      "kind": "struct",
+      "source": "yrs/src/sticky_index.rs:45",
+      "members": [
+        {
+          "name": "assoc",
+          "kind": "struct_field",
+          "context": "field",
+          "source": "yrs/src/sticky_index.rs:48"
+        },
+        {
+          "name": "at",
+          "kind": "function",
+          "context": "inherent",
+          "source": "yrs/src/sticky_index.rs:231"
+        },
+        {
+          "name": "from_id",
+          "kind": "function",
+          "context": "inherent",
+          "source": "yrs/src/sticky_index.rs:56"
+        },
+        {
+          "name": "from_type",
+          "kind": "function",
+          "context": "inherent",
+          "source": "yrs/src/sticky_index.rs:60"
+        },
+        {
+          "name": "get_offset",
+          "kind": "function",
+          "context": "inherent",
+          "source": "yrs/src/sticky_index.rs:155"
+        },
+        {
+          "name": "id",
+          "kind": "function",
+          "context": "inherent",
+          "source": "yrs/src/sticky_index.rs:116"
+        },
+        {
+          "name": "is_nested",
+          "kind": "function",
+          "context": "inherent",
+          "source": "yrs/src/sticky_index.rs:93"
+        },
+        {
+          "name": "is_relative",
+          "kind": "function",
+          "context": "inherent",
+          "source": "yrs/src/sticky_index.rs:103"
+        },
+        {
+          "name": "is_root",
+          "kind": "function",
+          "context": "inherent",
+          "source": "yrs/src/sticky_index.rs:83"
+        },
+        {
+          "name": "new",
+          "kind": "function",
+          "context": "inherent",
+          "source": "yrs/src/sticky_index.rs:52"
+        },
+        {
+          "name": "scope",
+          "kind": "function",
+          "context": "inherent",
+          "source": "yrs/src/sticky_index.rs:77"
+        }
+      ]
+    },
+    {
+      "path": "yrs::Store",
+      "aliases": [
+        "yrs::Store"
+      ],
+      "kind": "struct",
+      "source": "yrs/src/store.rs:29",
+      "members": [
+        {
+          "name": "encode_diff",
+          "kind": "function",
+          "context": "inherent",
+          "source": "yrs/src/store.rs:207"
+        },
+        {
+          "name": "encode_state_from_snapshot",
+          "kind": "function",
+          "context": "inherent",
+          "source": "yrs/src/store.rs:152"
+        },
+        {
+          "name": "get_local_state",
+          "kind": "function",
+          "context": "inherent",
+          "source": "yrs/src/store.rs:115"
+        },
+        {
+          "name": "get_type_from_path",
+          "kind": "function",
+          "context": "inherent",
+          "source": "yrs/src/store.rs:268"
+        },
+        {
+          "name": "is_subdoc",
+          "kind": "function",
+          "context": "inherent",
+          "source": "yrs/src/store.rs:107"
+        },
+        {
+          "name": "pending_ds",
+          "kind": "function",
+          "context": "inherent",
+          "source": "yrs/src/store.rs:98"
+        },
+        {
+          "name": "pending_ds_mut",
+          "kind": "function",
+          "context": "inherent",
+          "source": "yrs/src/store.rs:103"
+        },
+        {
+          "name": "pending_update",
+          "kind": "function",
+          "context": "inherent",
+          "source": "yrs/src/store.rs:87"
+        },
+        {
+          "name": "pending_update_mut",
+          "kind": "function",
+          "context": "inherent",
+          "source": "yrs/src/store.rs:92"
+        },
+        {
+          "name": "subdoc_guids",
+          "kind": "function",
+          "context": "inherent",
+          "source": "yrs/src/store.rs:364"
+        },
+        {
+          "name": "subdocs",
+          "kind": "function",
+          "context": "inherent",
+          "source": "yrs/src/store.rs:358"
+        }
+      ]
+    },
+    {
+      "path": "yrs::SubdocsEvent",
+      "aliases": [
+        "yrs::SubdocsEvent"
+      ],
+      "kind": "struct",
+      "source": "yrs/src/event.rs:46",
+      "members": [
+        {
+          "name": "added",
+          "kind": "function",
+          "context": "inherent",
+          "source": "yrs/src/event.rs:63"
+        },
+        {
+          "name": "loaded",
+          "kind": "function",
+          "context": "inherent",
+          "source": "yrs/src/event.rs:75"
+        },
+        {
+          "name": "removed",
+          "kind": "function",
+          "context": "inherent",
+          "source": "yrs/src/event.rs:69"
+        }
+      ]
+    },
+    {
+      "path": "yrs::SubdocsEventIter",
+      "aliases": [
+        "yrs::SubdocsEventIter"
+      ],
+      "kind": "struct",
+      "source": "yrs/src/event.rs:81",
+      "members": []
+    },
+    {
+      "path": "yrs::Text",
+      "aliases": [
+        "yrs::Text",
+        "yrs::types::Text",
+        "yrs::types::text::Text"
+      ],
+      "kind": "trait",
+      "source": "yrs/src/types/text.rs:158",
+      "members": [
+        {
+          "name": "apply_delta",
+          "kind": "function",
+          "context": "trait",
+          "source": "yrs/src/types/text.rs:233"
+        },
+        {
+          "name": "diff",
+          "kind": "function",
+          "context": "trait",
+          "source": "yrs/src/types/text.rs:420"
+        },
+        {
+          "name": "diff_range",
+          "kind": "function",
+          "context": "trait",
+          "source": "yrs/src/types/text.rs:431"
+        },
+        {
+          "name": "format",
+          "kind": "function",
+          "context": "trait",
+          "source": "yrs/src/types/text.rs:372"
+        },
+        {
+          "name": "insert",
+          "kind": "function",
+          "context": "trait",
+          "source": "yrs/src/types/text.rs:212"
+        },
+        {
+          "name": "insert_embed",
+          "kind": "function",
+          "context": "trait",
+          "source": "yrs/src/types/text.rs:301"
+        },
+        {
+          "name": "insert_embed_with_attributes",
+          "kind": "function",
+          "context": "trait",
+          "source": "yrs/src/types/text.rs:328"
+        },
+        {
+          "name": "insert_with_attributes",
+          "kind": "function",
+          "context": "trait",
+          "source": "yrs/src/types/text.rs:275"
+        },
+        {
+          "name": "len",
+          "kind": "function",
+          "context": "trait",
+          "source": "yrs/src/types/text.rs:160"
+        },
+        {
+          "name": "push",
+          "kind": "function",
+          "context": "trait",
+          "source": "yrs/src/types/text.rs:353"
+        },
+        {
+          "name": "remove_range",
+          "kind": "function",
+          "context": "trait",
+          "source": "yrs/src/types/text.rs:361"
+        }
+      ]
+    },
+    {
+      "path": "yrs::TextPrelim",
+      "aliases": [
+        "yrs::TextPrelim",
+        "yrs::types::text::TextPrelim"
+      ],
+      "kind": "struct",
+      "source": "yrs/src/types/text.rs:1442",
+      "members": [
+        {
+          "name": "new",
+          "kind": "function",
+          "context": "inherent",
+          "source": "yrs/src/types/text.rs:1446"
+        }
+      ]
+    },
+    {
+      "path": "yrs::TextRef",
+      "aliases": [
+        "yrs::TextRef",
+        "yrs::types::TextRef",
+        "yrs::types::text::TextRef"
+      ],
+      "kind": "struct",
+      "source": "yrs/src/types/text.rs:91",
+      "members": []
+    },
+    {
+      "path": "yrs::Transact",
+      "aliases": [
+        "yrs::Transact"
+      ],
+      "kind": "trait",
+      "source": "yrs/src/transact.rs:10",
+      "members": [
+        {
+          "name": "transact",
+          "kind": "function",
+          "context": "trait",
+          "source": "yrs/src/transact.rs:74"
+        },
+        {
+          "name": "transact_mut",
+          "kind": "function",
+          "context": "trait",
+          "source": "yrs/src/transact.rs:86"
+        },
+        {
+          "name": "transact_mut_with",
+          "kind": "function",
+          "context": "trait",
+          "source": "yrs/src/transact.rs:63"
+        },
+        {
+          "name": "try_transact",
+          "kind": "function",
+          "context": "trait",
+          "source": "yrs/src/transact.rs:18"
+        },
+        {
+          "name": "try_transact_mut",
+          "kind": "function",
+          "context": "trait",
+          "source": "yrs/src/transact.rs:29"
+        },
+        {
+          "name": "try_transact_mut_with",
+          "kind": "function",
+          "context": "trait",
+          "source": "yrs/src/transact.rs:43"
+        }
+      ]
+    },
+    {
+      "path": "yrs::Transaction",
+      "aliases": [
+        "yrs::Transaction"
+      ],
+      "kind": "struct",
+      "source": "yrs/src/transaction.rs:458",
+      "members": []
+    },
+    {
+      "path": "yrs::TransactionAcqError",
+      "aliases": [
+        "yrs::TransactionAcqError"
+      ],
+      "kind": "enum",
+      "source": "yrs/src/transact.rs:228",
+      "members": [
+        {
+          "name": "DocumentDropped",
+          "kind": "variant",
+          "context": "variant",
+          "source": "yrs/src/transact.rs:234"
+        },
+        {
+          "name": "ExclusiveAcqFailed",
+          "kind": "variant",
+          "context": "variant",
+          "source": "yrs/src/transact.rs:232"
+        },
+        {
+          "name": "SharedAcqFailed",
+          "kind": "variant",
+          "context": "variant",
+          "source": "yrs/src/transact.rs:230"
+        }
+      ]
+    },
+    {
+      "path": "yrs::TransactionCleanupEvent",
+      "aliases": [
+        "yrs::TransactionCleanupEvent"
+      ],
+      "kind": "struct",
+      "source": "yrs/src/event.rs:28",
+      "members": [
+        {
+          "name": "after_state",
+          "kind": "struct_field",
+          "context": "field",
+          "source": "yrs/src/event.rs:30"
+        },
+        {
+          "name": "before_state",
+          "kind": "struct_field",
+          "context": "field",
+          "source": "yrs/src/event.rs:29"
+        },
+        {
+          "name": "delete_set",
+          "kind": "struct_field",
+          "context": "field",
+          "source": "yrs/src/event.rs:31"
+        },
+        {
+          "name": "new",
+          "kind": "function",
+          "context": "inherent",
+          "source": "yrs/src/event.rs:35"
+        }
+      ]
+    },
+    {
+      "path": "yrs::TransactionMut",
+      "aliases": [
+        "yrs::TransactionMut"
+      ],
+      "kind": "struct",
+      "source": "yrs/src/transaction.rs:487",
+      "members": [
+        {
+          "name": "after_state",
+          "kind": "function",
+          "context": "inherent",
+          "source": "yrs/src/transaction.rs:592"
+        },
+        {
+          "name": "apply_update",
+          "kind": "function",
+          "context": "inherent",
+          "source": "yrs/src/transaction.rs:873"
+        },
+        {
+          "name": "before_state",
+          "kind": "function",
+          "context": "inherent",
+          "source": "yrs/src/transaction.rs:579"
+        },
+        {
+          "name": "changed_parent_types",
+          "kind": "function",
+          "context": "inherent",
+          "source": "yrs/src/transaction.rs:628"
+        },
+        {
+          "name": "cleanups",
+          "kind": "function",
+          "context": "inherent",
+          "source": "yrs/src/transaction.rs:616"
+        },
+        {
+          "name": "commit",
+          "kind": "function",
+          "context": "inherent",
+          "source": "yrs/src/transaction.rs:1084"
+        },
+        {
+          "name": "delete_set",
+          "kind": "function",
+          "context": "inherent",
+          "source": "yrs/src/transaction.rs:610"
+        },
+        {
+          "name": "doc",
+          "kind": "function",
+          "context": "inherent",
+          "source": "yrs/src/transaction.rs:566"
+        },
+        {
+          "name": "encode_update",
+          "kind": "function",
+          "context": "inherent",
+          "source": "yrs/src/transaction.rs:678"
+        },
+        {
+          "name": "encode_update_v1",
+          "kind": "function",
+          "context": "inherent",
+          "source": "yrs/src/transaction.rs:650"
+        },
+        {
+          "name": "encode_update_v2",
+          "kind": "function",
+          "context": "inherent",
+          "source": "yrs/src/transaction.rs:664"
+        },
+        {
+          "name": "events",
+          "kind": "function",
+          "context": "inherent",
+          "source": "yrs/src/transaction.rs:570"
+        },
+        {
+          "name": "events_mut",
+          "kind": "function",
+          "context": "inherent",
+          "source": "yrs/src/transaction.rs:574"
+        },
+        {
+          "name": "gc",
+          "kind": "function",
+          "context": "inherent",
+          "source": "yrs/src/transaction.rs:1363"
+        },
+        {
+          "name": "has_changes",
+          "kind": "function",
+          "context": "inherent",
+          "source": "yrs/src/transaction.rs:562"
+        },
+        {
+          "name": "insert_set",
+          "kind": "function",
+          "context": "inherent",
+          "source": "yrs/src/transaction.rs:605"
+        },
+        {
+          "name": "observe_after_transaction",
+          "kind": "function",
+          "context": "inherent",
+          "source": "yrs/src/transaction.rs:1461"
+        },
+        {
+          "name": "observe_before_observer_calls",
+          "kind": "function",
+          "context": "inherent",
+          "source": "yrs/src/transaction.rs:1468"
+        },
+        {
+          "name": "observe_destroy",
+          "kind": "function",
+          "context": "inherent",
+          "source": "yrs/src/transaction.rs:1483"
+        },
+        {
+          "name": "observe_subdocs",
+          "kind": "function",
+          "context": "inherent",
+          "source": "yrs/src/transaction.rs:1476"
+        },
+        {
+          "name": "observe_transaction_cleanup",
+          "kind": "function",
+          "context": "inherent",
+          "source": "yrs/src/transaction.rs:1454"
+        },
+        {
+          "name": "observe_update_v1",
+          "kind": "function",
+          "context": "inherent",
+          "source": "yrs/src/transaction.rs:1436"
+        },
+        {
+          "name": "observe_update_v2",
+          "kind": "function",
+          "context": "inherent",
+          "source": "yrs/src/transaction.rs:1445"
+        },
+        {
+          "name": "origin",
+          "kind": "function",
+          "context": "inherent",
+          "source": "yrs/src/transaction.rs:622"
+        },
+        {
+          "name": "unobserve_after_transaction",
+          "kind": "function",
+          "context": "inherent",
+          "source": "yrs/src/transaction.rs:1461"
+        },
+        {
+          "name": "unobserve_before_observer_calls",
+          "kind": "function",
+          "context": "inherent",
+          "source": "yrs/src/transaction.rs:1468"
+        },
+        {
+          "name": "unobserve_destroy",
+          "kind": "function",
+          "context": "inherent",
+          "source": "yrs/src/transaction.rs:1483"
+        },
+        {
+          "name": "unobserve_subdocs",
+          "kind": "function",
+          "context": "inherent",
+          "source": "yrs/src/transaction.rs:1476"
+        },
+        {
+          "name": "unobserve_transaction_cleanup",
+          "kind": "function",
+          "context": "inherent",
+          "source": "yrs/src/transaction.rs:1454"
+        },
+        {
+          "name": "unobserve_update_v1",
+          "kind": "function",
+          "context": "inherent",
+          "source": "yrs/src/transaction.rs:1436"
+        },
+        {
+          "name": "unobserve_update_v2",
+          "kind": "function",
+          "context": "inherent",
+          "source": "yrs/src/transaction.rs:1445"
+        }
+      ]
+    },
+    {
+      "path": "yrs::UndoManager",
+      "aliases": [
+        "yrs::UndoManager"
+      ],
+      "kind": "type_alias",
+      "source": "yrs/src/lib.rs:721",
+      "members": []
+    },
+    {
+      "path": "yrs::Update",
+      "aliases": [
+        "yrs::Update"
+      ],
+      "kind": "struct",
+      "source": "yrs/src/update.rs:164",
+      "members": [
+        {
+          "name": "EMPTY_V1",
+          "kind": "assoc_const",
+          "context": "inherent",
+          "source": "yrs/src/update.rs:171"
+        },
+        {
+          "name": "EMPTY_V2",
+          "kind": "assoc_const",
+          "context": "inherent",
+          "source": "yrs/src/update.rs:174"
+        },
+        {
+          "name": "delete_set",
+          "kind": "function",
+          "context": "inherent",
+          "source": "yrs/src/update.rs:267"
+        },
+        {
+          "name": "extends",
+          "kind": "function",
+          "context": "inherent",
+          "source": "yrs/src/update.rs:186"
+        },
+        {
+          "name": "insertions",
+          "kind": "function",
+          "context": "inherent",
+          "source": "yrs/src/update.rs:248"
+        },
+        {
+          "name": "is_empty",
+          "kind": "function",
+          "context": "inherent",
+          "source": "yrs/src/update.rs:181"
+        },
+        {
+          "name": "merge",
+          "kind": "function",
+          "context": "inherent",
+          "source": "yrs/src/update.rs:272"
+        },
+        {
+          "name": "merge_updates",
+          "kind": "function",
+          "context": "inherent",
+          "source": "yrs/src/update.rs:648"
+        },
+        {
+          "name": "new",
+          "kind": "function",
+          "context": "inherent",
+          "source": "yrs/src/update.rs:176"
+        },
+        {
+          "name": "state_vector",
+          "kind": "function",
+          "context": "inherent",
+          "source": "yrs/src/update.rs:206"
+        },
+        {
+          "name": "state_vector_lower",
+          "kind": "function",
+          "context": "inherent",
+          "source": "yrs/src/update.rs:230"
+        }
+      ]
+    },
+    {
+      "path": "yrs::UpdateEvent",
+      "aliases": [
+        "yrs::UpdateEvent"
+      ],
+      "kind": "struct",
+      "source": "yrs/src/event.rs:7",
+      "members": [
+        {
+          "name": "update",
+          "kind": "struct_field",
+          "context": "field",
+          "source": "yrs/src/event.rs:10"
+        }
+      ]
+    },
+    {
+      "path": "yrs::Uuid",
+      "aliases": [
+        "yrs::Uuid"
+      ],
+      "kind": "type_alias",
+      "source": "yrs/src/lib.rs:722",
+      "members": []
+    },
+    {
+      "path": "yrs::Value",
+      "aliases": [
+        "yrs::Value"
+      ],
+      "kind": "type_alias",
+      "source": "yrs/src/lib.rs:719",
+      "members": []
+    },
+    {
+      "path": "yrs::WeakPrelim",
+      "aliases": [
+        "yrs::WeakPrelim",
+        "yrs::types::weak::WeakPrelim"
+      ],
+      "kind": "struct",
+      "source": "yrs/src/types/weak.rs:327",
+      "members": [
+        {
+          "name": "into_inner",
+          "kind": "function",
+          "context": "inherent",
+          "source": "yrs/src/types/weak.rs:347"
+        },
+        {
+          "name": "source",
+          "kind": "function",
+          "context": "inherent",
+          "source": "yrs/src/types/weak.rs:354"
+        },
+        {
+          "name": "try_deref",
+          "kind": "function",
+          "context": "inherent",
+          "source": "yrs/src/types/weak.rs:378"
+        },
+        {
+          "name": "try_deref_raw",
+          "kind": "function",
+          "context": "inherent",
+          "source": "yrs/src/types/weak.rs:374"
+        },
+        {
+          "name": "unquote",
+          "kind": "function",
+          "context": "inherent",
+          "source": "yrs/src/types/weak.rs:365"
+        },
+        {
+          "name": "upcast",
+          "kind": "function",
+          "context": "inherent",
+          "source": "yrs/src/types/weak.rs:421"
+        }
+      ]
+    },
+    {
+      "path": "yrs::WeakRef",
+      "aliases": [
+        "yrs::WeakRef",
+        "yrs::types::weak::WeakRef"
+      ],
+      "kind": "struct",
+      "source": "yrs/src/types/weak.rs:77",
+      "members": [
+        {
+          "name": "end_id",
+          "kind": "function",
+          "context": "inherent",
+          "source": "yrs/src/types/weak.rs:123"
+        },
+        {
+          "name": "into_inner",
+          "kind": "function",
+          "context": "inherent",
+          "source": "yrs/src/types/weak.rs:233"
+        },
+        {
+          "name": "source",
+          "kind": "function",
+          "context": "inherent",
+          "source": "yrs/src/types/weak.rs:110"
+        },
+        {
+          "name": "start_id",
+          "kind": "function",
+          "context": "inherent",
+          "source": "yrs/src/types/weak.rs:117"
+        },
+        {
+          "name": "try_deref",
+          "kind": "function",
+          "context": "inherent",
+          "source": "yrs/src/types/weak.rs:247"
+        },
+        {
+          "name": "try_deref_value",
+          "kind": "function",
+          "context": "inherent",
+          "source": "yrs/src/types/weak.rs:285"
+        },
+        {
+          "name": "try_source",
+          "kind": "function",
+          "context": "inherent",
+          "source": "yrs/src/types/weak.rs:94"
+        },
+        {
+          "name": "unquote",
+          "kind": "function",
+          "context": "inherent",
+          "source": "yrs/src/types/weak.rs:303"
+        }
+      ]
+    },
+    {
+      "path": "yrs::WriteTxn",
+      "aliases": [
+        "yrs::WriteTxn"
+      ],
+      "kind": "trait",
+      "source": "yrs/src/transaction.rs:292",
+      "members": [
+        {
+          "name": "get_or_insert_array",
+          "kind": "function",
+          "context": "trait",
+          "source": "yrs/src/transaction.rs:335"
+        },
+        {
+          "name": "get_or_insert_map",
+          "kind": "function",
+          "context": "trait",
+          "source": "yrs/src/transaction.rs:321"
+        },
+        {
+          "name": "get_or_insert_text",
+          "kind": "function",
+          "context": "trait",
+          "source": "yrs/src/transaction.rs:306"
+        },
+        {
+          "name": "get_or_insert_xml_fragment",
+          "kind": "function",
+          "context": "trait",
+          "source": "yrs/src/transaction.rs:351"
+        },
+        {
+          "name": "prune_pending",
+          "kind": "function",
+          "context": "trait",
+          "source": "yrs/src/transaction.rs:357"
+        },
+        {
+          "name": "store_mut",
+          "kind": "function",
+          "context": "trait",
+          "source": "yrs/src/transaction.rs:293"
+        },
+        {
+          "name": "subdocs_mut",
+          "kind": "function",
+          "context": "trait",
+          "source": "yrs/src/transaction.rs:294"
+        }
+      ]
+    },
+    {
+      "path": "yrs::Xml",
+      "aliases": [
+        "yrs::Xml",
+        "yrs::types::xml::Xml"
+      ],
+      "kind": "trait",
+      "source": "yrs/src/types/xml.rs:986",
+      "members": [
+        {
+          "name": "attributes",
+          "kind": "function",
+          "context": "trait",
+          "source": "yrs/src/types/xml.rs:1039"
+        },
+        {
+          "name": "get_attribute",
+          "kind": "function",
+          "context": "trait",
+          "source": "yrs/src/types/xml.rs:1032"
+        },
+        {
+          "name": "insert_attribute",
+          "kind": "function",
+          "context": "trait",
+          "source": "yrs/src/types/xml.rs:1002"
+        },
+        {
+          "name": "parent",
+          "kind": "function",
+          "context": "trait",
+          "source": "yrs/src/types/xml.rs:987"
+        },
+        {
+          "name": "remove_attribute",
+          "kind": "function",
+          "context": "trait",
+          "source": "yrs/src/types/xml.rs:994"
+        },
+        {
+          "name": "siblings",
+          "kind": "function",
+          "context": "trait",
+          "source": "yrs/src/types/xml.rs:1043"
+        }
+      ]
+    },
+    {
+      "path": "yrs::XmlElementPrelim",
+      "aliases": [
+        "yrs::XmlElementPrelim",
+        "yrs::types::xml::XmlElementPrelim"
+      ],
+      "kind": "struct",
+      "source": "yrs/src/types/xml.rs:394",
+      "members": [
+        {
+          "name": "attributes",
+          "kind": "struct_field",
+          "context": "field",
+          "source": "yrs/src/types/xml.rs:396"
+        },
+        {
+          "name": "children",
+          "kind": "struct_field",
+          "context": "field",
+          "source": "yrs/src/types/xml.rs:397"
+        },
+        {
+          "name": "tag",
+          "kind": "struct_field",
+          "context": "field",
+          "source": "yrs/src/types/xml.rs:395"
+        },
+        {
+          "name": "empty",
+          "kind": "function",
+          "context": "inherent",
+          "source": "yrs/src/types/xml.rs:413"
+        },
+        {
+          "name": "new",
+          "kind": "function",
+          "context": "inherent",
+          "source": "yrs/src/types/xml.rs:401"
+        }
+      ]
+    },
+    {
+      "path": "yrs::XmlElementRef",
+      "aliases": [
+        "yrs::XmlElementRef",
+        "yrs::types::xml::XmlElementRef"
+      ],
+      "kind": "struct",
+      "source": "yrs/src/types/xml.rs:247",
+      "members": [
+        {
+          "name": "tag",
+          "kind": "function",
+          "context": "inherent",
+          "source": "yrs/src/types/xml.rs:280"
+        },
+        {
+          "name": "try_tag",
+          "kind": "function",
+          "context": "inherent",
+          "source": "yrs/src/types/xml.rs:270"
+        }
+      ]
+    },
+    {
+      "path": "yrs::XmlFragment",
+      "aliases": [
+        "yrs::XmlFragment",
+        "yrs::types::xml::XmlFragment"
+      ],
+      "kind": "trait",
+      "source": "yrs/src/types/xml.rs:1049",
+      "members": [
+        {
+          "name": "children",
+          "kind": "function",
+          "context": "trait",
+          "source": "yrs/src/types/xml.rs:1064"
+        },
+        {
+          "name": "first_child",
+          "kind": "function",
+          "context": "trait",
+          "source": "yrs/src/types/xml.rs:1050"
+        },
+        {
+          "name": "get",
+          "kind": "function",
+          "context": "trait",
+          "source": "yrs/src/types/xml.rs:1128"
+        },
+        {
+          "name": "insert",
+          "kind": "function",
+          "context": "trait",
+          "source": "yrs/src/types/xml.rs:1079"
+        },
+        {
+          "name": "len",
+          "kind": "function",
+          "context": "trait",
+          "source": "yrs/src/types/xml.rs:1070"
+        },
+        {
+          "name": "push_back",
+          "kind": "function",
+          "context": "trait",
+          "source": "yrs/src/types/xml.rs:1092"
+        },
+        {
+          "name": "push_front",
+          "kind": "function",
+          "context": "trait",
+          "source": "yrs/src/types/xml.rs:1101"
+        },
+        {
+          "name": "remove",
+          "kind": "function",
+          "context": "trait",
+          "source": "yrs/src/types/xml.rs:1109"
+        },
+        {
+          "name": "remove_range",
+          "kind": "function",
+          "context": "trait",
+          "source": "yrs/src/types/xml.rs:1117"
+        },
+        {
+          "name": "successors",
+          "kind": "function",
+          "context": "trait",
+          "source": "yrs/src/types/xml.rs:1179"
+        }
+      ]
+    },
+    {
+      "path": "yrs::XmlFragmentPrelim",
+      "aliases": [
+        "yrs::XmlFragmentPrelim",
+        "yrs::types::xml::XmlFragmentPrelim"
+      ],
+      "kind": "struct",
+      "source": "yrs/src/types/xml.rs:906",
+      "members": [
+        {
+          "name": "new",
+          "kind": "function",
+          "context": "inherent",
+          "source": "yrs/src/types/xml.rs:909"
+        }
+      ]
+    },
+    {
+      "path": "yrs::XmlFragmentRef",
+      "aliases": [
+        "yrs::XmlFragmentRef",
+        "yrs::types::xml::XmlFragmentRef"
+      ],
+      "kind": "struct",
+      "source": "yrs/src/types/xml.rs:788",
+      "members": [
+        {
+          "name": "parent",
+          "kind": "function",
+          "context": "inherent",
+          "source": "yrs/src/types/xml.rs:800"
+        }
+      ]
+    },
+    {
+      "path": "yrs::XmlOut",
+      "aliases": [
+        "yrs::XmlOut",
+        "yrs::types::xml::XmlOut"
+      ],
+      "kind": "enum",
+      "source": "yrs/src/types/xml.rs:89",
+      "members": [
+        {
+          "name": "as_ptr",
+          "kind": "function",
+          "context": "inherent",
+          "source": "yrs/src/types/xml.rs:96"
+        },
+        {
+          "name": "id",
+          "kind": "function",
+          "context": "inherent",
+          "source": "yrs/src/types/xml.rs:104"
+        },
+        {
+          "name": "into_xml_element",
+          "kind": "function",
+          "context": "inherent",
+          "source": "yrs/src/types/xml.rs:110"
+        },
+        {
+          "name": "into_xml_fragment",
+          "kind": "function",
+          "context": "inherent",
+          "source": "yrs/src/types/xml.rs:119"
+        },
+        {
+          "name": "into_xml_text",
+          "kind": "function",
+          "context": "inherent",
+          "source": "yrs/src/types/xml.rs:128"
+        },
+        {
+          "name": "Element",
+          "kind": "variant",
+          "context": "variant",
+          "source": "yrs/src/types/xml.rs:90"
+        },
+        {
+          "name": "Fragment",
+          "kind": "variant",
+          "context": "variant",
+          "source": "yrs/src/types/xml.rs:91"
+        },
+        {
+          "name": "Text",
+          "kind": "variant",
+          "context": "variant",
+          "source": "yrs/src/types/xml.rs:92"
+        }
+      ]
+    },
+    {
+      "path": "yrs::XmlTextPrelim",
+      "aliases": [
+        "yrs::XmlTextPrelim",
+        "yrs::types::xml::XmlTextPrelim"
+      ],
+      "kind": "struct",
+      "source": "yrs/src/types/xml.rs:681",
+      "members": [
+        {
+          "name": "new",
+          "kind": "function",
+          "context": "inherent",
+          "source": "yrs/src/types/xml.rs:701"
+        }
+      ]
+    },
+    {
+      "path": "yrs::XmlTextRef",
+      "aliases": [
+        "yrs::XmlTextRef",
+        "yrs::types::xml::XmlTextRef"
+      ],
+      "kind": "struct",
+      "source": "yrs/src/types/xml.rs:530",
+      "members": []
+    },
+    {
+      "path": "yrs::any",
+      "aliases": [
+        "yrs::any"
+      ],
+      "kind": "macro",
+      "source": "yrs/src/any.rs:805",
+      "members": []
+    },
+    {
+      "path": "yrs::any::AnyArrayIter",
+      "aliases": [
+        "yrs::any::AnyArrayIter"
+      ],
+      "kind": "struct",
+      "source": "yrs/src/any.rs:464",
+      "members": [
+        {
+          "name": "new",
+          "kind": "function",
+          "context": "inherent",
+          "source": "yrs/src/any.rs:470"
+        }
+      ]
+    },
+    {
+      "path": "yrs::any::AnyIntoIter",
+      "aliases": [
+        "yrs::any::AnyIntoIter"
+      ],
+      "kind": "enum",
+      "source": "yrs/src/any.rs:489",
+      "members": [
+        {
+          "name": "Array",
+          "kind": "variant",
+          "context": "variant",
+          "source": "yrs/src/any.rs:490"
+        },
+        {
+          "name": "Map",
+          "kind": "variant",
+          "context": "variant",
+          "source": "yrs/src/any.rs:493"
+        }
+      ]
+    },
+    {
+      "path": "yrs::any::AnyIter",
+      "aliases": [
+        "yrs::any::AnyIter"
+      ],
+      "kind": "enum",
+      "source": "yrs/src/any.rs:442",
+      "members": [
+        {
+          "name": "Array",
+          "kind": "variant",
+          "context": "variant",
+          "source": "yrs/src/any.rs:443"
+        },
+        {
+          "name": "Map",
+          "kind": "variant",
+          "context": "variant",
+          "source": "yrs/src/any.rs:444"
+        }
+      ]
+    },
+    {
+      "path": "yrs::any::F64_MAX_SAFE_INTEGER",
+      "aliases": [
+        "yrs::any::F64_MAX_SAFE_INTEGER"
+      ],
+      "kind": "constant",
+      "source": "yrs/src/any.rs:11",
+      "members": []
+    },
+    {
+      "path": "yrs::any::F64_MIN_SAFE_INTEGER",
+      "aliases": [
+        "yrs::any::F64_MIN_SAFE_INTEGER"
+      ],
+      "kind": "constant",
+      "source": "yrs/src/any.rs:12",
+      "members": []
+    },
+    {
+      "path": "yrs::atomic::AtomicRef",
+      "aliases": [
+        "yrs::atomic::AtomicRef"
+      ],
+      "kind": "struct",
+      "source": "yrs/src/atomic.rs:31",
+      "members": [
+        {
+          "name": "get",
+          "kind": "function",
+          "context": "inherent",
+          "source": "yrs/src/atomic.rs:48"
+        },
+        {
+          "name": "get_owned",
+          "kind": "function",
+          "context": "inherent",
+          "source": "yrs/src/atomic.rs:127"
+        },
+        {
+          "name": "new",
+          "kind": "function",
+          "context": "inherent",
+          "source": "yrs/src/atomic.rs:39"
+        },
+        {
+          "name": "swap",
+          "kind": "function",
+          "context": "inherent",
+          "source": "yrs/src/atomic.rs:61"
+        },
+        {
+          "name": "take",
+          "kind": "function",
+          "context": "inherent",
+          "source": "yrs/src/atomic.rs:73"
+        },
+        {
+          "name": "update",
+          "kind": "function",
+          "context": "inherent",
+          "source": "yrs/src/atomic.rs:89"
+        }
+      ]
+    },
+    {
+      "path": "yrs::block::BLOCK_GC_REF_NUMBER",
+      "aliases": [
+        "yrs::block::BLOCK_GC_REF_NUMBER"
+      ],
+      "kind": "constant",
+      "source": "yrs/src/block.rs:29",
+      "members": []
+    },
+    {
+      "path": "yrs::block::BLOCK_ITEM_ANY_REF_NUMBER",
+      "aliases": [
+        "yrs::block::BLOCK_ITEM_ANY_REF_NUMBER"
+      ],
+      "kind": "constant",
+      "source": "yrs/src/block.rs:53",
+      "members": []
+    },
+    {
+      "path": "yrs::block::BLOCK_ITEM_BINARY_REF_NUMBER",
+      "aliases": [
+        "yrs::block::BLOCK_ITEM_BINARY_REF_NUMBER"
+      ],
+      "kind": "constant",
+      "source": "yrs/src/block.rs:38",
+      "members": []
+    },
+    {
+      "path": "yrs::block::BLOCK_ITEM_DELETED_REF_NUMBER",
+      "aliases": [
+        "yrs::block::BLOCK_ITEM_DELETED_REF_NUMBER"
+      ],
+      "kind": "constant",
+      "source": "yrs/src/block.rs:32",
+      "members": []
+    },
+    {
+      "path": "yrs::block::BLOCK_ITEM_DOC_REF_NUMBER",
+      "aliases": [
+        "yrs::block::BLOCK_ITEM_DOC_REF_NUMBER"
+      ],
+      "kind": "constant",
+      "source": "yrs/src/block.rs:56",
+      "members": []
+    },
+    {
+      "path": "yrs::block::BLOCK_ITEM_EMBED_REF_NUMBER",
+      "aliases": [
+        "yrs::block::BLOCK_ITEM_EMBED_REF_NUMBER"
+      ],
+      "kind": "constant",
+      "source": "yrs/src/block.rs:44",
+      "members": []
+    },
+    {
+      "path": "yrs::block::BLOCK_ITEM_FORMAT_REF_NUMBER",
+      "aliases": [
+        "yrs::block::BLOCK_ITEM_FORMAT_REF_NUMBER"
+      ],
+      "kind": "constant",
+      "source": "yrs/src/block.rs:47",
+      "members": []
+    },
+    {
+      "path": "yrs::block::BLOCK_ITEM_JSON_REF_NUMBER",
+      "aliases": [
+        "yrs::block::BLOCK_ITEM_JSON_REF_NUMBER"
+      ],
+      "kind": "constant",
+      "source": "yrs/src/block.rs:35",
+      "members": []
+    },
+    {
+      "path": "yrs::block::BLOCK_ITEM_STRING_REF_NUMBER",
+      "aliases": [
+        "yrs::block::BLOCK_ITEM_STRING_REF_NUMBER"
+      ],
+      "kind": "constant",
+      "source": "yrs/src/block.rs:41",
+      "members": []
+    },
+    {
+      "path": "yrs::block::BLOCK_ITEM_TYPE_REF_NUMBER",
+      "aliases": [
+        "yrs::block::BLOCK_ITEM_TYPE_REF_NUMBER"
+      ],
+      "kind": "constant",
+      "source": "yrs/src/block.rs:50",
+      "members": []
+    },
+    {
+      "path": "yrs::block::BLOCK_SKIP_REF_NUMBER",
+      "aliases": [
+        "yrs::block::BLOCK_SKIP_REF_NUMBER"
+      ],
+      "kind": "constant",
+      "source": "yrs/src/block.rs:59",
+      "members": []
+    },
+    {
+      "path": "yrs::block::BlockRange",
+      "aliases": [
+        "yrs::block::BlockRange"
+      ],
+      "kind": "struct",
+      "source": "yrs/src/block.rs:1348",
+      "members": [
+        {
+          "name": "client",
+          "kind": "struct_field",
+          "context": "field",
+          "source": "yrs/src/block.rs:1349"
+        },
+        {
+          "name": "clock",
+          "kind": "struct_field",
+          "context": "field",
+          "source": "yrs/src/block.rs:1350"
+        },
+        {
+          "name": "len",
+          "kind": "struct_field",
+          "context": "field",
+          "source": "yrs/src/block.rs:1351"
+        },
+        {
+          "name": "clock_end",
+          "kind": "function",
+          "context": "inherent",
+          "source": "yrs/src/block.rs:1372"
+        },
+        {
+          "name": "clock_range",
+          "kind": "function",
+          "context": "inherent",
+          "source": "yrs/src/block.rs:1377"
+        },
+        {
+          "name": "contains",
+          "kind": "function",
+          "context": "inherent",
+          "source": "yrs/src/block.rs:1430"
+        },
+        {
+          "name": "id",
+          "kind": "function",
+          "context": "inherent",
+          "source": "yrs/src/block.rs:1363"
+        },
+        {
+          "name": "last_id",
+          "kind": "function",
+          "context": "inherent",
+          "source": "yrs/src/block.rs:1368"
+        },
+        {
+          "name": "new",
+          "kind": "function",
+          "context": "inherent",
+          "source": "yrs/src/block.rs:1355"
+        },
+        {
+          "name": "slice",
+          "kind": "function",
+          "context": "inherent",
+          "source": "yrs/src/block.rs:1408"
+        }
+      ]
+    },
+    {
+      "path": "yrs::block::EmbedPrelim",
+      "aliases": [
+        "yrs::block::EmbedPrelim"
+      ],
+      "kind": "enum",
+      "source": "yrs/src/block.rs:2317",
+      "members": [
+        {
+          "name": "Primitive",
+          "kind": "variant",
+          "context": "variant",
+          "source": "yrs/src/block.rs:2318"
+        },
+        {
+          "name": "Shared",
+          "kind": "variant",
+          "context": "variant",
+          "source": "yrs/src/block.rs:2319"
+        }
+      ]
+    },
+    {
+      "path": "yrs::block::HAS_ORIGIN",
+      "aliases": [
+        "yrs::block::HAS_ORIGIN"
+      ],
+      "kind": "constant",
+      "source": "yrs/src/block.rs:65",
+      "members": []
+    },
+    {
+      "path": "yrs::block::HAS_PARENT_SUB",
+      "aliases": [
+        "yrs::block::HAS_PARENT_SUB"
+      ],
+      "kind": "constant",
+      "source": "yrs/src/block.rs:69",
+      "members": []
+    },
+    {
+      "path": "yrs::block::HAS_RIGHT_ORIGIN",
+      "aliases": [
+        "yrs::block::HAS_RIGHT_ORIGIN"
+      ],
+      "kind": "constant",
+      "source": "yrs/src/block.rs:62",
+      "members": []
+    },
+    {
+      "path": "yrs::block::Item",
+      "aliases": [
+        "yrs::block::Item"
+      ],
+      "kind": "struct",
+      "source": "yrs/src/block.rs:1302",
+      "members": [
+        {
+          "name": "block_range",
+          "kind": "function",
+          "context": "inherent",
+          "source": "yrs/src/block.rs:1502"
+        },
+        {
+          "name": "contains",
+          "kind": "function",
+          "context": "inherent",
+          "source": "yrs/src/block.rs:1507"
+        },
+        {
+          "name": "content_len",
+          "kind": "function",
+          "context": "inherent",
+          "source": "yrs/src/block.rs:1539"
+        },
+        {
+          "name": "encode",
+          "kind": "function",
+          "context": "inherent",
+          "source": "yrs/src/block.rs:780"
+        },
+        {
+          "name": "id",
+          "kind": "function",
+          "context": "inherent",
+          "source": "yrs/src/block.rs:823"
+        },
+        {
+          "name": "info",
+          "kind": "function",
+          "context": "inherent",
+          "source": "yrs/src/block.rs:1548"
+        },
+        {
+          "name": "is_countable",
+          "kind": "function",
+          "context": "inherent",
+          "source": "yrs/src/block.rs:1522"
+        },
+        {
+          "name": "is_deleted",
+          "kind": "function",
+          "context": "inherent",
+          "source": "yrs/src/block.rs:1516"
+        },
+        {
+          "name": "last_id",
+          "kind": "function",
+          "context": "inherent",
+          "source": "yrs/src/block.rs:1544"
+        },
+        {
+          "name": "len",
+          "kind": "function",
+          "context": "inherent",
+          "source": "yrs/src/block.rs:1535"
+        },
+        {
+          "name": "range",
+          "kind": "function",
+          "context": "inherent",
+          "source": "yrs/src/block.rs:828"
+        }
+      ]
+    },
+    {
+      "path": "yrs::block::ItemContent",
+      "aliases": [
+        "yrs::block::ItemContent"
+      ],
+      "kind": "enum",
+      "source": "yrs/src/block.rs:1692",
+      "members": [
+        {
+          "name": "decode",
+          "kind": "function",
+          "context": "inherent",
+          "source": "yrs/src/block.rs:1959"
+        },
+        {
+          "name": "encode",
+          "kind": "function",
+          "context": "inherent",
+          "source": "yrs/src/block.rs:1930"
+        },
+        {
+          "name": "encode_slice",
+          "kind": "function",
+          "context": "inherent",
+          "source": "yrs/src/block.rs:1886"
+        },
+        {
+          "name": "get_content",
+          "kind": "function",
+          "context": "inherent",
+          "source": "yrs/src/block.rs:1843"
+        },
+        {
+          "name": "get_first",
+          "kind": "function",
+          "context": "inherent",
+          "source": "yrs/src/block.rs:1855"
+        },
+        {
+          "name": "get_last",
+          "kind": "function",
+          "context": "inherent",
+          "source": "yrs/src/block.rs:1870"
+        },
+        {
+          "name": "get_ref_number",
+          "kind": "function",
+          "context": "inherent",
+          "source": "yrs/src/block.rs:1727"
+        },
+        {
+          "name": "is_countable",
+          "kind": "function",
+          "context": "inherent",
+          "source": "yrs/src/block.rs:1745"
+        },
+        {
+          "name": "len",
+          "kind": "function",
+          "context": "inherent",
+          "source": "yrs/src/block.rs:1770"
+        },
+        {
+          "name": "read",
+          "kind": "function",
+          "context": "inherent",
+          "source": "yrs/src/block.rs:1782"
+        },
+        {
+          "name": "try_squash",
+          "kind": "function",
+          "context": "inherent",
+          "source": "yrs/src/block.rs:2053"
+        },
+        {
+          "name": "Any",
+          "kind": "variant",
+          "context": "variant",
+          "source": "yrs/src/block.rs:1694"
+        },
+        {
+          "name": "Binary",
+          "kind": "variant",
+          "context": "variant",
+          "source": "yrs/src/block.rs:1697"
+        },
+        {
+          "name": "Deleted",
+          "kind": "variant",
+          "context": "variant",
+          "source": "yrs/src/block.rs:1701"
+        },
+        {
+          "name": "Doc",
+          "kind": "variant",
+          "context": "variant",
+          "source": "yrs/src/block.rs:1704"
+        },
+        {
+          "name": "Embed",
+          "kind": "variant",
+          "context": "variant",
+          "source": "yrs/src/block.rs:1710"
+        },
+        {
+          "name": "Format",
+          "kind": "variant",
+          "context": "variant",
+          "source": "yrs/src/block.rs:1714"
+        },
+        {
+          "name": "JSON",
+          "kind": "variant",
+          "context": "variant",
+          "source": "yrs/src/block.rs:1707"
+        },
+        {
+          "name": "String",
+          "kind": "variant",
+          "context": "variant",
+          "source": "yrs/src/block.rs:1717"
+        },
+        {
+          "name": "Type",
+          "kind": "variant",
+          "context": "variant",
+          "source": "yrs/src/block.rs:1721"
+        }
+      ]
+    },
+    {
+      "path": "yrs::block::ItemFlags",
+      "aliases": [
+        "yrs::block::ItemFlags"
+      ],
+      "kind": "struct",
+      "source": "yrs/src/block.rs:1204",
+      "members": [
+        {
+          "name": "clear_countable",
+          "kind": "function",
+          "context": "inherent",
+          "source": "yrs/src/block.rs:1247"
+        },
+        {
+          "name": "clear_keep",
+          "kind": "function",
+          "context": "inherent",
+          "source": "yrs/src/block.rs:1237"
+        },
+        {
+          "name": "clear_linked",
+          "kind": "function",
+          "context": "inherent",
+          "source": "yrs/src/block.rs:1282"
+        },
+        {
+          "name": "is_countable",
+          "kind": "function",
+          "context": "inherent",
+          "source": "yrs/src/block.rs:1252"
+        },
+        {
+          "name": "is_deleted",
+          "kind": "function",
+          "context": "inherent",
+          "source": "yrs/src/block.rs:1262"
+        },
+        {
+          "name": "is_keep",
+          "kind": "function",
+          "context": "inherent",
+          "source": "yrs/src/block.rs:1227"
+        },
+        {
+          "name": "is_linked",
+          "kind": "function",
+          "context": "inherent",
+          "source": "yrs/src/block.rs:1272"
+        },
+        {
+          "name": "is_marked",
+          "kind": "function",
+          "context": "inherent",
+          "source": "yrs/src/block.rs:1267"
+        },
+        {
+          "name": "new",
+          "kind": "function",
+          "context": "inherent",
+          "source": "yrs/src/block.rs:1207"
+        },
+        {
+          "name": "set_countable",
+          "kind": "function",
+          "context": "inherent",
+          "source": "yrs/src/block.rs:1242"
+        },
+        {
+          "name": "set_deleted",
+          "kind": "function",
+          "context": "inherent",
+          "source": "yrs/src/block.rs:1257"
+        },
+        {
+          "name": "set_keep",
+          "kind": "function",
+          "context": "inherent",
+          "source": "yrs/src/block.rs:1232"
+        },
+        {
+          "name": "set_linked",
+          "kind": "function",
+          "context": "inherent",
+          "source": "yrs/src/block.rs:1277"
+        }
+      ]
+    },
+    {
+      "path": "yrs::block::ItemPtr",
+      "aliases": [
+        "yrs::block::ItemPtr"
+      ],
+      "kind": "struct",
+      "source": "yrs/src/block.rs:439",
+      "members": []
+    },
+    {
+      "path": "yrs::block::Prelim",
+      "aliases": [
+        "yrs::block::Prelim"
+      ],
+      "kind": "trait",
+      "source": "yrs/src/block.rs:2254",
+      "members": [
+        {
+          "name": "Return",
+          "kind": "assoc_type",
+          "context": "trait",
+          "source": "yrs/src/block.rs:2257"
+        },
+        {
+          "name": "integrate",
+          "kind": "function",
+          "context": "trait",
+          "source": "yrs/src/block.rs:2271"
+        },
+        {
+          "name": "into_content",
+          "kind": "function",
+          "context": "trait",
+          "source": "yrs/src/block.rs:2266"
+        }
+      ]
+    },
+    {
+      "path": "yrs::block::SplittableString",
+      "aliases": [
+        "yrs::block::SplittableString"
+      ],
+      "kind": "struct",
+      "source": "yrs/src/block.rs:1571",
+      "members": [
+        {
+          "name": "as_str",
+          "kind": "function",
+          "context": "inherent",
+          "source": "yrs/src/block.rs:1589"
+        },
+        {
+          "name": "len",
+          "kind": "function",
+          "context": "inherent",
+          "source": "yrs/src/block.rs:1576"
+        },
+        {
+          "name": "push_str",
+          "kind": "function",
+          "context": "inherent",
+          "source": "yrs/src/block.rs:1621"
+        },
+        {
+          "name": "utf16_len",
+          "kind": "function",
+          "context": "inherent",
+          "source": "yrs/src/block.rs:1594"
+        }
+      ]
+    },
+    {
+      "path": "yrs::block::Unused",
+      "aliases": [
+        "yrs::block::Unused"
+      ],
+      "kind": "struct",
+      "source": "yrs/src/block.rs:2304",
+      "members": []
+    },
+    {
+      "path": "yrs::branch::Branch",
+      "aliases": [
+        "yrs::branch::Branch"
+      ],
+      "kind": "struct",
+      "source": "yrs/src/branch.rs:151",
+      "members": [
+        {
+          "name": "block_len",
+          "kind": "struct_field",
+          "context": "field",
+          "source": "yrs/src/branch.rs:183"
+        },
+        {
+          "name": "content_len",
+          "kind": "struct_field",
+          "context": "field",
+          "source": "yrs/src/branch.rs:185"
+        },
+        {
+          "name": "as_subdoc",
+          "kind": "function",
+          "context": "inherent",
+          "source": "yrs/src/branch.rs:255"
+        },
+        {
+          "name": "content_len",
+          "kind": "function",
+          "context": "inherent",
+          "source": "yrs/src/branch.rs:281"
+        },
+        {
+          "name": "id",
+          "kind": "function",
+          "context": "inherent",
+          "source": "yrs/src/branch.rs:245"
+        },
+        {
+          "name": "is_deleted",
+          "kind": "function",
+          "context": "inherent",
+          "source": "yrs/src/branch.rs:238"
+        },
+        {
+          "name": "len",
+          "kind": "function",
+          "context": "inherent",
+          "source": "yrs/src/branch.rs:277"
+        },
+        {
+          "name": "new",
+          "kind": "function",
+          "context": "inherent",
+          "source": "yrs/src/branch.rs:223"
+        },
+        {
+          "name": "observe",
+          "kind": "function",
+          "context": "inherent",
+          "source": "yrs/src/branch.rs:510"
+        },
+        {
+          "name": "observe_deep",
+          "kind": "function",
+          "context": "inherent",
+          "source": "yrs/src/branch.rs:530"
+        },
+        {
+          "name": "type_ref",
+          "kind": "function",
+          "context": "inherent",
+          "source": "yrs/src/branch.rs:265"
+        },
+        {
+          "name": "unobserve",
+          "kind": "function",
+          "context": "inherent",
+          "source": "yrs/src/branch.rs:517"
+        },
+        {
+          "name": "unobserve_deep",
+          "kind": "function",
+          "context": "inherent",
+          "source": "yrs/src/branch.rs:537"
+        }
+      ]
+    },
+    {
+      "path": "yrs::branch::BranchPtr",
+      "aliases": [
+        "yrs::branch::BranchPtr"
+      ],
+      "kind": "struct",
+      "source": "yrs/src/branch.rs:28",
+      "members": []
+    },
+    {
+      "path": "yrs::diff_updates_v1",
+      "aliases": [
+        "yrs::diff_updates_v1"
+      ],
+      "kind": "function",
+      "source": "yrs/src/alt.rs:73",
+      "members": []
+    },
+    {
+      "path": "yrs::diff_updates_v2",
+      "aliases": [
+        "yrs::diff_updates_v2"
+      ],
+      "kind": "function",
+      "source": "yrs/src/alt.rs:88",
+      "members": []
+    },
+    {
+      "path": "yrs::encode_state_vector_from_update_v1",
+      "aliases": [
+        "yrs::encode_state_vector_from_update_v1"
+      ],
+      "kind": "function",
+      "source": "yrs/src/alt.rs:54",
+      "members": []
+    },
+    {
+      "path": "yrs::encode_state_vector_from_update_v2",
+      "aliases": [
+        "yrs::encode_state_vector_from_update_v2"
+      ],
+      "kind": "function",
+      "source": "yrs/src/alt.rs:63",
+      "members": []
+    },
+    {
+      "path": "yrs::encoding::read::Cursor",
+      "aliases": [
+        "yrs::encoding::read::Cursor"
+      ],
+      "kind": "struct",
+      "source": "yrs/src/encoding/read.rs:37",
+      "members": [
+        {
+          "name": "buf",
+          "kind": "struct_field",
+          "context": "field",
+          "source": "yrs/src/encoding/read.rs:38"
+        },
+        {
+          "name": "next",
+          "kind": "struct_field",
+          "context": "field",
+          "source": "yrs/src/encoding/read.rs:39"
+        },
+        {
+          "name": "has_content",
+          "kind": "function",
+          "context": "inherent",
+          "source": "yrs/src/encoding/read.rs:47"
+        },
+        {
+          "name": "new",
+          "kind": "function",
+          "context": "inherent",
+          "source": "yrs/src/encoding/read.rs:43"
+        }
+      ]
+    },
+    {
+      "path": "yrs::encoding::read::Error",
+      "aliases": [
+        "yrs::encoding::read::Error"
+      ],
+      "kind": "enum",
+      "source": "yrs/src/encoding/read.rs:7",
+      "members": [
+        {
+          "name": "type_mismatch",
+          "kind": "function",
+          "context": "inherent",
+          "source": "yrs/src/encoding/read.rs:31"
+        },
+        {
+          "name": "Custom",
+          "kind": "variant",
+          "context": "variant",
+          "source": "yrs/src/encoding/read.rs:27"
+        },
+        {
+          "name": "EndOfBuffer",
+          "kind": "variant",
+          "context": "variant",
+          "source": "yrs/src/encoding/read.rs:12"
+        },
+        {
+          "name": "InvalidJSON",
+          "kind": "variant",
+          "context": "variant",
+          "source": "yrs/src/encoding/read.rs:21"
+        },
+        {
+          "name": "InvalidVarInt",
+          "kind": "variant",
+          "context": "variant",
+          "source": "yrs/src/encoding/read.rs:9"
+        },
+        {
+          "name": "NotEnoughMemory",
+          "kind": "variant",
+          "context": "variant",
+          "source": "yrs/src/encoding/read.rs:18"
+        },
+        {
+          "name": "TypeMismatch",
+          "kind": "variant",
+          "context": "variant",
+          "source": "yrs/src/encoding/read.rs:24"
+        },
+        {
+          "name": "UnexpectedValue",
+          "kind": "variant",
+          "context": "variant",
+          "source": "yrs/src/encoding/read.rs:15"
+        }
+      ]
+    },
+    {
+      "path": "yrs::encoding::read::Read",
+      "aliases": [
+        "yrs::encoding::read::Read"
+      ],
+      "kind": "trait",
+      "source": "yrs/src/encoding/read.rs:84",
+      "members": [
+        {
+          "name": "read_buf",
+          "kind": "function",
+          "context": "trait",
+          "source": "yrs/src/encoding/read.rs:94"
+        },
+        {
+          "name": "read_exact",
+          "kind": "function",
+          "context": "trait",
+          "source": "yrs/src/encoding/read.rs:85"
+        },
+        {
+          "name": "read_f32",
+          "kind": "function",
+          "context": "trait",
+          "source": "yrs/src/encoding/read.rs:142"
+        },
+        {
+          "name": "read_f64",
+          "kind": "function",
+          "context": "trait",
+          "source": "yrs/src/encoding/read.rs:151"
+        },
+        {
+          "name": "read_i64",
+          "kind": "function",
+          "context": "trait",
+          "source": "yrs/src/encoding/read.rs:159"
+        },
+        {
+          "name": "read_string",
+          "kind": "function",
+          "context": "trait",
+          "source": "yrs/src/encoding/read.rs:135"
+        },
+        {
+          "name": "read_u16",
+          "kind": "function",
+          "context": "trait",
+          "source": "yrs/src/encoding/read.rs:100"
+        },
+        {
+          "name": "read_u32",
+          "kind": "function",
+          "context": "trait",
+          "source": "yrs/src/encoding/read.rs:106"
+        },
+        {
+          "name": "read_u32_be",
+          "kind": "function",
+          "context": "trait",
+          "source": "yrs/src/encoding/read.rs:113"
+        },
+        {
+          "name": "read_u64",
+          "kind": "function",
+          "context": "trait",
+          "source": "yrs/src/encoding/read.rs:167"
+        },
+        {
+          "name": "read_u8",
+          "kind": "function",
+          "context": "trait",
+          "source": "yrs/src/encoding/read.rs:88"
+        },
+        {
+          "name": "read_var",
+          "kind": "function",
+          "context": "trait",
+          "source": "yrs/src/encoding/read.rs:122"
+        },
+        {
+          "name": "read_var_signed",
+          "kind": "function",
+          "context": "trait",
+          "source": "yrs/src/encoding/read.rs:130"
+        }
+      ]
+    },
+    {
+      "path": "yrs::encoding::serde::from_any",
+      "aliases": [
+        "yrs::encoding::serde::from_any"
+      ],
+      "kind": "function",
+      "source": "yrs/src/encoding/serde/de.rs:12",
+      "members": []
+    },
+    {
+      "path": "yrs::encoding::serde::to_any",
+      "aliases": [
+        "yrs::encoding::serde::to_any"
+      ],
+      "kind": "function",
+      "source": "yrs/src/encoding/serde/ser.rs:12",
+      "members": []
+    },
+    {
+      "path": "yrs::encoding::varint::Signed",
+      "aliases": [
+        "yrs::encoding::varint::Signed"
+      ],
+      "kind": "struct",
+      "source": "yrs/src/encoding/varint.rs:292",
+      "members": [
+        {
+          "name": "is_negative",
+          "kind": "function",
+          "context": "inherent",
+          "source": "yrs/src/encoding/varint.rs:308"
+        },
+        {
+          "name": "is_positive",
+          "kind": "function",
+          "context": "inherent",
+          "source": "yrs/src/encoding/varint.rs:303"
+        },
+        {
+          "name": "map",
+          "kind": "function",
+          "context": "inherent",
+          "source": "yrs/src/encoding/varint.rs:319"
+        },
+        {
+          "name": "new",
+          "kind": "function",
+          "context": "inherent",
+          "source": "yrs/src/encoding/varint.rs:298"
+        },
+        {
+          "name": "value",
+          "kind": "function",
+          "context": "inherent",
+          "source": "yrs/src/encoding/varint.rs:313"
+        }
+      ]
+    },
+    {
+      "path": "yrs::encoding::varint::SignedVarInt",
+      "aliases": [
+        "yrs::encoding::varint::SignedVarInt"
+      ],
+      "kind": "trait",
+      "source": "yrs/src/encoding/varint.rs:283",
+      "members": [
+        {
+          "name": "read_signed",
+          "kind": "function",
+          "context": "trait",
+          "source": "yrs/src/encoding/varint.rs:285"
+        },
+        {
+          "name": "write_signed",
+          "kind": "function",
+          "context": "trait",
+          "source": "yrs/src/encoding/varint.rs:284"
+        }
+      ]
+    },
+    {
+      "path": "yrs::encoding::varint::VarInt",
+      "aliases": [
+        "yrs::encoding::varint::VarInt"
+      ],
+      "kind": "trait",
+      "source": "yrs/src/encoding/varint.rs:5",
+      "members": [
+        {
+          "name": "read",
+          "kind": "function",
+          "context": "trait",
+          "source": "yrs/src/encoding/varint.rs:7"
+        },
+        {
+          "name": "write",
+          "kind": "function",
+          "context": "trait",
+          "source": "yrs/src/encoding/varint.rs:6"
+        }
+      ]
+    },
+    {
+      "path": "yrs::encoding::write::Write",
+      "aliases": [
+        "yrs::encoding::write::Write"
+      ],
+      "kind": "trait",
+      "source": "yrs/src/encoding/write.rs:13",
+      "members": [
+        {
+          "name": "write_all",
+          "kind": "function",
+          "context": "trait",
+          "source": "yrs/src/encoding/write.rs:14"
+        },
+        {
+          "name": "write_buf",
+          "kind": "function",
+          "context": "trait",
+          "source": "yrs/src/encoding/write.rs:68"
+        },
+        {
+          "name": "write_f32",
+          "kind": "function",
+          "context": "trait",
+          "source": "yrs/src/encoding/write.rs:82"
+        },
+        {
+          "name": "write_f64",
+          "kind": "function",
+          "context": "trait",
+          "source": "yrs/src/encoding/write.rs:88"
+        },
+        {
+          "name": "write_i64",
+          "kind": "function",
+          "context": "trait",
+          "source": "yrs/src/encoding/write.rs:94"
+        },
+        {
+          "name": "write_string",
+          "kind": "function",
+          "context": "trait",
+          "source": "yrs/src/encoding/write.rs:76"
+        },
+        {
+          "name": "write_u16",
+          "kind": "function",
+          "context": "trait",
+          "source": "yrs/src/encoding/write.rs:21"
+        },
+        {
+          "name": "write_u32",
+          "kind": "function",
+          "context": "trait",
+          "source": "yrs/src/encoding/write.rs:26"
+        },
+        {
+          "name": "write_u32_be",
+          "kind": "function",
+          "context": "trait",
+          "source": "yrs/src/encoding/write.rs:36"
+        },
+        {
+          "name": "write_u64",
+          "kind": "function",
+          "context": "trait",
+          "source": "yrs/src/encoding/write.rs:100"
+        },
+        {
+          "name": "write_u8",
+          "kind": "function",
+          "context": "trait",
+          "source": "yrs/src/encoding/write.rs:16"
+        },
+        {
+          "name": "write_var",
+          "kind": "function",
+          "context": "trait",
+          "source": "yrs/src/encoding/write.rs:52"
+        },
+        {
+          "name": "write_var_signed",
+          "kind": "function",
+          "context": "trait",
+          "source": "yrs/src/encoding/write.rs:63"
+        }
+      ]
+    },
+    {
+      "path": "yrs::error::Error",
+      "aliases": [
+        "yrs::error::Error"
+      ],
+      "kind": "enum",
+      "source": "yrs/src/error.rs:5",
+      "members": [
+        {
+          "name": "Gc",
+          "kind": "variant",
+          "context": "variant",
+          "source": "yrs/src/error.rs:11"
+        },
+        {
+          "name": "ReadError",
+          "kind": "variant",
+          "context": "variant",
+          "source": "yrs/src/error.rs:7"
+        },
+        {
+          "name": "UpdateError",
+          "kind": "variant",
+          "context": "variant",
+          "source": "yrs/src/error.rs:9"
+        }
+      ]
+    },
+    {
+      "path": "yrs::error::UpdateError",
+      "aliases": [
+        "yrs::error::UpdateError"
+      ],
+      "kind": "enum",
+      "source": "yrs/src/error.rs:15",
+      "members": [
+        {
+          "name": "InvalidParent",
+          "kind": "variant",
+          "context": "variant",
+          "source": "yrs/src/error.rs:17"
+        }
+      ]
+    },
+    {
+      "path": "yrs::iter::AsIter",
+      "aliases": [
+        "yrs::iter::AsIter"
+      ],
+      "kind": "struct",
+      "source": "yrs/src/iter.rs:286",
+      "members": [
+        {
+          "name": "new",
+          "kind": "function",
+          "context": "inherent",
+          "source": "yrs/src/iter.rs:296"
+        }
+      ]
+    },
+    {
+      "path": "yrs::iter::BlockIter",
+      "aliases": [
+        "yrs::iter::BlockIter"
+      ],
+      "kind": "struct",
+      "source": "yrs/src/iter.rs:41",
+      "members": [
+        {
+          "name": "new",
+          "kind": "function",
+          "context": "inherent",
+          "source": "yrs/src/iter.rs:45"
+        }
+      ]
+    },
+    {
+      "path": "yrs::iter::IntoBlockIter",
+      "aliases": [
+        "yrs::iter::IntoBlockIter"
+      ],
+      "kind": "trait",
+      "source": "yrs/src/iter.rs:25",
+      "members": [
+        {
+          "name": "to_iter",
+          "kind": "function",
+          "context": "trait",
+          "source": "yrs/src/iter.rs:26"
+        }
+      ]
+    },
+    {
+      "path": "yrs::iter::TxnDoubleEndedIterator",
+      "aliases": [
+        "yrs::iter::TxnDoubleEndedIterator"
+      ],
+      "kind": "trait",
+      "source": "yrs/src/iter.rs:100",
+      "members": [
+        {
+          "name": "next_back",
+          "kind": "function",
+          "context": "trait",
+          "source": "yrs/src/iter.rs:101"
+        }
+      ]
+    },
+    {
+      "path": "yrs::iter::TxnIterator",
+      "aliases": [
+        "yrs::iter::TxnIterator"
+      ],
+      "kind": "trait",
+      "source": "yrs/src/iter.rs:82",
+      "members": [
+        {
+          "name": "Item",
+          "kind": "assoc_type",
+          "context": "trait",
+          "source": "yrs/src/iter.rs:83"
+        },
+        {
+          "name": "collect",
+          "kind": "function",
+          "context": "trait",
+          "source": "yrs/src/iter.rs:86"
+        },
+        {
+          "name": "next",
+          "kind": "function",
+          "context": "trait",
+          "source": "yrs/src/iter.rs:84"
+        }
+      ]
+    },
+    {
+      "path": "yrs::json_path::JsonPathIter",
+      "aliases": [
+        "yrs::json_path::JsonPathIter"
+      ],
+      "kind": "struct",
+      "source": "yrs/src/json_path/iter_txn.rs:199",
+      "members": []
+    },
+    {
+      "path": "yrs::json_path::ParseError",
+      "aliases": [
+        "yrs::json_path::ParseError"
+      ],
+      "kind": "enum",
+      "source": "yrs/src/json_path/mod.rs:84",
+      "members": [
+        {
+          "name": "InvalidJsonPath",
+          "kind": "variant",
+          "context": "variant",
+          "source": "yrs/src/json_path/mod.rs:86"
+        }
+      ]
+    },
+    {
+      "path": "yrs::merge_updates_v1",
+      "aliases": [
+        "yrs::merge_updates_v1"
+      ],
+      "kind": "function",
+      "source": "yrs/src/alt.rs:15",
+      "members": []
+    },
+    {
+      "path": "yrs::merge_updates_v2",
+      "aliases": [
+        "yrs::merge_updates_v2"
+      ],
+      "kind": "function",
+      "source": "yrs/src/alt.rs:35",
+      "members": []
+    },
+    {
+      "path": "yrs::sync::Awareness",
+      "aliases": [
+        "yrs::sync::Awareness",
+        "yrs::sync::awareness::Awareness"
+      ],
+      "kind": "struct",
+      "source": "yrs/src/sync/awareness.rs:36",
+      "members": [
+        {
+          "name": "apply_update",
+          "kind": "function",
+          "context": "inherent",
+          "source": "yrs/src/sync/awareness.rs:311"
+        },
+        {
+          "name": "apply_update_summary",
+          "kind": "function",
+          "context": "inherent",
+          "source": "yrs/src/sync/awareness.rs:338"
+        },
+        {
+          "name": "apply_update_summary_with",
+          "kind": "function",
+          "context": "inherent",
+          "source": "yrs/src/sync/awareness.rs:351"
+        },
+        {
+          "name": "apply_update_with",
+          "kind": "function",
+          "context": "inherent",
+          "source": "yrs/src/sync/awareness.rs:322"
+        },
+        {
+          "name": "clean_local_state",
+          "kind": "function",
+          "context": "inherent",
+          "source": "yrs/src/sync/awareness.rs:198"
+        },
+        {
+          "name": "client_id",
+          "kind": "function",
+          "context": "inherent",
+          "source": "yrs/src/sync/awareness.rs:134"
+        },
+        {
+          "name": "doc",
+          "kind": "function",
+          "context": "inherent",
+          "source": "yrs/src/sync/awareness.rs:124"
+        },
+        {
+          "name": "doc_mut",
+          "kind": "function",
+          "context": "inherent",
+          "source": "yrs/src/sync/awareness.rs:129"
+        },
+        {
+          "name": "iter",
+          "kind": "function",
+          "context": "inherent",
+          "source": "yrs/src/sync/awareness.rs:141"
+        },
+        {
+          "name": "local_state",
+          "kind": "function",
+          "context": "inherent",
+          "source": "yrs/src/sync/awareness.rs:146"
+        },
+        {
+          "name": "local_state_raw",
+          "kind": "function",
+          "context": "inherent",
+          "source": "yrs/src/sync/awareness.rs:152"
+        },
+        {
+          "name": "meta",
+          "kind": "function",
+          "context": "inherent",
+          "source": "yrs/src/sync/awareness.rs:191"
+        },
+        {
+          "name": "new",
+          "kind": "function",
+          "context": "inherent",
+          "source": "yrs/src/sync/awareness.rs:49"
+        },
+        {
+          "name": "on_change",
+          "kind": "function",
+          "context": "inherent",
+          "source": "yrs/src/sync/awareness.rs:108"
+        },
+        {
+          "name": "on_update",
+          "kind": "function",
+          "context": "inherent",
+          "source": "yrs/src/sync/awareness.rs:81"
+        },
+        {
+          "name": "remove_state",
+          "kind": "function",
+          "context": "inherent",
+          "source": "yrs/src/sync/awareness.rs:159"
+        },
+        {
+          "name": "set_local_state",
+          "kind": "function",
+          "context": "inherent",
+          "source": "yrs/src/sync/awareness.rs:206"
+        },
+        {
+          "name": "set_local_state_raw",
+          "kind": "function",
+          "context": "inherent",
+          "source": "yrs/src/sync/awareness.rs:215"
+        },
+        {
+          "name": "state",
+          "kind": "function",
+          "context": "inherent",
+          "source": "yrs/src/sync/awareness.rs:184"
+        },
+        {
+          "name": "unobserve_change",
+          "kind": "function",
+          "context": "inherent",
+          "source": "yrs/src/sync/awareness.rs:116"
+        },
+        {
+          "name": "unobserve_update",
+          "kind": "function",
+          "context": "inherent",
+          "source": "yrs/src/sync/awareness.rs:89"
+        },
+        {
+          "name": "update",
+          "kind": "function",
+          "context": "inherent",
+          "source": "yrs/src/sync/awareness.rs:270"
+        },
+        {
+          "name": "update_with_clients",
+          "kind": "function",
+          "context": "inherent",
+          "source": "yrs/src/sync/awareness.rs:289"
+        },
+        {
+          "name": "with_clock",
+          "kind": "function",
+          "context": "inherent",
+          "source": "yrs/src/sync/awareness.rs:56"
+        }
+      ]
+    },
+    {
+      "path": "yrs::sync::AwarenessUpdate",
+      "aliases": [
+        "yrs::sync::AwarenessUpdate",
+        "yrs::sync::awareness::AwarenessUpdate"
+      ],
+      "kind": "struct",
+      "source": "yrs/src/sync/awareness.rs:509",
+      "members": [
+        {
+          "name": "clients",
+          "kind": "struct_field",
+          "context": "field",
+          "source": "yrs/src/sync/awareness.rs:511"
+        }
+      ]
+    },
+    {
+      "path": "yrs::sync::Clock",
+      "aliases": [
+        "yrs::sync::Clock",
+        "yrs::sync::time::Clock"
+      ],
+      "kind": "trait",
+      "source": "yrs/src/sync/time.rs:5",
+      "members": [
+        {
+          "name": "now",
+          "kind": "function",
+          "context": "trait",
+          "source": "yrs/src/sync/time.rs:6"
+        }
+      ]
+    },
+    {
+      "path": "yrs::sync::DefaultProtocol",
+      "aliases": [
+        "yrs::sync::DefaultProtocol",
+        "yrs::sync::protocol::DefaultProtocol"
+      ],
+      "kind": "struct",
+      "source": "yrs/src/sync/protocol.rs:38",
+      "members": []
+    },
+    {
+      "path": "yrs::sync::Error",
+      "aliases": [
+        "yrs::sync::Error",
+        "yrs::sync::protocol::Error"
+      ],
+      "kind": "enum",
+      "source": "yrs/src/sync/protocol.rs:485",
+      "members": [
+        {
+          "name": "AwarenessEncoding",
+          "kind": "variant",
+          "context": "variant",
+          "source": "yrs/src/sync/protocol.rs:492"
+        },
+        {
+          "name": "DecodingError",
+          "kind": "variant",
+          "context": "variant",
+          "source": "yrs/src/sync/protocol.rs:488"
+        },
+        {
+          "name": "IO",
+          "kind": "variant",
+          "context": "variant",
+          "source": "yrs/src/sync/protocol.rs:504"
+        },
+        {
+          "name": "Other",
+          "kind": "variant",
+          "context": "variant",
+          "source": "yrs/src/sync/protocol.rs:511"
+        },
+        {
+          "name": "PermissionDenied",
+          "kind": "variant",
+          "context": "variant",
+          "source": "yrs/src/sync/protocol.rs:496"
+        },
+        {
+          "name": "Unsupported",
+          "kind": "variant",
+          "context": "variant",
+          "source": "yrs/src/sync/protocol.rs:500"
+        },
+        {
+          "name": "Update",
+          "kind": "variant",
+          "context": "variant",
+          "source": "yrs/src/sync/protocol.rs:507"
+        }
+      ]
+    },
+    {
+      "path": "yrs::sync::Message",
+      "aliases": [
+        "yrs::sync::Message",
+        "yrs::sync::protocol::Message"
+      ],
+      "kind": "enum",
+      "source": "yrs/src/sync/protocol.rs:359",
+      "members": [
+        {
+          "name": "Auth",
+          "kind": "variant",
+          "context": "variant",
+          "source": "yrs/src/sync/protocol.rs:361"
+        },
+        {
+          "name": "Awareness",
+          "kind": "variant",
+          "context": "variant",
+          "source": "yrs/src/sync/protocol.rs:363"
+        },
+        {
+          "name": "AwarenessQuery",
+          "kind": "variant",
+          "context": "variant",
+          "source": "yrs/src/sync/protocol.rs:362"
+        },
+        {
+          "name": "Custom",
+          "kind": "variant",
+          "context": "variant",
+          "source": "yrs/src/sync/protocol.rs:364"
+        },
+        {
+          "name": "Sync",
+          "kind": "variant",
+          "context": "variant",
+          "source": "yrs/src/sync/protocol.rs:360"
+        }
+      ]
+    },
+    {
+      "path": "yrs::sync::MessageReader",
+      "aliases": [
+        "yrs::sync::MessageReader",
+        "yrs::sync::protocol::MessageReader"
+      ],
+      "kind": "struct",
+      "source": "yrs/src/sync/protocol.rs:517",
+      "members": [
+        {
+          "name": "new",
+          "kind": "function",
+          "context": "inherent",
+          "source": "yrs/src/sync/protocol.rs:520"
+        }
+      ]
+    },
+    {
+      "path": "yrs::sync::Protocol",
+      "aliases": [
+        "yrs::sync::Protocol",
+        "yrs::sync::protocol::Protocol"
+      ],
+      "kind": "trait",
+      "source": "yrs/src/sync/protocol.rs:49",
+      "members": [
+        {
+          "name": "handle",
+          "kind": "function",
+          "context": "trait",
+          "source": "yrs/src/sync/protocol.rs:69"
+        },
+        {
+          "name": "handle_auth",
+          "kind": "function",
+          "context": "trait",
+          "source": "yrs/src/sync/protocol.rs:149"
+        },
+        {
+          "name": "handle_awareness_query",
+          "kind": "function",
+          "context": "trait",
+          "source": "yrs/src/sync/protocol.rs:163"
+        },
+        {
+          "name": "handle_awareness_update",
+          "kind": "function",
+          "context": "trait",
+          "source": "yrs/src/sync/protocol.rs:173"
+        },
+        {
+          "name": "handle_message",
+          "kind": "function",
+          "context": "trait",
+          "source": "yrs/src/sync/protocol.rs:88"
+        },
+        {
+          "name": "handle_sync_step1",
+          "kind": "function",
+          "context": "trait",
+          "source": "yrs/src/sync/protocol.rs:114"
+        },
+        {
+          "name": "handle_sync_step2",
+          "kind": "function",
+          "context": "trait",
+          "source": "yrs/src/sync/protocol.rs:126"
+        },
+        {
+          "name": "handle_update",
+          "kind": "function",
+          "context": "trait",
+          "source": "yrs/src/sync/protocol.rs:139"
+        },
+        {
+          "name": "missing_handle",
+          "kind": "function",
+          "context": "trait",
+          "source": "yrs/src/sync/protocol.rs:184"
+        },
+        {
+          "name": "start",
+          "kind": "function",
+          "context": "trait",
+          "source": "yrs/src/sync/protocol.rs:53"
+        }
+      ]
+    },
+    {
+      "path": "yrs::sync::SyncMessage",
+      "aliases": [
+        "yrs::sync::SyncMessage",
+        "yrs::sync::protocol::SyncMessage"
+      ],
+      "kind": "enum",
+      "source": "yrs/src/sync/protocol.rs:436",
+      "members": [
+        {
+          "name": "SyncStep1",
+          "kind": "variant",
+          "context": "variant",
+          "source": "yrs/src/sync/protocol.rs:437"
+        },
+        {
+          "name": "SyncStep2",
+          "kind": "variant",
+          "context": "variant",
+          "source": "yrs/src/sync/protocol.rs:438"
+        },
+        {
+          "name": "Update",
+          "kind": "variant",
+          "context": "variant",
+          "source": "yrs/src/sync/protocol.rs:439"
+        }
+      ]
+    },
+    {
+      "path": "yrs::sync::Timestamp",
+      "aliases": [
+        "yrs::sync::Timestamp",
+        "yrs::sync::time::Timestamp"
+      ],
+      "kind": "type_alias",
+      "source": "yrs/src/sync/time.rs:2",
+      "members": []
+    },
+    {
+      "path": "yrs::sync::awareness::AwarenessIter",
+      "aliases": [
+        "yrs::sync::awareness::AwarenessIter"
+      ],
+      "kind": "struct",
+      "source": "yrs/src/sync/awareness.rs:473",
+      "members": []
+    },
+    {
+      "path": "yrs::sync::awareness::AwarenessUpdateEntry",
+      "aliases": [
+        "yrs::sync::awareness::AwarenessUpdateEntry"
+      ],
+      "kind": "struct",
+      "source": "yrs/src/sync/awareness.rs:546",
+      "members": [
+        {
+          "name": "clock",
+          "kind": "struct_field",
+          "context": "field",
+          "source": "yrs/src/sync/awareness.rs:548"
+        },
+        {
+          "name": "json",
+          "kind": "struct_field",
+          "context": "field",
+          "source": "yrs/src/sync/awareness.rs:550"
+        }
+      ]
+    },
+    {
+      "path": "yrs::sync::awareness::AwarenessUpdateSummary",
+      "aliases": [
+        "yrs::sync::awareness::AwarenessUpdateSummary"
+      ],
+      "kind": "struct",
+      "source": "yrs/src/sync/awareness.rs:486",
+      "members": [
+        {
+          "name": "added",
+          "kind": "struct_field",
+          "context": "field",
+          "source": "yrs/src/sync/awareness.rs:488"
+        },
+        {
+          "name": "removed",
+          "kind": "struct_field",
+          "context": "field",
+          "source": "yrs/src/sync/awareness.rs:492"
+        },
+        {
+          "name": "updated",
+          "kind": "struct_field",
+          "context": "field",
+          "source": "yrs/src/sync/awareness.rs:490"
+        },
+        {
+          "name": "all_changes",
+          "kind": "function",
+          "context": "inherent",
+          "source": "yrs/src/sync/awareness.rs:497"
+        }
+      ]
+    },
+    {
+      "path": "yrs::sync::awareness::ClientState",
+      "aliases": [
+        "yrs::sync::awareness::ClientState"
+      ],
+      "kind": "struct",
+      "source": "yrs/src/sync/awareness.rs:564",
+      "members": [
+        {
+          "name": "clock",
+          "kind": "struct_field",
+          "context": "field",
+          "source": "yrs/src/sync/awareness.rs:565"
+        },
+        {
+          "name": "data",
+          "kind": "struct_field",
+          "context": "field",
+          "source": "yrs/src/sync/awareness.rs:567"
+        },
+        {
+          "name": "last_updated",
+          "kind": "struct_field",
+          "context": "field",
+          "source": "yrs/src/sync/awareness.rs:566"
+        }
+      ]
+    },
+    {
+      "path": "yrs::sync::awareness::Error",
+      "aliases": [
+        "yrs::sync::awareness::Error"
+      ],
+      "kind": "enum",
+      "source": "yrs/src/sync/awareness.rs:555",
+      "members": [
+        {
+          "name": "ClientNotFound",
+          "kind": "variant",
+          "context": "variant",
+          "source": "yrs/src/sync/awareness.rs:558"
+        },
+        {
+          "name": "Serde",
+          "kind": "variant",
+          "context": "variant",
+          "source": "yrs/src/sync/awareness.rs:560"
+        }
+      ]
+    },
+    {
+      "path": "yrs::sync::awareness::Event",
+      "aliases": [
+        "yrs::sync::awareness::Event"
+      ],
+      "kind": "struct",
+      "source": "yrs/src/sync/awareness.rs:582",
+      "members": [
+        {
+          "name": "added",
+          "kind": "function",
+          "context": "inherent",
+          "source": "yrs/src/sync/awareness.rs:603"
+        },
+        {
+          "name": "all_changes",
+          "kind": "function",
+          "context": "inherent",
+          "source": "yrs/src/sync/awareness.rs:620"
+        },
+        {
+          "name": "new",
+          "kind": "function",
+          "context": "inherent",
+          "source": "yrs/src/sync/awareness.rs:587"
+        },
+        {
+          "name": "removed",
+          "kind": "function",
+          "context": "inherent",
+          "source": "yrs/src/sync/awareness.rs:615"
+        },
+        {
+          "name": "summary",
+          "kind": "function",
+          "context": "inherent",
+          "source": "yrs/src/sync/awareness.rs:597"
+        },
+        {
+          "name": "updated",
+          "kind": "function",
+          "context": "inherent",
+          "source": "yrs/src/sync/awareness.rs:609"
+        }
+      ]
+    },
+    {
+      "path": "yrs::sync::protocol::AsyncProtocol",
+      "aliases": [
+        "yrs::sync::protocol::AsyncProtocol"
+      ],
+      "kind": "trait",
+      "source": "yrs/src/sync/protocol.rs:199",
+      "members": [
+        {
+          "name": "handle",
+          "kind": "function",
+          "context": "trait",
+          "source": "yrs/src/sync/protocol.rs:220"
+        },
+        {
+          "name": "handle_auth",
+          "kind": "function",
+          "context": "trait",
+          "source": "yrs/src/sync/protocol.rs:301"
+        },
+        {
+          "name": "handle_awareness_query",
+          "kind": "function",
+          "context": "trait",
+          "source": "yrs/src/sync/protocol.rs:315"
+        },
+        {
+          "name": "handle_awareness_update",
+          "kind": "function",
+          "context": "trait",
+          "source": "yrs/src/sync/protocol.rs:325"
+        },
+        {
+          "name": "handle_message",
+          "kind": "function",
+          "context": "trait",
+          "source": "yrs/src/sync/protocol.rs:239"
+        },
+        {
+          "name": "handle_sync_step1",
+          "kind": "function",
+          "context": "trait",
+          "source": "yrs/src/sync/protocol.rs:265"
+        },
+        {
+          "name": "handle_sync_step2",
+          "kind": "function",
+          "context": "trait",
+          "source": "yrs/src/sync/protocol.rs:278"
+        },
+        {
+          "name": "handle_update",
+          "kind": "function",
+          "context": "trait",
+          "source": "yrs/src/sync/protocol.rs:291"
+        },
+        {
+          "name": "missing_handle",
+          "kind": "function",
+          "context": "trait",
+          "source": "yrs/src/sync/protocol.rs:336"
+        },
+        {
+          "name": "start",
+          "kind": "function",
+          "context": "trait",
+          "source": "yrs/src/sync/protocol.rs:202"
+        }
+      ]
+    },
+    {
+      "path": "yrs::sync::protocol::MSG_AUTH",
+      "aliases": [
+        "yrs::sync::protocol::MSG_AUTH"
+      ],
+      "kind": "constant",
+      "source": "yrs/src/sync/protocol.rs:351",
+      "members": []
+    },
+    {
+      "path": "yrs::sync::protocol::MSG_AWARENESS",
+      "aliases": [
+        "yrs::sync::protocol::MSG_AWARENESS"
+      ],
+      "kind": "constant",
+      "source": "yrs/src/sync/protocol.rs:349",
+      "members": []
+    },
+    {
+      "path": "yrs::sync::protocol::MSG_QUERY_AWARENESS",
+      "aliases": [
+        "yrs::sync::protocol::MSG_QUERY_AWARENESS"
+      ],
+      "kind": "constant",
+      "source": "yrs/src/sync/protocol.rs:353",
+      "members": []
+    },
+    {
+      "path": "yrs::sync::protocol::MSG_SYNC",
+      "aliases": [
+        "yrs::sync::protocol::MSG_SYNC"
+      ],
+      "kind": "constant",
+      "source": "yrs/src/sync/protocol.rs:347",
+      "members": []
+    },
+    {
+      "path": "yrs::sync::protocol::MSG_SYNC_STEP_1",
+      "aliases": [
+        "yrs::sync::protocol::MSG_SYNC_STEP_1"
+      ],
+      "kind": "constant",
+      "source": "yrs/src/sync/protocol.rs:429",
+      "members": []
+    },
+    {
+      "path": "yrs::sync::protocol::MSG_SYNC_STEP_2",
+      "aliases": [
+        "yrs::sync::protocol::MSG_SYNC_STEP_2"
+      ],
+      "kind": "constant",
+      "source": "yrs/src/sync/protocol.rs:431",
+      "members": []
+    },
+    {
+      "path": "yrs::sync::protocol::MSG_SYNC_UPDATE",
+      "aliases": [
+        "yrs::sync::protocol::MSG_SYNC_UPDATE"
+      ],
+      "kind": "constant",
+      "source": "yrs/src/sync/protocol.rs:433",
+      "members": []
+    },
+    {
+      "path": "yrs::sync::protocol::PERMISSION_DENIED",
+      "aliases": [
+        "yrs::sync::protocol::PERMISSION_DENIED"
+      ],
+      "kind": "constant",
+      "source": "yrs/src/sync/protocol.rs:355",
+      "members": []
+    },
+    {
+      "path": "yrs::sync::protocol::PERMISSION_GRANTED",
+      "aliases": [
+        "yrs::sync::protocol::PERMISSION_GRANTED"
+      ],
+      "kind": "constant",
+      "source": "yrs/src/sync/protocol.rs:356",
+      "members": []
+    },
+    {
+      "path": "yrs::sync::time::SystemClock",
+      "aliases": [
+        "yrs::sync::time::SystemClock"
+      ],
+      "kind": "struct",
+      "source": "yrs/src/sync/time.rs:22",
+      "members": []
+    },
+    {
+      "path": "yrs::types::AsPrelim",
+      "aliases": [
+        "yrs::types::AsPrelim"
+      ],
+      "kind": "trait",
+      "source": "yrs/src/types/mod.rs:377",
+      "members": [
+        {
+          "name": "Prelim",
+          "kind": "assoc_type",
+          "context": "trait",
+          "source": "yrs/src/types/mod.rs:378"
+        },
+        {
+          "name": "as_prelim",
+          "kind": "function",
+          "context": "trait",
+          "source": "yrs/src/types/mod.rs:382"
+        }
+      ]
+    },
+    {
+      "path": "yrs::types::Attrs",
+      "aliases": [
+        "yrs::types::Attrs"
+      ],
+      "kind": "type_alias",
+      "source": "yrs/src/types/mod.rs:777",
+      "members": []
+    },
+    {
+      "path": "yrs::types::Change",
+      "aliases": [
+        "yrs::types::Change"
+      ],
+      "kind": "enum",
+      "source": "yrs/src/types/mod.rs:673",
+      "members": [
+        {
+          "name": "Added",
+          "kind": "variant",
+          "context": "variant",
+          "source": "yrs/src/types/mod.rs:677"
+        },
+        {
+          "name": "Removed",
+          "kind": "variant",
+          "context": "variant",
+          "source": "yrs/src/types/mod.rs:681"
+        },
+        {
+          "name": "Retain",
+          "kind": "variant",
+          "context": "variant",
+          "source": "yrs/src/types/mod.rs:685"
+        }
+      ]
+    },
+    {
+      "path": "yrs::types::DefaultPrelim",
+      "aliases": [
+        "yrs::types::DefaultPrelim"
+      ],
+      "kind": "trait",
+      "source": "yrs/src/types/mod.rs:387",
+      "members": [
+        {
+          "name": "Prelim",
+          "kind": "assoc_type",
+          "context": "trait",
+          "source": "yrs/src/types/mod.rs:388"
+        },
+        {
+          "name": "default_prelim",
+          "kind": "function",
+          "context": "trait",
+          "source": "yrs/src/types/mod.rs:392"
+        }
+      ]
+    },
+    {
+      "path": "yrs::types::Delta",
+      "aliases": [
+        "yrs::types::Delta"
+      ],
+      "kind": "enum",
+      "source": "yrs/src/types/mod.rs:731",
+      "members": [
+        {
+          "name": "delete",
+          "kind": "function",
+          "context": "inherent",
+          "source": "yrs/src/types/mod.rs:771"
+        },
+        {
+          "name": "insert",
+          "kind": "function",
+          "context": "inherent",
+          "source": "yrs/src/types/mod.rs:763"
+        },
+        {
+          "name": "insert_with",
+          "kind": "function",
+          "context": "inherent",
+          "source": "yrs/src/types/mod.rs:767"
+        },
+        {
+          "name": "map",
+          "kind": "function",
+          "context": "inherent",
+          "source": "yrs/src/types/mod.rs:746"
+        },
+        {
+          "name": "retain",
+          "kind": "function",
+          "context": "inherent",
+          "source": "yrs/src/types/mod.rs:759"
+        },
+        {
+          "name": "Deleted",
+          "kind": "variant",
+          "context": "variant",
+          "source": "yrs/src/types/mod.rs:737"
+        },
+        {
+          "name": "Inserted",
+          "kind": "variant",
+          "context": "variant",
+          "source": "yrs/src/types/mod.rs:734"
+        },
+        {
+          "name": "Retain",
+          "kind": "variant",
+          "context": "variant",
+          "source": "yrs/src/types/mod.rs:742"
+        }
+      ]
+    },
+    {
+      "path": "yrs::types::EntryChange",
+      "aliases": [
+        "yrs::types::EntryChange"
+      ],
+      "kind": "enum",
+      "source": "yrs/src/types/mod.rs:690",
+      "members": [
+        {
+          "name": "Inserted",
+          "kind": "variant",
+          "context": "variant",
+          "source": "yrs/src/types/mod.rs:692"
+        },
+        {
+          "name": "Removed",
+          "kind": "variant",
+          "context": "variant",
+          "source": "yrs/src/types/mod.rs:699"
+        },
+        {
+          "name": "Updated",
+          "kind": "variant",
+          "context": "variant",
+          "source": "yrs/src/types/mod.rs:696"
+        }
+      ]
+    },
+    {
+      "path": "yrs::types::Event",
+      "aliases": [
+        "yrs::types::Event"
+      ],
+      "kind": "enum",
+      "source": "yrs/src/types/mod.rs:938",
+      "members": [
+        {
+          "name": "path",
+          "kind": "function",
+          "context": "inherent",
+          "source": "yrs/src/types/mod.rs:1024"
+        },
+        {
+          "name": "target",
+          "kind": "function",
+          "context": "inherent",
+          "source": "yrs/src/types/mod.rs:1037"
+        },
+        {
+          "name": "Array",
+          "kind": "variant",
+          "context": "variant",
+          "source": "yrs/src/types/mod.rs:940"
+        },
+        {
+          "name": "Map",
+          "kind": "variant",
+          "context": "variant",
+          "source": "yrs/src/types/mod.rs:941"
+        },
+        {
+          "name": "Text",
+          "kind": "variant",
+          "context": "variant",
+          "source": "yrs/src/types/mod.rs:939"
+        },
+        {
+          "name": "Weak",
+          "kind": "variant",
+          "context": "variant",
+          "source": "yrs/src/types/mod.rs:945"
+        },
+        {
+          "name": "XmlFragment",
+          "kind": "variant",
+          "context": "variant",
+          "source": "yrs/src/types/mod.rs:942"
+        },
+        {
+          "name": "XmlText",
+          "kind": "variant",
+          "context": "variant",
+          "source": "yrs/src/types/mod.rs:943"
+        }
+      ]
+    },
+    {
+      "path": "yrs::types::Events",
+      "aliases": [
+        "yrs::types::Events"
+      ],
+      "kind": "struct",
+      "source": "yrs/src/types/mod.rs:898",
+      "members": [
+        {
+          "name": "iter",
+          "kind": "function",
+          "context": "inherent",
+          "source": "yrs/src/types/mod.rs:911"
+        }
+      ]
+    },
+    {
+      "path": "yrs::types::EventsIter",
+      "aliases": [
+        "yrs::types::EventsIter"
+      ],
+      "kind": "struct",
+      "source": "yrs/src/types/mod.rs:916",
+      "members": []
+    },
+    {
+      "path": "yrs::types::Path",
+      "aliases": [
+        "yrs::types::Path"
+      ],
+      "kind": "type_alias",
+      "source": "yrs/src/types/mod.rs:630",
+      "members": []
+    },
+    {
+      "path": "yrs::types::PathSegment",
+      "aliases": [
+        "yrs::types::PathSegment"
+      ],
+      "kind": "enum",
+      "source": "yrs/src/types/mod.rs:634",
+      "members": [
+        {
+          "name": "Index",
+          "kind": "variant",
+          "context": "variant",
+          "source": "yrs/src/types/mod.rs:640"
+        },
+        {
+          "name": "Key",
+          "kind": "variant",
+          "context": "variant",
+          "source": "yrs/src/types/mod.rs:636"
+        }
+      ]
+    },
+    {
+      "path": "yrs::types::TYPE_REFS_ARRAY",
+      "aliases": [
+        "yrs::types::TYPE_REFS_ARRAY"
+      ],
+      "kind": "constant",
+      "source": "yrs/src/types/mod.rs:37",
+      "members": []
+    },
+    {
+      "path": "yrs::types::TYPE_REFS_DOC",
+      "aliases": [
+        "yrs::types::TYPE_REFS_DOC"
+      ],
+      "kind": "constant",
+      "source": "yrs/src/types/mod.rs:61",
+      "members": []
+    },
+    {
+      "path": "yrs::types::TYPE_REFS_MAP",
+      "aliases": [
+        "yrs::types::TYPE_REFS_MAP"
+      ],
+      "kind": "constant",
+      "source": "yrs/src/types/mod.rs:40",
+      "members": []
+    },
+    {
+      "path": "yrs::types::TYPE_REFS_TEXT",
+      "aliases": [
+        "yrs::types::TYPE_REFS_TEXT"
+      ],
+      "kind": "constant",
+      "source": "yrs/src/types/mod.rs:43",
+      "members": []
+    },
+    {
+      "path": "yrs::types::TYPE_REFS_UNDEFINED",
+      "aliases": [
+        "yrs::types::TYPE_REFS_UNDEFINED"
+      ],
+      "kind": "constant",
+      "source": "yrs/src/types/mod.rs:65",
+      "members": []
+    },
+    {
+      "path": "yrs::types::TYPE_REFS_WEAK",
+      "aliases": [
+        "yrs::types::TYPE_REFS_WEAK"
+      ],
+      "kind": "constant",
+      "source": "yrs/src/types/mod.rs:58",
+      "members": []
+    },
+    {
+      "path": "yrs::types::TYPE_REFS_XML_ELEMENT",
+      "aliases": [
+        "yrs::types::TYPE_REFS_XML_ELEMENT"
+      ],
+      "kind": "constant",
+      "source": "yrs/src/types/mod.rs:46",
+      "members": []
+    },
+    {
+      "path": "yrs::types::TYPE_REFS_XML_FRAGMENT",
+      "aliases": [
+        "yrs::types::TYPE_REFS_XML_FRAGMENT"
+      ],
+      "kind": "constant",
+      "source": "yrs/src/types/mod.rs:49",
+      "members": []
+    },
+    {
+      "path": "yrs::types::TYPE_REFS_XML_HOOK",
+      "aliases": [
+        "yrs::types::TYPE_REFS_XML_HOOK"
+      ],
+      "kind": "constant",
+      "source": "yrs/src/types/mod.rs:52",
+      "members": []
+    },
+    {
+      "path": "yrs::types::TYPE_REFS_XML_TEXT",
+      "aliases": [
+        "yrs::types::TYPE_REFS_XML_TEXT"
+      ],
+      "kind": "constant",
+      "source": "yrs/src/types/mod.rs:55",
+      "members": []
+    },
+    {
+      "path": "yrs::types::ToJson",
+      "aliases": [
+        "yrs::types::ToJson"
+      ],
+      "kind": "trait",
+      "source": "yrs/src/types/mod.rs:1054",
+      "members": [
+        {
+          "name": "to_json",
+          "kind": "function",
+          "context": "trait",
+          "source": "yrs/src/types/mod.rs:1056"
+        }
+      ]
+    },
+    {
+      "path": "yrs::types::TypeRef",
+      "aliases": [
+        "yrs::types::TypeRef"
+      ],
+      "kind": "enum",
+      "source": "yrs/src/types/mod.rs:69",
+      "members": [
+        {
+          "name": "kind",
+          "kind": "function",
+          "context": "inherent",
+          "source": "yrs/src/types/mod.rs:84"
+        },
+        {
+          "name": "Array",
+          "kind": "variant",
+          "context": "variant",
+          "source": "yrs/src/types/mod.rs:70"
+        },
+        {
+          "name": "Map",
+          "kind": "variant",
+          "context": "variant",
+          "source": "yrs/src/types/mod.rs:71"
+        },
+        {
+          "name": "SubDoc",
+          "kind": "variant",
+          "context": "variant",
+          "source": "yrs/src/types/mod.rs:77"
+        },
+        {
+          "name": "Text",
+          "kind": "variant",
+          "context": "variant",
+          "source": "yrs/src/types/mod.rs:72"
+        },
+        {
+          "name": "Undefined",
+          "kind": "variant",
+          "context": "variant",
+          "source": "yrs/src/types/mod.rs:80"
+        },
+        {
+          "name": "WeakLink",
+          "kind": "variant",
+          "context": "variant",
+          "source": "yrs/src/types/mod.rs:79"
+        },
+        {
+          "name": "XmlElement",
+          "kind": "variant",
+          "context": "variant",
+          "source": "yrs/src/types/mod.rs:73"
+        },
+        {
+          "name": "XmlFragment",
+          "kind": "variant",
+          "context": "variant",
+          "source": "yrs/src/types/mod.rs:74"
+        },
+        {
+          "name": "XmlHook",
+          "kind": "variant",
+          "context": "variant",
+          "source": "yrs/src/types/mod.rs:75"
+        },
+        {
+          "name": "XmlText",
+          "kind": "variant",
+          "context": "variant",
+          "source": "yrs/src/types/mod.rs:76"
+        }
+      ]
+    },
+    {
+      "path": "yrs::types::array::ArrayEvent",
+      "aliases": [
+        "yrs::types::array::ArrayEvent"
+      ],
+      "kind": "struct",
+      "source": "yrs/src/types/array.rs:509",
+      "members": [
+        {
+          "name": "delta",
+          "kind": "function",
+          "context": "inherent",
+          "source": "yrs/src/types/array.rs:537"
+        },
+        {
+          "name": "inserts",
+          "kind": "function",
+          "context": "inherent",
+          "source": "yrs/src/types/array.rs:543"
+        },
+        {
+          "name": "path",
+          "kind": "function",
+          "context": "inherent",
+          "source": "yrs/src/types/array.rs:531"
+        },
+        {
+          "name": "removes",
+          "kind": "function",
+          "context": "inherent",
+          "source": "yrs/src/types/array.rs:549"
+        },
+        {
+          "name": "target",
+          "kind": "function",
+          "context": "inherent",
+          "source": "yrs/src/types/array.rs:526"
+        }
+      ]
+    },
+    {
+      "path": "yrs::types::array::ArrayIter",
+      "aliases": [
+        "yrs::types::array::ArrayIter"
+      ],
+      "kind": "struct",
+      "source": "yrs/src/types/array.rs:344",
+      "members": [
+        {
+          "name": "from",
+          "kind": "function",
+          "context": "inherent",
+          "source": "yrs/src/types/array.rs:358"
+        },
+        {
+          "name": "from_ref",
+          "kind": "function",
+          "context": "inherent",
+          "source": "yrs/src/types/array.rs:371"
+        }
+      ]
+    },
+    {
+      "path": "yrs::types::map::Keys",
+      "aliases": [
+        "yrs::types::map::Keys"
+      ],
+      "kind": "struct",
+      "source": "yrs/src/types/map.rs:452",
+      "members": [
+        {
+          "name": "new",
+          "kind": "function",
+          "context": "inherent",
+          "source": "yrs/src/types/map.rs:459"
+        }
+      ]
+    },
+    {
+      "path": "yrs::types::map::MapEvent",
+      "aliases": [
+        "yrs::types::map::MapEvent"
+      ],
+      "kind": "struct",
+      "source": "yrs/src/types/map.rs:599",
+      "members": [
+        {
+          "name": "keys",
+          "kind": "function",
+          "context": "inherent",
+          "source": "yrs/src/types/map.rs:627"
+        },
+        {
+          "name": "path",
+          "kind": "function",
+          "context": "inherent",
+          "source": "yrs/src/types/map.rs:621"
+        },
+        {
+          "name": "target",
+          "kind": "function",
+          "context": "inherent",
+          "source": "yrs/src/types/map.rs:616"
+        }
+      ]
+    },
+    {
+      "path": "yrs::types::map::MapIntoIter",
+      "aliases": [
+        "yrs::types::map::MapIntoIter"
+      ],
+      "kind": "struct",
+      "source": "yrs/src/types/map.rs:425",
+      "members": []
+    },
+    {
+      "path": "yrs::types::map::MapIter",
+      "aliases": [
+        "yrs::types::map::MapIter"
+      ],
+      "kind": "struct",
+      "source": "yrs/src/types/map.rs:395",
+      "members": [
+        {
+          "name": "new",
+          "kind": "function",
+          "context": "inherent",
+          "source": "yrs/src/types/map.rs:402"
+        }
+      ]
+    },
+    {
+      "path": "yrs::types::map::Values",
+      "aliases": [
+        "yrs::types::map::Values"
+      ],
+      "kind": "struct",
+      "source": "yrs/src/types/map.rs:480",
+      "members": [
+        {
+          "name": "new",
+          "kind": "function",
+          "context": "inherent",
+          "source": "yrs/src/types/map.rs:487"
+        }
+      ]
+    },
+    {
+      "path": "yrs::types::text::ChangeKind",
+      "aliases": [
+        "yrs::types::text::ChangeKind"
+      ],
+      "kind": "enum",
+      "source": "yrs/src/types/text.rs:1200",
+      "members": [
+        {
+          "name": "Added",
+          "kind": "variant",
+          "context": "variant",
+          "source": "yrs/src/types/text.rs:1201"
+        },
+        {
+          "name": "Removed",
+          "kind": "variant",
+          "context": "variant",
+          "source": "yrs/src/types/text.rs:1202"
+        }
+      ]
+    },
+    {
+      "path": "yrs::types::text::DeltaPrelim",
+      "aliases": [
+        "yrs::types::text::DeltaPrelim"
+      ],
+      "kind": "struct",
+      "source": "yrs/src/types/text.rs:1131",
+      "members": []
+    },
+    {
+      "path": "yrs::types::text::Diff",
+      "aliases": [
+        "yrs::types::text::Diff"
+      ],
+      "kind": "struct",
+      "source": "yrs/src/types/text.rs:1096",
+      "members": [
+        {
+          "name": "attributes",
+          "kind": "struct_field",
+          "context": "field",
+          "source": "yrs/src/types/text.rs:1102"
+        },
+        {
+          "name": "insert",
+          "kind": "struct_field",
+          "context": "field",
+          "source": "yrs/src/types/text.rs:1099"
+        },
+        {
+          "name": "ychange",
+          "kind": "struct_field",
+          "context": "field",
+          "source": "yrs/src/types/text.rs:1105"
+        },
+        {
+          "name": "new",
+          "kind": "function",
+          "context": "inherent",
+          "source": "yrs/src/types/text.rs:1109"
+        },
+        {
+          "name": "with_change",
+          "kind": "function",
+          "context": "inherent",
+          "source": "yrs/src/types/text.rs:1113"
+        }
+      ]
+    },
+    {
+      "path": "yrs::types::text::TextEvent",
+      "aliases": [
+        "yrs::types::text::TextEvent"
+      ],
+      "kind": "struct",
+      "source": "yrs/src/types/text.rs:1206",
+      "members": [
+        {
+          "name": "delta",
+          "kind": "function",
+          "context": "inherent",
+          "source": "yrs/src/types/text.rs:1235"
+        },
+        {
+          "name": "path",
+          "kind": "function",
+          "context": "inherent",
+          "source": "yrs/src/types/text.rs:1229"
+        },
+        {
+          "name": "target",
+          "kind": "function",
+          "context": "inherent",
+          "source": "yrs/src/types/text.rs:1224"
+        }
+      ]
+    },
+    {
+      "path": "yrs::types::text::YChange",
+      "aliases": [
+        "yrs::types::text::YChange"
+      ],
+      "kind": "struct",
+      "source": "yrs/src/types/text.rs:1183",
+      "members": [
+        {
+          "name": "id",
+          "kind": "struct_field",
+          "context": "field",
+          "source": "yrs/src/types/text.rs:1185"
+        },
+        {
+          "name": "kind",
+          "kind": "struct_field",
+          "context": "field",
+          "source": "yrs/src/types/text.rs:1184"
+        },
+        {
+          "name": "identity",
+          "kind": "function",
+          "context": "inherent",
+          "source": "yrs/src/types/text.rs:1194"
+        },
+        {
+          "name": "new",
+          "kind": "function",
+          "context": "inherent",
+          "source": "yrs/src/types/text.rs:1189"
+        }
+      ]
+    },
+    {
+      "path": "yrs::types::weak::LinkSource",
+      "aliases": [
+        "yrs::types::weak::LinkSource"
+      ],
+      "kind": "struct",
+      "source": "yrs/src/types/weak.rs:487",
+      "members": [
+        {
+          "name": "is_single",
+          "kind": "function",
+          "context": "inherent",
+          "source": "yrs/src/types/weak.rs:501"
+        },
+        {
+          "name": "new",
+          "kind": "function",
+          "context": "inherent",
+          "source": "yrs/src/types/weak.rs:493"
+        },
+        {
+          "name": "to_string",
+          "kind": "function",
+          "context": "inherent",
+          "source": "yrs/src/types/weak.rs:587"
+        },
+        {
+          "name": "to_xml_string",
+          "kind": "function",
+          "context": "inherent",
+          "source": "yrs/src/types/weak.rs:614"
+        }
+      ]
+    },
+    {
+      "path": "yrs::types::weak::QuoteError",
+      "aliases": [
+        "yrs::types::weak::QuoteError"
+      ],
+      "kind": "enum",
+      "source": "yrs/src/types/weak.rs:782",
+      "members": [
+        {
+          "name": "OutOfBounds",
+          "kind": "variant",
+          "context": "variant",
+          "source": "yrs/src/types/weak.rs:790"
+        }
+      ]
+    },
+    {
+      "path": "yrs::types::weak::Unquote",
+      "aliases": [
+        "yrs::types::weak::Unquote"
+      ],
+      "kind": "struct",
+      "source": "yrs/src/types/weak.rs:630",
+      "members": []
+    },
+    {
+      "path": "yrs::types::weak::WeakEvent",
+      "aliases": [
+        "yrs::types::weak::WeakEvent"
+      ],
+      "kind": "struct",
+      "source": "yrs/src/types/weak.rs:462",
+      "members": [
+        {
+          "name": "as_target",
+          "kind": "function",
+          "context": "inherent",
+          "source": "yrs/src/types/weak.rs:476"
+        },
+        {
+          "name": "path",
+          "kind": "function",
+          "context": "inherent",
+          "source": "yrs/src/types/weak.rs:481"
+        }
+      ]
+    },
+    {
+      "path": "yrs::types::xml::Attributes",
+      "aliases": [
+        "yrs::types::xml::Attributes"
+      ],
+      "kind": "struct",
+      "source": "yrs/src/types/xml.rs:1185",
+      "members": [
+        {
+          "name": "new",
+          "kind": "function",
+          "context": "inherent",
+          "source": "yrs/src/types/xml.rs:1192"
+        }
+      ]
+    },
+    {
+      "path": "yrs::types::xml::Siblings",
+      "aliases": [
+        "yrs::types::xml::Siblings"
+      ],
+      "kind": "struct",
+      "source": "yrs/src/types/xml.rs:1386",
+      "members": []
+    },
+    {
+      "path": "yrs::types::xml::TreeWalker",
+      "aliases": [
+        "yrs::types::xml::TreeWalker"
+      ],
+      "kind": "struct",
+      "source": "yrs/src/types/xml.rs:1235",
+      "members": [
+        {
+          "name": "new",
+          "kind": "function",
+          "context": "inherent",
+          "source": "yrs/src/types/xml.rs:1248"
+        }
+      ]
+    },
+    {
+      "path": "yrs::types::xml::XmlDeltaPrelim",
+      "aliases": [
+        "yrs::types::xml::XmlDeltaPrelim"
+      ],
+      "kind": "struct",
+      "source": "yrs/src/types/xml.rs:739",
+      "members": [
+        {
+          "name": "attributes",
+          "kind": "struct_field",
+          "context": "field",
+          "source": "yrs/src/types/xml.rs:740"
+        },
+        {
+          "name": "delta",
+          "kind": "struct_field",
+          "context": "field",
+          "source": "yrs/src/types/xml.rs:741"
+        }
+      ]
+    },
+    {
+      "path": "yrs::types::xml::XmlEvent",
+      "aliases": [
+        "yrs::types::xml::XmlEvent"
+      ],
+      "kind": "struct",
+      "source": "yrs/src/types/xml.rs:1436",
+      "members": [
+        {
+          "name": "added",
+          "kind": "function",
+          "context": "inherent",
+          "source": "yrs/src/types/xml.rs:1480"
+        },
+        {
+          "name": "children_changed",
+          "kind": "function",
+          "context": "inherent",
+          "source": "yrs/src/types/xml.rs:1458"
+        },
+        {
+          "name": "deleted",
+          "kind": "function",
+          "context": "inherent",
+          "source": "yrs/src/types/xml.rs:1486"
+        },
+        {
+          "name": "delta",
+          "kind": "function",
+          "context": "inherent",
+          "source": "yrs/src/types/xml.rs:1474"
+        },
+        {
+          "name": "keys",
+          "kind": "function",
+          "context": "inherent",
+          "source": "yrs/src/types/xml.rs:1492"
+        },
+        {
+          "name": "path",
+          "kind": "function",
+          "context": "inherent",
+          "source": "yrs/src/types/xml.rs:1468"
+        },
+        {
+          "name": "target",
+          "kind": "function",
+          "context": "inherent",
+          "source": "yrs/src/types/xml.rs:1463"
+        }
+      ]
+    },
+    {
+      "path": "yrs::types::xml::XmlHookRef",
+      "aliases": [
+        "yrs::types::xml::XmlHookRef"
+      ],
+      "kind": "struct",
+      "source": "yrs/src/types/xml.rs:949",
+      "members": []
+    },
+    {
+      "path": "yrs::types::xml::XmlIn",
+      "aliases": [
+        "yrs::types::xml::XmlIn"
+      ],
+      "kind": "enum",
+      "source": "yrs/src/types/xml.rs:28",
+      "members": [
+        {
+          "name": "Element",
+          "kind": "variant",
+          "context": "variant",
+          "source": "yrs/src/types/xml.rs:30"
+        },
+        {
+          "name": "Fragment",
+          "kind": "variant",
+          "context": "variant",
+          "source": "yrs/src/types/xml.rs:31"
+        },
+        {
+          "name": "Text",
+          "kind": "variant",
+          "context": "variant",
+          "source": "yrs/src/types/xml.rs:29"
+        }
+      ]
+    },
+    {
+      "path": "yrs::types::xml::XmlNodes",
+      "aliases": [
+        "yrs::types::xml::XmlNodes"
+      ],
+      "kind": "struct",
+      "source": "yrs/src/types/xml.rs:1214",
+      "members": []
+    },
+    {
+      "path": "yrs::types::xml::XmlPrelim",
+      "aliases": [
+        "yrs::types::xml::XmlPrelim"
+      ],
+      "kind": "trait",
+      "source": "yrs/src/types/xml.rs:23",
+      "members": []
+    },
+    {
+      "path": "yrs::types::xml::XmlTextEvent",
+      "aliases": [
+        "yrs::types::xml::XmlTextEvent"
+      ],
+      "kind": "struct",
+      "source": "yrs/src/types/xml.rs:1326",
+      "members": [
+        {
+          "name": "delta",
+          "kind": "function",
+          "context": "inherent",
+          "source": "yrs/src/types/xml.rs:1357"
+        },
+        {
+          "name": "keys",
+          "kind": "function",
+          "context": "inherent",
+          "source": "yrs/src/types/xml.rs:1366"
+        },
+        {
+          "name": "path",
+          "kind": "function",
+          "context": "inherent",
+          "source": "yrs/src/types/xml.rs:1351"
+        },
+        {
+          "name": "target",
+          "kind": "function",
+          "context": "inherent",
+          "source": "yrs/src/types/xml.rs:1346"
+        }
+      ]
+    },
+    {
+      "path": "yrs::undo::CaptureTransactionFn",
+      "aliases": [
+        "yrs::undo::CaptureTransactionFn"
+      ],
+      "kind": "type_alias",
+      "source": "yrs/src/undo.rs:800",
+      "members": []
+    },
+    {
+      "path": "yrs::undo::Event",
+      "aliases": [
+        "yrs::undo::Event"
+      ],
+      "kind": "struct",
+      "source": "yrs/src/undo.rs:912",
+      "members": [
+        {
+          "name": "changed_parent_types",
+          "kind": "function",
+          "context": "inherent",
+          "source": "yrs/src/undo.rs:963"
+        },
+        {
+          "name": "has_changed",
+          "kind": "function",
+          "context": "inherent",
+          "source": "yrs/src/undo.rs:947"
+        },
+        {
+          "name": "kind",
+          "kind": "function",
+          "context": "inherent",
+          "source": "yrs/src/undo.rs:958"
+        },
+        {
+          "name": "meta",
+          "kind": "function",
+          "context": "inherent",
+          "source": "yrs/src/undo.rs:938"
+        },
+        {
+          "name": "meta_mut",
+          "kind": "function",
+          "context": "inherent",
+          "source": "yrs/src/undo.rs:942"
+        },
+        {
+          "name": "origin",
+          "kind": "function",
+          "context": "inherent",
+          "source": "yrs/src/undo.rs:953"
+        }
+      ]
+    },
+    {
+      "path": "yrs::undo::EventKind",
+      "aliases": [
+        "yrs::undo::EventKind"
+      ],
+      "kind": "enum",
+      "source": "yrs/src/undo.rs:972",
+      "members": [
+        {
+          "name": "Redo",
+          "kind": "variant",
+          "context": "variant",
+          "source": "yrs/src/undo.rs:976"
+        },
+        {
+          "name": "Undo",
+          "kind": "variant",
+          "context": "variant",
+          "source": "yrs/src/undo.rs:974"
+        }
+      ]
+    },
+    {
+      "path": "yrs::undo::Meta",
+      "aliases": [
+        "yrs::undo::Meta"
+      ],
+      "kind": "trait",
+      "source": "yrs/src/undo.rs:95",
+      "members": []
+    },
+    {
+      "path": "yrs::undo::Options",
+      "aliases": [
+        "yrs::undo::Options"
+      ],
+      "kind": "struct",
+      "source": "yrs/src/undo.rs:775",
+      "members": [
+        {
+          "name": "capture_timeout_millis",
+          "kind": "struct_field",
+          "context": "field",
+          "source": "yrs/src/undo.rs:778"
+        },
+        {
+          "name": "capture_transaction",
+          "kind": "struct_field",
+          "context": "field",
+          "source": "yrs/src/undo.rs:787"
+        },
+        {
+          "name": "init_redo_stack",
+          "kind": "struct_field",
+          "context": "field",
+          "source": "yrs/src/undo.rs:797"
+        },
+        {
+          "name": "init_undo_stack",
+          "kind": "struct_field",
+          "context": "field",
+          "source": "yrs/src/undo.rs:794"
+        },
+        {
+          "name": "timestamp",
+          "kind": "struct_field",
+          "context": "field",
+          "source": "yrs/src/undo.rs:791"
+        },
+        {
+          "name": "tracked_origins",
+          "kind": "struct_field",
+          "context": "field",
+          "source": "yrs/src/undo.rs:783"
+        }
+      ]
+    },
+    {
+      "path": "yrs::undo::StackClearedEvent",
+      "aliases": [
+        "yrs::undo::StackClearedEvent"
+      ],
+      "kind": "struct",
+      "source": "yrs/src/undo.rs:897",
+      "members": [
+        {
+          "name": "redo_stack_cleared",
+          "kind": "struct_field",
+          "context": "field",
+          "source": "yrs/src/undo.rs:899"
+        },
+        {
+          "name": "undo_stack_cleared",
+          "kind": "struct_field",
+          "context": "field",
+          "source": "yrs/src/undo.rs:898"
+        },
+        {
+          "name": "new",
+          "kind": "function",
+          "context": "inherent",
+          "source": "yrs/src/undo.rs:903"
+        }
+      ]
+    },
+    {
+      "path": "yrs::undo::StackItem",
+      "aliases": [
+        "yrs::undo::StackItem"
+      ],
+      "kind": "struct",
+      "source": "yrs/src/undo.rs:827",
+      "members": [
+        {
+          "name": "meta",
+          "kind": "struct_field",
+          "context": "field",
+          "source": "yrs/src/undo.rs:835"
+        },
+        {
+          "name": "deletions",
+          "kind": "function",
+          "context": "inherent",
+          "source": "yrs/src/undo.rs:850"
+        },
+        {
+          "name": "insertions",
+          "kind": "function",
+          "context": "inherent",
+          "source": "yrs/src/undo.rs:856"
+        },
+        {
+          "name": "merge",
+          "kind": "function",
+          "context": "inherent",
+          "source": "yrs/src/undo.rs:867"
+        },
+        {
+          "name": "meta",
+          "kind": "function",
+          "context": "inherent",
+          "source": "yrs/src/undo.rs:861"
+        },
+        {
+          "name": "new",
+          "kind": "function",
+          "context": "inherent",
+          "source": "yrs/src/undo.rs:878"
+        },
+        {
+          "name": "with_meta",
+          "kind": "function",
+          "context": "inherent",
+          "source": "yrs/src/undo.rs:839"
+        }
+      ]
+    },
+    {
+      "path": "yrs::undo::UndoManager",
+      "aliases": [
+        "yrs::undo::UndoManager"
+      ],
+      "kind": "struct",
+      "source": "yrs/src/undo.rs:73",
+      "members": [
+        {
+          "name": "as_origin",
+          "kind": "function",
+          "context": "inherent",
+          "source": "yrs/src/undo.rs:441"
+        },
+        {
+          "name": "can_redo",
+          "kind": "function",
+          "context": "inherent",
+          "source": "yrs/src/undo.rs:533"
+        },
+        {
+          "name": "can_undo",
+          "kind": "function",
+          "context": "inherent",
+          "source": "yrs/src/undo.rs:480"
+        },
+        {
+          "name": "clear_all",
+          "kind": "function",
+          "context": "inherent",
+          "source": "yrs/src/undo.rs:375"
+        },
+        {
+          "name": "clear_redo",
+          "kind": "function",
+          "context": "inherent",
+          "source": "yrs/src/undo.rs:415"
+        },
+        {
+          "name": "clear_undo",
+          "kind": "function",
+          "context": "inherent",
+          "source": "yrs/src/undo.rs:401"
+        },
+        {
+          "name": "docs",
+          "kind": "function",
+          "context": "inherent",
+          "source": "yrs/src/undo.rs:185"
+        },
+        {
+          "name": "exclude_origin",
+          "kind": "function",
+          "context": "inherent",
+          "source": "yrs/src/undo.rs:357"
+        },
+        {
+          "name": "expand_scope",
+          "kind": "function",
+          "context": "inherent",
+          "source": "yrs/src/undo.rs:152"
+        },
+        {
+          "name": "include_origin",
+          "kind": "function",
+          "context": "inherent",
+          "source": "yrs/src/undo.rs:348"
+        },
+        {
+          "name": "new",
+          "kind": "function",
+          "context": "inherent",
+          "source": "yrs/src/undo.rs:122"
+        },
+        {
+          "name": "observe_item_added",
+          "kind": "function",
+          "context": "inherent",
+          "source": "yrs/src/undo.rs:319"
+        },
+        {
+          "name": "observe_item_popped",
+          "kind": "function",
+          "context": "inherent",
+          "source": "yrs/src/undo.rs:331"
+        },
+        {
+          "name": "observe_item_updated",
+          "kind": "function",
+          "context": "inherent",
+          "source": "yrs/src/undo.rs:325"
+        },
+        {
+          "name": "observe_stack_cleared",
+          "kind": "function",
+          "context": "inherent",
+          "source": "yrs/src/undo.rs:338"
+        },
+        {
+          "name": "redo",
+          "kind": "function",
+          "context": "inherent",
+          "source": "yrs/src/undo.rs:550"
+        },
+        {
+          "name": "redo_blocking",
+          "kind": "function",
+          "context": "inherent",
+          "source": "yrs/src/undo.rs:568"
+        },
+        {
+          "name": "redo_stack",
+          "kind": "function",
+          "context": "inherent",
+          "source": "yrs/src/undo.rs:492"
+        },
+        {
+          "name": "reset",
+          "kind": "function",
+          "context": "inherent",
+          "source": "yrs/src/undo.rs:474"
+        },
+        {
+          "name": "undo",
+          "kind": "function",
+          "context": "inherent",
+          "source": "yrs/src/undo.rs:509"
+        },
+        {
+          "name": "undo_blocking",
+          "kind": "function",
+          "context": "inherent",
+          "source": "yrs/src/undo.rs:527"
+        },
+        {
+          "name": "undo_stack",
+          "kind": "function",
+          "context": "inherent",
+          "source": "yrs/src/undo.rs:486"
+        },
+        {
+          "name": "unobserve_item_added",
+          "kind": "function",
+          "context": "inherent",
+          "source": "yrs/src/undo.rs:319"
+        },
+        {
+          "name": "unobserve_item_popped",
+          "kind": "function",
+          "context": "inherent",
+          "source": "yrs/src/undo.rs:331"
+        },
+        {
+          "name": "unobserve_item_updated",
+          "kind": "function",
+          "context": "inherent",
+          "source": "yrs/src/undo.rs:325"
+        },
+        {
+          "name": "unobserve_stack_cleared",
+          "kind": "function",
+          "context": "inherent",
+          "source": "yrs/src/undo.rs:338"
+        },
+        {
+          "name": "with_options",
+          "kind": "function",
+          "context": "inherent",
+          "source": "yrs/src/undo.rs:130"
+        }
+      ]
+    },
+    {
+      "path": "yrs::updates::decoder::Decode",
+      "aliases": [
+        "yrs::updates::decoder::Decode"
+      ],
+      "kind": "trait",
+      "source": "yrs/src/updates/decoder.rs:7",
+      "members": [
+        {
+          "name": "decode",
+          "kind": "function",
+          "context": "trait",
+          "source": "yrs/src/updates/decoder.rs:8"
+        },
+        {
+          "name": "decode_v1",
+          "kind": "function",
+          "context": "trait",
+          "source": "yrs/src/updates/decoder.rs:11"
+        },
+        {
+          "name": "decode_v2",
+          "kind": "function",
+          "context": "trait",
+          "source": "yrs/src/updates/decoder.rs:17"
+        }
+      ]
+    },
+    {
+      "path": "yrs::updates::decoder::Decoder",
+      "aliases": [
+        "yrs::updates::decoder::Decoder"
+      ],
+      "kind": "trait",
+      "source": "yrs/src/updates/decoder.rs:29",
+      "members": [
+        {
+          "name": "read_any",
+          "kind": "function",
+          "context": "trait",
+          "source": "yrs/src/updates/decoder.rs:62"
+        },
+        {
+          "name": "read_client",
+          "kind": "function",
+          "context": "trait",
+          "source": "yrs/src/updates/decoder.rs:46"
+        },
+        {
+          "name": "read_ds_clock",
+          "kind": "function",
+          "context": "trait",
+          "source": "yrs/src/updates/decoder.rs:34"
+        },
+        {
+          "name": "read_ds_len",
+          "kind": "function",
+          "context": "trait",
+          "source": "yrs/src/updates/decoder.rs:37"
+        },
+        {
+          "name": "read_info",
+          "kind": "function",
+          "context": "trait",
+          "source": "yrs/src/updates/decoder.rs:49"
+        },
+        {
+          "name": "read_json",
+          "kind": "function",
+          "context": "trait",
+          "source": "yrs/src/updates/decoder.rs:66"
+        },
+        {
+          "name": "read_key",
+          "kind": "function",
+          "context": "trait",
+          "source": "yrs/src/updates/decoder.rs:69"
+        },
+        {
+          "name": "read_left_id",
+          "kind": "function",
+          "context": "trait",
+          "source": "yrs/src/updates/decoder.rs:40"
+        },
+        {
+          "name": "read_len",
+          "kind": "function",
+          "context": "trait",
+          "source": "yrs/src/updates/decoder.rs:58"
+        },
+        {
+          "name": "read_parent_info",
+          "kind": "function",
+          "context": "trait",
+          "source": "yrs/src/updates/decoder.rs:52"
+        },
+        {
+          "name": "read_right_id",
+          "kind": "function",
+          "context": "trait",
+          "source": "yrs/src/updates/decoder.rs:43"
+        },
+        {
+          "name": "read_to_end",
+          "kind": "function",
+          "context": "trait",
+          "source": "yrs/src/updates/decoder.rs:72"
+        },
+        {
+          "name": "read_type_ref",
+          "kind": "function",
+          "context": "trait",
+          "source": "yrs/src/updates/decoder.rs:55"
+        },
+        {
+          "name": "reset_ds_cur_val",
+          "kind": "function",
+          "context": "trait",
+          "source": "yrs/src/updates/decoder.rs:31"
+        }
+      ]
+    },
+    {
+      "path": "yrs::updates::decoder::DecoderV1",
+      "aliases": [
+        "yrs::updates::decoder::DecoderV1"
+      ],
+      "kind": "struct",
+      "source": "yrs/src/updates/decoder.rs:76",
+      "members": [
+        {
+          "name": "new",
+          "kind": "function",
+          "context": "inherent",
+          "source": "yrs/src/updates/decoder.rs:81"
+        }
+      ]
+    },
+    {
+      "path": "yrs::updates::decoder::DecoderV2",
+      "aliases": [
+        "yrs::updates::decoder::DecoderV2"
+      ],
+      "kind": "struct",
+      "source": "yrs/src/updates/decoder.rs:199",
+      "members": [
+        {
+          "name": "new",
+          "kind": "function",
+          "context": "inherent",
+          "source": "yrs/src/updates/decoder.rs:215"
+        }
+      ]
+    },
+    {
+      "path": "yrs::updates::encoder::Encode",
+      "aliases": [
+        "yrs::updates::encoder::Encode"
+      ],
+      "kind": "trait",
+      "source": "yrs/src/updates/encoder.rs:8",
+      "members": [
+        {
+          "name": "encode",
+          "kind": "function",
+          "context": "trait",
+          "source": "yrs/src/updates/encoder.rs:9"
+        },
+        {
+          "name": "encode_v1",
+          "kind": "function",
+          "context": "trait",
+          "source": "yrs/src/updates/encoder.rs:12"
+        },
+        {
+          "name": "encode_v2",
+          "kind": "function",
+          "context": "trait",
+          "source": "yrs/src/updates/encoder.rs:19"
+        }
+      ]
+    },
+    {
+      "path": "yrs::updates::encoder::Encoder",
+      "aliases": [
+        "yrs::updates::encoder::Encoder"
+      ],
+      "kind": "trait",
+      "source": "yrs/src/updates/encoder.rs:32",
+      "members": [
+        {
+          "name": "reset_ds_cur_val",
+          "kind": "function",
+          "context": "trait",
+          "source": "yrs/src/updates/encoder.rs:37"
+        },
+        {
+          "name": "to_vec",
+          "kind": "function",
+          "context": "trait",
+          "source": "yrs/src/updates/encoder.rs:34"
+        },
+        {
+          "name": "write_any",
+          "kind": "function",
+          "context": "trait",
+          "source": "yrs/src/updates/encoder.rs:70"
+        },
+        {
+          "name": "write_client",
+          "kind": "function",
+          "context": "trait",
+          "source": "yrs/src/updates/encoder.rs:52"
+        },
+        {
+          "name": "write_ds_clock",
+          "kind": "function",
+          "context": "trait",
+          "source": "yrs/src/updates/encoder.rs:40"
+        },
+        {
+          "name": "write_ds_len",
+          "kind": "function",
+          "context": "trait",
+          "source": "yrs/src/updates/encoder.rs:43"
+        },
+        {
+          "name": "write_info",
+          "kind": "function",
+          "context": "trait",
+          "source": "yrs/src/updates/encoder.rs:57"
+        },
+        {
+          "name": "write_json",
+          "kind": "function",
+          "context": "trait",
+          "source": "yrs/src/updates/encoder.rs:74"
+        },
+        {
+          "name": "write_key",
+          "kind": "function",
+          "context": "trait",
+          "source": "yrs/src/updates/encoder.rs:77"
+        },
+        {
+          "name": "write_left_id",
+          "kind": "function",
+          "context": "trait",
+          "source": "yrs/src/updates/encoder.rs:46"
+        },
+        {
+          "name": "write_len",
+          "kind": "function",
+          "context": "trait",
+          "source": "yrs/src/updates/encoder.rs:66"
+        },
+        {
+          "name": "write_parent_info",
+          "kind": "function",
+          "context": "trait",
+          "source": "yrs/src/updates/encoder.rs:60"
+        },
+        {
+          "name": "write_right_id",
+          "kind": "function",
+          "context": "trait",
+          "source": "yrs/src/updates/encoder.rs:49"
+        },
+        {
+          "name": "write_type_ref",
+          "kind": "function",
+          "context": "trait",
+          "source": "yrs/src/updates/encoder.rs:63"
+        }
+      ]
+    },
+    {
+      "path": "yrs::updates::encoder::EncoderV1",
+      "aliases": [
+        "yrs::updates::encoder::EncoderV1"
+      ],
+      "kind": "struct",
+      "source": "yrs/src/updates/encoder.rs:80",
+      "members": [
+        {
+          "name": "new",
+          "kind": "function",
+          "context": "inherent",
+          "source": "yrs/src/updates/encoder.rs:85"
+        }
+      ]
+    },
+    {
+      "path": "yrs::updates::encoder::EncoderV2",
+      "aliases": [
+        "yrs::updates::encoder::EncoderV2"
+      ],
+      "kind": "struct",
+      "source": "yrs/src/updates/encoder.rs:182",
+      "members": [
+        {
+          "name": "new",
+          "kind": "function",
+          "context": "inherent",
+          "source": "yrs/src/updates/encoder.rs:199"
+        }
+      ]
+    },
+    {
+      "path": "yrs::uuid_v4",
+      "aliases": [
+        "yrs::uuid_v4"
+      ],
+      "kind": "function",
+      "source": "yrs/src/lib.rs:726",
+      "members": []
+    },
+    {
+      "path": "yrs::uuid_v4_from",
+      "aliases": [
+        "yrs::uuid_v4_from"
+      ],
+      "kind": "function",
+      "source": "yrs/src/lib.rs:733",
+      "members": []
+    }
+  ]
+}

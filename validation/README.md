@@ -65,3 +65,11 @@ bidirectional v1/v2 imports through the main three-replica bridge.
 `python3 validation/prelims.py` checks XML copies, typed attribute stringification
 and concurrent insertion around tombstones, using independent replicas and
 bidirectional v1/v2 imports.
+
+`python3 validation/public_api.py --check` regenerates the public declaration
+inventory using the pinned Rust compiler's rustdoc JSON (with `RUSTC_BOOTSTRAP=1`
+limited to that documentation subprocess). It follows public modules and
+reexports and records inherent methods, trait members, public fields and enum
+variants. External/blanket trait implementations are not counted. The inventory
+is a checklist for the API audit, not a compatibility score. `--cached --check`
+uses the previously generated rustdoc JSON.

@@ -47,7 +47,12 @@ The generated `pkg.generated.mbti` is the authoritative MoonBit API.
 | `diff_updates_v1`, `diff_updates_v2` | Implemented stateless state-vector clipping |
 | `encode_state_vector_from_update_v1`, `encode_state_vector_from_update_v2` | Implemented contiguous-prefix extraction |
 
-This root inventory is **not a complete public-module audit**. Rust also exposes
+The compiler-derived [public API inventory](validation/public-api-inventory.json)
+now records 225 reachable declarations and 802 inherent methods, trait members,
+fields and variants, including public module paths and reexports. Regenerate it
+with `python3 validation/public_api.py`; `--check` detects inventory drift. It is
+a declaration inventory, **not a completed semantic audit** or a coverage percentage.
+Rust also exposes
 `block`, `doc`, `types`, `updates`, `any`, `atomic`, `branch`, `encoding`, `error`,
 `iter`, `json_path`, `observer`, `sync`, and `undo` modules. In particular:
 
@@ -58,7 +63,8 @@ This root inventory is **not a complete public-module audit**. Rust also exposes
   application-defined byte streams. Open `Encoder`, `Decoder`, `Encode` and `Decode`
   traits expose update fields, concrete v1/v2 codecs and application record composition.
   Updates, state vectors, deletion sets, snapshots and cursor metadata implement
-  generic value codecs; low-level block/branch internals remain outside the public API. Varint signedness and width are expressed explicitly
+  generic value codecs. Documents and transactions can also write directly through
+  application-supplied field codecs, including historical snapshots; low-level block/branch internals remain outside the public API. Varint signedness and width are expressed explicitly
   with 64-bit methods; Rust's generic integer trait and u128 are not exposed.
 - `block` / `branch` / `iter` / `atomic`: raw pointers, mutation internals,
   transaction-bound iterators and atomic storage are not ported as public APIs.
