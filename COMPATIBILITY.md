@@ -97,7 +97,7 @@ are API/lifetime adaptations, not claims of identical Rust ownership behavior.
 | Weak references | Mixed-runtime concurrent editing converges; broad query/event oracles retained | Resolve query inconsistencies and additional port notifications; do not label partial event comparisons as passes |
 | Concurrent undo | Mixed-runtime networks and restored stack tests pass | Separate nondeterministic restored identities from actual event/behavior mismatches in independently generated histories |
 | Public API | Root exports inventoried above; main editing and protocol APIs implemented | Finish method/module audit and resolve or explicitly define the portability boundary for unimplemented APIs |
-| Performance | All five real editing traces pass on JS/native with GC on/off | Remeasure recent improvements and address the substantial large-trace runtime gap |
+| Performance | All five real editing traces pass on JS/native with GC on/off | Clock-index and position-cache changes remeasured on both backends; address the substantial large-trace runtime gap |
 | Release packaging | Local small commits and reproducible oracle scripts | Pinned CI and reproduction instructions are prepared locally; finish the supported-feature contract and regression gates, then create the public GitHub repository |
 
 Known reference defects and deliberate corrections are recorded in
