@@ -52,6 +52,7 @@ def main():
  parser=argparse.ArgumentParser(description=__doc__)
  parser.add_argument('--gc',choices=['both','on','off'],default='both')
  parser.add_argument('--owner',choices=['mixed','moon','rust'],default='mixed')
+ parser.add_argument('--reference',choices=['rust','yjs'],default='rust')
  parser.add_argument('--seeds',type=int,default=96)
  parser.add_argument('--seed-start',type=int,default=0)
  parser.add_argument('--report',type=Path,help='write this scoped run, including failures, to a separate report')
@@ -62,11 +63,14 @@ def main():
  seeds=list(range(args.seed_start,args.seed_start+args.seeds))
  report=args.report
  if report is None and args.gc=='both' and authorship=='mixed' and args.seeds==96 and args.seed_start==0:
-  report=ROOT/'validation/undo-mixed-results.json'
- scope={'upstream':'ac339600c712642e556895426113c3f9c117de39','scenarios':len(seeds),'seed_start':args.seed_start,'gc_modes':gc_modes,'wire_versions':['v1','v2'],'authorship':authorship,'mixed_authorship':authorship=='mixed'}
+  report=ROOT/('validation/undo-mixed-results.json' if args.reference=='rust' else 'validation/undo-yjs-results.json')
+ if args.reference=='yjs':
+  assert authorship!='rust','Use --owner mixed or moon with the Yjs reference'
+  assert json.loads((ROOT/'validation/yjs/node_modules/yjs/package.json').read_text())['version']=='13.6.27'
+ scope={'upstream':'ac339600c712642e556895426113c3f9c117de39','reference':args.reference,'yjs_version':'13.6.27' if args.reference=='yjs' else None,'scenarios':len(seeds),'seed_start':args.seed_start,'gc_modes':gc_modes,'wire_versions':['v1','v2'],'authorship':authorship,'mixed_authorship':authorship=='mixed'}
  def save_report(result):
   if report is not None:report.write_text(json.dumps(result,indent=2)+'\n')
- subprocess.run(['cargo','+1.97.1','build','--release','--locked','--manifest-path','validation/rust/Cargo.toml','--bin','undo'],cwd=ROOT,check=True)
+ if args.reference=='rust':subprocess.run(['cargo','+1.97.1','build','--release','--locked','--manifest-path','validation/rust/Cargo.toml','--bin','undo'],cwd=ROOT,check=True)
  subprocess.run(['moon','build','validation/undo','--release','--target','js'],cwd=ROOT,check=True)
  checked=duplicates=undo_actions=reconciliations=0
  observer_checks=notification_batches=deep_events=0
@@ -77,13 +81,14 @@ def main():
  def compare_events(rows, version, seed, step, command):
   a,b=map(notifications,rows)
   if a!=b:
-   Path('/tmp/yrs-undo-mixed-events-failure.json').write_text(json.dumps({'version':version,'gc':gc,'seed':seed,'step':step,'command':command,'rust':rows[0],'moon':rows[1]})+'\n')
+   Path('/tmp/yrs-undo-mixed-events-failure.json').write_text(json.dumps({'version':version,'gc':gc,'seed':seed,'step':step,'command':command,'reference_engine':args.reference,'reference':rows[0],'moon':rows[1]})+'\n')
    raise AssertionError(('remote events',version,seed,step,command,a,b))
   return len(a),sum(len(batch.get('events',[])) for batch in a)
  for gc,version in [(gc,v) for gc in gc_modes for v in ['v1','v2']]:
   flags=['--gc'] if gc else []
   for seed in seeds:
-   sessions=[Session(['validation/rust/target/release/undo',version,'--live']+flags),Session(['node','validation/undo-live.cjs',version]+flags)]
+   reference=['validation/rust/target/release/undo',version,'--live'] if args.reference=='rust' else ['node','validation/yjs/undo-live.cjs',version]
+   sessions=[Session(reference+flags),Session(['node','validation/undo-live.cjs',version]+flags)]
    commands=history(seed)
    step=-1
    try:
@@ -103,7 +108,7 @@ def main():
       last[1-owner]=sessions[1-owner].call([['apply',x,packet]])
       if op in ('undo','redo'):undo_actions+=1
       # For MoonBit-owned edits, compare locally generated events directly with
-      # unchanged Rust applying exactly the generated update to its mirror.
+      # the unchanged reference applying the generated update to its mirror.
       if owner==1 and op in ('undo','redo','batch'):
        batches,events=compare_events(last,version,seed,step,c)
        local_batches+=batches;local_events+=events
@@ -125,7 +130,7 @@ def main():
         reconciliation_kinds[kind]+=1
       a,b=state(last[0]),state(last[1])
      if a!=b:
-      Path('/tmp/yrs-undo-mixed-failure.json').write_text(json.dumps({'version':version,'gc':gc,'seed':seed,'commands':commands[:step+1],'rust':last[0],'moon':last[1]})+'\n')
+      Path('/tmp/yrs-undo-mixed-failure.json').write_text(json.dumps({'version':version,'gc':gc,'seed':seed,'commands':commands[:step+1],'reference_engine':args.reference,'reference':last[0],'moon':last[1]})+'\n')
       raise AssertionError((version,seed,step,c,a,b))
      checked+=3
      if step%11==0:
@@ -145,7 +150,7 @@ def main():
    finally:
     for s in sessions:s.close()
    if (seed-args.seed_start)%16==15:print(f'{version} gc={gc} owner={authorship}: {seed-args.seed_start+1}/{len(seeds)} histories passed',flush=True)
- result={**scope,'replica_state_comparisons':checked,'duplicate_deliveries':duplicates,'undo_redo_actions':undo_actions,'reconciliation_rounds':reconciliations,'reconciliation_kinds':reconciliation_kinds,'independent_restoration_identity_equality_required':False,'structured_xml_attributes_compared':True,'observer_events_compared':'identical remote sync/duplicate transactions and port-owned local edits/undo/redo versus Rust wire mirrors, after prior state reconciliation','observer_transaction_comparisons':observer_checks,'port_local_undo_redo_observer_comparisons':local_undo_checks,'port_local_edit_observer_comparisons':local_edit_checks,'port_local_notification_batches':local_batches,'port_local_deep_events':local_events,'notification_batches':notification_batches,'deep_events':deep_events,'status':'passed'}
+ result={**scope,'replica_state_comparisons':checked,'duplicate_deliveries':duplicates,'undo_redo_actions':undo_actions,'reconciliation_rounds':reconciliations,'reconciliation_kinds':reconciliation_kinds,'independent_restoration_identity_equality_required':False,'structured_xml_attributes_compared':True,'observer_events_compared':'identical remote sync/duplicate transactions and port-owned local edits/undo/redo versus reference wire mirrors, after prior state reconciliation','observer_transaction_comparisons':observer_checks,'port_local_undo_redo_observer_comparisons':local_undo_checks,'port_local_edit_observer_comparisons':local_edit_checks,'port_local_notification_batches':local_batches,'port_local_deep_events':local_events,'notification_batches':notification_batches,'deep_events':deep_events,'status':'passed'}
  save_report(result)
  print(json.dumps(result))
 if __name__=='__main__':main()

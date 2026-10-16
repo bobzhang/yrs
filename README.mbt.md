@@ -232,6 +232,17 @@ with `python3 validation/undo_mixed.py --gc on --owner moon --report
 validation/undo-gc-port-results.json`. The Rust-owned GC failure remains a release
 gate rather than an excluded passing case.
 
+`python3 validation/undo_mixed.py --reference yjs` independently tests mixed
+Yjs 13.6.27/MoonBit editing owners. All 96 histories pass both update formats
+with GC on and off: 205,056 replica-state comparisons, 15,124 undo/redo actions,
+6,528 duplicate deliveries and 18,372 remote observer transactions. A further
+7,544 port-local undo/redo and 15,536 local editing transactions have matching
+Yjs mirror notifications. The 368 reconciliation exchanges are counted
+explicitly; equality is required after generated deletions arrive. This tests
+concurrent undo against a browser implementation that completes the isolated
+Rust GC-crash scenario. It does not turn the separate Rust comparison into a
+pass. Results are in `validation/undo-yjs-results.json`.
+
 
 Legacy JSON content and opaque shared-type references are preserved on the wire.
 `UndefinedRef` exposes retained compatibility branches through map, array and

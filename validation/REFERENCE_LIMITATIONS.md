@@ -425,6 +425,15 @@ API regression also checks continued undo/redo and save/reload on all backends.
 This establishes that the minimized crash is internal to the reference; the
 larger mixed-author gate remains separate and is not automatically waived.
 
+The separate `undo_mixed.py --reference yjs` comparison uses unchanged Yjs
+13.6.27 as the partner runtime and includes both Yjs and MoonBit editing owners.
+It passes all 96 histories in both update formats with GC enabled and disabled,
+including the corresponding nested undo scenarios. Mirrors consume identical
+wire histories, so local restoration IDs are not assumed equal across engines.
+State and observer comparisons retain the same reconciliation requirements as
+the Rust network test. `undo-yjs-results.json` records this independently; it
+does not suppress the failing Rust gate.
+
 The harness records both processes' complete call streams on failure in
 `/tmp/yrs-undo-mixed-execution-failure.json`. These are diagnostic evidence, not
 a deterministic standalone replay: rerunning Rust local undo may allocate
