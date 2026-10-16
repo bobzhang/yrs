@@ -238,3 +238,20 @@ transaction matrix records 166 different layouts. It checks every reported ID's
 logical membership and requires each changed interval's start, while comparing
 deltas and transaction ranges. The first layout is retained in
 `fixtures/array-event-block-layout.json`.
+
+## UTF-8 cursor offsets versus UTF-16 clocks
+
+`fixtures/upstream-byte-cursor-units.json` demonstrates that pinned Rust's
+`StickyIndex::at` adds a byte-relative position directly to a UTF-16 item clock.
+`get_offset` also adds the intra-item UTF-16 offset to the preceding UTF-8 length.
+The result may initially look plausible and then move incorrectly after a split,
+or name an item that does not exist. The port previously had the same defect.
+
+The port now converts valid character boundaries in both directions. Invalid
+UTF-8 boundaries return `None`; a UTF-16 cursor inside a surrogate pair likewise
+cannot be resolved to a byte boundary. The original UTF-16 path is preserved,
+including upstream's unusual left-associated end behavior. The cursor oracle
+compares UTF-16 identities and positions exactly with Rust, then checks byte-mode
+identities against those same cursors and byte offsets against independently
+converted Unicode prefixes. All 12,864 snapshots pass those checks. Rust byte-mode
+results differ in 11,016 snapshots; these differences are counted explicitly.

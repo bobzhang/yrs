@@ -348,3 +348,13 @@ agree with Rust. Intermediate sparse integration remains a compatibility gap:
 Pinned Rust also shifts identities in 101 full encodings and retains redundant
 pending deletions in 50 cases. These are recorded as partial compatibility, not
 removed from the test population; see `validation/pending-results.json`.
+
+Unicode sticky positions now convert between user offsets and UTF-16 item clocks.
+A cursor created at a UTF-8 character boundary has the same binary identity as
+one created at the corresponding UTF-16 position. Resolving a UTF-16 cursor inside
+a surrogate pair in byte mode returns `None`, as no UTF-8 boundary exists there.
+The UTF-16 path retains upstream boundary behavior. `validation/cursor_offsets.py`
+checks 12,864 snapshots from 3,216 cursor cases on 128 multilingual documents,
+including block splitting and v2 replication. Rust's UTF-16 results agree; its byte
+mode uses mixed units and differs in 11,016 snapshots. The port corrects that defect
+rather than copying invalid cursor clocks; see the retained reference fixture.

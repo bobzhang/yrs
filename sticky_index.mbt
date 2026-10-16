@@ -122,48 +122,47 @@ fn Doc::sticky_index(
   index : Int32,
   assoc : Assoc,
 ) -> StickyIndex? {
+  if self.wire_encoding != 1 {
+    return self.sticky_index_utf16(name, index, assoc)
+  }
   guard index >= 0 else { return None }
   let text : Text = { doc: self, name, }
   let length = text.length()
   if assoc == Before && index == 0 {
     return Some({ scope: name.index_scope(), assoc, })
   }
-  let mut remaining = index - (if assoc == Before { 1 } else { 0 })
-  guard remaining <= length else { return None }
+  guard index <= length else { return None }
+  let mut remaining = index
   let mut cursor = self.branch(name).head
-  let mut last = None
   while cursor is Some(id) {
     let item = self.items[id]
-    if !item.deleted && item.content.offset_length(self) > 0 {
-      if remaining < item.content.offset_length(self) {
+    let width = item.content.offset_length(self)
+    if !item.deleted && width > 0 {
+      if (assoc == After && remaining < width) ||
+        (assoc == Before && remaining > 0 && remaining <= width) {
+        let offset = if self.wire_encoding == 1 &&
+          item.content is Characters(text) {
+          guard cursor_boundary(text, remaining, true) is Some(offset) else {
+            return None
+          }
+          offset
+        } else {
+          remaining
+        }
         return Some({
           scope: Relative({
             client: id.client,
-            clock: id.clock + remaining.reinterpret_as_uint(),
+            clock: id.clock +
+            (offset - (if assoc == Before { 1 } else { 0 })).reinterpret_as_uint(),
           }),
           assoc,
         })
       }
-      remaining -= item.content.offset_length(self)
+      remaining -= width
     }
-    last = Some(item)
     cursor = item.right
   }
-  if assoc == After {
-    None
-  } else {
-    let scope = match last {
-      Some(item) =>
-        IndexScope::Relative({
-          client: item.id.client,
-          clock: item.id.clock +
-          item.content.length().reinterpret_as_uint() -
-          1U,
-        })
-      None => name.index_scope()
-    }
-    Some({ scope, assoc, })
-  }
+  None
 }
 
 ///|
@@ -184,8 +183,16 @@ pub fn StickyIndex::get_offset(self : StickyIndex, doc : Doc) -> Offset? {
       let mut index = 0
       if !deleted_parent {
         if !item.deleted && item.content.offset_length(doc) > 0 {
-          index = (id.clock - item.id.clock).reinterpret_as_int() +
+          let clock = (id.clock - item.id.clock).reinterpret_as_int() +
             (if self.assoc == Before { 1 } else { 0 })
+          index = if doc.wire_encoding == 1 && item.content is Characters(text) {
+            guard cursor_boundary(text, clock, false) is Some(offset) else {
+              return None
+            }
+            offset
+          } else {
+            clock
+          }
         }
         let mut left = item.left
         while left is Some(id) {
@@ -433,4 +440,79 @@ pub fn XmlText::sticky_boundary(
   assoc~ : Assoc = After,
 ) -> StickyIndex {
   { scope: self.name.index_scope(), assoc, }
+}
+
+///|
+// Convert only character boundaries; a UTF-16 position inside a surrogate pair
+// has no corresponding UTF-8 boundary and cannot be resolved in byte mode.
+fn cursor_boundary(text : String, offset : Int32, from_bytes : Bool) -> Int32? {
+  let mut source = 0
+  let mut target = 0
+  for c in text {
+    if source == offset {
+      return Some(target)
+    }
+    let units = if c.to_int() > 0xffff { 2 } else { 1 }
+    source += if from_bytes { utf8_width(c) } else { units }
+    target += if from_bytes { units } else { utf8_width(c) }
+    if source > offset {
+      return None
+    }
+  }
+  if source == offset {
+    Some(target)
+  } else {
+    None
+  }
+}
+
+///|
+fn Doc::sticky_index_utf16(
+  self : Doc,
+  name : Parent,
+  index : Int32,
+  assoc : Assoc,
+) -> StickyIndex? {
+  guard index >= 0 else { return None }
+  let text : Text = { doc: self, name, }
+  let length = text.length()
+  if assoc == Before && index == 0 {
+    return Some({ scope: name.index_scope(), assoc, })
+  }
+  let mut remaining = index - (if assoc == Before { 1 } else { 0 })
+  guard remaining <= length else { return None }
+  let mut cursor = self.branch(name).head
+  let mut last = None
+  while cursor is Some(id) {
+    let item = self.items[id]
+    if !item.deleted && item.content.offset_length(self) > 0 {
+      if remaining < item.content.offset_length(self) {
+        return Some({
+          scope: Relative({
+            client: id.client,
+            clock: id.clock + remaining.reinterpret_as_uint(),
+          }),
+          assoc,
+        })
+      }
+      remaining -= item.content.offset_length(self)
+    }
+    last = Some(item)
+    cursor = item.right
+  }
+  if assoc == After {
+    None
+  } else {
+    let scope = match last {
+      Some(item) =>
+        IndexScope::Relative({
+          client: item.id.client,
+          clock: item.id.clock +
+          item.content.length().reinterpret_as_uint() -
+          1U,
+        })
+      None => name.index_scope()
+    }
+    Some({ scope, assoc, })
+  }
 }

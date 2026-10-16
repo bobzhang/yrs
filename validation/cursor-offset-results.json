@@ -1,0 +1,8 @@
+{
+  "upstream": "ac339600c712642e556895426113c3f9c117de39",
+  "documents": 128,
+  "cursor_cases": 3216,
+  "snapshots": 12864,
+  "reference_byte_mode_mismatches": 11016,
+  "status": "UTF16 reference parity and cross-mode identity/offset invariants passed; Rust byte-mode unit defect differs"
+}

@@ -1,0 +1,48 @@
+{
+  "request": [
+    "\ud83d\udc69\u200d\ud83d\udcbb\ud83e\udd80e\u0301\ud83d\udc69\u200d\ud83d\udcbbe\u0301\ud83d\udc69\u200d\ud83d\udcbb\ufeff\ud83e\udd80",
+    2,
+    4,
+    false
+  ],
+  "rust": {
+    "byte_offset": 2,
+    "byte_own_offset": 4,
+    "bytes": {
+      "assoc": 0,
+      "item": {
+        "client": 1,
+        "clock": 4
+      }
+    },
+    "text": "\ud83d\udc69\u200d\ud83d\udcbb\ud83e\udd80e\u0301\ud83d\udc69\u200d\ud83d\udcbbe\u0301\ud83d\udc69\u200d\ud83d\udcbb\ufeff\ud83e\udd80",
+    "utf": {
+      "assoc": 0,
+      "item": {
+        "client": 1,
+        "clock": 2
+      }
+    },
+    "utf_offset": 2
+  },
+  "expected": {
+    "text": "\ud83d\udc69\u200d\ud83d\udcbb\ud83e\udd80e\u0301\ud83d\udc69\u200d\ud83d\udcbbe\u0301\ud83d\udc69\u200d\ud83d\udcbb\ufeff\ud83e\udd80",
+    "utf": {
+      "assoc": 0,
+      "item": {
+        "client": 1,
+        "clock": 2
+      }
+    },
+    "bytes": {
+      "assoc": 0,
+      "item": {
+        "client": 1,
+        "clock": 2
+      }
+    },
+    "utf_offset": 2,
+    "byte_offset": 4,
+    "byte_own_offset": 4
+  }
+}
