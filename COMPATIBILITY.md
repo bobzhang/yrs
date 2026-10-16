@@ -78,6 +78,10 @@ Rust also exposes
   compiler-derived serde attributes are not provided. `get_json_as` is a separate MoonBit JSON adapter.
 - `types` / `undo`: concrete editing and observation are implemented; method-level
   edge cases, generic conversions and event equivalence remain under audit.
+  The open `AsPrelim` trait exposes `to_input` for generic deep-copy builders
+  across shared collections, output values, XML nodes and weak links. Rust's
+  associated preliminary types are represented by the `In` enum; application
+  types can implement the trait without constructing an `Out` wrapper.
 - Errors use MoonBit error types. Stricter malformed-input validation is
   intentional; Rust panic behavior is not a compatibility target.
 

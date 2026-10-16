@@ -197,7 +197,11 @@ long-run editing and memory observations are recorded below.
 
 `In` describes detached nested inputs for `ArrayRef::insert` and
 `MapRef::insert_input`. `Out::to_input` captures an independent copy of shared
-arrays, maps, rich text and XML trees. `Text::apply_delta` accepts `TextDelta`
+arrays, maps, rich text and XML trees. The open `AsPrelim` trait also exposes
+`to_input` directly on shared handles, so generic functions and application
+wrappers can produce detached inputs without an `Out` wrapper. Copies capture
+the current values; weak links retain their original source identities.
+`Text::apply_delta` accepts `TextDelta`
 insert/delete/retain operations, including attributed text and shared-type
 embeds, in a single transaction. The mixed-offset Rust matrix includes these
 delta edits and checks observer output as well as rendered text and clocks.

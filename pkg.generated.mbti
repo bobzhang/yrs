@@ -98,11 +98,13 @@ pub fn Any::from_json(Json) -> Self
 pub fn Any::json_path(Self, JsonPath) -> Iter[Self]
 pub fn Any::not_equal(Self, Self) -> Bool
 pub fn Any::to_any(Self) -> Self raise ValueEncodeError
+pub fn Any::to_input(Self) -> In
 pub fn Any::to_json(Self) -> Json
 pub fn Any::to_repr(Self) -> @debug.Repr
 pub fn Any::to_string(Self) -> String
 pub fn Any::try_into_iter(Self) -> Iter[(String?, Self)]?
 pub fn Any::try_iter(Self) -> Iter[(String?, Self)]?
+pub impl AsPrelim for Any
 pub impl FromAny for Any
 pub impl ToAny for Any
 pub impl Eq for Any
@@ -147,10 +149,12 @@ pub fn ArrayRef::remove_range(Self, Int, Int) -> Unit
 pub fn ArrayRef::sticky_boundary(Self, assoc? : Assoc) -> StickyIndex
 pub fn ArrayRef::sticky_index(Self, Int, assoc? : Assoc) -> StickyIndex?
 pub fn ArrayRef::to_array(Self) -> Array[Out]
+pub fn ArrayRef::to_input(Self) -> In
 pub fn ArrayRef::to_json(Self) -> Json
 pub fn ArrayRef::try_from_out(Out) -> Result[Self, Out]
 pub fn ArrayRef::unobserve(Self, String) -> Bool
 pub fn ArrayRef::unobserve_deep(Self, String) -> Bool
+pub impl AsPrelim for ArrayRef
 pub impl DefaultPrelim for ArrayRef
 pub impl FromOut for ArrayRef
 pub impl RootRef for ArrayRef
@@ -793,12 +797,14 @@ pub fn MapRef::observe(Self, String, (MapEvent, Transaction) -> Unit) -> Unit
 pub fn MapRef::observe_deep(Self, String, (ReadOnlyArray[Event], Transaction) -> Unit) -> Unit
 pub fn MapRef::remove(Self, String) -> Unit
 pub fn MapRef::remove_entry(Self, String) -> Out?
+pub fn MapRef::to_input(Self) -> In
 pub fn MapRef::to_json(Self) -> Json
 pub fn MapRef::try_from_out(Out) -> Result[Self, Out]
 pub fn MapRef::try_update(Self, String, Any) -> Bool
 pub fn MapRef::unobserve(Self, String) -> Bool
 pub fn MapRef::unobserve_deep(Self, String) -> Bool
 pub fn MapRef::values(Self) -> Iter[Out]
+pub impl AsPrelim for MapRef
 pub impl DefaultPrelim for MapRef
 pub impl FromOut for MapRef
 pub impl RootRef for MapRef
@@ -877,6 +883,7 @@ pub fn Out::to_any(Self) -> Any
 pub fn Out::to_input(Self) -> In
 pub fn Out::to_json(Self) -> Json
 pub fn Out::to_string(Self) -> String
+pub impl AsPrelim for Out
 
 pub(all) enum PathSegment {
   Key(String)
@@ -1040,9 +1047,11 @@ pub fn Text::remove_range(Self, Int, Int) -> Unit
 pub fn Text::sticky_boundary(Self, assoc? : Assoc) -> StickyIndex
 pub fn Text::sticky_index(Self, Int, assoc? : Assoc) -> StickyIndex?
 pub fn Text::to_delta(Self) -> Array[TextChunk]
+pub fn Text::to_input(Self) -> In
 pub fn Text::try_from_out(Out) -> Result[Self, Out]
 pub fn Text::unobserve(Self, String) -> Bool
 pub fn Text::unobserve_deep(Self, String) -> Bool
+pub impl AsPrelim for Text
 pub impl DefaultPrelim for Text
 pub impl FromOut for Text
 pub impl RootRef for Text
@@ -1096,7 +1105,9 @@ pub fn UndefinedRef::as_map(Self) -> MapRef
 pub fn UndefinedRef::as_text(Self) -> Text
 pub fn UndefinedRef::equal(Self, Self) -> Bool
 pub fn UndefinedRef::not_equal(Self, Self) -> Bool
+pub fn UndefinedRef::to_input(Self) -> In
 pub fn UndefinedRef::type_ref(Self) -> Int
+pub impl AsPrelim for UndefinedRef
 pub impl Eq for UndefinedRef
 
 pub struct UndoEvent[M] {
@@ -1202,12 +1213,14 @@ pub fn WeakRef::observe_deep(Self, String, (ReadOnlyArray[Event], Transaction) -
 pub fn WeakRef::source(Self) -> LinkSource
 pub fn WeakRef::start_id(Self) -> Id?
 pub fn WeakRef::to_delta(Self) -> Array[TextChunk]
+pub fn WeakRef::to_input(Self) -> In
 pub fn[T : FromOut] WeakRef::try_deref(Self) -> Result[T, Out?]
 pub fn WeakRef::try_deref_value(Self) -> Out?
 pub fn WeakRef::try_from_out(Out) -> Result[Self, Out]
 pub fn WeakRef::unobserve(Self, String) -> Bool
 pub fn WeakRef::unobserve_deep(Self, String) -> Bool
 pub fn WeakRef::unquote(Self) -> Array[Out]
+pub impl AsPrelim for WeakRef
 pub impl FromOut for WeakRef
 pub impl SharedRef for WeakRef
 pub impl Eq for WeakRef
@@ -1233,9 +1246,11 @@ pub fn XmlElement::remove_attribute(Self, String) -> Unit
 pub fn XmlElement::sticky_boundary(Self, assoc? : Assoc) -> StickyIndex
 pub fn XmlElement::sticky_index(Self, Int, assoc? : Assoc) -> StickyIndex?
 pub fn XmlElement::tag(Self) -> String
+pub fn XmlElement::to_input(Self) -> In
 pub fn XmlElement::try_from_out(Out) -> Result[Self, Out]
 pub fn XmlElement::unobserve(Self, String) -> Bool
 pub fn XmlElement::unobserve_deep(Self, String) -> Bool
+pub impl AsPrelim for XmlElement
 pub impl FromOut for XmlElement
 pub impl SharedRef for XmlElement
 pub impl Eq for XmlElement
@@ -1286,9 +1301,11 @@ pub fn XmlFragment::remove_range(Self, Int, Int) -> Unit
 pub fn XmlFragment::sticky_boundary(Self, assoc? : Assoc) -> StickyIndex
 pub fn XmlFragment::sticky_index(Self, Int, assoc? : Assoc) -> StickyIndex?
 pub fn XmlFragment::successors(Self) -> Iter[XmlNode]
+pub fn XmlFragment::to_input(Self) -> In
 pub fn XmlFragment::try_from_out(Out) -> Result[Self, Out]
 pub fn XmlFragment::unobserve(Self, String) -> Bool
 pub fn XmlFragment::unobserve_deep(Self, String) -> Bool
+pub impl AsPrelim for XmlFragment
 pub impl DefaultPrelim for XmlFragment
 pub impl FromOut for XmlFragment
 pub impl RootRef for XmlFragment
@@ -1310,7 +1327,9 @@ pub fn XmlNode::not_equal(Self, Self) -> Bool
 pub fn XmlNode::parent(Self) -> Self?
 pub fn XmlNode::prev_sibling(Self) -> Self?
 pub fn XmlNode::siblings(Self, backwards? : Bool) -> Iter[Self]
+pub fn XmlNode::to_input(Self) -> In
 pub fn XmlNode::try_from_out(Out) -> Result[Self, Out]
+pub impl AsPrelim for XmlNode
 pub impl FromOut for XmlNode
 
 pub struct XmlText {
@@ -1337,9 +1356,11 @@ pub fn XmlText::quote(Self, QuoteBound, QuoteBound) -> WeakPrelim raise QuoteErr
 pub fn XmlText::remove_attribute(Self, String) -> Unit
 pub fn XmlText::sticky_boundary(Self, assoc? : Assoc) -> StickyIndex
 pub fn XmlText::sticky_index(Self, Int, assoc? : Assoc) -> StickyIndex?
+pub fn XmlText::to_input(Self) -> In
 pub fn XmlText::try_from_out(Out) -> Result[Self, Out]
 pub fn XmlText::unobserve(Self, String) -> Bool
 pub fn XmlText::unobserve_deep(Self, String) -> Bool
+pub impl AsPrelim for XmlText
 pub impl DefaultPrelim for XmlText
 pub impl FromOut for XmlText
 pub impl SharedRef for XmlText
@@ -1365,6 +1386,10 @@ pub fn YChange::to_repr(Self) -> @debug.Repr
 // Type aliases
 
 // Traits
+pub(open) trait AsPrelim {
+  fn to_input(Self) -> In
+}
+
 pub(open) trait AsyncProtocol {
   async fn start(Self, Awareness) -> Bytes = _
   async fn handle(Self, Awareness, Bytes) -> Array[Message] = _
