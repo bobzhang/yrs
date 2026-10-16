@@ -103,3 +103,35 @@ test "XML observers distinguish attributes from child changes and rich text" {
   assert_true(element.unobserve("element"))
   assert_true(text.unobserve("text"))
 }
+
+///|
+test "XML identity events retain child additions and deletions across deep paths" {
+  let doc = @yrs.Doc(client_id=1UL)
+  let root = doc.get_or_insert_xml_fragment("xml")
+  let outer = root.insert_element(0, "div")
+  let children = outer.as_fragment()
+  children.insert_element(0, "old") |> ignore
+  let events : Array[@yrs.XmlEvent] = []
+  root.observe_deep("ids", fn(batch, _) {
+    for event in batch {
+      if event is XmlFragment(event) {
+        events.push(event)
+      }
+    }
+  })
+  doc.transact(fn(_) {
+    children.remove(0)
+    children.insert_element(0, "kept") |> ignore
+    children.insert_element(1, "temporary") |> ignore
+    children.remove(1)
+  })
+  assert_eq(events.length(), 1)
+  assert_eq(events[0].added().iter().to_array(), [{ client: 1UL, clock: 2U, }])
+  assert_eq(events[0].deleted().iter().to_array(), [{ client: 1UL, clock: 1U, }])
+  children.remove(0)
+  assert_eq(events[0].added().iter().to_array(), [{ client: 1UL, clock: 2U, }])
+  let child = @yrs.Doc(client_id=3UL, guid="identity-test")
+  assert_true(child.branch_id() is None)
+  doc.get_or_insert_map("docs").insert_doc("child", child) |> ignore
+  assert_true(child.branch_id() is Some(Nested(_)))
+}

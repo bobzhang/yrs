@@ -24,6 +24,8 @@ pub(all) enum Event {
 
 ///|
 pub struct XmlEvent {
+  priv added_ids : ReadOnlyArray[Id]
+  priv deleted_ids : ReadOnlyArray[Id]
   priv node : XmlNode
   priv route : ReadOnlyArray[PathSegment]
   priv changes : ReadOnlyArray[Change]
@@ -180,22 +182,30 @@ fn Doc::notify_collections(self : Doc, transaction : Transaction) -> Unit {
           changes: transaction.text_delta(parent),
           entries,
         })
-      Some(SharedXmlElement(tag)) =>
+      Some(SharedXmlElement(tag)) => {
+        let (added_ids, deleted_ids) = transaction.sequence_ids(parent)
         XmlFragment({
+          added_ids,
+          deleted_ids,
           node: Element({ doc: self, name: parent, tag, }),
           route: [],
           changes: transaction.array_delta(parent),
           entries,
           changed_children: transaction.sequences.contains(parent),
         })
-      Some(SharedXmlFragment) =>
+      }
+      Some(SharedXmlFragment) => {
+        let (added_ids, deleted_ids) = transaction.sequence_ids(parent)
         XmlFragment({
+          added_ids,
+          deleted_ids,
           node: Fragment({ doc: self, name: parent, }),
           route: [],
           changes: transaction.array_delta(parent),
           entries,
           changed_children: transaction.sequences.contains(parent),
         })
+      }
       Some(SharedWeak(link)) =>
         Weak({ weak: { doc: self, name: parent, link, }, route: [], })
       None | Some(SharedOpaque(_)) => continue
@@ -335,6 +345,8 @@ fn Event::with_path(self : Event, path : ReadOnlyArray[PathSegment]) -> Event {
     Map(event) => Map({ map: event.map, changes: event.changes, route: path, })
     XmlFragment(event) =>
       XmlFragment({
+        added_ids: event.added_ids,
+        deleted_ids: event.deleted_ids,
         node: event.node,
         changes: event.changes,
         route: path,
@@ -632,3 +644,15 @@ pub extend PathSegment with Eq::{equal, not_equal}
 
 ///|
 pub extend PathSegment with Debug::{to_repr}
+
+///|
+/// Inserted child block identities, excluding children also removed in this transaction.
+pub fn XmlEvent::added(self : XmlEvent) -> ReadOnlyArray[Id] {
+  self.added_ids
+}
+
+///|
+/// Removed child block identities, excluding transient new children.
+pub fn XmlEvent::deleted(self : XmlEvent) -> ReadOnlyArray[Id] {
+  self.deleted_ids
+}

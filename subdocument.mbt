@@ -291,3 +291,9 @@ pub fn Doc::destroy(self : Doc) -> Unit {
     self.destroy_contents()
   }
 }
+
+///|
+/// Identity of this subdocument's owning item in its parent document.
+pub fn Doc::branch_id(self : Doc) -> BranchId? {
+  self.owner.map(fn(p) { BranchId::Nested(p.1) })
+}

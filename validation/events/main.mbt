@@ -45,6 +45,15 @@ fn event_json(event : @yrs.Event) -> Json {
       out["delta"] = Json(e.delta().iter().map(@yrs.Change::to_json).to_array())
       out["keys"] = keys(e.keys())
       out["children"] = Json(e.children_changed())
+      fn ids(values : ReadOnlyArray[@yrs.Id]) -> Json {
+        let values = values.iter().to_array()
+        values.sort()
+        Json(
+          values.map(fn(id) { Json([Json(id.client.to_int()), Json(id.clock)]) }),
+        )
+      }
+      out["added"] = ids(e.added())
+      out["deleted"] = ids(e.deleted())
     }
     XmlText(e) => {
       out["kind"] = "xmltext"

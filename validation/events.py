@@ -52,6 +52,6 @@ def main():
     x,y=canonical(x),canonical(y)
     if x!=y:
      Path('/tmp/yrs-events-failure.json').write_text(json.dumps(cases[seed][:step+1])+'\n');raise AssertionError(f'{version} seed={seed} step={step} op={cases[seed][step]} Rust={x!r} Moon={y!r}')
- result={'upstream':'ac339600c712642e556895426113c3f9c117de39','scenarios':len(cases),'wire_versions':['v1','v2'],'transaction_snapshots':checks,'notification_batches':batches,'deep_events':events,'status':'passed'}
+ result={'upstream':'ac339600c712642e556895426113c3f9c117de39','scenarios':len(cases),'wire_versions':['v1','v2'],'transaction_snapshots':checks,'notification_batches':batches,'deep_events':events,'xml_identity_sets_compared':True,'status':'passed'}
  (ROOT/'validation/event-results.json').write_text(json.dumps(result,indent=2)+'\n');print(json.dumps(result))
 if __name__=='__main__':main()

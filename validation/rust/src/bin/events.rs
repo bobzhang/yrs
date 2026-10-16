@@ -28,7 +28,9 @@ fn event(e:&Event,tx:&TransactionMut)->Value{
  Event::Text(e)=>{out["kind"]=json!("text");out["delta"]=delta(e.delta(tx),tx)},
  Event::Array(e)=>{out["kind"]=json!("array");out["delta"]=changes(e.delta(tx),tx)},
  Event::Map(e)=>{out["kind"]=json!("map");out["keys"]=keys(e.keys(tx),tx)},
- Event::XmlFragment(e)=>{out["kind"]=json!("xml");out["delta"]=changes(e.delta(tx),tx);out["keys"]=keys(e.keys(tx),tx);out["children"]=json!(e.children_changed());},
+ Event::XmlFragment(e)=>{out["kind"]=json!("xml");out["delta"]=changes(e.delta(tx),tx);out["keys"]=keys(e.keys(tx),tx);out["children"]=json!(e.children_changed());
+ let mut added=e.added(tx).iter().map(|id|(id.client.get(),id.clock)).collect::<Vec<_>>();added.sort();out["added"]=json!(added);
+ let mut deleted=e.deleted(tx).iter().map(|id|(id.client.get(),id.clock)).collect::<Vec<_>>();deleted.sort();out["deleted"]=json!(deleted);},
  Event::XmlText(e)=>{out["kind"]=json!("xmltext");out["delta"]=delta(e.delta(tx),tx);out["keys"]=keys(e.keys(tx),tx);}
  }
  out

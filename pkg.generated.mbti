@@ -268,6 +268,7 @@ pub fn Doc::apply_update(Self, Update) -> Unit raise DecodeError
 pub fn Doc::apply_update_v1(Self, Bytes) -> Unit raise DecodeError
 pub fn Doc::apply_update_v2(Self, Bytes, max_items? : Int) -> Unit raise DecodeError
 pub fn Doc::auto_load(Self) -> Bool
+pub fn Doc::branch_id(Self) -> BranchId?
 pub fn Doc::cleanup_formatting_enabled(Self) -> Bool
 pub fn Doc::client_id(Self) -> UInt64
 pub fn Doc::collection_id(Self) -> String?
@@ -826,7 +827,9 @@ pub fn XmlElement::unobserve_deep(Self, String) -> Bool
 pub struct XmlEvent {
   // private fields
 }
+pub fn XmlEvent::added(Self) -> ReadOnlyArray[Id]
 pub fn XmlEvent::children_changed(Self) -> Bool
+pub fn XmlEvent::deleted(Self) -> ReadOnlyArray[Id]
 pub fn XmlEvent::delta(Self) -> ReadOnlyArray[Change]
 pub fn XmlEvent::keys(Self) -> Map[String, EntryChange]
 pub fn XmlEvent::path(Self) -> ReadOnlyArray[PathSegment]

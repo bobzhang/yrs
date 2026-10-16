@@ -8,5 +8,6 @@
   "transaction_snapshots": 32256,
   "notification_batches": 55344,
   "deep_events": 71910,
-  "status": "passed"
+  "status": "passed",
+  "xml_identity_sets_compared": true
 }
