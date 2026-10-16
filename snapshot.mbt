@@ -67,22 +67,36 @@ pub fn Snapshot::is_visible(self : Snapshot, id : Id) -> Bool {
 }
 
 ///|
-pub fn Doc::snapshot(self : Doc) -> Snapshot {
-  let ranges = []
-  for client, items in self.clients {
+fn Doc::integrated_delete_set(self : Doc) -> IdSet {
+  let deleted = IdSet()
+  for items in self.clients.values() {
     for item in items {
       if item.deleted {
-        ranges.push(
-          (
-            client,
-            item.id.clock,
-            item.id.clock + item.content.length().reinterpret_as_uint(),
-          ),
-        )
+        deleted.insert(item.id, item.content.length().reinterpret_as_uint())
       }
     }
   }
-  Snapshot(state=self.state, deletions=ranges)
+  deleted
+}
+
+///|
+/// Capture every integrated item, including items beyond missing clock ranges.
+/// Snapshot clocks bound observed identities; absent ranges are excluded by its
+/// delete set. Use Doc::state_vector (not this snapshot's vector) for replication.
+pub fn Doc::snapshot(self : Doc) -> Snapshot {
+  let state = StateVector(entries=self.state.entries())
+  let deleted = self.integrated_delete_set()
+  for client, items in self.clients {
+    let mut end = 0U
+    for item in items {
+      if end < item.id.clock {
+        deleted.insert({ client, clock: end, }, item.id.clock - end)
+      }
+      end = item.id.clock + item.content.length().reinterpret_as_uint()
+    }
+    state.set_max(client, end)
+  }
+  Snapshot(state~, delete_set=deleted)
 }
 
 ///|
@@ -161,7 +175,7 @@ pub fn Doc::encode_state_from_snapshot_v1(
   }
   let items = []
   for client, blocks in self.clients {
-    let end = snapshot.state.get(client).min(self.state.get(client))
+    let end = snapshot.state.get(client)
     for item in blocks {
       if item.id.clock >= end {
         break

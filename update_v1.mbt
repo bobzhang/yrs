@@ -211,7 +211,7 @@ fn Doc::encode_document(
     if include_pending {
       self.deletes
     } else {
-      self.snapshot().deletes
+      self.integrated_delete_set().deletion_map()
     },
   )
 }
