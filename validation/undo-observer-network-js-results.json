@@ -13,9 +13,9 @@
     true
   ],
   "local_commands": 18868,
-  "emitted_packets": 22614,
-  "delivered_packets": 45228,
-  "duplicate_checks": 3479,
+  "emitted_packets": 22722,
+  "delivered_packets": 45444,
+  "duplicate_checks": 3495,
   "converged_replicas": 384,
   "cross_runtime_reloads": 768,
   "status": "passed"

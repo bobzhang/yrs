@@ -1,7 +1,7 @@
 {
   "contract": "complete CRDT features with documented adaptations",
   "reference": "ac339600c712642e556895426113c3f9c117de39",
-  "source_sha256": "352c5e7e9573d22d53959a648b47115c0852778a86c94bb3df3c4f07098e36e4",
+  "source_sha256": "589fefe9f33b9b9aff28b0889b6d6e44006d330ab13384c80d1ebf9f044247ac",
   "suite": "core",
   "commands": [
     {
@@ -10,7 +10,7 @@
         "validation/compare.py"
       ],
       "exit_code": 0,
-      "seconds": 591.299
+      "seconds": 614.337
     }
   ],
   "status": "passed"

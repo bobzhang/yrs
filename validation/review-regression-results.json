@@ -1,0 +1,46 @@
+{
+  "version": "0.1.1",
+  "source_sha256": "589fefe9f33b9b9aff28b0889b6d6e44006d330ab13384c80d1ebf9f044247ac",
+  "fresh_reviews": 2,
+  "review_cli": "Codex CLI 0.153.4",
+  "review_model": "gpt-6-astra",
+  "review_reasoning": "ultra",
+  "issues": [
+    "https://github.com/bobzhang/yrs/issues/1",
+    "https://github.com/bobzhang/yrs/issues/2",
+    "https://github.com/bobzhang/yrs/issues/3",
+    "https://github.com/bobzhang/yrs/issues/4",
+    "https://github.com/bobzhang/yrs/issues/5"
+  ],
+  "unit_tests": [
+    {
+      "target": "wasm",
+      "total": 196,
+      "passed": 196,
+      "failed": 0
+    },
+    {
+      "target": "wasm-gc",
+      "total": 196,
+      "passed": 196,
+      "failed": 0
+    },
+    {
+      "target": "js",
+      "total": 196,
+      "passed": 196,
+      "failed": 0
+    },
+    {
+      "target": "native",
+      "total": 196,
+      "passed": 196,
+      "failed": 0
+    }
+  ],
+  "release_suites": 13,
+  "reference_commands": 44,
+  "public_declarations": 225,
+  "public_members": 802,
+  "status": "passed"
+}
