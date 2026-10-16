@@ -112,10 +112,10 @@ pub struct UndoManager[M] {
   priv redo_items : Array[StackItem[M]]
   priv mut last_change : UInt64
   priv mut mode : Int32
-  priv added_observers : Map[String, (UndoEvent[M], Transaction) -> Unit]
-  priv updated_observers : Map[String, (UndoEvent[M], Transaction) -> Unit]
-  priv popped_observers : Map[String, (UndoEvent[M], Transaction) -> Unit]
-  priv cleared_observers : Map[String, (Bool, Bool) -> Unit]
+  priv added_observers : Observer[String, (UndoEvent[M], Transaction) -> Unit]
+  priv updated_observers : Observer[String, (UndoEvent[M], Transaction) -> Unit]
+  priv popped_observers : Observer[String, (UndoEvent[M], Transaction) -> Unit]
+  priv cleared_observers : Observer[String, (Bool, Bool) -> Unit]
 }
 
 ///|
@@ -146,10 +146,10 @@ pub fn[M : Default] UndoManager::UndoManager(
     redo_items: init_redo_stack.map(StackItem::copy),
     last_change: 0UL,
     mode: 0,
-    added_observers: Map([]),
-    updated_observers: Map([]),
-    popped_observers: Map([]),
-    cleared_observers: Map([]),
+    added_observers: Observer(),
+    updated_observers: Observer(),
+    popped_observers: Observer(),
+    cleared_observers: Observer(),
   }
 }
 
@@ -338,9 +338,7 @@ fn[M] UndoManager::capture(
   } else {
     self.added_observers
   }
-  for (_, callback) in observers.to_array() {
-    callback(event, transaction)
-  }
+  observers.trigger(fn(callback) { callback(event, transaction) })
   entry.meta = event.meta
 }
 
@@ -510,9 +508,9 @@ fn[M] UndoManager::pop(self : UndoManager[M], undoing : Bool) -> Bool {
         source: Some(self.origin),
         changed: committed.unwrap().changed_parent_types(),
       }
-      for (_, callback) in self.popped_observers.to_array() {
+      self.popped_observers.trigger(fn(callback) {
         callback(event, committed.unwrap())
-      }
+      })
       break
     }
   }
@@ -545,9 +543,7 @@ fn[M] UndoManager::clear(
     self.redo_items.clear()
   }
   if u || r {
-    for (_, callback) in self.cleared_observers.to_array() {
-      callback(u, r)
-    }
+    self.cleared_observers.trigger(fn(callback) { callback(u, r) })
   }
 }
 
@@ -572,7 +568,7 @@ pub fn[M] UndoManager::observe_item_added(
   key : String,
   callback : (UndoEvent[M], Transaction) -> Unit,
 ) -> Unit {
-  self.added_observers[key] = callback
+  self.added_observers.subscribe(key, callback)
 }
 
 ///|
@@ -580,9 +576,7 @@ pub fn[M] UndoManager::unobserve_item_added(
   self : UndoManager[M],
   key : String,
 ) -> Bool {
-  let found = self.added_observers.contains(key)
-  self.added_observers.remove(key)
-  found
+  self.added_observers.unsubscribe(key)
 }
 
 ///|
@@ -591,7 +585,7 @@ pub fn[M] UndoManager::observe_item_updated(
   key : String,
   callback : (UndoEvent[M], Transaction) -> Unit,
 ) -> Unit {
-  self.updated_observers[key] = callback
+  self.updated_observers.subscribe(key, callback)
 }
 
 ///|
@@ -599,9 +593,7 @@ pub fn[M] UndoManager::unobserve_item_updated(
   self : UndoManager[M],
   key : String,
 ) -> Bool {
-  let found = self.updated_observers.contains(key)
-  self.updated_observers.remove(key)
-  found
+  self.updated_observers.unsubscribe(key)
 }
 
 ///|
@@ -610,7 +602,7 @@ pub fn[M] UndoManager::observe_item_popped(
   key : String,
   callback : (UndoEvent[M], Transaction) -> Unit,
 ) -> Unit {
-  self.popped_observers[key] = callback
+  self.popped_observers.subscribe(key, callback)
 }
 
 ///|
@@ -618,9 +610,7 @@ pub fn[M] UndoManager::unobserve_item_popped(
   self : UndoManager[M],
   key : String,
 ) -> Bool {
-  let found = self.popped_observers.contains(key)
-  self.popped_observers.remove(key)
-  found
+  self.popped_observers.unsubscribe(key)
 }
 
 ///|
@@ -629,7 +619,7 @@ pub fn[M] UndoManager::observe_stack_cleared(
   key : String,
   callback : (Bool, Bool) -> Unit,
 ) -> Unit {
-  self.cleared_observers[key] = callback
+  self.cleared_observers.subscribe(key, callback)
 }
 
 ///|
@@ -637,9 +627,7 @@ pub fn[M] UndoManager::unobserve_stack_cleared(
   self : UndoManager[M],
   key : String,
 ) -> Bool {
-  let found = self.cleared_observers.contains(key)
-  self.cleared_observers.remove(key)
-  found
+  self.cleared_observers.unsubscribe(key)
 }
 
 ///|

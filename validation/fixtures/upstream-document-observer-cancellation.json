@@ -1,0 +1,42 @@
+{
+  "upstream": "ac339600c712642e556895426113c3f9c117de39",
+  "reproducer": "cargo +1.97.1 run --release --locked --manifest-path validation/rust/Cargo.toml --bin observers",
+  "rust": {
+    "destroy_calls": 2,
+    "destroy_cancel": [
+      false,
+      false
+    ],
+    "document_phases": [
+      {
+        "calls_after_two_edits": 4,
+        "phase": 0
+      },
+      {
+        "calls_after_two_edits": 4,
+        "phase": 1
+      },
+      {
+        "calls_after_two_edits": 4,
+        "phase": 2
+      },
+      {
+        "calls_after_two_edits": 4,
+        "phase": 3
+      },
+      {
+        "calls_after_two_edits": 4,
+        "phase": 4
+      }
+    ],
+    "pending_repeat": true,
+    "typed_cancellation": true
+  },
+  "moonbit": {
+    "document_calls_after_two_edits": 2,
+    "destroy_calls": 1,
+    "typed_cancellation": true,
+    "pending_repeat": true
+  },
+  "classification": "Typed and generic observers support in-dispatch cancellation. Pinned Rust takes document event registries out during dispatch, so transaction cancellation cannot find them. MoonBit applies cancellation consistently."
+}

@@ -33,7 +33,8 @@ test "awareness renewals events removal protection and origins" {
   assert_eq(tombstone.entries()[0].1.json, "null")
   assert_eq(a.update().entries().length(), 1)
   assert_true(a.unobserve_change("test"))
-  assert_true(!a.unobserve_change("test"))
+  // Yrs drains cancelled entries at the next dispatch or subscription.
+  assert_true(a.unobserve_change("test"))
   assert_true(a.unobserve_update("test"))
   try a.update_with_clients([99UL]) catch {
     ClientNotFound(99UL) => ()

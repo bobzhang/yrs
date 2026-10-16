@@ -385,3 +385,10 @@ causal clocks and final convergence agree. There are 1,650 observer mismatch
 snapshots with 2,282 additional MoonBit notifications and zero missing Rust events;
 there are no query exceptions in this network matrix. Exact observer parity is
 still intentionally different from the pinned reference's lost subscriptions.
+
+Observer dispatch now honors cancellation by an earlier callback in the same
+batch. `observer_test.mbt` covers 27 collection, deep, transaction, subdocument,
+undo and awareness notification paths, plus generic observer replacement and
+pending removal. The typed behavior agrees with Rust. Pinned Rust's document
+callbacks temporarily lose access to their registry during dispatch; the port
+keeps cancellation effective there too (see `REFERENCE_LIMITATIONS.md`).

@@ -128,34 +128,40 @@ pub struct Doc {
   priv pending_weak : Set[Id]
   priv weak_observers : Map[
     Parent,
-    Map[String, (WeakEvent, Transaction) -> Unit],
+    Observer[String, (WeakEvent, Transaction) -> Unit],
   ]
   priv identity : UInt64
   priv mut active_transaction : Transaction?
   priv mut notifying_transaction : Bool
   priv deep_observers : Map[
     Parent,
-    Map[String, (ReadOnlyArray[Event], Transaction) -> Unit],
+    Observer[String, (ReadOnlyArray[Event], Transaction) -> Unit],
   ]
-  priv xml_observers : Map[Parent, Map[String, (XmlEvent, Transaction) -> Unit]]
+  priv xml_observers : Map[
+    Parent,
+    Observer[String, (XmlEvent, Transaction) -> Unit],
+  ]
   priv xml_text_observers : Map[
     Parent,
-    Map[String, (XmlTextEvent, Transaction) -> Unit],
+    Observer[String, (XmlTextEvent, Transaction) -> Unit],
   ]
   priv array_observers : Map[
     Parent,
-    Map[String, (ArrayEvent, Transaction) -> Unit],
+    Observer[String, (ArrayEvent, Transaction) -> Unit],
   ]
   priv text_observers : Map[
     Parent,
-    Map[String, (TextEvent, Transaction) -> Unit],
+    Observer[String, (TextEvent, Transaction) -> Unit],
   ]
-  priv map_observers : Map[Parent, Map[String, (MapEvent, Transaction) -> Unit]]
-  priv before_observers : Map[String, (Transaction) -> Unit]
-  priv after_observers : Map[String, (Transaction) -> Unit]
-  priv cleanup_observers : Map[String, (Transaction) -> Unit]
-  priv update_v1_observers : Map[String, (Bytes, Transaction) -> Unit]
-  priv update_v2_observers : Map[String, (Bytes, Transaction) -> Unit]
+  priv map_observers : Map[
+    Parent,
+    Observer[String, (MapEvent, Transaction) -> Unit],
+  ]
+  priv before_observers : Observer[String, (Transaction) -> Unit]
+  priv after_observers : Observer[String, (Transaction) -> Unit]
+  priv cleanup_observers : Observer[String, (Transaction) -> Unit]
+  priv update_v1_observers : Observer[String, (Bytes, Transaction) -> Unit]
+  priv update_v2_observers : Observer[String, (Bytes, Transaction) -> Unit]
   priv mut client : UInt64
   priv document_guid : String
   priv mut collection : String?
@@ -167,8 +173,8 @@ pub struct Doc {
   priv mut owner : (Doc, Id)?
   priv children_docs : Map[UInt64, Doc]
   priv undo_retention : Map[String, () -> Array[(UInt64, UInt32, UInt32)]]
-  priv subdoc_observers : Map[String, (SubdocsEvent, Transaction) -> Unit]
-  priv destroy_observers : Map[String, (Doc) -> Unit]
+  priv subdoc_observers : Observer[String, (SubdocsEvent, Transaction) -> Unit]
+  priv destroy_observers : Observer[String, (Doc) -> Unit]
   priv state : StateVector
   priv clients : Map[UInt64, Array[Item]]
   priv items : Map[Id, Item]
@@ -230,11 +236,11 @@ fn make_doc(
     text_observers: {},
     map_observers: {},
     pending_weak: Set([]),
-    before_observers: {},
-    after_observers: {},
-    cleanup_observers: {},
-    update_v1_observers: {},
-    update_v2_observers: {},
+    before_observers: Observer(),
+    after_observers: Observer(),
+    cleanup_observers: Observer(),
+    update_v1_observers: Observer(),
+    update_v2_observers: Observer(),
     client,
     document_guid: guid,
     collection,
@@ -246,8 +252,8 @@ fn make_doc(
     owner: None,
     children_docs: {},
     undo_retention: {},
-    subdoc_observers: {},
-    destroy_observers: {},
+    subdoc_observers: Observer(),
+    destroy_observers: Observer(),
     state: StateVector(),
     clients: Map([]),
     items: Map([]),

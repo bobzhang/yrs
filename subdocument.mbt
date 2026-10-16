@@ -177,14 +177,12 @@ pub fn Doc::observe_subdocs(
   key : String,
   callback : (SubdocsEvent, Transaction) -> Unit,
 ) -> Unit {
-  self.subdoc_observers[key] = callback
+  self.subdoc_observers.subscribe(key, callback)
 }
 
 ///|
 pub fn Doc::unobserve_subdocs(self : Doc, key : String) -> Bool {
-  let found = self.subdoc_observers.contains(key)
-  self.subdoc_observers.remove(key)
-  found
+  self.subdoc_observers.unsubscribe(key)
 }
 
 ///|
@@ -193,14 +191,12 @@ pub fn Doc::observe_destroy(
   key : String,
   callback : (Doc) -> Unit,
 ) -> Unit {
-  self.destroy_observers[key] = callback
+  self.destroy_observers.subscribe(key, callback)
 }
 
 ///|
 pub fn Doc::unobserve_destroy(self : Doc, key : String) -> Bool {
-  let found = self.destroy_observers.contains(key)
-  self.destroy_observers.remove(key)
-  found
+  self.destroy_observers.unsubscribe(key)
 }
 
 ///|
@@ -226,9 +222,7 @@ fn Doc::commit_subdocuments(self : Doc, txn : Transaction) -> Unit {
     removals: ReadOnlyArray::from_array(txn.sub_removed.values().to_array()[:]),
     loads: ReadOnlyArray::from_array(txn.sub_loaded.values().to_array()[:]),
   }
-  for (_, callback) in self.subdoc_observers.to_array() {
-    callback(event, txn)
-  }
+  self.subdoc_observers.trigger(fn(callback) { callback(event, txn) })
   // Removal unloads the old handle after observers have inspected it.
   for child in event.removals {
     child.destroy_contents()
@@ -249,17 +243,36 @@ fn Doc::destroy_contents(self : Doc) -> Unit {
     parent.items[id].content = Subdocument(replacement)
   }
   self.owner = None
-  for (_, callback) in self.destroy_observers.to_array() {
-    callback(self)
-  }
+  self.destroy_observers.trigger(fn(callback) { callback(self) })
   self.destroy_observers.clear()
   self.subdoc_observers.clear()
+  for observers in self.weak_observers.values() {
+    observers.clear()
+  }
   self.weak_observers.clear()
+  for observers in self.deep_observers.values() {
+    observers.clear()
+  }
   self.deep_observers.clear()
+  for observers in self.xml_observers.values() {
+    observers.clear()
+  }
   self.xml_observers.clear()
+  for observers in self.xml_text_observers.values() {
+    observers.clear()
+  }
   self.xml_text_observers.clear()
+  for observers in self.array_observers.values() {
+    observers.clear()
+  }
   self.array_observers.clear()
+  for observers in self.text_observers.values() {
+    observers.clear()
+  }
   self.text_observers.clear()
+  for observers in self.map_observers.values() {
+    observers.clear()
+  }
   self.map_observers.clear()
   self.before_observers.clear()
   self.after_observers.clear()

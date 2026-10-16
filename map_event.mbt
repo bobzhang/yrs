@@ -54,12 +54,12 @@ pub fn MapRef::observe(
   let observers = match self.doc.map_observers.get(self.name) {
     Some(observers) => observers
     None => {
-      let observers : Map[String, (MapEvent, Transaction) -> Unit] = Map([])
+      let observers : Observer[String, (MapEvent, Transaction) -> Unit] = Observer()
       self.doc.map_observers[self.name] = observers
       observers
     }
   }
-  observers[key] = callback
+  observers.subscribe(key, callback)
 }
 
 ///|
@@ -67,8 +67,7 @@ pub fn MapRef::unobserve(self : MapRef, key : String) -> Bool {
   guard self.doc.map_observers.get(self.name) is Some(observers) else {
     return false
   }
-  let found = observers.contains(key)
-  observers.remove(key)
+  let found = observers.unsubscribe(key)
   if observers.is_empty() {
     self.doc.map_observers.remove(self.name)
   }

@@ -22,7 +22,8 @@ test "map events report transaction-level old and new entries" {
   map.remove("missing")
   assert_eq(changes.length(), 2)
   assert_true(map.unobserve("test"))
-  assert_true(!map.unobserve("test"))
+  // Yrs drains cancelled entries at the next dispatch or subscription.
+  assert_true(map.unobserve("test"))
 }
 
 ///|

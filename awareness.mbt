@@ -98,8 +98,8 @@ pub struct Awareness {
   priv document : Doc
   priv states : Map[UInt64, AwarenessState]
   priv clock : () -> UInt64
-  priv changes : Map[String, (Awareness, AwarenessSummary, Bytes?) -> Unit]
-  priv updates : Map[String, (Awareness, AwarenessSummary, Bytes?) -> Unit]
+  priv changes : Observer[String, (Awareness, AwarenessSummary, Bytes?) -> Unit]
+  priv updates : Observer[String, (Awareness, AwarenessSummary, Bytes?) -> Unit]
   priv mut notifying_change : Bool
   priv mut notifying_update : Bool
 }
@@ -110,8 +110,8 @@ pub fn Awareness::Awareness(doc : Doc, clock~ : () -> UInt64) -> Awareness {
     document: doc,
     states: {},
     clock,
-    changes: {},
-    updates: {},
+    changes: Observer(),
+    updates: Observer(),
     notifying_change: false,
     notifying_update: false,
   }
@@ -167,7 +167,7 @@ pub fn Awareness::on_change(
   key : String,
   callback : (Awareness, AwarenessSummary, Bytes?) -> Unit,
 ) -> Unit {
-  self.changes[key] = callback
+  self.changes.subscribe(key, callback)
 }
 
 ///|
@@ -176,21 +176,17 @@ pub fn Awareness::on_update(
   key : String,
   callback : (Awareness, AwarenessSummary, Bytes?) -> Unit,
 ) -> Unit {
-  self.updates[key] = callback
+  self.updates.subscribe(key, callback)
 }
 
 ///|
 pub fn Awareness::unobserve_change(self : Awareness, key : String) -> Bool {
-  let found = self.changes.contains(key)
-  self.changes.remove(key)
-  found
+  self.changes.unsubscribe(key)
 }
 
 ///|
 pub fn Awareness::unobserve_update(self : Awareness, key : String) -> Bool {
-  let found = self.updates.contains(key)
-  self.updates.remove(key)
-  found
+  self.updates.unsubscribe(key)
 }
 
 ///|
@@ -202,16 +198,12 @@ fn Awareness::notify(
 ) -> Unit {
   if !change.is_empty() && !self.notifying_change {
     self.notifying_change = true
-    for (_, callback) in self.changes.to_array() {
-      callback(self, change, origin)
-    }
+    self.changes.trigger(fn(callback) { callback(self, change, origin) })
     self.notifying_change = false
   }
   if !update.is_empty() && !self.notifying_update {
     self.notifying_update = true
-    for (_, callback) in self.updates.to_array() {
-      callback(self, update, origin)
-    }
+    self.updates.trigger(fn(callback) { callback(self, update, origin) })
     self.notifying_update = false
   }
 }

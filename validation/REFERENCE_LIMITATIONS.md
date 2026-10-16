@@ -269,3 +269,22 @@ in both wire formats and GC settings. All 15,360 state/view comparisons converge
 without query exceptions. It records 1,650 observer-difference snapshots (2,282
 additional MoonBit notifications, zero missing reference events). The main weak
 matrix's updated counts above include both split and open-boundary corrections.
+
+## Cancellation during observer dispatch
+
+`validation/rust/src/bin/observers.rs` exercises mutual cancellation: each of two
+callbacks removes the other. Typed collection observers correctly run only one
+callback. The pinned Rust document transaction phases instead run both callbacks
+on every edit, because `commit` temporarily takes `store.events` out before
+calling them; the transaction's unsubscribe method sees no registry. Destruction
+has the same issue. The captured fixture is
+`fixtures/upstream-document-observer-cancellation.json`.
+
+The port now checks shared subscription cells at dispatch time, fixing its typed
+observer cancellation bug and applying consistent immediate cancellation to
+document, awareness, undo and deep observers as well. This is an intentional
+difference from the pinned document callback behavior. The generic public
+`Observer[K, F]` also exposes replacement, dispatch, pending cancellation and
+subscriber queries; generic keys replace Rust's `Into<Origin>` conversion. Like
+Rust, an unsubscribed key remains discoverable until the next dispatch or
+subscription drains it, so repeated unsubscribe can return true before that drain.

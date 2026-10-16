@@ -44,7 +44,8 @@ test "grouped transaction emits one replayable update and stable metadata" {
   assert_eq(event.encode_update_v1(), update)
   assert_eq(event.after_state().entries(), state)
   assert_true(doc.unobserve_update_v1("test"))
-  assert_true(!doc.unobserve_update_v1("test"))
+  // Yrs drains cancelled entries at the next dispatch or subscription.
+  assert_true(doc.unobserve_update_v1("test"))
 }
 
 ///|

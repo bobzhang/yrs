@@ -166,9 +166,7 @@ fn Doc::begin_transaction(
 fn Doc::commit_transaction(self : Doc, transaction : Transaction) -> Unit {
   guard !transaction.closed else { return }
   self.notifying_transaction = true
-  for (_, callback) in self.before_observers.to_array() {
-    callback(transaction)
-  }
+  self.before_observers.trigger(fn(callback) { callback(transaction) })
   self.notify_collections(transaction)
   self.notifying_transaction = false
   if self.collect_deletes {
@@ -186,9 +184,7 @@ fn Doc::commit_transaction(self : Doc, transaction : Transaction) -> Unit {
   }
   // Rust's after-transaction callback receives a mutable transaction. Its
   // additional edits belong to this commit but do not repeat type observers.
-  for (_, callback) in self.after_observers.to_array() {
-    callback(transaction)
-  }
+  self.after_observers.trigger(fn(callback) { callback(transaction) })
   if self.wire_gc {
     self.collect_garbage(transaction.removed)
   }
@@ -200,18 +196,16 @@ fn Doc::commit_transaction(self : Doc, transaction : Transaction) -> Unit {
   }
   transaction.closed = true
   self.notifying_transaction = true
-  for (_, callback) in self.cleanup_observers.to_array() {
-    callback(transaction)
-  }
+  self.cleanup_observers.trigger(fn(callback) { callback(transaction) })
   if !transaction.added.is_empty() || !transaction.removed.is_empty() {
-    for (_, callback) in self.update_v1_observers.to_array() {
+    self.update_v1_observers.trigger(fn(callback) {
       callback(transaction.encode_update_v1(), transaction)
-    }
+    })
     if !self.update_v2_observers.is_empty() {
       let bytes = try! transaction.encode_update_v2()
-      for (_, callback) in self.update_v2_observers.to_array() {
+      self.update_v2_observers.trigger(fn(callback) {
         callback(bytes, transaction)
-      }
+      })
     }
   }
   self.commit_subdocuments(transaction)
@@ -270,14 +264,12 @@ pub fn Doc::observe_before_observer_calls(
   key : String,
   callback : (Transaction) -> Unit,
 ) -> Unit {
-  self.before_observers[key] = callback
+  self.before_observers.subscribe(key, callback)
 }
 
 ///|
 pub fn Doc::unobserve_before_observer_calls(self : Doc, key : String) -> Bool {
-  let found = self.before_observers.contains(key)
-  self.before_observers.remove(key)
-  found
+  self.before_observers.unsubscribe(key)
 }
 
 ///|
@@ -286,14 +278,12 @@ pub fn Doc::observe_after_transaction(
   key : String,
   callback : (Transaction) -> Unit,
 ) -> Unit {
-  self.after_observers[key] = callback
+  self.after_observers.subscribe(key, callback)
 }
 
 ///|
 pub fn Doc::unobserve_after_transaction(self : Doc, key : String) -> Bool {
-  let found = self.after_observers.contains(key)
-  self.after_observers.remove(key)
-  found
+  self.after_observers.unsubscribe(key)
 }
 
 ///|
@@ -302,14 +292,12 @@ pub fn Doc::observe_transaction_cleanup(
   key : String,
   callback : (Transaction) -> Unit,
 ) -> Unit {
-  self.cleanup_observers[key] = callback
+  self.cleanup_observers.subscribe(key, callback)
 }
 
 ///|
 pub fn Doc::unobserve_transaction_cleanup(self : Doc, key : String) -> Bool {
-  let found = self.cleanup_observers.contains(key)
-  self.cleanup_observers.remove(key)
-  found
+  self.cleanup_observers.unsubscribe(key)
 }
 
 ///|
@@ -318,14 +306,12 @@ pub fn Doc::observe_update_v1(
   key : String,
   callback : (Bytes, Transaction) -> Unit,
 ) -> Unit {
-  self.update_v1_observers[key] = callback
+  self.update_v1_observers.subscribe(key, callback)
 }
 
 ///|
 pub fn Doc::unobserve_update_v1(self : Doc, key : String) -> Bool {
-  let found = self.update_v1_observers.contains(key)
-  self.update_v1_observers.remove(key)
-  found
+  self.update_v1_observers.unsubscribe(key)
 }
 
 ///|
@@ -334,14 +320,12 @@ pub fn Doc::observe_update_v2(
   key : String,
   callback : (Bytes, Transaction) -> Unit,
 ) -> Unit {
-  self.update_v2_observers[key] = callback
+  self.update_v2_observers.subscribe(key, callback)
 }
 
 ///|
 pub fn Doc::unobserve_update_v2(self : Doc, key : String) -> Bool {
-  let found = self.update_v2_observers.contains(key)
-  self.update_v2_observers.remove(key)
-  found
+  self.update_v2_observers.unsubscribe(key)
 }
 
 ///|

@@ -23,12 +23,12 @@ pub fn WeakRef::observe(
   let observers = match self.doc.weak_observers.get(self.name) {
     Some(observers) => observers
     None => {
-      let observers : Map[String, (WeakEvent, Transaction) -> Unit] = Map([])
+      let observers : Observer[String, (WeakEvent, Transaction) -> Unit] = Observer()
       self.doc.weak_observers[self.name] = observers
       observers
     }
   }
-  observers[key] = callback
+  observers.subscribe(key, callback)
 }
 
 ///|
@@ -36,12 +36,11 @@ pub fn WeakRef::unobserve(self : WeakRef, key : String) -> Bool {
   guard self.doc.weak_observers.get(self.name) is Some(observers) else {
     return false
   }
-  let existed = observers.contains(key)
-  observers.remove(key)
+  let found = observers.unsubscribe(key)
   if observers.is_empty() {
     self.doc.weak_observers.remove(self.name)
   }
-  existed
+  found
 }
 
 ///|

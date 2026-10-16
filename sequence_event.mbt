@@ -310,12 +310,12 @@ pub fn Text::observe(
   let observers = match self.doc.text_observers.get(self.name) {
     Some(observers) => observers
     None => {
-      let observers : Map[String, (TextEvent, Transaction) -> Unit] = Map([])
+      let observers : Observer[String, (TextEvent, Transaction) -> Unit] = Observer()
       self.doc.text_observers[self.name] = observers
       observers
     }
   }
-  observers[key] = callback
+  observers.subscribe(key, callback)
 }
 
 ///|
@@ -323,8 +323,7 @@ pub fn Text::unobserve(self : Text, key : String) -> Bool {
   guard self.doc.text_observers.get(self.name) is Some(observers) else {
     return false
   }
-  let found = observers.contains(key)
-  observers.remove(key)
+  let found = observers.unsubscribe(key)
   if observers.is_empty() {
     self.doc.text_observers.remove(self.name)
   }
@@ -340,12 +339,12 @@ pub fn ArrayRef::observe(
   let observers = match self.doc.array_observers.get(self.name) {
     Some(observers) => observers
     None => {
-      let observers : Map[String, (ArrayEvent, Transaction) -> Unit] = Map([])
+      let observers : Observer[String, (ArrayEvent, Transaction) -> Unit] = Observer()
       self.doc.array_observers[self.name] = observers
       observers
     }
   }
-  observers[key] = callback
+  observers.subscribe(key, callback)
 }
 
 ///|
@@ -353,8 +352,7 @@ pub fn ArrayRef::unobserve(self : ArrayRef, key : String) -> Bool {
   guard self.doc.array_observers.get(self.name) is Some(observers) else {
     return false
   }
-  let found = observers.contains(key)
-  observers.remove(key)
+  let found = observers.unsubscribe(key)
   if observers.is_empty() {
     self.doc.array_observers.remove(self.name)
   }

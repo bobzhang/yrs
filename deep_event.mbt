@@ -213,39 +213,27 @@ fn Doc::notify_collections(self : Doc, transaction : Transaction) -> Unit {
     match event {
       Weak(event) =>
         if self.weak_observers.get(parent) is Some(observers) {
-          for (_, callback) in observers.to_array() {
-            callback(event, transaction)
-          }
+          observers.trigger(fn(callback) { callback(event, transaction) })
         }
       Text(event) =>
         if self.text_observers.get(parent) is Some(observers) {
-          for (_, callback) in observers.to_array() {
-            callback(event, transaction)
-          }
+          observers.trigger(fn(callback) { callback(event, transaction) })
         }
       Array(event) =>
         if self.array_observers.get(parent) is Some(observers) {
-          for (_, callback) in observers.to_array() {
-            callback(event, transaction)
-          }
+          observers.trigger(fn(callback) { callback(event, transaction) })
         }
       Map(event) =>
         if self.map_observers.get(parent) is Some(observers) {
-          for (_, callback) in observers.to_array() {
-            callback(event, transaction)
-          }
+          observers.trigger(fn(callback) { callback(event, transaction) })
         }
       XmlFragment(event) =>
         if self.xml_observers.get(parent) is Some(observers) {
-          for (_, callback) in observers.to_array() {
-            callback(event, transaction)
-          }
+          observers.trigger(fn(callback) { callback(event, transaction) })
         }
       XmlText(event) =>
         if self.xml_text_observers.get(parent) is Some(observers) {
-          for (_, callback) in observers.to_array() {
-            callback(event, transaction)
-          }
+          observers.trigger(fn(callback) { callback(event, transaction) })
         }
     }
     for location in self.event_ancestors(parent) {
@@ -267,9 +255,7 @@ fn Doc::notify_collections(self : Doc, transaction : Transaction) -> Unit {
     if !relevant.is_empty() {
       relevant.sort_by(fn(a, b) { a.path().length().compare(b.path().length()) })
       let batch = ReadOnlyArray::from_array(relevant[:])
-      for (_, callback) in observers.to_array() {
-        callback(batch, transaction)
-      }
+      observers.trigger(fn(callback) { callback(batch, transaction) })
     }
   }
 }
@@ -372,13 +358,15 @@ pub fn Text::observe_deep(
   let observers = match self.doc.deep_observers.get(self.name) {
     Some(observers) => observers
     None => {
-      let observers : Map[String, (ReadOnlyArray[Event], Transaction) -> Unit] = Map([],
-      )
+      let observers : Observer[
+        String,
+        (ReadOnlyArray[Event], Transaction) -> Unit,
+      ] = Observer()
       self.doc.deep_observers[self.name] = observers
       observers
     }
   }
-  observers[key] = callback
+  observers.subscribe(key, callback)
 }
 
 ///|
@@ -386,8 +374,7 @@ pub fn Text::unobserve_deep(self : Text, key : String) -> Bool {
   guard self.doc.deep_observers.get(self.name) is Some(observers) else {
     return false
   }
-  let found = observers.contains(key)
-  observers.remove(key)
+  let found = observers.unsubscribe(key)
   if observers.is_empty() {
     self.doc.deep_observers.remove(self.name)
   }
@@ -403,13 +390,15 @@ pub fn ArrayRef::observe_deep(
   let observers = match self.doc.deep_observers.get(self.name) {
     Some(observers) => observers
     None => {
-      let observers : Map[String, (ReadOnlyArray[Event], Transaction) -> Unit] = Map([],
-      )
+      let observers : Observer[
+        String,
+        (ReadOnlyArray[Event], Transaction) -> Unit,
+      ] = Observer()
       self.doc.deep_observers[self.name] = observers
       observers
     }
   }
-  observers[key] = callback
+  observers.subscribe(key, callback)
 }
 
 ///|
@@ -417,8 +406,7 @@ pub fn ArrayRef::unobserve_deep(self : ArrayRef, key : String) -> Bool {
   guard self.doc.deep_observers.get(self.name) is Some(observers) else {
     return false
   }
-  let found = observers.contains(key)
-  observers.remove(key)
+  let found = observers.unsubscribe(key)
   if observers.is_empty() {
     self.doc.deep_observers.remove(self.name)
   }
@@ -434,13 +422,15 @@ pub fn MapRef::observe_deep(
   let observers = match self.doc.deep_observers.get(self.name) {
     Some(observers) => observers
     None => {
-      let observers : Map[String, (ReadOnlyArray[Event], Transaction) -> Unit] = Map([],
-      )
+      let observers : Observer[
+        String,
+        (ReadOnlyArray[Event], Transaction) -> Unit,
+      ] = Observer()
       self.doc.deep_observers[self.name] = observers
       observers
     }
   }
-  observers[key] = callback
+  observers.subscribe(key, callback)
 }
 
 ///|
@@ -448,8 +438,7 @@ pub fn MapRef::unobserve_deep(self : MapRef, key : String) -> Bool {
   guard self.doc.deep_observers.get(self.name) is Some(observers) else {
     return false
   }
-  let found = observers.contains(key)
-  observers.remove(key)
+  let found = observers.unsubscribe(key)
   if observers.is_empty() {
     self.doc.deep_observers.remove(self.name)
   }
@@ -465,13 +454,15 @@ pub fn XmlFragment::observe_deep(
   let observers = match self.doc.deep_observers.get(self.name) {
     Some(observers) => observers
     None => {
-      let observers : Map[String, (ReadOnlyArray[Event], Transaction) -> Unit] = Map([],
-      )
+      let observers : Observer[
+        String,
+        (ReadOnlyArray[Event], Transaction) -> Unit,
+      ] = Observer()
       self.doc.deep_observers[self.name] = observers
       observers
     }
   }
-  observers[key] = callback
+  observers.subscribe(key, callback)
 }
 
 ///|
@@ -479,8 +470,7 @@ pub fn XmlFragment::unobserve_deep(self : XmlFragment, key : String) -> Bool {
   guard self.doc.deep_observers.get(self.name) is Some(observers) else {
     return false
   }
-  let found = observers.contains(key)
-  observers.remove(key)
+  let found = observers.unsubscribe(key)
   if observers.is_empty() {
     self.doc.deep_observers.remove(self.name)
   }
@@ -496,13 +486,15 @@ pub fn XmlElement::observe_deep(
   let observers = match self.doc.deep_observers.get(self.name) {
     Some(observers) => observers
     None => {
-      let observers : Map[String, (ReadOnlyArray[Event], Transaction) -> Unit] = Map([],
-      )
+      let observers : Observer[
+        String,
+        (ReadOnlyArray[Event], Transaction) -> Unit,
+      ] = Observer()
       self.doc.deep_observers[self.name] = observers
       observers
     }
   }
-  observers[key] = callback
+  observers.subscribe(key, callback)
 }
 
 ///|
@@ -510,8 +502,7 @@ pub fn XmlElement::unobserve_deep(self : XmlElement, key : String) -> Bool {
   guard self.doc.deep_observers.get(self.name) is Some(observers) else {
     return false
   }
-  let found = observers.contains(key)
-  observers.remove(key)
+  let found = observers.unsubscribe(key)
   if observers.is_empty() {
     self.doc.deep_observers.remove(self.name)
   }
@@ -527,13 +518,15 @@ pub fn XmlText::observe_deep(
   let observers = match self.doc.deep_observers.get(self.name) {
     Some(observers) => observers
     None => {
-      let observers : Map[String, (ReadOnlyArray[Event], Transaction) -> Unit] = Map([],
-      )
+      let observers : Observer[
+        String,
+        (ReadOnlyArray[Event], Transaction) -> Unit,
+      ] = Observer()
       self.doc.deep_observers[self.name] = observers
       observers
     }
   }
-  observers[key] = callback
+  observers.subscribe(key, callback)
 }
 
 ///|
@@ -541,8 +534,7 @@ pub fn XmlText::unobserve_deep(self : XmlText, key : String) -> Bool {
   guard self.doc.deep_observers.get(self.name) is Some(observers) else {
     return false
   }
-  let found = observers.contains(key)
-  observers.remove(key)
+  let found = observers.unsubscribe(key)
   if observers.is_empty() {
     self.doc.deep_observers.remove(self.name)
   }
@@ -558,12 +550,12 @@ pub fn XmlFragment::observe(
   let observers = match self.doc.xml_observers.get(self.name) {
     Some(observers) => observers
     None => {
-      let observers : Map[String, (XmlEvent, Transaction) -> Unit] = Map([])
+      let observers : Observer[String, (XmlEvent, Transaction) -> Unit] = Observer()
       self.doc.xml_observers[self.name] = observers
       observers
     }
   }
-  observers[key] = callback
+  observers.subscribe(key, callback)
 }
 
 ///|
@@ -571,8 +563,7 @@ pub fn XmlFragment::unobserve(self : XmlFragment, key : String) -> Bool {
   guard self.doc.xml_observers.get(self.name) is Some(observers) else {
     return false
   }
-  let found = observers.contains(key)
-  observers.remove(key)
+  let found = observers.unsubscribe(key)
   if observers.is_empty() {
     self.doc.xml_observers.remove(self.name)
   }
@@ -588,12 +579,12 @@ pub fn XmlElement::observe(
   let observers = match self.doc.xml_observers.get(self.name) {
     Some(observers) => observers
     None => {
-      let observers : Map[String, (XmlEvent, Transaction) -> Unit] = Map([])
+      let observers : Observer[String, (XmlEvent, Transaction) -> Unit] = Observer()
       self.doc.xml_observers[self.name] = observers
       observers
     }
   }
-  observers[key] = callback
+  observers.subscribe(key, callback)
 }
 
 ///|
@@ -601,8 +592,7 @@ pub fn XmlElement::unobserve(self : XmlElement, key : String) -> Bool {
   guard self.doc.xml_observers.get(self.name) is Some(observers) else {
     return false
   }
-  let found = observers.contains(key)
-  observers.remove(key)
+  let found = observers.unsubscribe(key)
   if observers.is_empty() {
     self.doc.xml_observers.remove(self.name)
   }
@@ -618,12 +608,12 @@ pub fn XmlText::observe(
   let observers = match self.doc.xml_text_observers.get(self.name) {
     Some(observers) => observers
     None => {
-      let observers : Map[String, (XmlTextEvent, Transaction) -> Unit] = Map([])
+      let observers : Observer[String, (XmlTextEvent, Transaction) -> Unit] = Observer()
       self.doc.xml_text_observers[self.name] = observers
       observers
     }
   }
-  observers[key] = callback
+  observers.subscribe(key, callback)
 }
 
 ///|
@@ -631,8 +621,7 @@ pub fn XmlText::unobserve(self : XmlText, key : String) -> Bool {
   guard self.doc.xml_text_observers.get(self.name) is Some(observers) else {
     return false
   }
-  let found = observers.contains(key)
-  observers.remove(key)
+  let found = observers.unsubscribe(key)
   if observers.is_empty() {
     self.doc.xml_text_observers.remove(self.name)
   }

@@ -496,6 +496,15 @@ pub(all) enum Message {
 pub fn Message::decode_v1(Bytes) -> Self raise DecodeError
 pub fn Message::encode_v1(Self) -> Bytes
 
+pub struct Observer[K, F] {
+  // private fields
+}
+pub fn[K : Hash + Eq, F] Observer::Observer() -> Self[K, F]
+pub fn[K, F] Observer::has_subscribers(Self[K, F]) -> Bool
+pub fn[K : Hash + Eq, F] Observer::subscribe(Self[K, F], K, F) -> Unit
+pub fn[K : Hash + Eq, F] Observer::trigger(Self[K, F], (F) -> Unit) -> Unit
+pub fn[K : Hash + Eq, F] Observer::unsubscribe(Self[K, F], K) -> Bool
+
 pub(all) struct Offset {
   branch : BranchId
   index : Int
