@@ -39,7 +39,7 @@ Rich text supports attributed insertion, formatting, JSON embeds and formatted d
 
 XML fragments, elements, attributes, formatted XML text and parent navigation now share the CRDT store. A further 128 randomized XML histories pass in v1/v2 with Rust GC both enabled and disabled (91,136 operation snapshots and 3,072 cross-runtime document transfers). XML insertion preserves upstream tombstone boundary choices.
 
-Current limitations: full compatibility is not yet established for sparse intermediate states, weak-reference queries/events, and independently allocated concurrent undo histories. Long-session stress and performance validation remain outstanding. The core shared types, undo, transactions and protocols described below are implemented. This is not a production release or a completed port.
+Current limitations: full compatibility is not yet established for sparse intermediate states, weak-reference queries/events, and independently allocated concurrent undo histories. Real editing traces now pass on JavaScript and native, with a substantial speed gap versus Rust; results are below. The core shared types, undo, transactions and protocols described below are implemented. This is not a production release or a completed port.
 
 Run `moon test --target all` and `python3 validation/compare.py`. The oracle uses the installed Rust 1.97.1 toolchain and the exact reference checkout under `.repos/y-crdt`; its Cargo dependencies are locked. Clone `https://github.com/y-crdt/y-crdt.git` there and check out `ac339600c712642e556895426113c3f9c117de39` before running it.
 
@@ -143,7 +143,7 @@ The full 641-scenario core interoperability suite passed again after block
 compaction and the map-head split correction. Unit regressions cover compaction,
 remote-edit preservation, repeated nested restoration, cursor tracking and
 multiple documents. Remaining major milestones are closing the documented behavioral differences,
-completing the public API audit, and performance/stress validation. A public release and repository
+completing the public API audit, and resolving the performance gap on large editing traces. A public release and repository
 completion claim are still pending those milestones.
 
 Subdocuments can be inserted into maps and arrays using `insert_doc`. Supply an
@@ -392,3 +392,26 @@ undo and awareness notification paths, plus generic observer replacement and
 pending removal. The typed behavior agrees with Rust. Pinned Rust's document
 callbacks temporarily lose access to their registry during dispatch; the port
 keeps cancellation effective there too (see `REFERENCE_LIMITATIONS.md`).
+
+Real-trace results are saved in `validation/trace-results.json` and
+`validation/trace-native-results.json`. Both backends passed all five traces with
+and without GC: 907,542 transactions, 923,962 patches, 1,815,084 packet deliveries
+and 7,094 reconnect checkpoints per backend. Every final document also passed
+v1/v2 restarts and bidirectional Rust imports. MoonBit required zero full-state
+catchups; the Rust runs required 4,454, tracked separately from normal replay.
+
+For the largest trace (259,778 transactions, GC enabled), the recorded process
+measurements were:
+
+| Runtime | Seconds | Peak RSS (MiB) |
+| --- | ---: | ---: |
+| MoonBit native | 316.45 | 117.97 |
+| Rust paired with native | 13.69 | 94.08 |
+| MoonBit JavaScript | 481.76 | 508.17 |
+| Rust paired with JavaScript | 12.38 | 93.05 |
+
+These runs demonstrate recovery and interoperability under long editing
+histories, but also a major performance limitation. They are not throughput
+promises or evidence of full compatibility. The files record the tested revision
+and measurement boundaries; timings were collected alongside other validation
+work.

@@ -1,0 +1,300 @@
+{
+  "upstream": "ac339600c712642e556895426113c3f9c117de39",
+  "platform": "macOS-26.4.1-arm64-arm-64bit-Mach-O",
+  "node": "v25.8.2",
+  "moon": "moon 0.1.20261012 (748b63c 2026-10-12)\n\nFeature flags enabled: rr_moon_mod,rr_moon_pkg",
+  "measurement": "one run per case; whole-process wall time and macOS peak RSS; includes JSON, replicas, updates, reconnects and restarts",
+  "offsets": "Unicode traces converted to UTF-16 by independent Python model",
+  "checks": [
+    "recorded final content",
+    "reversed duplicate update delivery every 128 transactions",
+    "full-state catchup when pending replay stalls (counted)",
+    "state-vector equality at reconnects",
+    "v1 and v2 restart",
+    "bidirectional Rust/MoonBit v1 and v2 full-state imports"
+  ],
+  "cases": [
+    {
+      "clock": 23720,
+      "patches": 4288,
+      "transactions": 1523,
+      "deliveries": 3046,
+      "checkpoints": 12,
+      "trace": "friendsforever_flat",
+      "gc": false,
+      "source_sha256": "20107f040f4a0332cc66a117a8bf6ba5b7393e1871d3ae829eeae2b251022f9a",
+      "final_utf8_sha256": "4720ec330c91e288c00b71cab318f7a1cdde689dfc401f269c353acfd6cb03f6",
+      "measurements": {
+        "rust": {
+          "elapsed_seconds": 0.2821,
+          "peak_rss_bytes": 7372800,
+          "full_sync_catchups": 11,
+          "encoded_v1_bytes": 50262,
+          "encoded_v2_bytes": 38016
+        },
+        "moonbit_native": {
+          "elapsed_seconds": 0.9695,
+          "peak_rss_bytes": 9814016,
+          "full_sync_catchups": 0,
+          "encoded_v1_bytes": 50262,
+          "encoded_v2_bytes": 38016
+        }
+      },
+      "status": "passed"
+    },
+    {
+      "clock": 23720,
+      "patches": 4288,
+      "transactions": 1523,
+      "deliveries": 3046,
+      "checkpoints": 12,
+      "trace": "friendsforever_flat",
+      "gc": true,
+      "source_sha256": "20107f040f4a0332cc66a117a8bf6ba5b7393e1871d3ae829eeae2b251022f9a",
+      "final_utf8_sha256": "4720ec330c91e288c00b71cab318f7a1cdde689dfc401f269c353acfd6cb03f6",
+      "measurements": {
+        "rust": {
+          "elapsed_seconds": 0.0592,
+          "peak_rss_bytes": 7225344,
+          "full_sync_catchups": 11,
+          "encoded_v1_bytes": 47904,
+          "encoded_v2_bytes": 37738
+        },
+        "moonbit_native": {
+          "elapsed_seconds": 0.6627,
+          "peak_rss_bytes": 9748480,
+          "full_sync_catchups": 0,
+          "encoded_v1_bytes": 47904,
+          "encoded_v2_bytes": 37738
+        }
+      },
+      "status": "passed"
+    },
+    {
+      "clock": 93984,
+      "patches": 19749,
+      "transactions": 18335,
+      "deliveries": 36670,
+      "checkpoints": 144,
+      "trace": "sveltecomponent",
+      "gc": false,
+      "source_sha256": "0393353a1ff0281f4a2adad080b0843bffa7988f9a4869ed04faf0984f78a234",
+      "final_utf8_sha256": "d8bb93b7cf87b4c3a0394fddc028284a093d90d5794a213d1ccb0794eb4ede8f",
+      "measurements": {
+        "rust": {
+          "elapsed_seconds": 0.4583,
+          "peak_rss_bytes": 15138816,
+          "full_sync_catchups": 139,
+          "encoded_v1_bytes": 137636,
+          "encoded_v2_bytes": 111521
+        },
+        "moonbit_native": {
+          "elapsed_seconds": 7.2882,
+          "peak_rss_bytes": 19349504,
+          "full_sync_catchups": 0,
+          "encoded_v1_bytes": 137636,
+          "encoded_v2_bytes": 111521
+        }
+      },
+      "status": "passed"
+    },
+    {
+      "clock": 93984,
+      "patches": 19749,
+      "transactions": 18335,
+      "deliveries": 36670,
+      "checkpoints": 144,
+      "trace": "sveltecomponent",
+      "gc": true,
+      "source_sha256": "0393353a1ff0281f4a2adad080b0843bffa7988f9a4869ed04faf0984f78a234",
+      "final_utf8_sha256": "d8bb93b7cf87b4c3a0394fddc028284a093d90d5794a213d1ccb0794eb4ede8f",
+      "measurements": {
+        "rust": {
+          "elapsed_seconds": 0.4196,
+          "peak_rss_bytes": 14270464,
+          "full_sync_catchups": 139,
+          "encoded_v1_bytes": 62103,
+          "encoded_v2_bytes": 36841
+        },
+        "moonbit_native": {
+          "elapsed_seconds": 8.2816,
+          "peak_rss_bytes": 18137088,
+          "full_sync_catchups": 0,
+          "encoded_v1_bytes": 62103,
+          "encoded_v2_bytes": 36841
+        }
+      },
+      "status": "passed"
+    },
+    {
+      "clock": 522531,
+      "patches": 40173,
+      "transactions": 36981,
+      "deliveries": 73962,
+      "checkpoints": 289,
+      "trace": "rustcode",
+      "gc": false,
+      "source_sha256": "a13d472b5641dcad18d52882eff8c2d68ecbc27aa0f1e5a17eeb42f0f3130f38",
+      "final_utf8_sha256": "2cde7bd1dedbcd198e3f5a66a4135f120571a4349d48d057009f311622a0894c",
+      "measurements": {
+        "rust": {
+          "elapsed_seconds": 2.0049,
+          "peak_rss_bytes": 35586048,
+          "full_sync_catchups": 266,
+          "encoded_v1_bytes": 625840,
+          "encoded_v2_bytes": 562690
+        },
+        "moonbit_native": {
+          "elapsed_seconds": 26.0732,
+          "peak_rss_bytes": 60440576,
+          "full_sync_catchups": 0,
+          "encoded_v1_bytes": 625840,
+          "encoded_v2_bytes": 562690
+        }
+      },
+      "status": "passed"
+    },
+    {
+      "clock": 522531,
+      "patches": 40173,
+      "transactions": 36981,
+      "deliveries": 73962,
+      "checkpoints": 289,
+      "trace": "rustcode",
+      "gc": true,
+      "source_sha256": "a13d472b5641dcad18d52882eff8c2d68ecbc27aa0f1e5a17eeb42f0f3130f38",
+      "final_utf8_sha256": "2cde7bd1dedbcd198e3f5a66a4135f120571a4349d48d057009f311622a0894c",
+      "measurements": {
+        "rust": {
+          "elapsed_seconds": 1.9724,
+          "peak_rss_bytes": 26591232,
+          "full_sync_catchups": 266,
+          "encoded_v1_bytes": 168507,
+          "encoded_v2_bytes": 109116
+        },
+        "moonbit_native": {
+          "elapsed_seconds": 30.1018,
+          "peak_rss_bytes": 35880960,
+          "full_sync_catchups": 0,
+          "encoded_v1_bytes": 168507,
+          "encoded_v2_bytes": 109116
+        }
+      },
+      "status": "passed"
+    },
+    {
+      "clock": 212489,
+      "patches": 137993,
+      "transactions": 137154,
+      "deliveries": 274308,
+      "checkpoints": 1072,
+      "trace": "seph-blog1",
+      "gc": false,
+      "source_sha256": "43b5d326ca8c9094cd94e28ab66cd2f3073ce2893db959a0388c53f0aed8156d",
+      "final_utf8_sha256": "fd42bef4fbb237f8cd748d2c1c628c51b489ea9b98992e6eb815d04a090a70ba",
+      "measurements": {
+        "rust": {
+          "elapsed_seconds": 8.9805,
+          "peak_rss_bytes": 63733760,
+          "full_sync_catchups": 914,
+          "encoded_v1_bytes": 373401,
+          "encoded_v2_bytes": 277421
+        },
+        "moonbit_native": {
+          "elapsed_seconds": 142.5604,
+          "peak_rss_bytes": 81920000,
+          "full_sync_catchups": 0,
+          "encoded_v1_bytes": 373401,
+          "encoded_v2_bytes": 277421
+        }
+      },
+      "status": "passed"
+    },
+    {
+      "clock": 212489,
+      "patches": 137993,
+      "transactions": 137154,
+      "deliveries": 274308,
+      "checkpoints": 1072,
+      "trace": "seph-blog1",
+      "gc": true,
+      "source_sha256": "43b5d326ca8c9094cd94e28ab66cd2f3073ce2893db959a0388c53f0aed8156d",
+      "final_utf8_sha256": "fd42bef4fbb237f8cd748d2c1c628c51b489ea9b98992e6eb815d04a090a70ba",
+      "measurements": {
+        "rust": {
+          "elapsed_seconds": 9.1808,
+          "peak_rss_bytes": 62423040,
+          "full_sync_catchups": 914,
+          "encoded_v1_bytes": 217673,
+          "encoded_v2_bytes": 135217
+        },
+        "moonbit_native": {
+          "elapsed_seconds": 178.8629,
+          "peak_rss_bytes": 80265216,
+          "full_sync_catchups": 0,
+          "encoded_v1_bytes": 217673,
+          "encoded_v2_bytes": 135217
+        }
+      },
+      "status": "passed"
+    },
+    {
+      "clock": 182315,
+      "patches": 259778,
+      "transactions": 259778,
+      "deliveries": 519556,
+      "checkpoints": 2030,
+      "trace": "automerge-paper",
+      "gc": false,
+      "source_sha256": "42c0ff1720c0cad77077e190e36135c9cab9f7bbc266351c0a7fe4981c6a1546",
+      "final_utf8_sha256": "a489e9022976c14e46627aea174d07797edcb3fd17df42605956d4cf01bf9039",
+      "measurements": {
+        "rust": {
+          "elapsed_seconds": 13.4004,
+          "peak_rss_bytes": 98631680,
+          "full_sync_catchups": 897,
+          "encoded_v1_bytes": 300877,
+          "encoded_v2_bytes": 226973
+        },
+        "moonbit_native": {
+          "elapsed_seconds": 259.2172,
+          "peak_rss_bytes": 124387328,
+          "full_sync_catchups": 0,
+          "encoded_v1_bytes": 300877,
+          "encoded_v2_bytes": 226973
+        }
+      },
+      "status": "passed"
+    },
+    {
+      "clock": 182315,
+      "patches": 259778,
+      "transactions": 259778,
+      "deliveries": 519556,
+      "checkpoints": 2030,
+      "trace": "automerge-paper",
+      "gc": true,
+      "source_sha256": "42c0ff1720c0cad77077e190e36135c9cab9f7bbc266351c0a7fe4981c6a1546",
+      "final_utf8_sha256": "a489e9022976c14e46627aea174d07797edcb3fd17df42605956d4cf01bf9039",
+      "measurements": {
+        "rust": {
+          "elapsed_seconds": 13.6945,
+          "peak_rss_bytes": 98648064,
+          "full_sync_catchups": 897,
+          "encoded_v1_bytes": 223414,
+          "encoded_v2_bytes": 159921
+        },
+        "moonbit_native": {
+          "elapsed_seconds": 316.4454,
+          "peak_rss_bytes": 123699200,
+          "full_sync_catchups": 0,
+          "encoded_v1_bytes": 223414,
+          "encoded_v2_bytes": 159921
+        }
+      },
+      "status": "passed"
+    }
+  ],
+  "port_revision": "efbb919",
+  "port_revision_note": "Runner binaries built after incremental deletion replay; excludes subsequent weak and observer changes."
+}
