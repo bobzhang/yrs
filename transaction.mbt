@@ -100,21 +100,20 @@ pub fn Transaction::encode_update_v1(self : Transaction) -> Bytes {
       self.document.state.get(client) <= before.get(client) {
       continue
     }
-    for item in blocks {
-      if item.id.clock + item.content.length().reinterpret_as_uint() >
-        before.get(client) {
-        items.push(
-          (
-            {
-              id: item.id,
-              origin: item.origin,
-              right_origin: item.right_origin,
-              parent: item.parent,
-              parent_sub: item.parent_sub,
-              content: item.content,
-            } : RawItem).trim_start(before.get(client)),
-        )
-      }
+    let clock = before.get(client)
+    for index in first_block_after(blocks, clock)..<blocks.length() {
+      let item = blocks[index]
+      items.push(
+        (
+          {
+            id: item.id,
+            origin: item.origin,
+            right_origin: item.right_origin,
+            parent: item.parent,
+            parent_sub: item.parent_sub,
+            content: item.content,
+          } : RawItem).trim_start(clock),
+      )
     }
   }
   encode_raw_update(items, Snapshot(deletions=self.removed).deletes)

@@ -301,6 +301,23 @@ fn Doc::branch(self : Doc, name : Parent) -> Branch {
 }
 
 ///|
+// Client blocks are sorted by clock, including histories with gaps. The first
+// block whose end exceeds the requested clock may contain it or follow a gap.
+fn first_block_after(blocks : Array[Item], clock : UInt32) -> Int32 {
+  for lo = 0, hi = blocks.length(); lo < hi; {
+    let mid = lo + (hi - lo) / 2
+    let item = blocks[mid]
+    if item.id.clock + item.content.length().reinterpret_as_uint() <= clock {
+      continue mid + 1, hi
+    } else {
+      continue lo, mid
+    }
+  } nobreak {
+    lo
+  }
+}
+
+///|
 fn Doc::find(self : Doc, id : Id) -> Item? {
   guard self.clients.get(id.client) is Some(items) else { return None }
   for lo = 0, hi = items.length(); lo < hi; {
@@ -355,11 +372,8 @@ fn Doc::split(self : Doc, item : Item, at : Int32) -> Item {
   item.content = item.content.slice(0, at)
   item.right = Some(id)
   let entries = self.clients[item.id.client]
-  let index = for i = 0; i < entries.length(); i = i + 1 {
-    if entries[i].id == item.id {
-      break i
-    }
-  } nobreak {
+  let index = first_block_after(entries, item.id.clock)
+  guard index < entries.length() && entries[index].id == item.id else {
     abort("missing split item")
   }
   entries.insert(index + 1, tail)
@@ -395,17 +409,7 @@ fn Doc::integrate(self : Doc, raw : RawItem) -> Bool {
   let blocks = self.clients.get(raw.id.client).unwrap_or([])
   // Most incoming packets append or overlap the recent end of a client's
   // history. Locate the first overlap instead of rescanning its entire past.
-  let first = for lo = 0, hi = blocks.length(); lo < hi; {
-    let mid = lo + (hi - lo) / 2
-    let item = blocks[mid]
-    if item.id.clock + item.content.length().reinterpret_as_uint() <= start {
-      continue mid + 1, hi
-    } else {
-      continue lo, mid
-    }
-  } nobreak {
-    lo
-  }
+  let first = first_block_after(blocks, start)
   for index in first..<blocks.length() {
     let item = blocks[index]
     let item_end = item.id.clock + item.content.length().reinterpret_as_uint()
