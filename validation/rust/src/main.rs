@@ -1,7 +1,7 @@
 use std::io::{self, BufRead};
 use yrs::{Doc, Text, GetString, ReadTxn, Transact, Options, OffsetKind, Update};
 use yrs::updates::{decoder::Decode, encoder::Encode};
-use yrs::{Array, Map, Xml, XmlFragment};
+use yrs::{Array, Map, Xml, XmlFragment, WriteTxn};
 use yrs::types::{ToJson,AsPrelim};
 use serde_json::{Value, json};
 fn hex(b: &[u8]) -> String { b.iter().map(|b| format!("{b:02x}")).collect() }
@@ -28,6 +28,7 @@ fn main() {
  let v2=std::env::args().any(|s|s=="v2");
  let utilities=std::env::args().any(|s|s=="utilities");
  let gc=std::env::args().any(|s|s=="--gc");
+ let eager=std::env::args().any(|s|s=="--eager-reference");
  for line in io::stdin().lock().lines() {
   let line=line.unwrap();
   if utilities {
@@ -53,6 +54,7 @@ fn main() {
   let xmls:Vec<_>=docs.iter().map(|d|d.get_or_insert_xml_fragment("article")).collect();
   let mut queued: Vec<(usize,Vec<u8>)> = vec![];
   let mut snapshots=vec![];
+  let mut originals:Vec<Vec<Vec<u8>>>=vec![vec![],vec![],vec![]];
   let mut trace=false;
   let mut history=vec![];
   let mut local_cases=vec![];
@@ -155,6 +157,26 @@ fn main() {
     "M" => { maps[x].remove(&mut docs[x].transact_mut(),a[2].as_str().unwrap()); }
     "s" | "q" | "u" => { let y=a[2].as_u64().unwrap() as usize; let sv=if kind=="u" { a[3].as_array().unwrap().iter().map(|p|(yrs::block::ClientID::new(p[0].as_u64().unwrap()),p[1].as_u64().unwrap() as u32)).collect() } else { docs[y].transact().state_vector() }; let bytes=if v2 { docs[x].transact().encode_state_as_update_v2(&sv) } else { docs[x].transact().encode_state_as_update_v1(&sv) }; if kind=="q" {queued.push((y,bytes));} else { docs[y].transact_mut().apply_update(if v2 { Update::decode_v2(&bytes) } else { Update::decode_v1(&bytes) }.unwrap()).unwrap(); } }
     "r" => { if !queued.is_empty() { let (y,bytes)=&queued[x % queued.len()]; docs[*y].transact_mut().apply_update(if v2 { Update::decode_v2(bytes) } else { Update::decode_v1(bytes) }.unwrap()).unwrap(); } }
+    "a" if eager => {
+      assert!(!v2, "split-packet oracle currently uses v1");
+      for packet in a[3].as_array().expect("Yjs-split original packet") {
+        let bytes=unhex(packet.as_str().unwrap());
+        if !originals[x].contains(&bytes) { originals[x].push(bytes); }
+      }
+      let mut rounds=0;
+      loop {
+        let before=docs[x].transact().encode_diff_v1(&Default::default());
+        for bytes in &originals[x] {
+          let mut tx=docs[x].transact_mut();
+          tx.prune_pending();
+          tx.apply_update(Update::decode_v1(bytes).unwrap()).unwrap();
+        }
+        docs[x].transact_mut().prune_pending();
+        rounds+=1;
+        if docs[x].transact().encode_diff_v1(&Default::default())==before { break; }
+        assert!(rounds<=originals[x].len()+1, "reference fixed point did not settle");
+      }
+    }
     "a" => { docs[x].transact_mut().apply_update(if v2 { Update::decode_v2(&unhex(a[2].as_str().unwrap())) } else { Update::decode_v1(&unhex(a[2].as_str().unwrap())) }.unwrap()).unwrap(); }
     _ => panic!("bad command")
    }

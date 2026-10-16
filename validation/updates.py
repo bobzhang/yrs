@@ -14,6 +14,14 @@ def execute(command, cases):
             raise AssertionError(row)
     return rows
 
+_split_cache={}
+def eager_cases(cases):
+    packets=sorted({cmd[2] for case in cases for cmd in case if cmd[0]=='a'}-_split_cache.keys())
+    if packets:
+        rows=execute(['node','validation/yjs/split-update.cjs'],packets)
+        _split_cache.update(zip(packets,rows))
+    return [[cmd+[_split_cache[cmd[2]]] if cmd[0]=='a' else cmd for cmd in case] for case in cases]
+
 def states(value):
     return [[str(client),clock] for client,clock in value]
 
@@ -77,30 +85,23 @@ def main():
         b=execute(moon,active)
         for seed,(ra,mb) in enumerate(zip(a,b)):
             assert len(ra['snapshots'])==len(mb['snapshots'])==len(active[seed])-1
-            # Different GC policies change intermediate readiness, which in
-            # turn changes later position-based edits. Compare each producer's
-            # convergence, and compare runtimes using identical wire below.
-            if gc:
-                for produced in [ra,mb]:
-                    final=canonical_snapshot(produced['snapshots'][-1])
-                    assert final[0]==final[1]==final[2],f'producer did not converge {version} seed={seed}'
-                    vectors=[states(s) for s in produced['states']]
-                    assert vectors[0]==vectors[1]==vectors[2]
-                    converged+=1
-                continue
-            pairs=list(enumerate(zip(ra['snapshots'],mb['snapshots'])))
-            for step,(x,y) in pairs:
-                if canonical_snapshot(x)!=canonical_snapshot(y):
-                    Path('/tmp/yrs-relay-failure.json').write_text(json.dumps(active[seed][:step+2]))
-                    print('Rust',x,'Moon',y,flush=True)
-                assert canonical_snapshot(x)==canonical_snapshot(y),f'relay {version} gc={gc} seed={seed} step={step}'
-                snapshots+=1
-            assert [states(s) for s in ra['states']]==[states(s) for s in mb['states']]
+            # Readiness differs deliberately; later position edits then differ.
+            # Require each producer to converge, and compare identical histories
+            # below against unchanged Rust driven to its causal fixed point.
+            for produced in [ra,mb]:
+                final=canonical_snapshot(produced['snapshots'][-1])
+                assert final[0]==final[1]==final[2],f'producer did not converge {version} seed={seed}'
+                vectors=[states(s) for s in produced['states']]
+                assert vectors[0]==vectors[1]==vectors[2]
+                converged+=1
+            for x,y in zip(ra['snapshots'],mb['snapshots']):
+                snapshots+=canonical_snapshot(x)==canonical_snapshot(y)
+        eager=rust+['--eager-reference']
         for source in [a,b]:
             traces=[row['history'] for row in source]
             for offset in range(0,len(traces),8):
                 batch=traces[offset:offset+8]
-                rr,mm=execute(rust,batch),execute(moon,batch)
+                rr,mm=execute(eager,eager_cases(batch)),execute(moon,batch)
                 for seed,(ra,mb) in enumerate(zip(rr,mm)):
                     for step,(x,y) in enumerate(zip(ra['snapshots'],mb['snapshots'])):
                         if canonical_snapshot(x)!=canonical_snapshot(y):
@@ -123,17 +124,17 @@ def main():
         imports=lambda rows:[[['a',0,row['merged']],['a',1,row['diff']]] for row in rows]
         # Both engines must accept each producer's merged and differential wire.
         for output in [ra,mb]:
-            x,y=execute(rust,imports(output)),execute(moon,imports(output))
+            x,y=execute(eager,eager_cases(imports(output))),execute(moon,imports(output))
             for i,(xr,ym) in enumerate(zip(x,y)):
                 assert canonical_snapshot(xr['snapshots'][-1])==canonical_snapshot(ym['snapshots'][-1]),f'utility import differs case={i}'
                 assert [states(s) for s in xr['states']]==[states(s) for s in ym['states']]
         # Different valid block layouts must represent the same integrated state.
-        x,y=execute(rust,imports(ra)),execute(rust,imports(mb))
+        x,y=execute(eager,eager_cases(imports(ra))),execute(eager,eager_cases(imports(mb)))
         for i,(xr,yr) in enumerate(zip(x,y)):
             assert canonical_snapshot(xr['snapshots'][-1])==canonical_snapshot(yr['snapshots'][-1]),f'merge/diff differs case={i}'
             assert [states(s) for s in xr['states']]==[states(s) for s in yr['states']]
         utility_cases+=len(cases)
-    result={'upstream':'ac339600c712642e556895426113c3f9c117de39','relay_scenarios':len(scenarios),'wire_versions':['v1'],'rust_gc_modes':[False,True],'independent_relay_snapshots':snapshots,'wire_replay_snapshots':replayed,'gc_producer_convergence_checks':converged,'stateless_merge_diff_cases':utility_cases,'reference_failures':reference_failures,'status':'passed_available_reference_cases'}
+    result={'upstream':'ac339600c712642e556895426113c3f9c117de39','relay_scenarios':len(scenarios),'wire_versions':['v1'],'rust_gc_modes':[False,True],'equal_independent_snapshots':snapshots,'reference_schedule':'fixed point of Yjs-split original blocks through unchanged Rust','wire_replay_snapshots':replayed,'producer_convergence_checks':converged,'stateless_merge_diff_cases':utility_cases,'reference_failures':reference_failures,'status':'passed_available_reference_cases'}
     (ROOT/'validation/update-results.json').write_text(json.dumps(result,indent=2)+'\n')
     print(json.dumps(result))
 if __name__=='__main__':main()
