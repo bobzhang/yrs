@@ -401,12 +401,12 @@ v1/v2 restarts and bidirectional Rust imports. MoonBit required zero full-state
 catchups; the Rust runs required 4,454, tracked separately from normal replay.
 
 For the largest trace (259,778 transactions, GC enabled), the recorded process
-measurements were:
+measurements were (native refreshed at `cb236ef`; JavaScript remains at `efbb919`):
 
 | Runtime | Seconds | Peak RSS (MiB) |
 | --- | ---: | ---: |
-| MoonBit native | 316.45 | 117.97 |
-| Rust paired with native | 13.69 | 94.08 |
+| MoonBit native | 168.15 | 116.45 |
+| Rust paired with native | 12.52 | 92.75 |
 | MoonBit JavaScript | 481.76 | 508.17 |
 | Rust paired with JavaScript | 12.38 | 93.05 |
 
@@ -512,3 +512,11 @@ sequences. Like Rust's store lookup, map-key traversal can inspect retained
 deleted branches; sequence indices refer to visible values. `pending_update()`
 and `pending_delete_set()` return owned snapshots of unresolved blocks and early
 deletions without draining them, retrying integration, or notifying observers.
+
+The refreshed native trace matrix at `cb236ef` passes all ten cases again:
+907,542 transactions, 1,815,084 deliveries and 7,094 reconnect checkpoints, with
+zero MoonBit full-state catchups. Each case records its revision, a source hash,
+clean/dirty source status and toolchain. The largest GC-enabled case decreased
+from the earlier recorded 316.45 seconds to 168.15 seconds; these are separate
+whole-process runs, not a controlled speedup claim. Rust still finishes that
+case in 12.52 seconds, so performance remains an open concern.
