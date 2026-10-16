@@ -168,6 +168,7 @@ pub(all) enum BranchId {
   Root(String)
 } derive(Eq, @debug.Debug)
 pub fn BranchId::equal(Self, Self) -> Bool
+pub fn BranchId::get(Self, Doc) -> Out?
 pub fn BranchId::not_equal(Self, Self) -> Bool
 pub fn BranchId::to_repr(Self) -> @debug.Repr
 
@@ -217,6 +218,7 @@ pub fn Doc::observe_update_v2(Self, String, (Bytes, Transaction) -> Unit) -> Uni
 pub fn Doc::offset_kind(Self) -> OffsetKind
 pub fn Doc::parent_doc(Self) -> Self?
 pub fn Doc::pending_items(Self) -> Int
+pub fn Doc::root_refs(Self) -> Array[(String, Out)]
 pub fn Doc::should_load(Self) -> Bool
 pub fn Doc::skip_gc(Self) -> Bool
 pub fn Doc::snapshot(Self) -> Snapshot
@@ -263,6 +265,31 @@ pub fn Id::op_gt(Self, Self) -> Bool
 pub fn Id::op_le(Self, Self) -> Bool
 pub fn Id::op_lt(Self, Self) -> Bool
 pub fn Id::to_repr(Self) -> @debug.Repr
+
+pub struct IdSet {
+  // private fields
+}
+pub fn IdSet::IdSet(ranges? : Array[(UInt64, UInt, UInt)]) -> Self
+pub fn IdSet::client_ids(Self) -> Array[UInt64]
+pub fn IdSet::contains(Self, Id) -> Bool
+pub fn IdSet::decode_v1(Bytes) -> Self raise DecodeError
+pub fn IdSet::decode_v2(Bytes) -> Self raise DecodeError
+pub fn IdSet::diff(Self, Self) -> Self
+pub fn IdSet::diff_with(Self, Self) -> Unit
+pub fn IdSet::encode_v1(Self) -> Bytes
+pub fn IdSet::encode_v2(Self) -> Bytes raise DecodeError
+pub fn IdSet::from_json(Json) -> Self raise DecodeError
+pub fn IdSet::get(Self, UInt64) -> Array[(UInt, UInt)]?
+pub fn IdSet::insert(Self, Id, UInt) -> Unit
+pub fn IdSet::intersect(Self, Self) -> Self
+pub fn IdSet::intersect_with(Self, Self) -> Unit
+pub fn IdSet::is_empty(Self) -> Bool
+pub fn IdSet::length(Self) -> Int
+pub fn IdSet::merge(Self, Self) -> Self
+pub fn IdSet::merge_with(Self, Self) -> Unit
+pub fn IdSet::ranges(Self) -> Array[(UInt64, UInt, UInt)]
+pub fn IdSet::remove_range(Self, Id, UInt) -> Unit
+pub fn IdSet::to_json(Self) -> Json
 
 pub(all) enum In {
   Value(Any)
@@ -348,6 +375,8 @@ pub(all) enum Out {
   XmlFragment(XmlFragment)
   XmlText(XmlText)
 }
+pub fn Out::branch_id(Self) -> BranchId?
+pub fn Out::is_deleted(Self) -> Bool
 pub fn Out::to_input(Self) -> In
 pub fn Out::to_json(Self) -> Json
 pub fn Out::to_string(Self) -> String
@@ -377,9 +406,14 @@ pub struct StackItem[M] {
   mut meta : M
   // private fields
 }
+pub fn[M] StackItem::StackItem(Doc, insertions? : IdSet, deletions? : IdSet, meta~ : M) -> Self[M]
 pub fn[M] StackItem::deletions(Self[M]) -> Array[(UInt64, UInt, UInt)]
 pub fn[M] StackItem::doc(Self[M]) -> Doc
+pub fn[M] StackItem::from_json(Json, Doc, (Json) -> M raise DecodeError) -> Self[M] raise DecodeError
 pub fn[M] StackItem::insertions(Self[M]) -> Array[(UInt64, UInt, UInt)]
+pub fn[M] StackItem::merge(Self[M], Self[M], (M, M) -> M) -> Unit
+pub fn[M] StackItem::set_meta(Self[M], M) -> Unit
+pub fn[M] StackItem::to_json(Self[M], (M) -> Json) -> Json
 
 pub struct StateVector {
   // private fields
@@ -465,6 +499,7 @@ pub struct Transaction {
 }
 pub fn Transaction::after_state(Self) -> StateVector
 pub fn Transaction::before_state(Self) -> StateVector
+pub fn Transaction::changed_parent_types(Self) -> ReadOnlyArray[Out]
 pub fn Transaction::deletions(Self) -> Array[(UInt64, UInt, UInt)]
 pub fn Transaction::doc(Self) -> Doc
 pub fn Transaction::encode_update_v1(Self) -> Bytes
@@ -486,6 +521,8 @@ pub struct UndoEvent[M] {
   mut meta : M
   // private fields
 }
+pub fn[M] UndoEvent::changed_parent_types(Self[M]) -> ReadOnlyArray[Out]
+pub fn[M] UndoEvent::has_changed(Self[M], Out) -> Bool
 pub fn[M] UndoEvent::kind(Self[M]) -> UndoEventKind
 pub fn[M] UndoEvent::origin(Self[M]) -> Bytes?
 pub fn[M] UndoEvent::set_meta(Self[M], M) -> Unit
@@ -501,7 +538,7 @@ pub fn UndoEventKind::to_repr(Self) -> @debug.Repr
 pub struct UndoManager[M] {
   // private fields
 }
-pub fn[M : Default] UndoManager::UndoManager(clock~ : () -> UInt64, capture_timeout_millis? : UInt64, tracked_origins? : Array[Bytes], capture_transaction? : (Transaction) -> Bool) -> Self[M]
+pub fn[M : Default] UndoManager::UndoManager(clock~ : () -> UInt64, capture_timeout_millis? : UInt64, tracked_origins? : Array[Bytes], capture_transaction? : (Transaction) -> Bool, init_undo_stack? : Array[StackItem[M]], init_redo_stack? : Array[StackItem[M]]) -> Self[M]
 pub fn[M] UndoManager::as_origin(Self[M]) -> Bytes
 pub fn[M] UndoManager::can_redo(Self[M]) -> Bool
 pub fn[M] UndoManager::can_undo(Self[M]) -> Bool

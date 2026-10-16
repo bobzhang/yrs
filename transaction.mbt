@@ -2,6 +2,7 @@
 /// A grouped mutation scope. Metadata and encoded updates become stable when
 /// the scope closes. Use Doc::transact to commit even when the action raises.
 pub struct Transaction {
+  priv changed_parents : Array[Out]
   priv mut sub_changed : Bool
   priv sub_added : Map[UInt64, Doc]
   priv sub_removed : Map[UInt64, Doc]
@@ -134,6 +135,7 @@ fn Doc::begin_transaction(
     abort("document already has an active transaction")
   }
   let transaction : Transaction = {
+    changed_parents: [],
     sub_changed: false,
     sub_added: {},
     sub_removed: {},
@@ -329,4 +331,13 @@ pub fn Doc::unobserve_update_v2(self : Doc, key : String) -> Bool {
   let found = self.update_v2_observers.contains(key)
   self.update_v2_observers.remove(key)
   found
+}
+
+///|
+/// Collections changed by this transaction and their ancestors. Ancestors may
+/// occur more than once, matching the upstream event traversal.
+pub fn Transaction::changed_parent_types(
+  self : Transaction,
+) -> ReadOnlyArray[Out] {
+  ReadOnlyArray::from_array(self.changed_parents[:])
 }

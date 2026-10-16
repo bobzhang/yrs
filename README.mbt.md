@@ -217,3 +217,22 @@ against Yjs 13.6.27 in both wire formats. Install the pinned JavaScript referenc
 with `npm ci --ignore-scripts --prefix validation/yjs` first. A retained fixture
 demonstrates the pinned Rust legacy decoder's off-by-one error; the port follows
 Yjs for that obsolete format. See `validation/REFERENCE_LIMITATIONS.md`.
+
+
+Saved undo stacks can be restored with `StackItem::from_json` and the
+`init_undo_stack` / `init_redo_stack` constructor arguments. Stack JSON uses the
+Rust serde schema, including v1-encoded `IdSet` byte arrays; metadata encoding is
+caller-defined. Load the matching document state with retained tombstones before
+restoring its stacks. `IdSet` also exposes union, difference, intersection and
+v1/v2 codecs. `Out::branch_id` and `BranchId::get` resolve collection identities
+across replicas; `Doc::root_refs` enumerates root collections.
+
+Undo events expose `changed_parent_types` and `has_changed`, including changed
+collections' ancestors. Destroying a tracked document removes its scopes and
+stacks while preserving history for other documents. The contract oracle
+(`python3 validation/contracts.py`) checks 128 randomized set cases and 4,416
+undo/redo operations from identical saved Rust state, sampled from 96 histories
+with 17,280 source snapshots. It compares stack JSON, metadata, results and
+changed-parent multisets. Independent undo allocations remain subject to the
+reference restoration-order limitation; this matrix does not assert that those
+independently generated identities are equal.

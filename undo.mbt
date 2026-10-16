@@ -84,6 +84,7 @@ pub struct UndoEvent[M] {
   mut meta : M
   priv event_kind : UndoEventKind
   priv source : Bytes?
+  priv changed : ReadOnlyArray[Out]
 }
 
 ///|
@@ -124,6 +125,8 @@ pub fn[M : Default] UndoManager::UndoManager(
   capture_timeout_millis~ : UInt64 = 500UL,
   tracked_origins~ : Array[Bytes] = [],
   capture_transaction~ : (Transaction) -> Bool = fn(_) { true },
+  init_undo_stack~ : Array[StackItem[M]] = [],
+  init_redo_stack~ : Array[StackItem[M]] = [],
 ) -> UndoManager[M] {
   let key = "yrs.undo.\{allocate_identity()}"
   let origin = @utf8.encode(key)
@@ -138,8 +141,8 @@ pub fn[M : Default] UndoManager::UndoManager(
     filter: capture_transaction,
     scopes: Map([]),
     tracked,
-    undo_items: [],
-    redo_items: [],
+    undo_items: init_undo_stack.map(StackItem::copy),
+    redo_items: init_redo_stack.map(StackItem::copy),
     last_change: 0UL,
     mode: 0,
     added_observers: Map([]),
@@ -161,6 +164,9 @@ pub fn[M] UndoManager::expand_scope(
     scope.add(parent) |> ignore
   } else {
     self.scopes[doc.identity] = (doc, Set::from_array([parent]))
+    doc.observe_destroy(self.key, fn(document) {
+      self.remove_document(document)
+    })
     doc.undo_retention[self.key] = fn() { self.retained_ranges(doc) }
     doc.observe_after_transaction(self.key, fn(transaction) {
       self.capture(transaction)
@@ -227,6 +233,7 @@ pub fn[M] UndoManager::redo_stack(
 pub fn[M] UndoManager::destroy(self : UndoManager[M]) -> Unit {
   for (doc, _) in self.scopes.values() {
     doc.unobserve_after_transaction(self.key) |> ignore
+    doc.unobserve_destroy(self.key) |> ignore
     doc.undo_retention.remove(self.key)
   }
   self.scopes.clear()
@@ -323,6 +330,7 @@ fn[M] UndoManager::capture(
       Undo
     },
     source: transaction.origin(),
+    changed: transaction.changed_parent_types(),
   }
   let observers = if extending {
     self.updated_observers
@@ -499,6 +507,7 @@ fn[M] UndoManager::pop(self : UndoManager[M], undoing : Bool) -> Bool {
           Redo
         },
         source: Some(self.origin),
+        changed: committed.unwrap().changed_parent_types(),
       }
       for (_, callback) in self.popped_observers.to_array() {
         callback(event, committed.unwrap())

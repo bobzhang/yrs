@@ -128,3 +128,16 @@ replay of MoonBit output. This is an explicit reference exception; it is not a
 passing Rust legacy-content comparison. A separate Rust matrix checks opaque
 shared-type references 5, 9 and 15 with modern content, in both wire formats and
 GC modes. Type reference 9 is distinct from actual subdocument content reference 9.
+
+
+## Saved undo stacks and independently allocated identities
+
+`fixtures/undo-reload-independent-identity.json` also demonstrates that independent
+undo/reload histories can allocate different restored IDs while the rendered
+text remains equal. Those IDs become visible in later stack deletion ranges.
+The saved-stack contract oracle therefore starts each comparison from the exact
+same Rust document update and serialized undo/redo stacks. It compares complete
+output stack records and metadata, undo/redo results, and event parent multisets.
+This validates cross-runtime stack restoration rather than requiring identical
+allocation from independently generated histories. It does not resolve the
+previously documented independent-history limitation.

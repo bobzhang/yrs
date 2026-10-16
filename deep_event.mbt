@@ -222,6 +222,20 @@ fn Doc::notify_collections(self : Doc, transaction : Transaction) -> Unit {
           }
         }
     }
+    let mut current = Some(parent)
+    while current is Some(location) {
+      if location.branch_id().get(self) is Some(value) {
+        transaction.changed_parents.push(value)
+      }
+      current = match location {
+        Root(_) => None
+        Nested(id) =>
+          match self.find(id) {
+            Some(item) => item.parent
+            None => None
+          }
+      }
+    }
     events.push((parent, event))
   }
   for (ancestor, observers) in self.deep_observers.to_array() {
