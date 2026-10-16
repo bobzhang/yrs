@@ -332,6 +332,12 @@ Decoded deleted-content items count as insertions until integration; GC blocks
 are included only when requested. State vectors support causal partial ordering,
 and state vectors and sticky indices support both metadata encoding versions.
 
+`python3 validation/undo_high_clocks.py` seeds compact GC histories just below
+Int32::MAX and near UInt32::MAX, then runs mixed Yjs/MoonBit editing and undo on
+JavaScript and native. Both formats and GC modes pass 136,704 replica comparisons
+and 10,112 undo/redo actions. Initialization restores Yjs's fixed test client IDs
+after its collision guard fires; ordinary edits and imports use unmodified Yjs.
+
 Compressed deleted/GC ranges accept the full UInt32 clock domain without
 allocating one element per clock. Large runs are stored in bounded internal
 blocks; compaction preserves that bound. `validation/large_ranges.py` checks

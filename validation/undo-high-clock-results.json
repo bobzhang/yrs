@@ -1,0 +1,311 @@
+{
+  "runs": [
+    {
+      "upstream": "ac339600c712642e556895426113c3f9c117de39",
+      "reference": "yjs",
+      "moonbit_target": "js",
+      "yjs_version": "13.6.27",
+      "scenarios": 8,
+      "seed_start": 0,
+      "gc_modes": [
+        false,
+        true
+      ],
+      "wire_versions": [
+        "v1",
+        "v2"
+      ],
+      "authorship": "mixed",
+      "mixed_authorship": true,
+      "initial_clock": 2147483584,
+      "replica_state_comparisons": 17088,
+      "duplicate_deliveries": 544,
+      "undo_redo_actions": 1272,
+      "reconciliation_rounds": 28,
+      "reconciliation_kinds": {
+        "rendered_content": 28,
+        "xml_attributes_only": 0
+      },
+      "independent_restoration_identity_equality_required": false,
+      "structured_xml_attributes_compared": true,
+      "observer_events_compared": "identical remote sync/duplicate transactions and port-owned local edits/undo/redo versus reference wire mirrors, after prior state reconciliation",
+      "observer_transaction_comparisons": 1456,
+      "port_local_undo_redo_observer_comparisons": 652,
+      "port_local_edit_observer_comparisons": 1368,
+      "port_local_notification_batches": 976,
+      "port_local_deep_events": 976,
+      "notification_batches": 452,
+      "deep_events": 452,
+      "status": "passed"
+    },
+    {
+      "upstream": "ac339600c712642e556895426113c3f9c117de39",
+      "reference": "yjs",
+      "moonbit_target": "js",
+      "yjs_version": "13.6.27",
+      "scenarios": 8,
+      "seed_start": 48,
+      "gc_modes": [
+        false,
+        true
+      ],
+      "wire_versions": [
+        "v1",
+        "v2"
+      ],
+      "authorship": "mixed",
+      "mixed_authorship": true,
+      "initial_clock": 2147483584,
+      "replica_state_comparisons": 17088,
+      "duplicate_deliveries": 544,
+      "undo_redo_actions": 1256,
+      "reconciliation_rounds": 72,
+      "reconciliation_kinds": {
+        "rendered_content": 72,
+        "xml_attributes_only": 0
+      },
+      "independent_restoration_identity_equality_required": false,
+      "structured_xml_attributes_compared": true,
+      "observer_events_compared": "identical remote sync/duplicate transactions and port-owned local edits/undo/redo versus reference wire mirrors, after prior state reconciliation",
+      "observer_transaction_comparisons": 1540,
+      "port_local_undo_redo_observer_comparisons": 624,
+      "port_local_edit_observer_comparisons": 1280,
+      "port_local_notification_batches": 2556,
+      "port_local_deep_events": 3060,
+      "notification_batches": 1396,
+      "deep_events": 1120,
+      "status": "passed"
+    },
+    {
+      "upstream": "ac339600c712642e556895426113c3f9c117de39",
+      "reference": "yjs",
+      "moonbit_target": "js",
+      "yjs_version": "13.6.27",
+      "scenarios": 8,
+      "seed_start": 0,
+      "gc_modes": [
+        false,
+        true
+      ],
+      "wire_versions": [
+        "v1",
+        "v2"
+      ],
+      "authorship": "mixed",
+      "mixed_authorship": true,
+      "initial_clock": 4294836223,
+      "replica_state_comparisons": 17088,
+      "duplicate_deliveries": 544,
+      "undo_redo_actions": 1272,
+      "reconciliation_rounds": 28,
+      "reconciliation_kinds": {
+        "rendered_content": 28,
+        "xml_attributes_only": 0
+      },
+      "independent_restoration_identity_equality_required": false,
+      "structured_xml_attributes_compared": true,
+      "observer_events_compared": "identical remote sync/duplicate transactions and port-owned local edits/undo/redo versus reference wire mirrors, after prior state reconciliation",
+      "observer_transaction_comparisons": 1456,
+      "port_local_undo_redo_observer_comparisons": 652,
+      "port_local_edit_observer_comparisons": 1368,
+      "port_local_notification_batches": 976,
+      "port_local_deep_events": 976,
+      "notification_batches": 452,
+      "deep_events": 452,
+      "status": "passed"
+    },
+    {
+      "upstream": "ac339600c712642e556895426113c3f9c117de39",
+      "reference": "yjs",
+      "moonbit_target": "js",
+      "yjs_version": "13.6.27",
+      "scenarios": 8,
+      "seed_start": 48,
+      "gc_modes": [
+        false,
+        true
+      ],
+      "wire_versions": [
+        "v1",
+        "v2"
+      ],
+      "authorship": "mixed",
+      "mixed_authorship": true,
+      "initial_clock": 4294836223,
+      "replica_state_comparisons": 17088,
+      "duplicate_deliveries": 544,
+      "undo_redo_actions": 1256,
+      "reconciliation_rounds": 72,
+      "reconciliation_kinds": {
+        "rendered_content": 72,
+        "xml_attributes_only": 0
+      },
+      "independent_restoration_identity_equality_required": false,
+      "structured_xml_attributes_compared": true,
+      "observer_events_compared": "identical remote sync/duplicate transactions and port-owned local edits/undo/redo versus reference wire mirrors, after prior state reconciliation",
+      "observer_transaction_comparisons": 1540,
+      "port_local_undo_redo_observer_comparisons": 624,
+      "port_local_edit_observer_comparisons": 1280,
+      "port_local_notification_batches": 2556,
+      "port_local_deep_events": 3060,
+      "notification_batches": 1396,
+      "deep_events": 1120,
+      "status": "passed"
+    },
+    {
+      "upstream": "ac339600c712642e556895426113c3f9c117de39",
+      "reference": "yjs",
+      "moonbit_target": "native",
+      "yjs_version": "13.6.27",
+      "scenarios": 8,
+      "seed_start": 0,
+      "gc_modes": [
+        false,
+        true
+      ],
+      "wire_versions": [
+        "v1",
+        "v2"
+      ],
+      "authorship": "mixed",
+      "mixed_authorship": true,
+      "initial_clock": 2147483584,
+      "replica_state_comparisons": 17088,
+      "duplicate_deliveries": 544,
+      "undo_redo_actions": 1272,
+      "reconciliation_rounds": 28,
+      "reconciliation_kinds": {
+        "rendered_content": 28,
+        "xml_attributes_only": 0
+      },
+      "independent_restoration_identity_equality_required": false,
+      "structured_xml_attributes_compared": true,
+      "observer_events_compared": "identical remote sync/duplicate transactions and port-owned local edits/undo/redo versus reference wire mirrors, after prior state reconciliation",
+      "observer_transaction_comparisons": 1456,
+      "port_local_undo_redo_observer_comparisons": 652,
+      "port_local_edit_observer_comparisons": 1368,
+      "port_local_notification_batches": 976,
+      "port_local_deep_events": 976,
+      "notification_batches": 452,
+      "deep_events": 452,
+      "status": "passed"
+    },
+    {
+      "upstream": "ac339600c712642e556895426113c3f9c117de39",
+      "reference": "yjs",
+      "moonbit_target": "native",
+      "yjs_version": "13.6.27",
+      "scenarios": 8,
+      "seed_start": 48,
+      "gc_modes": [
+        false,
+        true
+      ],
+      "wire_versions": [
+        "v1",
+        "v2"
+      ],
+      "authorship": "mixed",
+      "mixed_authorship": true,
+      "initial_clock": 2147483584,
+      "replica_state_comparisons": 17088,
+      "duplicate_deliveries": 544,
+      "undo_redo_actions": 1256,
+      "reconciliation_rounds": 72,
+      "reconciliation_kinds": {
+        "rendered_content": 72,
+        "xml_attributes_only": 0
+      },
+      "independent_restoration_identity_equality_required": false,
+      "structured_xml_attributes_compared": true,
+      "observer_events_compared": "identical remote sync/duplicate transactions and port-owned local edits/undo/redo versus reference wire mirrors, after prior state reconciliation",
+      "observer_transaction_comparisons": 1540,
+      "port_local_undo_redo_observer_comparisons": 624,
+      "port_local_edit_observer_comparisons": 1280,
+      "port_local_notification_batches": 2556,
+      "port_local_deep_events": 3060,
+      "notification_batches": 1396,
+      "deep_events": 1120,
+      "status": "passed"
+    },
+    {
+      "upstream": "ac339600c712642e556895426113c3f9c117de39",
+      "reference": "yjs",
+      "moonbit_target": "native",
+      "yjs_version": "13.6.27",
+      "scenarios": 8,
+      "seed_start": 0,
+      "gc_modes": [
+        false,
+        true
+      ],
+      "wire_versions": [
+        "v1",
+        "v2"
+      ],
+      "authorship": "mixed",
+      "mixed_authorship": true,
+      "initial_clock": 4294836223,
+      "replica_state_comparisons": 17088,
+      "duplicate_deliveries": 544,
+      "undo_redo_actions": 1272,
+      "reconciliation_rounds": 28,
+      "reconciliation_kinds": {
+        "rendered_content": 28,
+        "xml_attributes_only": 0
+      },
+      "independent_restoration_identity_equality_required": false,
+      "structured_xml_attributes_compared": true,
+      "observer_events_compared": "identical remote sync/duplicate transactions and port-owned local edits/undo/redo versus reference wire mirrors, after prior state reconciliation",
+      "observer_transaction_comparisons": 1456,
+      "port_local_undo_redo_observer_comparisons": 652,
+      "port_local_edit_observer_comparisons": 1368,
+      "port_local_notification_batches": 976,
+      "port_local_deep_events": 976,
+      "notification_batches": 452,
+      "deep_events": 452,
+      "status": "passed"
+    },
+    {
+      "upstream": "ac339600c712642e556895426113c3f9c117de39",
+      "reference": "yjs",
+      "moonbit_target": "native",
+      "yjs_version": "13.6.27",
+      "scenarios": 8,
+      "seed_start": 48,
+      "gc_modes": [
+        false,
+        true
+      ],
+      "wire_versions": [
+        "v1",
+        "v2"
+      ],
+      "authorship": "mixed",
+      "mixed_authorship": true,
+      "initial_clock": 4294836223,
+      "replica_state_comparisons": 17088,
+      "duplicate_deliveries": 544,
+      "undo_redo_actions": 1256,
+      "reconciliation_rounds": 72,
+      "reconciliation_kinds": {
+        "rendered_content": 72,
+        "xml_attributes_only": 0
+      },
+      "independent_restoration_identity_equality_required": false,
+      "structured_xml_attributes_compared": true,
+      "observer_events_compared": "identical remote sync/duplicate transactions and port-owned local edits/undo/redo versus reference wire mirrors, after prior state reconciliation",
+      "observer_transaction_comparisons": 1540,
+      "port_local_undo_redo_observer_comparisons": 624,
+      "port_local_edit_observer_comparisons": 1280,
+      "port_local_notification_batches": 2556,
+      "port_local_deep_events": 3060,
+      "notification_batches": 1396,
+      "deep_events": 1120,
+      "status": "passed"
+    }
+  ],
+  "status": "passed",
+  "replica_state_comparisons": 136704,
+  "undo_redo_actions": 10112
+}

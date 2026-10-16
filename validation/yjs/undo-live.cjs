@@ -119,7 +119,13 @@ function run(commands) {
   for (const [op, x, arg] of commands) {
     notifications = [];
     let result = null;
-    if (op === 'apply') apply(docs[x], Buffer.from(arg, 'hex'));
+    if (op === 'seed') {
+      Y.applyUpdate(docs[x], Buffer.from(arg, 'hex'));
+      // Seeding our own ID triggers Yjs's collision guard. Restore the fixed
+      // harness identity before any edits; ordinary apply never does this.
+      docs[x].clientID = x + 1;
+      result = Y.decodeStateVector(Y.encodeStateVector(docs[x])).get(x + 1);
+    } else if (op === 'apply') apply(docs[x], Buffer.from(arg, 'hex'));
     else if (op === 'sync') apply(docs[arg], encode(docs[x], Y.encodeStateVector(docs[arg])));
     else if (op === 'undo') result = managers[x].undo() !== null;
     else if (op === 'redo') result = managers[x].redo() !== null;

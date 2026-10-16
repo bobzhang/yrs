@@ -196,7 +196,12 @@ fn run(
     guard command is Array(c) else { abort("command") }
     let x = integer(c[1])
     let mut result : Json = Json::null()
-    if string(c[0]) == "apply" {
+    if string(c[0]) == "seed" {
+      // Validation-only setup: the supplied v1 packet contains compressed GC
+      // history and must be installed before any user-authored operations.
+      docs[x].apply_update_v1(unhex(string(c[2])))
+      result = Json(docs[x].state_vector().get((x + 1).to_uint64()))
+    } else if string(c[0]) == "apply" {
       let bytes = unhex(string(c[2]))
       if v2 {
         docs[x].apply_update_v2(bytes)

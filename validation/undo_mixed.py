@@ -10,6 +10,7 @@ import argparse,json,random,subprocess,select,tempfile
 from pathlib import Path
 from undo import canonical,ROOT
 from events import canonical as canonical_events
+from updates import varuint
 
 class Session:
  def __init__(self,command):
@@ -56,20 +57,23 @@ def main():
  parser.add_argument('--target',choices=['js','native'],default='js')
  parser.add_argument('--seeds',type=int,default=96)
  parser.add_argument('--seed-start',type=int,default=0)
+ parser.add_argument('--initial-clock',type=int,default=0,help='seed compressed GC history before editing (Yjs reference only)')
  parser.add_argument('--report',type=Path,help='write this scoped run, including failures, to a separate report')
  args=parser.parse_args()
  if args.seeds<=0 or args.seed_start<0:parser.error('seeds must be positive and seed-start nonnegative')
+ if args.initial_clock and (args.reference!='yjs' or not 0 < args.initial_clock <= (1 << 32)-1-65536):parser.error('initial-clock requires Yjs and at least 65,536 remaining clocks')
  gc_modes=[False,True] if args.gc=='both' else [args.gc=='on']
  authorship=args.owner
  seeds=list(range(args.seed_start,args.seed_start+args.seeds))
  report=args.report
- if report is None and args.gc=='both' and authorship=='mixed' and args.seeds==96 and args.seed_start==0:
+ if report is None and args.initial_clock==0 and args.gc=='both' and authorship=='mixed' and args.seeds==96 and args.seed_start==0:
   name='undo-mixed' if args.reference=='rust' else 'undo-yjs'
   report=ROOT/('validation/'+name+('-native' if args.target=='native' else '')+'-results.json')
  if args.reference=='yjs':
   assert authorship!='rust','Use --owner mixed or moon with the Yjs reference'
   assert json.loads((ROOT/'validation/yjs/node_modules/yjs/package.json').read_text())['version']=='13.6.27'
  scope={'upstream':'ac339600c712642e556895426113c3f9c117de39','reference':args.reference,'moonbit_target':args.target,'yjs_version':'13.6.27' if args.reference=='yjs' else None,'scenarios':len(seeds),'seed_start':args.seed_start,'gc_modes':gc_modes,'wire_versions':['v1','v2'],'authorship':authorship,'mixed_authorship':authorship=='mixed'}
+ scope['initial_clock']=args.initial_clock
  def save_report(result):
   if report is not None:report.write_text(json.dumps(result,indent=2)+'\n')
  if args.reference=='rust':subprocess.run(['cargo','+1.97.1','build','--release','--locked','--manifest-path','validation/rust/Cargo.toml','--bin','undo'],cwd=ROOT,check=True)
@@ -96,7 +100,13 @@ def main():
    commands=history(seed)
    step=-1
    try:
-    last=[s.call([]) for s in sessions]
+    if args.initial_clock:
+     packet=varuint(3)+b''.join(varuint(1)+varuint(c)+varuint(0)+bytes([0])+varuint(args.initial_clock) for c in [3,2,1])+bytes([0])
+     bootstrap=[['seed',x,packet.hex()] for x in range(3)]
+     last=[s.call(bootstrap) for s in sessions]
+     assert all(row['result']==args.initial_clock for result in last for row in result['snapshots'])
+    else:
+     last=[s.call([]) for s in sessions]
     for step,c in enumerate(commands):
      op,x=c[:2];owner=(x+seed)%2 if authorship=='mixed' else (1 if authorship=='moon' else 0)
      if op=='tick':
