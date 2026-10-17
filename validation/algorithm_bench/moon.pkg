@@ -1,0 +1,9 @@
+import {
+  "bobzhang/yrs",
+  "moonbitlang/core/env",
+  "moonbitlang/core/json",
+}
+
+pkgtype(kind: "executable")
+
+supported_targets = "native+js"
