@@ -439,6 +439,11 @@ fn Doc::clean_end(self : Doc, id : Id) -> Item {
 
 ///|
 fn Doc::integrate(self : Doc, raw : RawItem) -> Bool {
+  self.integrate_dependency(raw) is None
+}
+
+///|
+fn Doc::integrate_dependency(self : Doc, raw : RawItem) -> Id? {
   let end = raw.id.clock + raw.content.length().reinterpret_as_uint()
   let mut start = raw.id.clock
   let missing : Array[RawItem] = []
@@ -470,11 +475,25 @@ fn Doc::integrate(self : Doc, raw : RawItem) -> Bool {
     missing.push(raw.trim_start(start))
   }
   for part in missing {
-    if !self.integrate_missing(part) {
-      return false
+    if self.missing_dependency(part) is Some(id) {
+      return Some(id)
+    }
+    self.integrate_missing(part) |> ignore
+  }
+  None
+}
+
+///|
+fn Doc::missing_dependency(self : Doc, raw : RawItem) -> Id? {
+  if raw.parent is Some(Nested(id)) && self.find(id) is None {
+    return Some(id)
+  }
+  for dep in [raw.origin, raw.right_origin] {
+    if dep is Some(id) && self.find(id) is None {
+      return Some(id)
     }
   }
-  true
+  None
 }
 
 ///|
@@ -699,34 +718,7 @@ fn Doc::settle(
   self : Doc,
   incoming~ : Array[(UInt64, UInt32, UInt32)] = [],
 ) -> Unit {
-  let mut batch = normalize_items(self.pending)
-  for ;; {
-    let mut progress = false
-    let unresolved = []
-    // Each block has explicit dependencies. A missing dependency in one
-    // block must not stall independent later blocks from the same client.
-    for raw in batch {
-      let before = self.items.length()
-      if self.integrate(raw) {
-        progress = true
-      } else {
-        unresolved.push(raw)
-      }
-      if self.items.length() != before {
-        progress = true
-      }
-    }
-    self.pending.clear()
-    for raw in unresolved {
-      self.pending.push(raw)
-    }
-    if !progress {
-      break
-    }
-    // Filtering a normalized batch preserves its order and disjoint clocks.
-    // Retry dependencies without copying and sorting the same backlog again.
-    batch = unresolved
-  }
+  self.integrate_pending() |> ignore
   for link in self.pending_weak.to_array() {
     if self.find(link)
       is Some({ content: Shared(SharedWeak(source)), deleted: false, .. }) {
