@@ -32,7 +32,7 @@ fn main() {
     let length = if kind == "array" { array.len(&txn) } else { text.len(&txn) };
     assert_eq!(length, size);
     if kind == "array" {
-        for i in 0..size { assert_eq!(array.get(&txn, i).unwrap().to_string(&txn), i.to_string()); }
+        for i in 0..size { assert_eq!(array.get(&txn, i), Some(yrs::Out::Any((i as i64).into()))); }
     } else { assert!(text.get_string(&txn).chars().all(|c| c == 'x')); }
     let v1 = txn.encode_state_as_update_v1(&StateVector::default());
     let v2 = txn.encode_state_as_update_v2(&StateVector::default());
