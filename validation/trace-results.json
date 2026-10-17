@@ -1,17 +1,17 @@
 {
   "upstream": "ac339600c712642e556895426113c3f9c117de39",
   "port_revisions": [
-    "ef2d287bf296e78888e0710cd6c90da4b9121c4a"
+    "232aa1043913553f1e55dee25c5522873d4b2125"
   ],
   "latest_run": {
-    "port_revision": "ef2d287bf296e78888e0710cd6c90da4b9121c4a",
+    "port_revision": "232aa1043913553f1e55dee25c5522873d4b2125",
     "source_dirty": false,
-    "source_sha256": "46bcb70ab06ad3db44fb3f16c960352339574997b610909d923b431df82333f2",
-    "started_utc": "2026-10-17T10:13:01.969809+00:00",
+    "source_sha256": "bfdcc7367a53d31e86b23b8c34bd20d29fcc50caea3cf712d5626571e81892b6",
+    "started_utc": "2026-10-17T11:01:19.450595+00:00",
     "moon_toolchain": "moon 0.1.20261012 (748b63c 2026-10-12) ~/.moon/bin/moon\nmoonc v0.10.15+943464bfa (2026-10-12) ~/.moon/bin/moonc\nmoonrun 0.1.20261012 (748b63c 2026-10-12) ~/.moon/bin/moonrun\n\nFeature flags enabled: rr_moon_mod,rr_moon_pkg",
     "artifact_sha256": {
       "rust": "7aa924417d029dbbc250e39750ad41dcf017947c4b3feb391ee6215bbab5b0bc",
-      "moonbit_js": "4f945a4b5ba2040ed4dda4054d5d6f5e3c3189f3f66c8de9c300da92e0b5542e"
+      "moonbit_js": "88b1671f87d420ed3e5b29182067fa7a5f962dd6d4c0bb1709303bc279da6e09"
     }
   },
   "platform": "macOS-26.4.1-arm64-arm-64bit-Mach-O",
@@ -34,16 +34,16 @@
       "transactions": 1523,
       "deliveries": 3046,
       "checkpoints": 12,
-      "port_revision": "ef2d287bf296e78888e0710cd6c90da4b9121c4a",
+      "port_revision": "232aa1043913553f1e55dee25c5522873d4b2125",
       "provenance": {
-        "port_revision": "ef2d287bf296e78888e0710cd6c90da4b9121c4a",
+        "port_revision": "232aa1043913553f1e55dee25c5522873d4b2125",
         "source_dirty": false,
-        "source_sha256": "46bcb70ab06ad3db44fb3f16c960352339574997b610909d923b431df82333f2",
-        "started_utc": "2026-10-17T10:13:01.969809+00:00",
+        "source_sha256": "bfdcc7367a53d31e86b23b8c34bd20d29fcc50caea3cf712d5626571e81892b6",
+        "started_utc": "2026-10-17T11:01:19.450595+00:00",
         "moon_toolchain": "moon 0.1.20261012 (748b63c 2026-10-12) ~/.moon/bin/moon\nmoonc v0.10.15+943464bfa (2026-10-12) ~/.moon/bin/moonc\nmoonrun 0.1.20261012 (748b63c 2026-10-12) ~/.moon/bin/moonrun\n\nFeature flags enabled: rr_moon_mod,rr_moon_pkg",
         "artifact_sha256": {
           "rust": "7aa924417d029dbbc250e39750ad41dcf017947c4b3feb391ee6215bbab5b0bc",
-          "moonbit_js": "4f945a4b5ba2040ed4dda4054d5d6f5e3c3189f3f66c8de9c300da92e0b5542e"
+          "moonbit_js": "88b1671f87d420ed3e5b29182067fa7a5f962dd6d4c0bb1709303bc279da6e09"
         }
       },
       "trace": "friendsforever_flat",
@@ -52,15 +52,15 @@
       "final_utf8_sha256": "4720ec330c91e288c00b71cab318f7a1cdde689dfc401f269c353acfd6cb03f6",
       "measurements": {
         "rust": {
-          "elapsed_seconds": 0.4646,
-          "peak_rss_bytes": 7438336,
+          "elapsed_seconds": 0.2771,
+          "peak_rss_bytes": 7356416,
           "full_sync_catchups": 11,
           "encoded_v1_bytes": 50262,
           "encoded_v2_bytes": 38016
         },
         "moonbit_js": {
-          "elapsed_seconds": 0.4312,
-          "peak_rss_bytes": 112541696,
+          "elapsed_seconds": 0.4684,
+          "peak_rss_bytes": 116408320,
           "full_sync_catchups": 0,
           "encoded_v1_bytes": 50262,
           "encoded_v2_bytes": 38016
@@ -74,16 +74,16 @@
       "transactions": 1523,
       "deliveries": 3046,
       "checkpoints": 12,
-      "port_revision": "ef2d287bf296e78888e0710cd6c90da4b9121c4a",
+      "port_revision": "232aa1043913553f1e55dee25c5522873d4b2125",
       "provenance": {
-        "port_revision": "ef2d287bf296e78888e0710cd6c90da4b9121c4a",
+        "port_revision": "232aa1043913553f1e55dee25c5522873d4b2125",
         "source_dirty": false,
-        "source_sha256": "46bcb70ab06ad3db44fb3f16c960352339574997b610909d923b431df82333f2",
-        "started_utc": "2026-10-17T10:13:01.969809+00:00",
+        "source_sha256": "bfdcc7367a53d31e86b23b8c34bd20d29fcc50caea3cf712d5626571e81892b6",
+        "started_utc": "2026-10-17T11:01:19.450595+00:00",
         "moon_toolchain": "moon 0.1.20261012 (748b63c 2026-10-12) ~/.moon/bin/moon\nmoonc v0.10.15+943464bfa (2026-10-12) ~/.moon/bin/moonc\nmoonrun 0.1.20261012 (748b63c 2026-10-12) ~/.moon/bin/moonrun\n\nFeature flags enabled: rr_moon_mod,rr_moon_pkg",
         "artifact_sha256": {
           "rust": "7aa924417d029dbbc250e39750ad41dcf017947c4b3feb391ee6215bbab5b0bc",
-          "moonbit_js": "4f945a4b5ba2040ed4dda4054d5d6f5e3c3189f3f66c8de9c300da92e0b5542e"
+          "moonbit_js": "88b1671f87d420ed3e5b29182067fa7a5f962dd6d4c0bb1709303bc279da6e09"
         }
       },
       "trace": "friendsforever_flat",
@@ -92,15 +92,15 @@
       "final_utf8_sha256": "4720ec330c91e288c00b71cab318f7a1cdde689dfc401f269c353acfd6cb03f6",
       "measurements": {
         "rust": {
-          "elapsed_seconds": 0.0614,
-          "peak_rss_bytes": 7323648,
+          "elapsed_seconds": 0.0561,
+          "peak_rss_bytes": 7143424,
           "full_sync_catchups": 11,
           "encoded_v1_bytes": 47904,
           "encoded_v2_bytes": 37738
         },
         "moonbit_js": {
-          "elapsed_seconds": 0.4407,
-          "peak_rss_bytes": 112181248,
+          "elapsed_seconds": 0.4968,
+          "peak_rss_bytes": 117489664,
           "full_sync_catchups": 0,
           "encoded_v1_bytes": 47904,
           "encoded_v2_bytes": 37738
@@ -114,16 +114,16 @@
       "transactions": 18335,
       "deliveries": 36670,
       "checkpoints": 144,
-      "port_revision": "ef2d287bf296e78888e0710cd6c90da4b9121c4a",
+      "port_revision": "232aa1043913553f1e55dee25c5522873d4b2125",
       "provenance": {
-        "port_revision": "ef2d287bf296e78888e0710cd6c90da4b9121c4a",
+        "port_revision": "232aa1043913553f1e55dee25c5522873d4b2125",
         "source_dirty": false,
-        "source_sha256": "46bcb70ab06ad3db44fb3f16c960352339574997b610909d923b431df82333f2",
-        "started_utc": "2026-10-17T10:13:01.969809+00:00",
+        "source_sha256": "bfdcc7367a53d31e86b23b8c34bd20d29fcc50caea3cf712d5626571e81892b6",
+        "started_utc": "2026-10-17T11:01:19.450595+00:00",
         "moon_toolchain": "moon 0.1.20261012 (748b63c 2026-10-12) ~/.moon/bin/moon\nmoonc v0.10.15+943464bfa (2026-10-12) ~/.moon/bin/moonc\nmoonrun 0.1.20261012 (748b63c 2026-10-12) ~/.moon/bin/moonrun\n\nFeature flags enabled: rr_moon_mod,rr_moon_pkg",
         "artifact_sha256": {
           "rust": "7aa924417d029dbbc250e39750ad41dcf017947c4b3feb391ee6215bbab5b0bc",
-          "moonbit_js": "4f945a4b5ba2040ed4dda4054d5d6f5e3c3189f3f66c8de9c300da92e0b5542e"
+          "moonbit_js": "88b1671f87d420ed3e5b29182067fa7a5f962dd6d4c0bb1709303bc279da6e09"
         }
       },
       "trace": "sveltecomponent",
@@ -132,15 +132,15 @@
       "final_utf8_sha256": "d8bb93b7cf87b4c3a0394fddc028284a093d90d5794a213d1ccb0794eb4ede8f",
       "measurements": {
         "rust": {
-          "elapsed_seconds": 0.4547,
-          "peak_rss_bytes": 15859712,
+          "elapsed_seconds": 0.4336,
+          "peak_rss_bytes": 15564800,
           "full_sync_catchups": 139,
           "encoded_v1_bytes": 137636,
           "encoded_v2_bytes": 111521
         },
         "moonbit_js": {
-          "elapsed_seconds": 1.5112,
-          "peak_rss_bytes": 180862976,
+          "elapsed_seconds": 1.5528,
+          "peak_rss_bytes": 247873536,
           "full_sync_catchups": 0,
           "encoded_v1_bytes": 137636,
           "encoded_v2_bytes": 111521
@@ -154,16 +154,16 @@
       "transactions": 18335,
       "deliveries": 36670,
       "checkpoints": 144,
-      "port_revision": "ef2d287bf296e78888e0710cd6c90da4b9121c4a",
+      "port_revision": "232aa1043913553f1e55dee25c5522873d4b2125",
       "provenance": {
-        "port_revision": "ef2d287bf296e78888e0710cd6c90da4b9121c4a",
+        "port_revision": "232aa1043913553f1e55dee25c5522873d4b2125",
         "source_dirty": false,
-        "source_sha256": "46bcb70ab06ad3db44fb3f16c960352339574997b610909d923b431df82333f2",
-        "started_utc": "2026-10-17T10:13:01.969809+00:00",
+        "source_sha256": "bfdcc7367a53d31e86b23b8c34bd20d29fcc50caea3cf712d5626571e81892b6",
+        "started_utc": "2026-10-17T11:01:19.450595+00:00",
         "moon_toolchain": "moon 0.1.20261012 (748b63c 2026-10-12) ~/.moon/bin/moon\nmoonc v0.10.15+943464bfa (2026-10-12) ~/.moon/bin/moonc\nmoonrun 0.1.20261012 (748b63c 2026-10-12) ~/.moon/bin/moonrun\n\nFeature flags enabled: rr_moon_mod,rr_moon_pkg",
         "artifact_sha256": {
           "rust": "7aa924417d029dbbc250e39750ad41dcf017947c4b3feb391ee6215bbab5b0bc",
-          "moonbit_js": "4f945a4b5ba2040ed4dda4054d5d6f5e3c3189f3f66c8de9c300da92e0b5542e"
+          "moonbit_js": "88b1671f87d420ed3e5b29182067fa7a5f962dd6d4c0bb1709303bc279da6e09"
         }
       },
       "trace": "sveltecomponent",
@@ -172,15 +172,15 @@
       "final_utf8_sha256": "d8bb93b7cf87b4c3a0394fddc028284a093d90d5794a213d1ccb0794eb4ede8f",
       "measurements": {
         "rust": {
-          "elapsed_seconds": 0.4122,
-          "peak_rss_bytes": 14237696,
+          "elapsed_seconds": 0.4216,
+          "peak_rss_bytes": 14614528,
           "full_sync_catchups": 139,
           "encoded_v1_bytes": 62103,
           "encoded_v2_bytes": 36841
         },
         "moonbit_js": {
-          "elapsed_seconds": 1.4484,
-          "peak_rss_bytes": 166477824,
+          "elapsed_seconds": 1.5624,
+          "peak_rss_bytes": 203718656,
           "full_sync_catchups": 0,
           "encoded_v1_bytes": 62103,
           "encoded_v2_bytes": 36841
@@ -194,16 +194,16 @@
       "transactions": 36981,
       "deliveries": 73962,
       "checkpoints": 289,
-      "port_revision": "ef2d287bf296e78888e0710cd6c90da4b9121c4a",
+      "port_revision": "232aa1043913553f1e55dee25c5522873d4b2125",
       "provenance": {
-        "port_revision": "ef2d287bf296e78888e0710cd6c90da4b9121c4a",
+        "port_revision": "232aa1043913553f1e55dee25c5522873d4b2125",
         "source_dirty": false,
-        "source_sha256": "46bcb70ab06ad3db44fb3f16c960352339574997b610909d923b431df82333f2",
-        "started_utc": "2026-10-17T10:13:01.969809+00:00",
+        "source_sha256": "bfdcc7367a53d31e86b23b8c34bd20d29fcc50caea3cf712d5626571e81892b6",
+        "started_utc": "2026-10-17T11:01:19.450595+00:00",
         "moon_toolchain": "moon 0.1.20261012 (748b63c 2026-10-12) ~/.moon/bin/moon\nmoonc v0.10.15+943464bfa (2026-10-12) ~/.moon/bin/moonc\nmoonrun 0.1.20261012 (748b63c 2026-10-12) ~/.moon/bin/moonrun\n\nFeature flags enabled: rr_moon_mod,rr_moon_pkg",
         "artifact_sha256": {
           "rust": "7aa924417d029dbbc250e39750ad41dcf017947c4b3feb391ee6215bbab5b0bc",
-          "moonbit_js": "4f945a4b5ba2040ed4dda4054d5d6f5e3c3189f3f66c8de9c300da92e0b5542e"
+          "moonbit_js": "88b1671f87d420ed3e5b29182067fa7a5f962dd6d4c0bb1709303bc279da6e09"
         }
       },
       "trace": "rustcode",
@@ -212,15 +212,15 @@
       "final_utf8_sha256": "2cde7bd1dedbcd198e3f5a66a4135f120571a4349d48d057009f311622a0894c",
       "measurements": {
         "rust": {
-          "elapsed_seconds": 2.1437,
-          "peak_rss_bytes": 36585472,
+          "elapsed_seconds": 2.0763,
+          "peak_rss_bytes": 34865152,
           "full_sync_catchups": 266,
           "encoded_v1_bytes": 625840,
           "encoded_v2_bytes": 562690
         },
         "moonbit_js": {
-          "elapsed_seconds": 5.2176,
-          "peak_rss_bytes": 368787456,
+          "elapsed_seconds": 4.8039,
+          "peak_rss_bytes": 397131776,
           "full_sync_catchups": 0,
           "encoded_v1_bytes": 625840,
           "encoded_v2_bytes": 562690
@@ -234,16 +234,16 @@
       "transactions": 36981,
       "deliveries": 73962,
       "checkpoints": 289,
-      "port_revision": "ef2d287bf296e78888e0710cd6c90da4b9121c4a",
+      "port_revision": "232aa1043913553f1e55dee25c5522873d4b2125",
       "provenance": {
-        "port_revision": "ef2d287bf296e78888e0710cd6c90da4b9121c4a",
+        "port_revision": "232aa1043913553f1e55dee25c5522873d4b2125",
         "source_dirty": false,
-        "source_sha256": "46bcb70ab06ad3db44fb3f16c960352339574997b610909d923b431df82333f2",
-        "started_utc": "2026-10-17T10:13:01.969809+00:00",
+        "source_sha256": "bfdcc7367a53d31e86b23b8c34bd20d29fcc50caea3cf712d5626571e81892b6",
+        "started_utc": "2026-10-17T11:01:19.450595+00:00",
         "moon_toolchain": "moon 0.1.20261012 (748b63c 2026-10-12) ~/.moon/bin/moon\nmoonc v0.10.15+943464bfa (2026-10-12) ~/.moon/bin/moonc\nmoonrun 0.1.20261012 (748b63c 2026-10-12) ~/.moon/bin/moonrun\n\nFeature flags enabled: rr_moon_mod,rr_moon_pkg",
         "artifact_sha256": {
           "rust": "7aa924417d029dbbc250e39750ad41dcf017947c4b3feb391ee6215bbab5b0bc",
-          "moonbit_js": "4f945a4b5ba2040ed4dda4054d5d6f5e3c3189f3f66c8de9c300da92e0b5542e"
+          "moonbit_js": "88b1671f87d420ed3e5b29182067fa7a5f962dd6d4c0bb1709303bc279da6e09"
         }
       },
       "trace": "rustcode",
@@ -252,15 +252,15 @@
       "final_utf8_sha256": "2cde7bd1dedbcd198e3f5a66a4135f120571a4349d48d057009f311622a0894c",
       "measurements": {
         "rust": {
-          "elapsed_seconds": 1.9991,
-          "peak_rss_bytes": 28213248,
+          "elapsed_seconds": 1.8848,
+          "peak_rss_bytes": 26509312,
           "full_sync_catchups": 266,
           "encoded_v1_bytes": 168507,
           "encoded_v2_bytes": 109116
         },
         "moonbit_js": {
-          "elapsed_seconds": 4.1926,
-          "peak_rss_bytes": 303284224,
+          "elapsed_seconds": 4.6759,
+          "peak_rss_bytes": 304791552,
           "full_sync_catchups": 0,
           "encoded_v1_bytes": 168507,
           "encoded_v2_bytes": 109116
@@ -274,16 +274,16 @@
       "transactions": 137154,
       "deliveries": 274308,
       "checkpoints": 1072,
-      "port_revision": "ef2d287bf296e78888e0710cd6c90da4b9121c4a",
+      "port_revision": "232aa1043913553f1e55dee25c5522873d4b2125",
       "provenance": {
-        "port_revision": "ef2d287bf296e78888e0710cd6c90da4b9121c4a",
+        "port_revision": "232aa1043913553f1e55dee25c5522873d4b2125",
         "source_dirty": false,
-        "source_sha256": "46bcb70ab06ad3db44fb3f16c960352339574997b610909d923b431df82333f2",
-        "started_utc": "2026-10-17T10:13:01.969809+00:00",
+        "source_sha256": "bfdcc7367a53d31e86b23b8c34bd20d29fcc50caea3cf712d5626571e81892b6",
+        "started_utc": "2026-10-17T11:01:19.450595+00:00",
         "moon_toolchain": "moon 0.1.20261012 (748b63c 2026-10-12) ~/.moon/bin/moon\nmoonc v0.10.15+943464bfa (2026-10-12) ~/.moon/bin/moonc\nmoonrun 0.1.20261012 (748b63c 2026-10-12) ~/.moon/bin/moonrun\n\nFeature flags enabled: rr_moon_mod,rr_moon_pkg",
         "artifact_sha256": {
           "rust": "7aa924417d029dbbc250e39750ad41dcf017947c4b3feb391ee6215bbab5b0bc",
-          "moonbit_js": "4f945a4b5ba2040ed4dda4054d5d6f5e3c3189f3f66c8de9c300da92e0b5542e"
+          "moonbit_js": "88b1671f87d420ed3e5b29182067fa7a5f962dd6d4c0bb1709303bc279da6e09"
         }
       },
       "trace": "seph-blog1",
@@ -292,15 +292,15 @@
       "final_utf8_sha256": "fd42bef4fbb237f8cd748d2c1c628c51b489ea9b98992e6eb815d04a090a70ba",
       "measurements": {
         "rust": {
-          "elapsed_seconds": 8.5662,
-          "peak_rss_bytes": 64192512,
+          "elapsed_seconds": 8.6506,
+          "peak_rss_bytes": 64602112,
           "full_sync_catchups": 914,
           "encoded_v1_bytes": 373401,
           "encoded_v2_bytes": 277421
         },
         "moonbit_js": {
-          "elapsed_seconds": 12.9914,
-          "peak_rss_bytes": 367951872,
+          "elapsed_seconds": 15.2326,
+          "peak_rss_bytes": 392396800,
           "full_sync_catchups": 0,
           "encoded_v1_bytes": 373401,
           "encoded_v2_bytes": 277421
@@ -314,16 +314,16 @@
       "transactions": 137154,
       "deliveries": 274308,
       "checkpoints": 1072,
-      "port_revision": "ef2d287bf296e78888e0710cd6c90da4b9121c4a",
+      "port_revision": "232aa1043913553f1e55dee25c5522873d4b2125",
       "provenance": {
-        "port_revision": "ef2d287bf296e78888e0710cd6c90da4b9121c4a",
+        "port_revision": "232aa1043913553f1e55dee25c5522873d4b2125",
         "source_dirty": false,
-        "source_sha256": "46bcb70ab06ad3db44fb3f16c960352339574997b610909d923b431df82333f2",
-        "started_utc": "2026-10-17T10:13:01.969809+00:00",
+        "source_sha256": "bfdcc7367a53d31e86b23b8c34bd20d29fcc50caea3cf712d5626571e81892b6",
+        "started_utc": "2026-10-17T11:01:19.450595+00:00",
         "moon_toolchain": "moon 0.1.20261012 (748b63c 2026-10-12) ~/.moon/bin/moon\nmoonc v0.10.15+943464bfa (2026-10-12) ~/.moon/bin/moonc\nmoonrun 0.1.20261012 (748b63c 2026-10-12) ~/.moon/bin/moonrun\n\nFeature flags enabled: rr_moon_mod,rr_moon_pkg",
         "artifact_sha256": {
           "rust": "7aa924417d029dbbc250e39750ad41dcf017947c4b3feb391ee6215bbab5b0bc",
-          "moonbit_js": "4f945a4b5ba2040ed4dda4054d5d6f5e3c3189f3f66c8de9c300da92e0b5542e"
+          "moonbit_js": "88b1671f87d420ed3e5b29182067fa7a5f962dd6d4c0bb1709303bc279da6e09"
         }
       },
       "trace": "seph-blog1",
@@ -332,15 +332,15 @@
       "final_utf8_sha256": "fd42bef4fbb237f8cd748d2c1c628c51b489ea9b98992e6eb815d04a090a70ba",
       "measurements": {
         "rust": {
-          "elapsed_seconds": 8.2293,
-          "peak_rss_bytes": 61538304,
+          "elapsed_seconds": 8.4016,
+          "peak_rss_bytes": 62488576,
           "full_sync_catchups": 914,
           "encoded_v1_bytes": 217673,
           "encoded_v2_bytes": 135217
         },
         "moonbit_js": {
-          "elapsed_seconds": 12.8486,
-          "peak_rss_bytes": 359809024,
+          "elapsed_seconds": 15.1474,
+          "peak_rss_bytes": 364838912,
           "full_sync_catchups": 0,
           "encoded_v1_bytes": 217673,
           "encoded_v2_bytes": 135217
@@ -354,16 +354,16 @@
       "transactions": 259778,
       "deliveries": 519556,
       "checkpoints": 2030,
-      "port_revision": "ef2d287bf296e78888e0710cd6c90da4b9121c4a",
+      "port_revision": "232aa1043913553f1e55dee25c5522873d4b2125",
       "provenance": {
-        "port_revision": "ef2d287bf296e78888e0710cd6c90da4b9121c4a",
+        "port_revision": "232aa1043913553f1e55dee25c5522873d4b2125",
         "source_dirty": false,
-        "source_sha256": "46bcb70ab06ad3db44fb3f16c960352339574997b610909d923b431df82333f2",
-        "started_utc": "2026-10-17T10:13:01.969809+00:00",
+        "source_sha256": "bfdcc7367a53d31e86b23b8c34bd20d29fcc50caea3cf712d5626571e81892b6",
+        "started_utc": "2026-10-17T11:01:19.450595+00:00",
         "moon_toolchain": "moon 0.1.20261012 (748b63c 2026-10-12) ~/.moon/bin/moon\nmoonc v0.10.15+943464bfa (2026-10-12) ~/.moon/bin/moonc\nmoonrun 0.1.20261012 (748b63c 2026-10-12) ~/.moon/bin/moonrun\n\nFeature flags enabled: rr_moon_mod,rr_moon_pkg",
         "artifact_sha256": {
           "rust": "7aa924417d029dbbc250e39750ad41dcf017947c4b3feb391ee6215bbab5b0bc",
-          "moonbit_js": "4f945a4b5ba2040ed4dda4054d5d6f5e3c3189f3f66c8de9c300da92e0b5542e"
+          "moonbit_js": "88b1671f87d420ed3e5b29182067fa7a5f962dd6d4c0bb1709303bc279da6e09"
         }
       },
       "trace": "automerge-paper",
@@ -372,15 +372,15 @@
       "final_utf8_sha256": "a489e9022976c14e46627aea174d07797edcb3fd17df42605956d4cf01bf9039",
       "measurements": {
         "rust": {
-          "elapsed_seconds": 13.6363,
-          "peak_rss_bytes": 99614720,
+          "elapsed_seconds": 13.7461,
+          "peak_rss_bytes": 100384768,
           "full_sync_catchups": 897,
           "encoded_v1_bytes": 300877,
           "encoded_v2_bytes": 226973
         },
         "moonbit_js": {
-          "elapsed_seconds": 37.6774,
-          "peak_rss_bytes": 442515456,
+          "elapsed_seconds": 41.712,
+          "peak_rss_bytes": 454049792,
           "full_sync_catchups": 0,
           "encoded_v1_bytes": 300877,
           "encoded_v2_bytes": 226973
@@ -394,16 +394,16 @@
       "transactions": 259778,
       "deliveries": 519556,
       "checkpoints": 2030,
-      "port_revision": "ef2d287bf296e78888e0710cd6c90da4b9121c4a",
+      "port_revision": "232aa1043913553f1e55dee25c5522873d4b2125",
       "provenance": {
-        "port_revision": "ef2d287bf296e78888e0710cd6c90da4b9121c4a",
+        "port_revision": "232aa1043913553f1e55dee25c5522873d4b2125",
         "source_dirty": false,
-        "source_sha256": "46bcb70ab06ad3db44fb3f16c960352339574997b610909d923b431df82333f2",
-        "started_utc": "2026-10-17T10:13:01.969809+00:00",
+        "source_sha256": "bfdcc7367a53d31e86b23b8c34bd20d29fcc50caea3cf712d5626571e81892b6",
+        "started_utc": "2026-10-17T11:01:19.450595+00:00",
         "moon_toolchain": "moon 0.1.20261012 (748b63c 2026-10-12) ~/.moon/bin/moon\nmoonc v0.10.15+943464bfa (2026-10-12) ~/.moon/bin/moonc\nmoonrun 0.1.20261012 (748b63c 2026-10-12) ~/.moon/bin/moonrun\n\nFeature flags enabled: rr_moon_mod,rr_moon_pkg",
         "artifact_sha256": {
           "rust": "7aa924417d029dbbc250e39750ad41dcf017947c4b3feb391ee6215bbab5b0bc",
-          "moonbit_js": "4f945a4b5ba2040ed4dda4054d5d6f5e3c3189f3f66c8de9c300da92e0b5542e"
+          "moonbit_js": "88b1671f87d420ed3e5b29182067fa7a5f962dd6d4c0bb1709303bc279da6e09"
         }
       },
       "trace": "automerge-paper",
@@ -412,15 +412,15 @@
       "final_utf8_sha256": "a489e9022976c14e46627aea174d07797edcb3fd17df42605956d4cf01bf9039",
       "measurements": {
         "rust": {
-          "elapsed_seconds": 13.2728,
-          "peak_rss_bytes": 97910784,
+          "elapsed_seconds": 13.4407,
+          "peak_rss_bytes": 98369536,
           "full_sync_catchups": 897,
           "encoded_v1_bytes": 223414,
           "encoded_v2_bytes": 159921
         },
         "moonbit_js": {
-          "elapsed_seconds": 37.8191,
-          "peak_rss_bytes": 427589632,
+          "elapsed_seconds": 41.6675,
+          "peak_rss_bytes": 441090048,
           "full_sync_catchups": 0,
           "encoded_v1_bytes": 223414,
           "encoded_v2_bytes": 159921
