@@ -20,6 +20,7 @@ pub struct Transaction {
   priv sequences : Set[Parent]
   priv map_changes : Map[Parent, Map[String, (Id?, Out?)]]
   priv removed : Array[(UInt64, UInt32, UInt32)]
+  priv mut frozen_items : Array[RawItem]?
   priv mut encoded : Bytes?
   priv mut encoded_v2 : Bytes?
   priv mut closed : Bool
@@ -99,6 +100,25 @@ fn Transaction::encode_update_wire(self : Transaction, v2 : Bool) -> Bytes {
   if (if v2 { self.encoded_v2 } else { self.encoded }) is Some(bytes) {
     return bytes
   }
+  let items = self.frozen_items.unwrap_or_else(fn() { self.update_items() })
+  let bytes = encode_raw_update(
+    items,
+    Snapshot(deletions=self.removed).deletes,
+    v2~,
+  )
+  // A live transaction may still change after an observer reads its update.
+  if self.closed {
+    if v2 {
+      self.encoded_v2 = Some(bytes)
+    } else {
+      self.encoded = Some(bytes)
+    }
+  }
+  bytes
+}
+
+///|
+fn Transaction::update_items(self : Transaction) -> Array[RawItem] {
   let before = self.before_state()
   let items = []
   for client, blocks in self.document.clients {
@@ -118,7 +138,7 @@ fn Transaction::encode_update_wire(self : Transaction, v2 : Bool) -> Bytes {
       )
     }
   }
-  encode_raw_update(items, Snapshot(deletions=self.removed).deletes, v2~)
+  items
 }
 
 ///|
@@ -158,6 +178,7 @@ fn Doc::begin_transaction(
     sequences: Set([]),
     map_changes: {},
     removed: [],
+    frozen_items: None,
     encoded: None,
     encoded_v2: None,
     closed: false,
@@ -196,8 +217,11 @@ fn Doc::commit_transaction(self : Doc, transaction : Transaction) -> Unit {
   if transaction.capture_update {
     transaction.before_state() |> ignore
     transaction.after_state() |> ignore
-    transaction.encoded = Some(transaction.encode_update_v1())
-    transaction.encoded_v2 = Some(try! transaction.encode_update_v2())
+    // Retained transactions own their payload, but pay for a wire format only
+    // when requested. In particular, a v1 observer never needs a v2 encoding.
+    transaction.frozen_items = Some(
+      transaction.update_items().map(RawItem::owned_update_item),
+    )
   }
   transaction.closed = true
   self.notifying_transaction = true
