@@ -113,6 +113,7 @@ priv struct Item {
 
 ///|
 priv struct Branch {
+  mut content_length : Int32
   mut position_hint : (Item, Int32)?
   weak_quotes : Set[Id]
   mut kind : SharedKind?
@@ -293,6 +294,7 @@ fn Doc::branch(self : Doc, name : Parent) -> Branch {
     Some(b) => b
     None => {
       let b : Branch = {
+        content_length: 0,
         position_hint: None,
         weak_quotes: Set([]),
         kind: None,
@@ -311,6 +313,14 @@ fn Doc::branch(self : Doc, name : Parent) -> Branch {
 // Client blocks are sorted by clock, including histories with gaps. The first
 // block whose end exceeds the requested clock may contain it or follow a gap.
 fn first_block_after(blocks : Array[Item], clock : UInt32) -> Int32 {
+  if blocks.last() is Some(last) && clock >= last.id.clock {
+    return if clock <
+      last.id.clock + last.content.length().reinterpret_as_uint() {
+      blocks.length() - 1
+    } else {
+      blocks.length()
+    }
+  }
   for lo = 0, hi = blocks.length(); lo < hi; {
     let mid = lo + (hi - lo) / 2
     let item = blocks[mid]
@@ -327,6 +337,14 @@ fn first_block_after(blocks : Array[Item], clock : UInt32) -> Int32 {
 ///|
 fn Doc::find(self : Doc, id : Id) -> Item? {
   guard self.clients.get(id.client) is Some(items) else { return None }
+  if items.last() is Some(last) && id.clock >= last.id.clock {
+    return if id.clock - last.id.clock <
+      last.content.length().reinterpret_as_uint() {
+      Some(last)
+    } else {
+      None
+    }
+  }
   for lo = 0, hi = items.length(); lo < hi; {
     let mid = lo + (hi - lo) / 2
     let item = items[mid]
@@ -379,7 +397,15 @@ fn Doc::split(self : Doc, item : Item, at : Int32) -> Item {
   } else if item.parent is Some(parent) && item.parent_sub is Some(key) {
     self.branch(parent).values[key] = id
   }
-  item.content = item.content.slice(0, at)
+  let prefix = item.content.slice(0, at)
+  if !item.deleted && item.parent_sub is None && item.parent is Some(parent) {
+    // A remote UTF-16 split can replace a surrogate pair with two U+FFFDs,
+    // changing byte length even though the logical clocks are unchanged.
+    self.branch(parent).content_length += prefix.offset_length(self) +
+      tail.content.offset_length(self) -
+      item.content.offset_length(self)
+  }
+  item.content = prefix
   item.right = Some(id)
   let entries = self.clients[item.id.client]
   let index = first_block_after(entries, item.id.clock)
@@ -567,6 +593,9 @@ fn Doc::integrate_missing(self : Doc, raw : RawItem) -> Bool {
     if item.right is Some(id) {
       self.items[id].left = Some(item.id)
     }
+    if parent_sub is None && !item.deleted {
+      branch.content_length += item.content.offset_length(self)
+    }
   }
   self.items[item.id] = item
   // GC/deleted blocks may arrive without an explicit deletion-set entry, or
@@ -670,12 +699,13 @@ fn Doc::settle(
   self : Doc,
   incoming~ : Array[(UInt64, UInt32, UInt32)] = [],
 ) -> Unit {
+  let mut batch = normalize_items(self.pending)
   for ;; {
     let mut progress = false
     let unresolved = []
     // Each block has explicit dependencies. A missing dependency in one
     // block must not stall independent later blocks from the same client.
-    for raw in normalize_items(self.pending) {
+    for raw in batch {
       let before = self.items.length()
       if self.integrate(raw) {
         progress = true
@@ -693,6 +723,9 @@ fn Doc::settle(
     if !progress {
       break
     }
+    // Filtering a normalized batch preserves its order and disjoint clocks.
+    // Retry dependencies without copying and sorting the same backlog again.
+    batch = unresolved
   }
   for link in self.pending_weak.to_array() {
     if self.find(link)
@@ -785,21 +818,15 @@ fn Doc::add_delete(
   if start == end {
     return
   }
-  let ranges = self.deletes
-    .get(client)
-    .map(fn(ranges) { ranges[:].to_owned() })
-    .unwrap_or([])
-  ranges.push((start, end))
-  ranges.sort_by(fn(a, b) { a.0.compare(b.0) })
-  let merged : Array[(UInt32, UInt32)] = []
-  for range in ranges {
-    if merged.last() is Some(previous) && previous.1 >= range.0 {
-      merged[merged.length() - 1] = (previous.0, previous.1.max(range.1))
-    } else {
-      merged.push(range)
+  let ranges = match self.deletes.get(client) {
+    Some(ranges) => ranges
+    None => {
+      let ranges = []
+      self.deletes[client] = ranges
+      ranges
     }
   }
-  self.deletes[client] = merged
+  insert_clock_range(ranges, start, end)
 }
 
 ///|
@@ -831,16 +858,7 @@ pub fn Text::get_string(self : Text) -> String {
 
 ///|
 pub fn Text::length(self : Text) -> Int32 {
-  let mut length = 0
-  let mut cursor = self.doc.branch(self.name).head
-  while cursor is Some(id) {
-    let item = self.doc.items[id]
-    if !item.deleted {
-      length += item.content.offset_length(self.doc)
-    }
-    cursor = item.right
-  }
-  length
+  self.doc.branch(self.name).content_length
 }
 
 ///|
@@ -976,6 +994,9 @@ fn Doc::mark_deleted(self : Doc, item : Item) -> Unit {
     item.links.clear()
     if item.parent_sub is None && item.parent is Some(parent) {
       self.branch(parent).position_hint = None
+    }
+    if item.parent_sub is None && item.parent is Some(parent) {
+      self.branch(parent).content_length -= item.content.offset_length(self)
     }
     item.deleted = true
     if self.active_transaction is Some(transaction) {

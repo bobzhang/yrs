@@ -94,6 +94,7 @@ fn Doc::collect_garbage(
       }
       branch.position_hint = None
       branch.head = None
+      branch.content_length = 0
       branch.values.clear()
       branch.heads.clear()
     }

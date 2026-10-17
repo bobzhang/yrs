@@ -38,6 +38,18 @@ test "compaction preserves origin-based integration after a block splits" {
 // must leave exactly the same fixed point, including block identities and wire
 // representation; equal visible text alone would miss retained fragmentation.
 fn assert_fully_compacted(doc : Doc) -> Unit raise {
+  for branch in doc.roots.values() {
+    let mut expected = 0
+    let mut cursor = branch.head
+    while cursor is Some(id) {
+      let item = doc.items[id]
+      if !item.deleted {
+        expected += item.content.offset_length(doc)
+      }
+      cursor = item.right
+    }
+    assert_eq(branch.content_length, expected)
+  }
   let count = doc.items.length()
   let wire = doc.encode_state_as_update_v2()
   let ranges = doc.clients

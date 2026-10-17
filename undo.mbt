@@ -10,8 +10,16 @@ fn Doc::materialize_ranges(
 ) -> Array[Item] {
   let result : Array[Item] = []
   for (client, start, end) in ranges {
-    let blocks = self.clients.get(client).unwrap_or([]).copy()
-    for block in blocks {
+    let blocks = self.clients.get(client).unwrap_or([])
+    let selected = []
+    for index in first_block_after(blocks, start)..<blocks.length() {
+      if blocks[index].id.clock >= end {
+        break
+      }
+      selected.push(blocks[index])
+    }
+    // Splitting mutates the client array; snapshot only the overlapping blocks.
+    for block in selected {
       let stop = block.id.clock + block.content.length().reinterpret_as_uint()
       if block.id.clock >= end || stop <= start {
         continue

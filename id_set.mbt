@@ -69,7 +69,19 @@ pub fn IdSet::ranges(self : IdSet) -> Array[(UInt64, UInt32, UInt32)] {
 
 ///|
 pub fn IdSet::contains(self : IdSet, id : Id) -> Bool {
-  contains_range(self.ranges, id)
+  for lo = 0, hi = self.ranges.length(); lo < hi; {
+    let mid = lo + (hi - lo) / 2
+    let (client, start, end) = self.ranges[mid]
+    if client < id.client || (client == id.client && end <= id.clock) {
+      continue mid + 1, hi
+    } else if client > id.client || start > id.clock {
+      continue lo, mid
+    } else {
+      return true
+    }
+  } nobreak {
+    false
+  }
 }
 
 ///|
@@ -106,17 +118,88 @@ pub fn IdSet::get(self : IdSet, client : UInt64) -> Array[(UInt32, UInt32)]? {
 pub fn IdSet::insert(self : IdSet, id : Id, length : UInt32) -> Unit {
   guard length <= 0xffff_ffffU - id.clock else { abort("clock range overflow") }
   self.clients.add(id.client)
-  if length > 0U {
-    self.ranges = normalize_id_ranges(
-      self.ranges + [(id.client, id.clock, id.clock + length)],
-    )
+  guard length > 0U else { return }
+  let ranges = self.ranges
+  let end = id.clock + length
+  if ranges.last() is Some((client, start, stop)) {
+    if client < id.client || (client == id.client && stop < id.clock) {
+      ranges.push((id.client, id.clock, end))
+      return
+    }
+    if client == id.client && start <= id.clock {
+      ranges[ranges.length() - 1] = (client, start, stop.max(end))
+      return
+    }
+  }
+  let first = for lo = 0, hi = ranges.length(); lo < hi; {
+    let mid = lo + (hi - lo) / 2
+    let (client, _, stop) = ranges[mid]
+    if client < id.client || (client == id.client && stop < id.clock) {
+      continue mid + 1, hi
+    } else {
+      continue lo, mid
+    }
+  } nobreak {
+    lo
+  }
+  let mut last = first
+  let mut start = id.clock
+  let mut stop = end
+  while last < ranges.length() &&
+        ranges[last].0 == id.client &&
+        ranges[last].1 <= stop {
+    start = start.min(ranges[last].1)
+    stop = stop.max(ranges[last].2)
+    last += 1
+  }
+  if first == last {
+    ranges.insert(first, (id.client, start, stop))
+  } else {
+    ranges[first] = (id.client, start, stop)
+    let removed = last - first - 1
+    if removed > 0 {
+      for i in last..<ranges.length() {
+        ranges[i - removed] = ranges[i]
+      }
+      ranges.truncate(ranges.length() - removed)
+    }
   }
 }
 
 ///|
 pub fn IdSet::merge(self : IdSet, other : IdSet) -> IdSet {
+  let result = []
+  let mut left = 0
+  let mut right = 0
+  while left < self.ranges.length() || right < other.ranges.length() {
+    let next = if right == other.ranges.length() ||
+      (
+        left < self.ranges.length() &&
+        (
+          self.ranges[left].0 < other.ranges[right].0 ||
+          (
+            self.ranges[left].0 == other.ranges[right].0 &&
+            self.ranges[left].1 <= other.ranges[right].1
+          )
+        )
+      ) {
+      let item = self.ranges[left]
+      left += 1
+      item
+    } else {
+      let item = other.ranges[right]
+      right += 1
+      item
+    }
+    let (client, start, end) = next
+    if result.last() is Some((c, a, b)) && c == client && start <= b {
+      result[result.length() - 1] = (client, a, b.max(end))
+    } else {
+      result.push(next)
+    }
+  }
   {
-    ranges: normalize_id_ranges(self.ranges + other.ranges),
+    ranges: result,
     clients: Set::from_array(self.clients.to_array() + other.clients.to_array()),
   }
 }
@@ -131,28 +214,32 @@ pub fn IdSet::merge_with(self : IdSet, other : IdSet) -> Unit {
 ///|
 pub fn IdSet::diff(self : IdSet, other : IdSet) -> IdSet {
   let result = []
+  let mut right = 0
   for (client, start, end) in self.ranges {
     let mut cursor = start
-    for (c, a, b) in other.ranges {
-      if c != client || b <= cursor {
+    while right < other.ranges.length() {
+      let (c, a, b) = other.ranges[right]
+      if c < client || (c == client && b <= cursor) {
+        right += 1
         continue
       }
-      if a >= end {
+      if c > client || a >= end {
         break
       }
       if a > cursor {
         result.push((client, cursor, a))
       }
       cursor = cursor.max(b).min(end)
-      if cursor == end {
+      if b >= end {
         break
       }
+      right += 1
     }
     if cursor < end {
       result.push((client, cursor, end))
     }
   }
-  IdSet(ranges=result)
+  { ranges: result, clients: Set::from_array(result.map(fn(r) { r.0 })), }
 }
 
 ///|
@@ -165,14 +252,25 @@ pub fn IdSet::diff_with(self : IdSet, other : IdSet) -> Unit {
 ///|
 pub fn IdSet::intersect(self : IdSet, other : IdSet) -> IdSet {
   let result = []
-  for (client, start, end) in self.ranges {
-    for (c, a, b) in other.ranges {
-      if c == client && start < b && a < end {
-        result.push((client, start.max(a), end.min(b)))
+  let mut left = 0
+  let mut right = 0
+  while left < self.ranges.length() && right < other.ranges.length() {
+    let (client, start, end) = self.ranges[left]
+    let (c, a, b) = other.ranges[right]
+    if client < c || (client == c && end <= a) {
+      left += 1
+    } else if client > c || b <= start {
+      right += 1
+    } else {
+      result.push((client, start.max(a), end.min(b)))
+      if end <= b {
+        left += 1
+      } else {
+        right += 1
       }
     }
   }
-  IdSet(ranges=result)
+  { ranges: result, clients: Set::from_array(result.map(fn(r) { r.0 })), }
 }
 
 ///|

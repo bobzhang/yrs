@@ -15,6 +15,16 @@ fn position_boundaries(text : Text) -> Array[Int32] {
 ///|
 fn check_position_hint(text : Text) -> Unit raise {
   let branch = text.doc.branch(text.name)
+  let mut expected = 0
+  let mut scan = branch.head
+  while scan is Some(id) {
+    let item = text.doc.items[id]
+    if !item.deleted {
+      expected += item.content.offset_length(text.doc)
+    }
+    scan = item.right
+  }
+  assert_eq(text.length(), expected)
   guard branch.position_hint is Some((hint, offset)) else { return }
   assert_false(hint.deleted)
   assert_eq(text.doc.items[hint.id].id, hint.id)
