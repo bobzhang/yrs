@@ -8,11 +8,11 @@
     false,
     true
   ],
-  "equal_independent_snapshots": 3864,
+  "equal_independent_snapshots": 3956,
   "reference_schedule": "fixed point of Yjs-split original blocks through unchanged Rust",
-  "wire_replay_snapshots": 36432,
-  "producer_convergence_checks": 88,
-  "stateless_merge_diff_cases": 352,
+  "wire_replay_snapshots": 37260,
+  "producer_convergence_checks": 90,
+  "stateless_merge_diff_cases": 360,
   "reference_failures": [
     {
       "wire_version": "v1",
@@ -115,12 +115,6 @@
       "rust_gc": true,
       "scenario": 26,
       "error": "reference emitted an overflowing skip block"
-    },
-    {
-      "wire_version": "v1",
-      "rust_gc": true,
-      "scenario": 28,
-      "signal": "SIGBUS"
     },
     {
       "wire_version": "v1",

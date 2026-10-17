@@ -1,7 +1,7 @@
 {
   "contract": "complete CRDT features with documented adaptations",
   "reference": "ac339600c712642e556895426113c3f9c117de39",
-  "source_sha256": "bf245aa48e713c07c2af65310d7662677dcf709ad0f455f02b7861585a4eb4b6",
+  "source_sha256": "abfd338cebe43c59c0c5895c057806e0b66e78658852ab14fb5e407760fd9f98",
   "suite": "undo-observer",
   "commands": [
     {
@@ -10,7 +10,7 @@
         "validation/undo_observer_network.py"
       ],
       "exit_code": 0,
-      "seconds": 139.315
+      "seconds": 141.952
     }
   ],
   "status": "passed"
