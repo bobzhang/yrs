@@ -41,7 +41,11 @@ def main():
               'source_sha256': digest.hexdigest(),
               'source_dirty': bool(subprocess.check_output(['git', 'status', '--porcelain', '--',
                   *[str(p.relative_to(ROOT)) for p in files]], cwd=ROOT, text=True).strip()),
-              'method': __doc__.strip(), 'host': platform.platform(), 'cases': []}
+              'method': __doc__.strip(), 'host': platform.platform(),
+              'rust_reference': subprocess.check_output(['git', '-C', '.repos/y-crdt', 'rev-parse', 'HEAD'], cwd=ROOT, text=True).strip(),
+              'moon_toolchain': subprocess.check_output(['moon', 'version', '--all'], cwd=ROOT, text=True).strip(),
+              'artifacts': {name: {'command': command, 'sha256': hashlib.sha256((ROOT / command[-1]).read_bytes()).hexdigest()}
+                            for name, command in commands.items()}, 'cases': []}
     for kind, sizes in [('text', [20000, 40000, 80000]), ('array', [20000, 40000, 80000]),
                         ('dependencies', [2000, 4000, 8000])]:
         for size in sizes:
