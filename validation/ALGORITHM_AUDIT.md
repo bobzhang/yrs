@@ -3,7 +3,8 @@
 Audit date: 2026-10-17. Reference: unchanged Yrs 0.28.0 with `weak`, commit
 [`ac339600c712642e556895426113c3f9c117de39`](https://github.com/y-crdt/y-crdt/tree/ac339600c712642e556895426113c3f9c117de39).
 Starting port: `5836bae`; first-pass changes: `ea2f455`, `34521b5`, `21049c8`.
-Dependency/content follow-up: `835be98`, `dd4578a`; scaling harness: `7dfa455`.
+Dependency/content follow-up: `835be98`, `dd4578a`, `cad6e60`; allocation follow-up:
+`8e1e226`, `68999e8`, `9749d9a`. Scaling harness starts at `7dfa455`.
 
 The sequence CRDT uses the same origin/right-origin conflict rules and client-ID
 ordering as Rust. The old port did **not** match Rust's operational algorithms
@@ -38,7 +39,9 @@ The relevant MoonBit sources are [compaction](../compaction.mbt),
 ## Dependency and content corrections
 
 `dependency_scheduler.mbt` indexes each missing clock to its provider in the
-normalized batch. A blocked block registers one waiter; integration (including
+normalized batch. An initial linear pass integrates ready blocks. If no blocked
+clock has become available, it returns the unresolved batch without building
+provider indexes or retry-queue nodes. Otherwise a blocked block registers one waiter; integration (including
 partial integration) wakes waiters whose exact clocks now exist. Missing external
 providers and cycles terminate without retry loops. A `(round, position)` priority
 queue preserves the old deterministic scan order and its observer side effects.
@@ -55,7 +58,8 @@ its prefix. Freezing an owned update seals the shared allocation so the next app
 forks it: old retained transactions and decoded updates neither change nor pin
 an allocation that continues growing forever. Public `Any` values remain immutable.
 
-Text uses UTF-16 units with cached byte length and a lazily rendered string. Slices
+Text keeps immutable strings until append storage is needed; appends use UTF-16
+units with cached byte length and a lazily rendered string. Slices
 copy only the selected range rather than walking the entire source text; copying
 also keeps tiny surviving slices from pinning large deleted allocations. Orphaned
 surrogate halves become U+FFFD permanently, even if rejoined. Full-range slices
@@ -88,13 +92,31 @@ These are open performance gaps, not claims of Rust algorithm parity:
    history; unlinking a weak reference scans items/branches. Rust has different
    ownership/indexing machinery. The port's multi-manager retention fixes must
    survive any future index-based replacement.
-3. **Serialization:** sorting/copying a generic block batch and freezing retained
+3. **Serialization and pending ingestion:** the scheduler is per batch; a
+   permanently blocked backlog is still scanned on later packets. Sorting/copying
+   generic block batches and freezing retained
    transaction payloads add work that Rust's borrowed transactions/ordered store
    can avoid. Lazy encoding removes the unused format, not all this overhead.
 
 Consequently, the earlier slowdown cannot be attributed to MoonBit versus Rust
 as languages. These are different data layouts and, in these remaining paths,
 different operational algorithms implementing compatible CRDT behavior.
+
+## Measured allocation regression and correction
+
+The first complete follow-up matrices are preserved at
+[`32eae7f`](https://github.com/bobzhang/yrs/tree/32eae7f/validation), measured against
+`232aa10`. They exposed a common-workload regression despite fixing pathological
+scaling: the largest GC-enabled trace rose to 26.269 s native and 41.668 s JavaScript.
+These intermediate results were retained rather than silently discarded.
+
+Ready batches now use a linear initial pass, and strings remain flat until append
+storage is needed. A subsequent native sampling run at `68999e8` (macOS `sample`,
+10 seconds, 1 ms interval, largest GC-enabled trace) identified repeated provider
+lookups and waiter-map construction for backlogs whose dependencies were still
+missing. `9749d9a` defers that index construction until at least one blocked clock
+is available. The final full matrices below supersede focused development probes;
+no selected pilot case is substituted into the final tables.
 
 ## First-pass verification
 
