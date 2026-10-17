@@ -1,7 +1,7 @@
 {
-  "started_utc": "2026-10-17T11:04:33.298641+00:00",
-  "port_revision": "232aa1043913553f1e55dee25c5522873d4b2125",
-  "source_sha256": "8c726eb9a9e3e618a30570bb8a3313efe93eada0ed09edb4585cf94f4725aeae",
+  "started_utc": "2026-10-17T11:27:50.062644+00:00",
+  "port_revision": "f6f0c467f3c55abbf07de6f98988fe523ee21ae8",
+  "source_sha256": "7a7cfaa0761bd38289b6aa7ca4c390f849b830fccbfbeaad7fae23714d380fda",
   "source_dirty": false,
   "method": "Whole-process scaling probes for append copying and dependency scheduling.\n\nIncludes construction, edits, final value checks and v1/v2 serialization. Each\nedit commits separately, with UTF-16 offsets and no observers or replicas.\nArray verification performs individual indexed reads to expose accidental copies.\nThree fresh processes\nper workload/size/runtime; output lengths and encoded sizes must match Rust.\nThese supplement, rather than replace, the real editing/network traces.",
   "host": "macOS-26.4.1-arm64-arm-64bit-Mach-O",
@@ -18,14 +18,14 @@
       "command": [
         "_build/native/release/build/validation/algorithm_bench/algorithm_bench.exe"
       ],
-      "sha256": "f18ba0dd7e638081f91ff551352efb03fbe5149daed3273e710f706ac59cfe23"
+      "sha256": "d4eed6c8ac30bd77a3af25cd9ae5317e4b4f636018a97731431019822858fcf7"
     },
     "moonbit_js": {
       "command": [
         "node",
         "_build/js/release/build/validation/algorithm_bench/algorithm_bench.js"
       ],
-      "sha256": "47222c4f8f8e4eb27641ed20f34445d675ea8e204978b89a3b3068b9d0355903"
+      "sha256": "696b2a2b24e7381132dc4ea615f5f3f52aef9e1f9d71260e0555ae052aef307c"
     }
   },
   "cases": [
@@ -40,59 +40,59 @@
       "measurements": {
         "rust": [
           {
-            "elapsed_seconds": 0.716892,
-            "peak_rss_bytes": 2719744
+            "elapsed_seconds": 0.706015,
+            "peak_rss_bytes": 2752512
           },
           {
-            "elapsed_seconds": 0.244852,
-            "peak_rss_bytes": 2719744
+            "elapsed_seconds": 0.232849,
+            "peak_rss_bytes": 2703360
           },
           {
-            "elapsed_seconds": 0.256326,
-            "peak_rss_bytes": 2719744
+            "elapsed_seconds": 0.233091,
+            "peak_rss_bytes": 2703360
           }
         ],
         "moonbit_native": [
           {
-            "elapsed_seconds": 0.053137,
+            "elapsed_seconds": 0.464389,
+            "peak_rss_bytes": 3375104
+          },
+          {
+            "elapsed_seconds": 0.049834,
             "peak_rss_bytes": 3358720
           },
           {
-            "elapsed_seconds": 0.055347,
-            "peak_rss_bytes": 3342336
-          },
-          {
-            "elapsed_seconds": 0.053866,
-            "peak_rss_bytes": 3342336
+            "elapsed_seconds": 0.049121,
+            "peak_rss_bytes": 3358720
           }
         ],
         "moonbit_js": [
           {
-            "elapsed_seconds": 0.167132,
-            "peak_rss_bytes": 79773696
+            "elapsed_seconds": 0.158437,
+            "peak_rss_bytes": 78413824
           },
           {
-            "elapsed_seconds": 0.169243,
-            "peak_rss_bytes": 80216064
+            "elapsed_seconds": 0.155076,
+            "peak_rss_bytes": 78299136
           },
           {
-            "elapsed_seconds": 0.168394,
-            "peak_rss_bytes": 80035840
+            "elapsed_seconds": 0.153765,
+            "peak_rss_bytes": 78479360
           }
         ]
       },
       "median": {
         "rust": {
-          "elapsed_seconds": 0.256326,
-          "peak_rss_bytes": 2719744
+          "elapsed_seconds": 0.233091,
+          "peak_rss_bytes": 2703360
         },
         "moonbit_native": {
-          "elapsed_seconds": 0.053866,
-          "peak_rss_bytes": 3342336
+          "elapsed_seconds": 0.049834,
+          "peak_rss_bytes": 3358720
         },
         "moonbit_js": {
-          "elapsed_seconds": 0.168394,
-          "peak_rss_bytes": 80035840
+          "elapsed_seconds": 0.155076,
+          "peak_rss_bytes": 78413824
         }
       }
     },
@@ -107,59 +107,59 @@
       "measurements": {
         "rust": [
           {
-            "elapsed_seconds": 0.958836,
-            "peak_rss_bytes": 2768896
+            "elapsed_seconds": 0.902602,
+            "peak_rss_bytes": 2752512
           },
           {
-            "elapsed_seconds": 0.963646,
-            "peak_rss_bytes": 2736128
+            "elapsed_seconds": 0.898108,
+            "peak_rss_bytes": 2752512
           },
           {
-            "elapsed_seconds": 0.964692,
-            "peak_rss_bytes": 2768896
+            "elapsed_seconds": 0.898464,
+            "peak_rss_bytes": 2752512
           }
         ],
         "moonbit_native": [
           {
-            "elapsed_seconds": 0.101882,
-            "peak_rss_bytes": 3653632
+            "elapsed_seconds": 0.092892,
+            "peak_rss_bytes": 3686400
           },
           {
-            "elapsed_seconds": 0.101535,
-            "peak_rss_bytes": 3670016
+            "elapsed_seconds": 0.094384,
+            "peak_rss_bytes": 3686400
           },
           {
-            "elapsed_seconds": 0.099512,
-            "peak_rss_bytes": 3670016
+            "elapsed_seconds": 0.094343,
+            "peak_rss_bytes": 3686400
           }
         ],
         "moonbit_js": [
           {
-            "elapsed_seconds": 0.228103,
-            "peak_rss_bytes": 82755584
+            "elapsed_seconds": 0.21289,
+            "peak_rss_bytes": 80429056
           },
           {
-            "elapsed_seconds": 0.229408,
-            "peak_rss_bytes": 82788352
+            "elapsed_seconds": 0.237467,
+            "peak_rss_bytes": 80461824
           },
           {
-            "elapsed_seconds": 0.225966,
-            "peak_rss_bytes": 82870272
+            "elapsed_seconds": 0.212915,
+            "peak_rss_bytes": 80117760
           }
         ]
       },
       "median": {
         "rust": {
-          "elapsed_seconds": 0.963646,
-          "peak_rss_bytes": 2768896
+          "elapsed_seconds": 0.898464,
+          "peak_rss_bytes": 2752512
         },
         "moonbit_native": {
-          "elapsed_seconds": 0.101535,
-          "peak_rss_bytes": 3670016
+          "elapsed_seconds": 0.094343,
+          "peak_rss_bytes": 3686400
         },
         "moonbit_js": {
-          "elapsed_seconds": 0.228103,
-          "peak_rss_bytes": 82788352
+          "elapsed_seconds": 0.212915,
+          "peak_rss_bytes": 80429056
         }
       }
     },
@@ -174,59 +174,59 @@
       "measurements": {
         "rust": [
           {
-            "elapsed_seconds": 3.752491,
+            "elapsed_seconds": 3.565132,
+            "peak_rss_bytes": 2867200
+          },
+          {
+            "elapsed_seconds": 3.569543,
             "peak_rss_bytes": 2883584
           },
           {
-            "elapsed_seconds": 3.763276,
-            "peak_rss_bytes": 3014656
-          },
-          {
-            "elapsed_seconds": 3.784707,
-            "peak_rss_bytes": 2899968
+            "elapsed_seconds": 3.567862,
+            "peak_rss_bytes": 2883584
           }
         ],
         "moonbit_native": [
           {
-            "elapsed_seconds": 0.193326,
-            "peak_rss_bytes": 4210688
+            "elapsed_seconds": 0.178623,
+            "peak_rss_bytes": 4243456
           },
           {
-            "elapsed_seconds": 0.195018,
-            "peak_rss_bytes": 4210688
+            "elapsed_seconds": 0.182271,
+            "peak_rss_bytes": 4227072
           },
           {
-            "elapsed_seconds": 0.198367,
-            "peak_rss_bytes": 4194304
+            "elapsed_seconds": 0.180506,
+            "peak_rss_bytes": 4227072
           }
         ],
         "moonbit_js": [
           {
-            "elapsed_seconds": 0.349128,
-            "peak_rss_bytes": 98353152
+            "elapsed_seconds": 0.32798,
+            "peak_rss_bytes": 96059392
           },
           {
-            "elapsed_seconds": 0.351062,
-            "peak_rss_bytes": 98189312
+            "elapsed_seconds": 0.331359,
+            "peak_rss_bytes": 96452608
           },
           {
-            "elapsed_seconds": 0.354715,
-            "peak_rss_bytes": 98107392
+            "elapsed_seconds": 0.326148,
+            "peak_rss_bytes": 96124928
           }
         ]
       },
       "median": {
         "rust": {
-          "elapsed_seconds": 3.763276,
-          "peak_rss_bytes": 2899968
+          "elapsed_seconds": 3.567862,
+          "peak_rss_bytes": 2883584
         },
         "moonbit_native": {
-          "elapsed_seconds": 0.195018,
-          "peak_rss_bytes": 4210688
+          "elapsed_seconds": 0.180506,
+          "peak_rss_bytes": 4227072
         },
         "moonbit_js": {
-          "elapsed_seconds": 0.351062,
-          "peak_rss_bytes": 98189312
+          "elapsed_seconds": 0.32798,
+          "peak_rss_bytes": 96124928
         }
       }
     },
@@ -241,59 +241,59 @@
       "measurements": {
         "rust": [
           {
-            "elapsed_seconds": 0.016384,
+            "elapsed_seconds": 0.015071,
             "peak_rss_bytes": 3375104
           },
           {
-            "elapsed_seconds": 0.017399,
-            "peak_rss_bytes": 3391488
+            "elapsed_seconds": 0.0153,
+            "peak_rss_bytes": 3375104
           },
           {
-            "elapsed_seconds": 0.017412,
-            "peak_rss_bytes": 3358720
+            "elapsed_seconds": 0.01542,
+            "peak_rss_bytes": 3375104
           }
         ],
         "moonbit_native": [
           {
-            "elapsed_seconds": 0.054041,
-            "peak_rss_bytes": 4325376
+            "elapsed_seconds": 0.049675,
+            "peak_rss_bytes": 4292608
           },
           {
-            "elapsed_seconds": 0.055452,
-            "peak_rss_bytes": 4341760
+            "elapsed_seconds": 0.050425,
+            "peak_rss_bytes": 4259840
           },
           {
-            "elapsed_seconds": 0.05393,
-            "peak_rss_bytes": 4276224
+            "elapsed_seconds": 0.05013,
+            "peak_rss_bytes": 4259840
           }
         ],
         "moonbit_js": [
           {
-            "elapsed_seconds": 0.186537,
-            "peak_rss_bytes": 87457792
+            "elapsed_seconds": 0.172274,
+            "peak_rss_bytes": 86212608
           },
           {
-            "elapsed_seconds": 0.185786,
-            "peak_rss_bytes": 87736320
+            "elapsed_seconds": 0.171191,
+            "peak_rss_bytes": 86147072
           },
           {
-            "elapsed_seconds": 0.1875,
-            "peak_rss_bytes": 88293376
+            "elapsed_seconds": 0.173827,
+            "peak_rss_bytes": 86392832
           }
         ]
       },
       "median": {
         "rust": {
-          "elapsed_seconds": 0.017399,
+          "elapsed_seconds": 0.0153,
           "peak_rss_bytes": 3375104
         },
         "moonbit_native": {
-          "elapsed_seconds": 0.054041,
-          "peak_rss_bytes": 4325376
+          "elapsed_seconds": 0.05013,
+          "peak_rss_bytes": 4259840
         },
         "moonbit_js": {
-          "elapsed_seconds": 0.186537,
-          "peak_rss_bytes": 87736320
+          "elapsed_seconds": 0.172274,
+          "peak_rss_bytes": 86212608
         }
       }
     },
@@ -308,59 +308,59 @@
       "measurements": {
         "rust": [
           {
-            "elapsed_seconds": 0.027252,
-            "peak_rss_bytes": 4079616
-          },
-          {
-            "elapsed_seconds": 0.027475,
-            "peak_rss_bytes": 4145152
-          },
-          {
-            "elapsed_seconds": 0.027366,
+            "elapsed_seconds": 0.025173,
             "peak_rss_bytes": 4096000
+          },
+          {
+            "elapsed_seconds": 0.025593,
+            "peak_rss_bytes": 4096000
+          },
+          {
+            "elapsed_seconds": 0.025646,
+            "peak_rss_bytes": 4079616
           }
         ],
         "moonbit_native": [
           {
-            "elapsed_seconds": 0.101966,
-            "peak_rss_bytes": 5324800
-          },
-          {
-            "elapsed_seconds": 0.103381,
+            "elapsed_seconds": 0.095268,
             "peak_rss_bytes": 5308416
           },
           {
-            "elapsed_seconds": 0.105329,
+            "elapsed_seconds": 0.095921,
+            "peak_rss_bytes": 5324800
+          },
+          {
+            "elapsed_seconds": 0.095694,
             "peak_rss_bytes": 5308416
           }
         ],
         "moonbit_js": [
           {
-            "elapsed_seconds": 0.25735,
-            "peak_rss_bytes": 96485376
+            "elapsed_seconds": 0.23799,
+            "peak_rss_bytes": 96256000
           },
           {
-            "elapsed_seconds": 0.254331,
-            "peak_rss_bytes": 98385920
+            "elapsed_seconds": 0.234534,
+            "peak_rss_bytes": 95682560
           },
           {
-            "elapsed_seconds": 0.25264,
-            "peak_rss_bytes": 97173504
+            "elapsed_seconds": 0.266847,
+            "peak_rss_bytes": 96600064
           }
         ]
       },
       "median": {
         "rust": {
-          "elapsed_seconds": 0.027366,
+          "elapsed_seconds": 0.025593,
           "peak_rss_bytes": 4096000
         },
         "moonbit_native": {
-          "elapsed_seconds": 0.103381,
+          "elapsed_seconds": 0.095694,
           "peak_rss_bytes": 5308416
         },
         "moonbit_js": {
-          "elapsed_seconds": 0.254331,
-          "peak_rss_bytes": 97173504
+          "elapsed_seconds": 0.23799,
+          "peak_rss_bytes": 96256000
         }
       }
     },
@@ -375,59 +375,59 @@
       "measurements": {
         "rust": [
           {
-            "elapsed_seconds": 0.050645,
-            "peak_rss_bytes": 7225344
-          },
-          {
-            "elapsed_seconds": 0.048874,
+            "elapsed_seconds": 0.044813,
             "peak_rss_bytes": 6176768
           },
           {
-            "elapsed_seconds": 0.049963,
-            "peak_rss_bytes": 6176768
+            "elapsed_seconds": 0.044971,
+            "peak_rss_bytes": 6160384
+          },
+          {
+            "elapsed_seconds": 0.046282,
+            "peak_rss_bytes": 6193152
           }
         ],
         "moonbit_native": [
           {
-            "elapsed_seconds": 0.210337,
-            "peak_rss_bytes": 7618560
+            "elapsed_seconds": 0.188328,
+            "peak_rss_bytes": 7651328
           },
           {
-            "elapsed_seconds": 0.202625,
+            "elapsed_seconds": 0.187203,
             "peak_rss_bytes": 7634944
           },
           {
-            "elapsed_seconds": 0.201255,
-            "peak_rss_bytes": 7585792
+            "elapsed_seconds": 0.184506,
+            "peak_rss_bytes": 7651328
           }
         ],
         "moonbit_js": [
           {
-            "elapsed_seconds": 0.386692,
-            "peak_rss_bytes": 128974848
+            "elapsed_seconds": 0.360135,
+            "peak_rss_bytes": 127877120
           },
           {
-            "elapsed_seconds": 0.38431,
-            "peak_rss_bytes": 128958464
+            "elapsed_seconds": 0.35948,
+            "peak_rss_bytes": 127467520
           },
           {
-            "elapsed_seconds": 0.388396,
-            "peak_rss_bytes": 128565248
+            "elapsed_seconds": 0.356636,
+            "peak_rss_bytes": 127369216
           }
         ]
       },
       "median": {
         "rust": {
-          "elapsed_seconds": 0.049963,
+          "elapsed_seconds": 0.044971,
           "peak_rss_bytes": 6176768
         },
         "moonbit_native": {
-          "elapsed_seconds": 0.202625,
-          "peak_rss_bytes": 7618560
+          "elapsed_seconds": 0.187203,
+          "peak_rss_bytes": 7651328
         },
         "moonbit_js": {
-          "elapsed_seconds": 0.386692,
-          "peak_rss_bytes": 128958464
+          "elapsed_seconds": 0.35948,
+          "peak_rss_bytes": 127467520
         }
       }
     },
@@ -442,59 +442,59 @@
       "measurements": {
         "rust": [
           {
-            "elapsed_seconds": 0.008357,
-            "peak_rss_bytes": 4407296
+            "elapsed_seconds": 0.00768,
+            "peak_rss_bytes": 4341760
           },
           {
-            "elapsed_seconds": 0.008838,
-            "peak_rss_bytes": 4358144
+            "elapsed_seconds": 0.007883,
+            "peak_rss_bytes": 4341760
           },
           {
-            "elapsed_seconds": 0.008317,
-            "peak_rss_bytes": 4358144
+            "elapsed_seconds": 0.007572,
+            "peak_rss_bytes": 4341760
           }
         ],
         "moonbit_native": [
           {
-            "elapsed_seconds": 0.009283,
-            "peak_rss_bytes": 5308416
+            "elapsed_seconds": 0.008091,
+            "peak_rss_bytes": 5226496
           },
           {
-            "elapsed_seconds": 0.010105,
-            "peak_rss_bytes": 5308416
+            "elapsed_seconds": 0.009512,
+            "peak_rss_bytes": 5210112
           },
           {
-            "elapsed_seconds": 0.009084,
-            "peak_rss_bytes": 5308416
+            "elapsed_seconds": 0.008229,
+            "peak_rss_bytes": 5210112
           }
         ],
         "moonbit_js": [
           {
-            "elapsed_seconds": 0.121847,
-            "peak_rss_bytes": 78610432
+            "elapsed_seconds": 0.114349,
+            "peak_rss_bytes": 81788928
           },
           {
-            "elapsed_seconds": 0.123152,
-            "peak_rss_bytes": 80232448
+            "elapsed_seconds": 0.111287,
+            "peak_rss_bytes": 80904192
           },
           {
-            "elapsed_seconds": 0.122473,
-            "peak_rss_bytes": 78594048
+            "elapsed_seconds": 0.11217,
+            "peak_rss_bytes": 81985536
           }
         ]
       },
       "median": {
         "rust": {
-          "elapsed_seconds": 0.008357,
-          "peak_rss_bytes": 4358144
+          "elapsed_seconds": 0.00768,
+          "peak_rss_bytes": 4341760
         },
         "moonbit_native": {
-          "elapsed_seconds": 0.009283,
-          "peak_rss_bytes": 5308416
+          "elapsed_seconds": 0.008229,
+          "peak_rss_bytes": 5210112
         },
         "moonbit_js": {
-          "elapsed_seconds": 0.122473,
-          "peak_rss_bytes": 78610432
+          "elapsed_seconds": 0.11217,
+          "peak_rss_bytes": 81788928
         }
       }
     },
@@ -509,59 +509,59 @@
       "measurements": {
         "rust": [
           {
-            "elapsed_seconds": 0.013882,
+            "elapsed_seconds": 0.01302,
             "peak_rss_bytes": 6012928
           },
           {
-            "elapsed_seconds": 0.015106,
-            "peak_rss_bytes": 6012928
+            "elapsed_seconds": 0.013678,
+            "peak_rss_bytes": 5980160
           },
           {
-            "elapsed_seconds": 0.015038,
+            "elapsed_seconds": 0.013937,
             "peak_rss_bytes": 6012928
           }
         ],
         "moonbit_native": [
           {
-            "elapsed_seconds": 0.012786,
-            "peak_rss_bytes": 8028160
+            "elapsed_seconds": 0.011363,
+            "peak_rss_bytes": 7618560
           },
           {
-            "elapsed_seconds": 0.013335,
-            "peak_rss_bytes": 8028160
+            "elapsed_seconds": 0.011929,
+            "peak_rss_bytes": 7667712
           },
           {
-            "elapsed_seconds": 0.013332,
-            "peak_rss_bytes": 7979008
+            "elapsed_seconds": 0.011527,
+            "peak_rss_bytes": 7667712
           }
         ],
         "moonbit_js": [
           {
-            "elapsed_seconds": 0.143352,
-            "peak_rss_bytes": 86802432
+            "elapsed_seconds": 0.133496,
+            "peak_rss_bytes": 93192192
           },
           {
-            "elapsed_seconds": 0.146355,
-            "peak_rss_bytes": 87490560
+            "elapsed_seconds": 0.133862,
+            "peak_rss_bytes": 94666752
           },
           {
-            "elapsed_seconds": 0.144037,
-            "peak_rss_bytes": 87179264
+            "elapsed_seconds": 0.136218,
+            "peak_rss_bytes": 93552640
           }
         ]
       },
       "median": {
         "rust": {
-          "elapsed_seconds": 0.015038,
+          "elapsed_seconds": 0.013678,
           "peak_rss_bytes": 6012928
         },
         "moonbit_native": {
-          "elapsed_seconds": 0.013332,
-          "peak_rss_bytes": 8028160
+          "elapsed_seconds": 0.011527,
+          "peak_rss_bytes": 7667712
         },
         "moonbit_js": {
-          "elapsed_seconds": 0.144037,
-          "peak_rss_bytes": 87179264
+          "elapsed_seconds": 0.133862,
+          "peak_rss_bytes": 93552640
         }
       }
     },
@@ -576,59 +576,59 @@
       "measurements": {
         "rust": [
           {
-            "elapsed_seconds": 0.040474,
-            "peak_rss_bytes": 9371648
+            "elapsed_seconds": 0.036878,
+            "peak_rss_bytes": 9388032
           },
           {
-            "elapsed_seconds": 0.040495,
-            "peak_rss_bytes": 9306112
+            "elapsed_seconds": 0.037886,
+            "peak_rss_bytes": 9388032
           },
           {
-            "elapsed_seconds": 0.040627,
-            "peak_rss_bytes": 9519104
+            "elapsed_seconds": 0.03791,
+            "peak_rss_bytes": 9388032
           }
         ],
         "moonbit_native": [
           {
-            "elapsed_seconds": 0.021657,
-            "peak_rss_bytes": 13058048
+            "elapsed_seconds": 0.018414,
+            "peak_rss_bytes": 12288000
           },
           {
-            "elapsed_seconds": 0.023306,
-            "peak_rss_bytes": 13074432
+            "elapsed_seconds": 0.019173,
+            "peak_rss_bytes": 12173312
           },
           {
-            "elapsed_seconds": 0.022101,
-            "peak_rss_bytes": 13058048
+            "elapsed_seconds": 0.01866,
+            "peak_rss_bytes": 12206080
           }
         ],
         "moonbit_js": [
           {
-            "elapsed_seconds": 0.184107,
-            "peak_rss_bytes": 117751808
+            "elapsed_seconds": 0.172426,
+            "peak_rss_bytes": 117817344
           },
           {
-            "elapsed_seconds": 0.213588,
-            "peak_rss_bytes": 119734272
+            "elapsed_seconds": 0.17146,
+            "peak_rss_bytes": 116654080
           },
           {
-            "elapsed_seconds": 0.184957,
-            "peak_rss_bytes": 116310016
+            "elapsed_seconds": 0.174087,
+            "peak_rss_bytes": 117243904
           }
         ]
       },
       "median": {
         "rust": {
-          "elapsed_seconds": 0.040495,
-          "peak_rss_bytes": 9371648
+          "elapsed_seconds": 0.037886,
+          "peak_rss_bytes": 9388032
         },
         "moonbit_native": {
-          "elapsed_seconds": 0.022101,
-          "peak_rss_bytes": 13058048
+          "elapsed_seconds": 0.01866,
+          "peak_rss_bytes": 12206080
         },
         "moonbit_js": {
-          "elapsed_seconds": 0.184957,
-          "peak_rss_bytes": 117751808
+          "elapsed_seconds": 0.172426,
+          "peak_rss_bytes": 117243904
         }
       }
     }
