@@ -35,11 +35,18 @@ fn Doc::integrate_pending(self : Doc) -> Int32 {
   let ready = @priority_queue.PriorityQueue([])
   let done = Array::make(batch.length(), false)
   let waiting : Map[Int32, Array[(Id, Int32)]] = Map([])
-  for index in 0..<batch.length() {
-    ready.push((0, -index))
-  }
   let mut attempts = 0
-  while ready.pop() is Some((negative_round, negative_index)) {
+  let mut initial = 0
+  // Ordinary ready batches use one linear pass and allocate no heap nodes.
+  // Only dependency-triggered retries need ordered queue entries.
+  while initial < batch.length() || !ready.is_empty() {
+    let (negative_round, negative_index) = if initial < batch.length() {
+      let index = initial
+      initial += 1
+      (0, -index)
+    } else {
+      ready.pop().unwrap()
+    }
     let index = -negative_index
     attempts += 1
     match self.integrate_dependency(batch[index]) {
