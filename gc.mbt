@@ -100,7 +100,7 @@ fn Doc::collect_garbage(
     let length = item.content.length()
     item.content = if parent_gc { Garbage(length) } else { Deleted(length) }
     if self.active_transaction is Some(txn) {
-      txn.merge_clients.add(item.id.client) |> ignore
+      txn.track_merge(item)
     }
   }
 }

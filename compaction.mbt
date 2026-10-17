@@ -25,18 +25,37 @@ fn Content::joined(self : Content, other : Content) -> Content? {
 }
 
 ///|
+fn Transaction::track_merge(self : Transaction, item : Item) -> Unit {
+  self.merge_ranges.push(
+    (
+      item.id.client,
+      item.id.clock,
+      item.id.clock + item.content.length().reinterpret_as_uint(),
+    ),
+  )
+}
+
+///|
 fn Doc::compact(self : Doc, transaction : Transaction) -> Unit {
-  let clients = transaction.merge_clients
-  for (client, _, _) in transaction.added {
-    clients.add(client) |> ignore
-  }
-  for (client, _, _) in transaction.removed {
-    clients.add(client) |> ignore
-  }
-  for client in clients {
+  // Only pairs touching changed blocks can have become mergeable. Include
+  // both boundary pairs, and normalize overlapping edits before visiting them.
+  // Clock ranges also cover sparse clients, unlike a before/after state vector.
+  let ranges = IdSet(
+    ranges=transaction.merge_ranges + transaction.added + transaction.removed,
+  )
+  self.compact_ranges(ranges.ranges())
+}
+
+///|
+fn Doc::compact_ranges(
+  self : Doc,
+  ranges : Array[(UInt64, UInt32, UInt32)],
+) -> Unit {
+  for (client, start, end) in ranges {
     guard self.clients.get(client) is Some(blocks) else { continue }
-    let mut index = blocks.length() - 1
-    while index > 0 {
+    let first = first_block_after(blocks, start).max(1)
+    let mut index = first_block_after(blocks, end).min(blocks.length() - 1)
+    while index >= first {
       let a = blocks[index - 1]
       let b = blocks[index]
       let end = a.id.clock + a.content.length().reinterpret_as_uint()

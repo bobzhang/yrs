@@ -16,7 +16,7 @@ pub struct Transaction {
   priv mut is_local : Bool
   priv added : Array[(UInt64, UInt32, UInt32)]
   priv capture_update : Bool
-  priv merge_clients : Set[UInt64]
+  priv merge_ranges : Array[(UInt64, UInt32, UInt32)]
   priv sequences : Set[Parent]
   priv map_changes : Map[Parent, Map[String, (Id?, Out?)]]
   priv removed : Array[(UInt64, UInt32, UInt32)]
@@ -174,7 +174,7 @@ fn Doc::begin_transaction(
     is_local: true,
     added: [],
     capture_update,
-    merge_clients: Set([]),
+    merge_ranges: [],
     sequences: Set([]),
     map_changes: {},
     removed: [],

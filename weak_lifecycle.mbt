@@ -54,6 +54,9 @@ fn Doc::unlink_weak(self : Doc, link : Id) -> Unit {
       item.links.remove(link)
       if item.links.is_empty() {
         item.linked = false
+        if self.active_transaction is Some(txn) {
+          txn.track_merge(item)
+        }
       }
     }
   }

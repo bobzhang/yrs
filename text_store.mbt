@@ -346,7 +346,7 @@ fn Doc::find(self : Doc, id : Id) -> Item? {
 ///|
 fn Doc::split(self : Doc, item : Item, at : Int32) -> Item {
   if self.active_transaction is Some(transaction) {
-    transaction.merge_clients.add(item.id.client) |> ignore
+    transaction.track_merge(item)
   }
   if item.parent_sub is None && item.parent is Some(parent) {
     self.branch(parent).position_hint = None
