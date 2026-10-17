@@ -131,78 +131,80 @@ authors' packets, and re-export them across both runtimes again. Public API test
 add pending, generic, historical and retained-transaction coverage. The review
 record and associated GitHub issues are in [reviews/2026-10-16-ultra.md](reviews/2026-10-16-ultra.md).
 
-## Performance after the 0.1.1 review fixes
+## Performance after the algorithm audit
 
-Both full trace matrices were rerun on 2026-10-16 against port commit
-`8342642d255fcf223762cc106984e773b048661f` and unchanged Rust Yrs
-`ac339600c712642e556895426113c3f9c117de39`. All 20 trace/GC/backend
-comparisons passed, including final content, state-vector checks, two restart
-formats, and 80 bidirectional v1/v2 full-state imports. Both runtimes were rebuilt
-in release mode and their executables frozen before each matrix. Every case
-records the source revision/hash, executable hashes and trace checksum.
+Both full matrices were rerun on 2026-10-17 against port commit `ef2d287bf296e78888e0710cd6c90da4b9121c4a`
+and unchanged Rust Yrs `ac339600c712642e556895426113c3f9c117de39`.
+All 20 trace/GC/backend comparisons passed, including final content, state vectors,
+two restart formats, and 80 bidirectional v1/v2 full-state imports. Release-mode
+executables were frozen before each matrix; source and artifact hashes are in
+every case. The [algorithm audit](ALGORITHM_AUDIT.md) explains the changes and
+remaining implementation differences.
 
 Host: Apple M2 Ultra, 24 CPU cores, 192 GiB RAM; macOS 26.4.1 arm64.
 MoonBit 0.10.15+943464bfa / moon 0.1.20261012, Rust 1.97.1 and Node v25.8.2.
-Native and JavaScript matrices ran sequentially, with one measured run per case.
-RSS is whole-process peak resident memory from macOS `/usr/bin/time -l`, in MiB.
-Elapsed time includes startup, JSON parsing, two replicas, reverse/duplicate
-packet delivery, reconnects, serialization and restarts; cross-import checks run
-in separate processes and are excluded from the tabulated replay times.
-JavaScript RSS includes Node/V8. These are not local-edit microbenchmarks or
-retained-document-memory measurements. No confidence intervals are inferred.
+Matrices ran sequentially after the reference suites, with one measured run per
+case. RSS is whole-process peak memory from macOS `/usr/bin/time -l`, in MiB.
+Time includes startup, JSON parsing, two replicas, reverse/duplicate packet
+transport, reconnects, encoding and restarts. Cross-import checks run separately
+and are excluded from replay time. JavaScript includes Node/V8 overhead.
+These are not local-edit microbenchmarks or retained-document-memory measures;
+no confidence intervals or language-wide speed claims are inferred.
+
+The first post-audit JavaScript matrix encountered a burst of unrelated CPU-heavy
+Git processes. Its complete measurements are retained in
+[trace-js-contention-results.json](trace-js-contention-results.json). The table
+below uses one complete repeat after that burst subsided, not selected best cases.
+The shared host is not an isolated benchmark machine; residual variation remains.
 
 ### MoonBit native versus Rust
 
 | Trace | GC | Rust s | MoonBit s | Time ratio | Rust MiB | MoonBit MiB | RSS ratio |
 | --- | --- | ---: | ---: | ---: | ---: | ---: | ---: |
-| friendsforever_flat | off | 0.495 | 0.666 | 1.34× | 7.0 | 9.5 | 1.35× |
-| friendsforever_flat | on | 0.057 | 0.309 | 5.43× | 7.0 | 9.6 | 1.37× |
-| sveltecomponent | off | 0.437 | 2.353 | 5.38× | 14.5 | 18.4 | 1.27× |
-| sveltecomponent | on | 0.414 | 2.372 | 5.73× | 13.5 | 17.5 | 1.30× |
-| rustcode | off | 2.112 | 8.778 | 4.16× | 31.4 | 46.5 | 1.48× |
-| rustcode | on | 1.935 | 8.056 | 4.16× | 25.0 | 34.8 | 1.39× |
-| seph-blog1 | off | 8.844 | 37.757 | 4.27× | 62.5 | 76.8 | 1.23× |
-| seph-blog1 | on | 8.427 | 43.794 | 5.20× | 58.7 | 75.3 | 1.28× |
-| automerge-paper | off | 13.862 | 117.067 | 8.45× | 96.0 | 117.8 | 1.23× |
-| automerge-paper | on | 13.726 | 115.760 | 8.43× | 93.2 | 116.8 | 1.25× |
+| friendsforever_flat | off | 0.491 | 0.537 | 1.09× | 7.3 | 9.7 | 1.33× |
+| friendsforever_flat | on | 0.058 | 0.133 | 2.29× | 6.9 | 9.6 | 1.40× |
+| sveltecomponent | off | 0.419 | 0.704 | 1.68× | 14.5 | 18.2 | 1.26× |
+| sveltecomponent | on | 0.398 | 0.715 | 1.80× | 13.5 | 17.4 | 1.29× |
+| rustcode | off | 2.054 | 2.185 | 1.06× | 32.7 | 54.8 | 1.68× |
+| rustcode | on | 1.931 | 2.164 | 1.12× | 25.8 | 34.4 | 1.33× |
+| seph-blog1 | off | 8.419 | 7.441 | 0.88× | 61.8 | 76.9 | 1.24× |
+| seph-blog1 | on | 8.092 | 7.962 | 0.98× | 58.7 | 75.8 | 1.29× |
+| automerge-paper | off | 13.583 | 24.457 | 1.80× | 95.3 | 118.0 | 1.24× |
+| automerge-paper | on | 13.977 | 23.779 | 1.70× | 93.9 | 117.6 | 1.25× |
 
 ### MoonBit JavaScript versus Rust
 
 | Trace | GC | Rust s | MoonBit s | Time ratio | Rust MiB | MoonBit MiB | RSS ratio |
 | --- | --- | ---: | ---: | ---: | ---: | ---: | ---: |
-| friendsforever_flat | off | 0.453 | 0.707 | 1.56× | 7.1 | 108.3 | 15.30× |
-| friendsforever_flat | on | 0.057 | 0.709 | 12.35× | 6.8 | 108.2 | 15.82× |
-| sveltecomponent | off | 0.431 | 3.511 | 8.14× | 14.8 | 231.2 | 15.67× |
-| sveltecomponent | on | 0.403 | 3.543 | 8.78× | 13.7 | 195.4 | 14.31× |
-| rustcode | off | 2.099 | 12.634 | 6.02× | 32.2 | 344.4 | 10.68× |
-| rustcode | on | 1.886 | 12.855 | 6.82× | 25.6 | 289.6 | 11.33× |
-| seph-blog1 | off | 8.696 | 53.334 | 6.13× | 60.8 | 359.4 | 5.91× |
-| seph-blog1 | on | 8.736 | 54.682 | 6.26× | 59.3 | 346.1 | 5.84× |
-| automerge-paper | off | 14.381 | 165.873 | 11.53× | 95.1 | 440.2 | 4.63× |
-| automerge-paper | on | 13.395 | 168.716 | 12.60× | 94.9 | 436.3 | 4.60× |
+| friendsforever_flat | off | 0.465 | 0.431 | 0.93× | 7.1 | 107.3 | 15.13× |
+| friendsforever_flat | on | 0.061 | 0.441 | 7.18× | 7.0 | 107.0 | 15.32× |
+| sveltecomponent | off | 0.455 | 1.511 | 3.32× | 15.1 | 172.5 | 11.40× |
+| sveltecomponent | on | 0.412 | 1.448 | 3.51× | 13.6 | 158.8 | 11.69× |
+| rustcode | off | 2.144 | 5.218 | 2.43× | 34.9 | 351.7 | 10.08× |
+| rustcode | on | 1.999 | 4.193 | 2.10× | 26.9 | 289.2 | 10.75× |
+| seph-blog1 | off | 8.566 | 12.991 | 1.52× | 61.2 | 350.9 | 5.73× |
+| seph-blog1 | on | 8.229 | 12.849 | 1.56× | 58.7 | 343.1 | 5.85× |
+| automerge-paper | off | 13.636 | 37.677 | 2.76× | 95.0 | 422.0 | 4.44× |
+| automerge-paper | on | 13.273 | 37.819 | 2.85× | 93.4 | 407.8 | 4.37× |
 
-The Rust measurements in each table are fresh runs made alongside that target.
-Ratios greater than one mean MoonBit took more time or peak memory. Rust used
-full-state catchups at some reconnects; the port used none, reflecting the
-documented pending-integration correction. Catchup counts are retained per case.
-The comparison measures completion of the same end-to-end scenario, not identical
-internal work. Encoded v1/v2 byte lengths and final state checks also remain in
-the JSON reports.
+Rust was measured freshly alongside each target. Ratios greater than one mean
+MoonBit used more time or peak memory. Rust used full-state catchups at some
+checkpoints; MoonBit used none, reflecting the documented pending-integration
+correction. This measures the same end-to-end scenario, not identical internal
+work. Catchup counts, wire sizes, and state checks remain in the raw reports.
 
-### Comparison with the previous saved measurements
+### Compared with the pre-audit measurements
 
-The largest trace (`automerge-paper`, 259,778 transactions) compares as follows.
-These are separate single runs; differences are descriptive and cannot isolate
-which fixes or system variation caused a change. The previous native revision
-was `43342d397e56802d083eeee9c6d860b673799fac`; JavaScript was
-`e0542e95f2f5d526d6d0e328f8497dca065c10d5`.
+The largest trace contains 259,778 transactions. These are separate single runs;
+the change combines several algorithm fixes and does not isolate individual
+contributions or eliminate system variation. The previous measured code was
+`8342642`, with reports committed in `5836bae`.
 
-| Backend | GC | Previous MoonBit s | Current MoonBit s | Time change | Previous MiB | Current MiB | RSS change |
+| Backend | GC | Before MoonBit s | After MoonBit s | Time change | Before MiB | After MiB | RSS change |
 | --- | --- | ---: | ---: | ---: | ---: | ---: | ---: |
-| native | off | 117.239 | 117.067 | -0.1% | 117.9 | 117.8 | -0.1% |
-| native | on | 119.912 | 115.760 | -3.5% | 116.7 | 116.8 | +0.0% |
-| js | off | 155.068 | 165.873 | +7.0% | 442.2 | 440.2 | -0.4% |
-| js | on | 184.774 | 168.716 | -8.7% | 434.1 | 436.3 | +0.5% |
+| native | off | 117.067 | 24.457 | -79.1% | 117.8 | 118.0 | +0.2% |
+| native | on | 115.760 | 23.779 | -79.5% | 116.8 | 117.6 | +0.7% |
+| js | off | 165.873 | 37.677 | -77.3% | 440.2 | 422.0 | -4.1% |
+| js | on | 168.716 | 37.819 | -77.6% | 436.3 | 407.8 | -6.5% |
 
-Previous complete reports remain available in [the pre-rerun revision](https://github.com/bobzhang/yrs/tree/8342642d255fcf223762cc106984e773b048661f/validation).
-Current raw data: [native](trace-native-results.json), [JavaScript](trace-results.json).
+Previous reports: [pre-audit revision](https://github.com/bobzhang/yrs/tree/5836bae/validation). Current raw data: [native](trace-native-results.json), [JavaScript](trace-results.json).

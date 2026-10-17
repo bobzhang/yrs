@@ -150,11 +150,13 @@ success criteria. The release instead tests mixed Yjs authors under both GC mode
 GC-disabled mixed Rust authors, GC-enabled port authors with Rust mirrors, and
 saved-state roundtrips in both runtimes.
 
-The port does not promise equal runtime/memory use. After the 0.1.1 review fixes,
-the largest GC-enabled native editing trace took 115.8 seconds versus
-13.7 seconds for Rust (8.43×), with 116.8 versus 93.2 MiB
-peak RSS. This is a single-run whole-process workload measurement, not a general
-language performance ratio. See the [benchmark tables and caveats](validation/README.md#performance-after-the-011-review-fixes).
+The port does not promise identical algorithms or equal runtime/memory use.
+The [algorithm audit](validation/ALGORITHM_AUDIT.md) records source comparisons,
+corrected complexity differences, and remaining gaps. After these changes, the
+largest GC-enabled native trace took 23.8 seconds versus 14.0 for Rust
+(1.70×), with 117.6 versus 93.9 MiB peak RSS. This is a
+single-run whole-process workload measurement, not a general language ratio.
+See the [benchmark tables and caveats](validation/README.md#performance-after-the-algorithm-audit).
 
 Known reference defects and deliberate corrections are recorded in
 [`validation/REFERENCE_LIMITATIONS.md`](validation/REFERENCE_LIMITATIONS.md).

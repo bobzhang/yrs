@@ -92,3 +92,24 @@ The core matrix covers 641 scenarios, 364,568 independent-operation snapshots,
 reference corrections remain explicitly asserted; see
 [REFERENCE_LIMITATIONS.md](REFERENCE_LIMITATIONS.md). The post-change trace
 reports additionally identify the exact source and executable hashes measured.
+
+
+## Measured effect
+
+All 20 final trace/GC/backend comparisons passed, including 80 bidirectional
+v1/v2 imports. On the largest GC-enabled trace (259,778 transactions), native
+fell from 115.760 s before the audit to 23.779 s, versus 13.977 s for fresh Rust:
+about 4.9 times faster than the previous port, with the Rust gap reduced from
+8.43 times to 1.70 times. Native peak RSS was 117.6 MiB versus 93.9 MiB for Rust,
+roughly unchanged from the port's earlier 116.8 MiB.
+
+JavaScript fell from 168.716 s to 37.819 s; fresh Rust measured 13.273 s in that
+matrix. The complete first JavaScript attempt is retained with a host-contention
+note. The reported matrix is a complete repeat after the observed Git CPU burst
+subsided, not a selection of the fastest cases.
+
+These single-run whole-process measurements support a substantial improvement,
+not an isolated attribution to each change or a language-speed conclusion. Rust
+still performs full-state catchups that the port's corrected dependency handling
+avoids. See the [full tables and methodology](README.md#performance-after-the-algorithm-audit)
+for all traces, memory measurements, provenance and limitations.
