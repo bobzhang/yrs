@@ -1,4 +1,4 @@
-use yrs::{Array, ClientID, Doc, GetString, Options, ReadTxn, StateVector, Text, Transact, Update};
+use yrs::{Array, ClientID, Doc, GetString, OffsetKind, Options, ReadTxn, StateVector, Text, Transact, Update};
 use yrs::updates::decoder::Decode;
 fn uint(out: &mut Vec<u8>, mut value: u64) {
     while value >= 128 { out.push(value as u8 | 128); value >>= 7; }
@@ -8,7 +8,7 @@ fn main() {
     let args: Vec<_> = std::env::args().collect();
     let kind = &args[1];
     let size: u32 = args[2].parse().unwrap();
-    let doc = Doc::with_options(Options { client_id: ClientID::new(1000000), skip_gc: true, ..Options::default() });
+    let doc = Doc::with_options(Options { client_id: ClientID::new(1000000), skip_gc: true, offset_kind: OffsetKind::Utf16, ..Options::default() });
     let text = doc.get_or_insert_text("text");
     let array = doc.get_or_insert_array("array");
     match kind.as_str() {

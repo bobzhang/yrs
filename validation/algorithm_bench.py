@@ -2,7 +2,9 @@
 """Whole-process scaling probes for append copying and dependency scheduling.
 
 Includes construction, edits, final value checks and v1/v2 serialization. Each
-edit commits separately, with no observers or replicas. Three fresh processes
+edit commits separately, with UTF-16 offsets and no observers or replicas.
+Array verification performs individual indexed reads to expose accidental copies.
+Three fresh processes
 per workload/size/runtime; output lengths and encoded sizes must match Rust.
 These supplement, rather than replace, the real editing/network traces.
 """
