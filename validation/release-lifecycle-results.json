@@ -1,7 +1,7 @@
 {
   "contract": "complete CRDT features with documented adaptations",
   "reference": "ac339600c712642e556895426113c3f9c117de39",
-  "source_sha256": "1ae6424bc66e75d4616d192f539ba4b9f937cbd48f18780bdcd82b0eb5779b9b",
+  "source_sha256": "bf245aa48e713c07c2af65310d7662677dcf709ad0f455f02b7861585a4eb4b6",
   "suite": "lifecycle",
   "commands": [
     {
@@ -10,7 +10,7 @@
         "validation/transactions.py"
       ],
       "exit_code": 0,
-      "seconds": 24.321
+      "seconds": 23.542
     },
     {
       "command": [
@@ -18,7 +18,7 @@
         "validation/events.py"
       ],
       "exit_code": 0,
-      "seconds": 13.06
+      "seconds": 12.7
     },
     {
       "command": [
@@ -26,7 +26,7 @@
         "validation/presence.py"
       ],
       "exit_code": 0,
-      "seconds": 4.104
+      "seconds": 4.137
     },
     {
       "command": [
@@ -34,7 +34,7 @@
         "validation/subdocs.py"
       ],
       "exit_code": 0,
-      "seconds": 10.544
+      "seconds": 10.055
     },
     {
       "command": [
@@ -42,7 +42,7 @@
         "validation/embeds.py"
       ],
       "exit_code": 0,
-      "seconds": 108.143
+      "seconds": 104.322
     },
     {
       "command": [
@@ -50,7 +50,7 @@
         "validation/prelims.py"
       ],
       "exit_code": 0,
-      "seconds": 6.792
+      "seconds": 6.349
     }
   ],
   "status": "passed"

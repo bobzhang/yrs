@@ -1,7 +1,7 @@
 {
   "contract": "complete CRDT features with documented adaptations",
   "reference": "ac339600c712642e556895426113c3f9c117de39",
-  "source_sha256": "1ae6424bc66e75d4616d192f539ba4b9f937cbd48f18780bdcd82b0eb5779b9b",
+  "source_sha256": "bf245aa48e713c07c2af65310d7662677dcf709ad0f455f02b7861585a4eb4b6",
   "suite": "contracts",
   "commands": [
     {
@@ -10,7 +10,7 @@
         "validation/contracts.py"
       ],
       "exit_code": 0,
-      "seconds": 5.991
+      "seconds": 5.592
     },
     {
       "command": [
@@ -18,7 +18,7 @@
         "validation/handles.py"
       ],
       "exit_code": 0,
-      "seconds": 0.806
+      "seconds": 1.528
     },
     {
       "command": [
@@ -26,7 +26,7 @@
         "validation/attribution.py"
       ],
       "exit_code": 0,
-      "seconds": 5.222
+      "seconds": 5.005
     },
     {
       "command": [
@@ -34,7 +34,7 @@
         "validation/block_ranges.py"
       ],
       "exit_code": 0,
-      "seconds": 0.526
+      "seconds": 0.539
     },
     {
       "command": [
@@ -42,7 +42,7 @@
         "validation/type_refs.py"
       ],
       "exit_code": 0,
-      "seconds": 6.978
+      "seconds": 6.843
     },
     {
       "command": [
@@ -50,7 +50,7 @@
         "validation/update_codecs.py"
       ],
       "exit_code": 0,
-      "seconds": 1.073
+      "seconds": 1.18
     },
     {
       "command": [
@@ -58,7 +58,7 @@
         "validation/codec_updates.py"
       ],
       "exit_code": 0,
-      "seconds": 32.723
+      "seconds": 31.713
     },
     {
       "command": [
@@ -66,7 +66,7 @@
         "validation/protocol_codec.py"
       ],
       "exit_code": 0,
-      "seconds": 2.731
+      "seconds": 2.697
     }
   ],
   "status": "passed"
