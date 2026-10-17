@@ -51,7 +51,7 @@ fn slice_reference(text : String, start : Int32, end : Int32) -> String {
 
 ///|
 test "text buffers preserve surrogate cuts and immutable rendered snapshots" {
-  let seed = TextContent("a😀")
+  let seed = TextContent("a").joined(TextContent("😀"))
   let mut current = seed
   let mut expected = "a😀"
   for s in ["界", "🦀", "é", "z", "😀"] {
@@ -59,14 +59,16 @@ test "text buffers preserve surrogate cuts and immutable rendered snapshots" {
     expected += s
   }
   assert_eq(seed.text(), "a😀")
-  assert_eq(seed.units.data.length(), expected.length())
-  for start in 0..<(expected.length() + 1) {
-    for end in start..<(expected.length() + 1) {
-      let slice = current.slice(start, end)
-      let reference = slice_reference(expected, start, end)
-      assert_eq(slice.text(), reference)
-      assert_eq(slice.length(), end - start)
-      assert_eq(slice.utf8_length, @utf8.encode(reference).length())
+  assert_eq(buffered_units(seed).data.length(), expected.length())
+  for content in [current, TextContent(expected)] {
+    for start in 0..<(expected.length() + 1) {
+      for end in start..<(expected.length() + 1) {
+        let slice = content.slice(start, end)
+        let reference = slice_reference(expected, start, end)
+        assert_eq(slice.text(), reference)
+        assert_eq(slice.length(), end - start)
+        assert_eq(slice.utf8_length, @utf8.encode(reference).length())
+      }
     }
   }
   let left = current.slice(0, 2)
@@ -105,13 +107,13 @@ test "retained array and text updates own bounded content after future appends" 
 
 ///|
 test "owned content snapshots do not pin future append allocations" {
-  let saved = TextContent("old")
+  let saved = TextContent("ol").joined(TextContent("d"))
   Characters(saved).freeze_storage()
   let mut current = saved
   for _ in 0..<1000 {
     current = current.joined(TextContent("x"))
   }
-  assert_eq(saved.units.data.length(), 3)
+  assert_eq(buffered_units(saved).data.length(), 3)
   assert_eq(saved.text(), "old")
   assert_eq(current.length(), 1003)
   let values = ContentBuffer([Any::Integer(1L)])
@@ -137,4 +139,26 @@ test "indexed reads address a packed array block without materializing its conte
   array.remove_range(5, size - 10)
   assert_true(array.get(4) == Some(Value(Integer(4L))))
   assert_true(array.get(5) == Some(Value(Integer((size - 5).to_int64()))))
+}
+
+///|
+fn buffered_units(text : TextContent) -> ContentBuffer[UInt16] {
+  guard text.storage is Buffered(units) else {
+    abort("expected append storage")
+  }
+  units
+}
+
+///|
+test "flat strings allocate append storage only when joined" {
+  let text = TextContent("a😀b")
+  assert_true(text.storage is Flat(_))
+  Characters(text).freeze_storage()
+  let joined = text.joined(TextContent("!"))
+  assert_true(text.storage is Flat(_))
+  assert_eq(text.text(), "a😀b")
+  assert_eq(joined.text(), "a😀b!")
+  assert_eq(text.slice(2, 2).text(), "")
+  assert_eq(text.slice(1, 2).text(), "�")
+  assert_eq(text.slice(2, 3).text(), "�")
 }
