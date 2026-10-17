@@ -85,6 +85,10 @@ different operational algorithms implementing compatible CRDT behavior.
   load/destroy, and GC; tests also cover live transaction reads and typed v2
   values that cannot be faithfully projected through JSON.
 
-Full reference-suite and post-change benchmark results are recorded after the
-stable implementation is validated. See `release-*-results.json` and the trace
-reports; the source hashes identify exactly which implementation was measured.
+All 13 reference suites (44 oracle commands) passed for library source hash
+`2514c18182551c55aaf2bd57351df48c86e630b368089efeb2a8c7ff8fea0c09`.
+The core matrix covers 641 scenarios, 364,568 independent-operation snapshots,
+546,816 wire-replay snapshots, and 109,400 same-state local operations. The
+reference corrections remain explicitly asserted; see
+[REFERENCE_LIMITATIONS.md](REFERENCE_LIMITATIONS.md). The post-change trace
+reports additionally identify the exact source and executable hashes measured.
