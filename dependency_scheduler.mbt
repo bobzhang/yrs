@@ -32,21 +32,35 @@ fn dependency_provider(batch : Array[RawItem], id : Id) -> Int32? {
 // Return attempts for deterministic complexity regression tests.
 fn Doc::integrate_pending(self : Doc) -> Int32 {
   let batch = normalize_items(self.pending)
-  let ready = @priority_queue.PriorityQueue([])
   let done = Array::make(batch.length(), false)
-  let waiting : Map[Int32, Array[(Id, Int32)]] = Map([])
+  let blocked = []
   let mut attempts = 0
-  let mut initial = 0
-  // Ordinary ready batches use one linear pass and allocate no heap nodes.
-  // Only dependency-triggered retries need ordered queue entries.
-  while initial < batch.length() || !ready.is_empty() {
-    let (negative_round, negative_index) = if initial < batch.length() {
-      let index = initial
-      initial += 1
-      (0, -index)
-    } else {
-      ready.pop().unwrap()
+  // A normal ordered batch integrates in one pass. A still-blocked backlog
+  // also needs no dependency index until some missing clock becomes available.
+  for index, raw in batch {
+    attempts += 1
+    match self.integrate_dependency(raw) {
+      None => done[index] = true
+      Some(id) => blocked.push((id, index))
     }
+  }
+  if !blocked.any(fn(entry) { self.find(entry.0) is Some(_) }) {
+    self.pending.clear()
+    for (_, index) in blocked {
+      self.pending.push(batch[index])
+    }
+    return attempts
+  }
+  let ready = @priority_queue.PriorityQueue([])
+  let waiting : Map[Int32, Array[(Id, Int32)]] = Map([])
+  for (id, index) in blocked {
+    if self.find(id) is Some(_) {
+      ready.push((-1, -index))
+    } else if dependency_provider(batch, id) is Some(provider) {
+      waiting.get_or_init(provider, fn() { [] }).push((id, index))
+    }
+  }
+  while ready.pop() is Some((negative_round, negative_index)) {
     let index = -negative_index
     attempts += 1
     match self.integrate_dependency(batch[index]) {

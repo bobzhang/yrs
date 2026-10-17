@@ -53,3 +53,25 @@ test "dependency scheduling preserves sparse independence and terminates cycles"
   assert_eq(doc.pending.length(), 2)
   assert_eq(doc.get_or_insert_text("text").length(), 4)
 }
+
+///|
+test "a blocked backlog remains pending until its external root arrives" {
+  let doc = Doc(client_id=100000UL)
+  let size = 1024
+  for client in 1..<(size + 1) {
+    doc.pending.push(
+      dependency_block(
+        client.to_uint64(),
+        Some({ client: (client - 1).to_uint64(), clock: 0U, }),
+      ),
+    )
+  }
+  assert_eq(doc.integrate_pending(), size)
+  assert_eq(doc.integrate_pending(), size)
+  assert_eq(doc.pending.length(), size)
+  assert_eq(doc.get_or_insert_text("text").length(), 0)
+  doc.pending.push(dependency_block(0UL, None))
+  assert_eq(doc.integrate_pending(), 2 * size + 1)
+  assert_eq(doc.pending.length(), 0)
+  assert_eq(doc.get_or_insert_text("text").length(), size + 1)
+}
