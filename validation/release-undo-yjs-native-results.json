@@ -1,7 +1,7 @@
 {
   "contract": "complete CRDT features with documented adaptations",
   "reference": "ac339600c712642e556895426113c3f9c117de39",
-  "source_sha256": "2514c18182551c55aaf2bd57351df48c86e630b368089efeb2a8c7ff8fea0c09",
+  "source_sha256": "a21090031e35fe6b7415173dfd814c3988b7d558d2243bd51300077a64afe502",
   "suite": "undo-yjs-native",
   "commands": [
     {
@@ -14,7 +14,7 @@
         "native"
       ],
       "exit_code": 0,
-      "seconds": 105.916
+      "seconds": 105.848
     }
   ],
   "status": "passed"
