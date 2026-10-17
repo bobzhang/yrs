@@ -41,8 +41,8 @@ The relevant MoonBit sources are [compaction](../compaction.mbt),
 `dependency_scheduler.mbt` indexes each missing clock to its provider in the
 normalized batch. An initial linear pass integrates ready blocks. If no blocked
 clock has become available, it returns the unresolved batch without building
-provider indexes or retry-queue nodes. Otherwise a blocked block registers one waiter; integration (including
-partial integration) wakes waiters whose exact clocks now exist. Missing external
+provider indexes or retry-queue nodes. Otherwise a blocked block registers one
+waiter; integration (including partial integration) wakes waiters whose exact clocks now exist. Missing external
 providers and cycles terminate without retry loops. A `(round, position)` priority
 queue preserves the old deterministic scan order and its observer side effects.
 An 8,192-client reversed dependency chain takes exactly 16,383 integration attempts,
@@ -59,8 +59,7 @@ forks it: old retained transactions and decoded updates neither change nor pin
 an allocation that continues growing forever. Public `Any` values remain immutable.
 
 Text keeps immutable strings until append storage is needed; appends use UTF-16
-units with cached byte length and a lazily rendered string. Slices
-copy only the selected range rather than walking the entire source text; copying
+units with cached byte length and a lazily rendered string. Slices copy only the selected range rather than walking the entire source text; copying
 also keeps tiny surviving slices from pinning large deleted allocations. Orphaned
 surrogate halves become U+FFFD permanently, even if rejoined. Full-range slices
 reuse the immutable view. This removes the growing-prefix append penalty; it does
@@ -94,8 +93,7 @@ These are open performance gaps, not claims of Rust algorithm parity:
    survive any future index-based replacement.
 3. **Serialization and pending ingestion:** the scheduler is per batch; a
    permanently blocked backlog is still scanned on later packets. Sorting/copying
-   generic block batches and freezing retained
-   transaction payloads add work that Rust's borrowed transactions/ordered store
+   generic block batches and freezing retained transaction payloads add work that Rust's borrowed transactions/ordered store
    can avoid. Lazy encoding removes the unused format, not all this overhead.
 
 Consequently, the earlier slowdown cannot be attributed to MoonBit versus Rust
@@ -164,3 +162,24 @@ not an isolated attribution to each change or a language-speed conclusion. Rust
 still performs full-state catchups that the port's corrected dependency handling
 avoids. See the [full tables and methodology](README.md#performance-after-the-algorithm-audit)
 for all traces, memory measurements, provenance and limitations.
+
+## Dependency/content follow-up verification and measurements
+
+- 212 tests passed on native, JavaScript, wasm and wasm-gc.
+- All-target warnings-as-errors checks passed; the public API remains unchanged.
+- All 13 reference suites (44 oracle commands) passed against the follow-up source
+  hash `bf245aa48e713c07c2af65310d7662677dcf709ad0f455f02b7861585a4eb4b6`.
+  Known Rust exceptions remain explicit and unmodified. Available sparse-update
+  comparison counts vary when the already documented Rust seed-28 GC crash occurs;
+  exact counts and exceptions are retained in `update-results.json`.
+- All 20 editing-trace cases and 80 cross-imports passed. Nine scaling configurations
+  ran three times on each of Rust/native/JavaScript (81 measured processes).
+
+On the largest GC-enabled trace, native changed from 23.779 s to 21.498 s
+(fresh Rust: 12.507 s); JavaScript changed from 37.819 s to 38.261 s
+(fresh Rust: 12.561 s). Native peak RSS changed from 117.6 MiB to
+118.8 MiB and JavaScript from 407.8 MiB to 411.0 MiB. See the
+[complete tables](README.md#performance-after-the-algorithm-audit) for every case,
+scaling probes and measurement caveats. The representation/retention/serialization
+differences above remain; this follow-up does not claim universal Rust algorithm
+or performance parity.

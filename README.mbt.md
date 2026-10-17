@@ -100,7 +100,7 @@ retained observer transactions. See the [review and issue dispositions](validati
 
 ## Validation
 
-203 tests pass on all four backends. Differential tests use unchanged Yrs at
+212 tests pass on all four backends. Differential tests use unchanged Yrs at
 `ac339600c712642e556895426113c3f9c117de39` and pinned Yjs 13.6.27.
 The core matrix covers 641 scenarios across both wire formats and GC modes.
 Mixed MoonBit/Yjs undo tests check rendered content, state vectors, deletion ranges,
@@ -123,12 +123,13 @@ Historical development measurements are retained in
 
 Correctness compatibility does not imply identical algorithms or performance.
 The [algorithm audit](validation/ALGORITHM_AUDIT.md) fixes avoidable history scans,
-eager encoding and range rebuilding, and lists remaining differences. After those
-changes, the largest GC-enabled trace measured **23.8 seconds
-and 117.6 MiB peak RSS** for MoonBit native versus **14.0 seconds
-and 93.9 MiB** for Rust (1.70× elapsed time,
-1.25× peak RSS). All five traces passed with GC on/off on native
-and JavaScript, including bidirectional v1/v2 imports.
+eager encoding, range rebuilding, repeated dependency retries and growing-prefix
+content copies. The largest GC-enabled trace measured **21.5 seconds
+and 118.8 MiB peak RSS** for MoonBit native versus **12.5 seconds
+and 93.3 MiB** for Rust (1.72× elapsed time,
+1.27× peak RSS). All five traces passed with GC on/off on native
+and JavaScript, including bidirectional v1/v2 imports. Separate append/dependency
+scaling probes and their limits are included with the results.
 
 These are single-run whole-process measurements including parsing, replication,
 reconnects and restarts. See the [complete tables and methodology](validation/README.md#performance-after-the-algorithm-audit),
