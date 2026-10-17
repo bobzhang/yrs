@@ -1,23 +1,9 @@
 ///|
 fn Content::joined(self : Content, other : Content) -> Content? {
   match (self, other) {
-    (Characters(a), Characters(b)) => Some(Characters(a + b))
-    (Values(a), Values(b)) =>
-      Some(
-        Values(
-          ReadOnlyArray::from_array(
-            (a.iter().to_array() + b.iter().to_array())[:],
-          ),
-        ),
-      )
-    (LegacyJson(a), LegacyJson(b)) =>
-      Some(
-        LegacyJson(
-          ReadOnlyArray::from_array(
-            (a.iter().to_array() + b.iter().to_array())[:],
-          ),
-        ),
-      )
+    (Characters(a), Characters(b)) => Some(Characters(a.joined(b)))
+    (Values(a), Values(b)) => Some(Values(a.joined(b)))
+    (LegacyJson(a), LegacyJson(b)) => Some(LegacyJson(a.joined(b)))
     (Deleted(a), Deleted(b)) if a <= 0x7fff_ffff - b => Some(Deleted(a + b))
     (Garbage(a), Garbage(b)) if a <= 0x7fff_ffff - b => Some(Garbage(a + b))
     _ => None

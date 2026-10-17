@@ -134,11 +134,12 @@ pub fn[M] Text::diff_range(
             }
           }
           builder.buffer.write_string(
-            utf16_slice(
-              text,
+            text
+            .slice(
               (cuts[i] - item.id.clock).reinterpret_as_int(),
               (cuts[i + 1] - item.id.clock).reinterpret_as_int(),
-            ),
+            )
+            .text(),
           )
         }
         Shared(kind) => {

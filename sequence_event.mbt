@@ -213,7 +213,7 @@ fn Transaction::text_delta(
               flush()
               action = 1
             }
-            text += value
+            text += value.text()
           }
         } else if deleted {
           if action != 3 {

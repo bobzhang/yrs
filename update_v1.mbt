@@ -157,7 +157,7 @@ fn UpdateWriter::raw_item(self : UpdateWriter, item : RawItem) -> Unit {
         child.decoded_options.unwrap_or_else(fn() { child.wire_options() }),
       )
     }
-    Characters(s) => self.string(s)
+    Characters(s) => self.string(s.text())
     Binary(b) => self.raw.buffer(b)
     Format(key, value) => {
       self.key(key)

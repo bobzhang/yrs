@@ -178,6 +178,9 @@ pub fn encode_state_vector_from_update_v2(
 // Decoded updates and pending-store snapshots own subdocument descriptors.
 // Integrating an update into one replica must not attach another replica's Doc.
 fn RawItem::owned_update_item(self : RawItem) -> RawItem {
+  // Retained payloads must not keep growing backing allocations alive forever.
+  // The next append forks storage; subsequent ordinary appends reuse that fork.
+  self.content.freeze_storage()
   match self.content {
     Subdocument(child) =>
       {

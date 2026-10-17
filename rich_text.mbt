@@ -164,7 +164,7 @@ pub fn Text::insert_with_attributes(
   value : String,
   attributes : Array[(String, Any)],
 ) -> Unit {
-  self.insert_formatted(index, Characters(value), attributes)
+  self.insert_formatted(index, Characters(TextContent(value)), attributes)
 }
 
 ///|
@@ -382,7 +382,7 @@ pub fn Text::to_delta(self : Text) -> Array[TextChunk] {
       } else {
         let attributes = ReadOnlyArray::from_array(sorted_attributes(attrs)[:])
         let output : Out? = match item.content {
-          Characters(s) => Some(Value(String(s)))
+          Characters(s) => Some(Value(String(s.text())))
           Embed(value) => Some(Value(value))
           Shared(kind) => Some(self.doc.shared_output(item.id, kind))
           _ => None

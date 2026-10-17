@@ -73,8 +73,13 @@ pub fn Out::to_input(self : Out) -> In {
 ///|
 fn In::content(self : In, text : Bool) -> Content {
   match self {
-    Value(String(value)) if text => Characters(value)
-    Value(value) => if text { Embed(value) } else { Values([value]) }
+    Value(String(value)) if text => Characters(TextContent(value))
+    Value(value) =>
+      if text {
+        Embed(value)
+      } else {
+        Values(ContentBuffer([value]))
+      }
     Array(_) => Shared(SharedArray)
     Map(_) => Shared(SharedMap)
     Text(_) => Shared(SharedText)

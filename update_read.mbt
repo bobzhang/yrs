@@ -99,7 +99,7 @@ fn read_update_fields(
               },
             )
           }
-          LegacyJson(ReadOnlyArray::from_array(values[:]))
+          LegacyJson(ContentBuffer(values[:]))
         }
         9 => Subdocument(decode_subdocument(reader.string(), reader.raw.any()))
         5 => Embed(reader.json())
@@ -125,9 +125,9 @@ fn read_update_fields(
           for _ in 0..<count {
             values.push(reader.raw.any())
           }
-          Values(ReadOnlyArray::from_array(values[:]))
+          Values(ContentBuffer(values[:]))
         }
-        4 => Characters(reader.string())
+        4 => Characters(TextContent(reader.string()))
         _ => raise InvalidData("unsupported item content")
       }
       let length = content.length()

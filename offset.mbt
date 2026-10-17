@@ -37,11 +37,7 @@ fn utf8_width(c : Char) -> Int32 {
 ///|
 fn Content::offset_length(self : Content, doc : Doc) -> Int32 {
   if doc.wire_encoding == 1 && self is Characters(text) {
-    let mut length = 0
-    for c in text {
-      length += utf8_width(c)
-    }
-    length
+    text.utf8_length
   } else {
     self.visible_length()
   }

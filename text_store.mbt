@@ -18,9 +18,9 @@ priv enum SharedKind {
 
 ///|
 priv enum Content {
-  Characters(String)
-  Values(ReadOnlyArray[Any])
-  LegacyJson(ReadOnlyArray[Any])
+  Characters(TextContent)
+  Values(ContentBuffer[Any])
+  LegacyJson(ContentBuffer[Any])
   Binary(Bytes)
   Shared(SharedKind)
   Subdocument(Doc)
@@ -42,39 +42,11 @@ fn Content::length(self : Content) -> Int32 {
 }
 
 ///|
-// Yjs indexes text by UTF-16 code units. Splitting a surrogate pair replaces
-// the orphaned halves with U+FFFD, while preserving their two logical clocks.
-fn utf16_slice(s : String, start : Int32, end : Int32) -> String {
-  let out = StringBuilder()
-  let mut offset = 0
-  for c in s {
-    let size = if c.to_int() > 0xffff { 2 } else { 1 }
-    if offset >= start && offset + size <= end {
-      out.write_char(c)
-    } else if offset < end && offset + size > start {
-      out.write_char('\ufffd')
-    }
-    offset += size
-  }
-  out.to_string()
-}
-
-///|
 fn Content::slice(self : Content, start : Int32, end : Int32) -> Content {
   match self {
-    Characters(s) => Characters(utf16_slice(s, start, end))
-    LegacyJson(values) =>
-      LegacyJson(
-        ReadOnlyArray::from_array(
-          Array::makei(end - start, fn(i) { values[start + i] })[:],
-        ),
-      )
-    Values(values) =>
-      Values(
-        ReadOnlyArray::from_array(
-          Array::makei(end - start, fn(i) { values[start + i] })[:],
-        ),
-      )
+    Characters(s) => Characters(s.slice(start, end))
+    LegacyJson(values) => LegacyJson(values.slice(start, end))
+    Values(values) => Values(values.slice(start, end))
     Binary(_) | Shared(_) | Subdocument(_) | Format(_, _) | Embed(_) => {
       guard start == 0 && end == 1 else { abort("binary item is indivisible") }
       self
@@ -841,7 +813,7 @@ pub fn Text::get_string(self : Text) -> String {
   while cursor is Some(id) {
     let item = self.doc.items[id]
     if !item.deleted && item.content is Characters(s) {
-      out.write_string(s)
+      out.write_string(s.text())
     }
     cursor = item.right
   }
@@ -908,7 +880,7 @@ pub fn Text::insert(self : Text, index : Int32, value : String) -> Unit {
       right_origin: right,
       parent: Some(self.name),
       parent_sub: None,
-      content: Characters(value),
+      content: Characters(TextContent(value)),
     }
     guard self.doc.integrate(raw) else {
       abort("local insert has missing dependency")

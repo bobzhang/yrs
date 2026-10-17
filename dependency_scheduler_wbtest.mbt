@@ -10,7 +10,7 @@ fn dependency_block(
     right_origin: None,
     parent: Some(Root("text")),
     parent_sub: None,
-    content: Characters("x"),
+    content: Characters(TextContent("x")),
   }
 }
 

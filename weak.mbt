@@ -308,7 +308,7 @@ pub fn LinkSource::get_string(self : LinkSource, doc : Doc) -> String {
   let result = StringBuilder()
   for (item, start, end) in self.segments(doc) {
     if !item.deleted && item.content is Characters(text) {
-      result.write_string(utf16_slice(text, start, end))
+      result.write_string(text.slice(start, end).text())
     }
   }
   result.to_string()
@@ -380,7 +380,7 @@ pub fn LinkSource::to_delta(self : LinkSource, doc : Doc) -> Array[TextChunk] {
       } else if selected.get(id) is Some((start, end)) {
         let attributes = ReadOnlyArray::from_array(sorted_attributes(attrs)[:])
         let output : Out? = match item.content {
-          Characters(s) => Some(Value(String(utf16_slice(s, start, end))))
+          Characters(s) => Some(Value(String(s.slice(start, end).text())))
           Embed(value) => Some(Value(value))
           Shared(kind) => Some(doc.shared_output(id, kind))
           _ => None

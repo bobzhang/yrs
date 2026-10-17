@@ -8,11 +8,13 @@ test "legacy JSON and opaque shared branches retain clocks and child content" {
         right_origin: None,
         parent: Some(Root("items")),
         parent_sub: None,
-        content: LegacyJson([
-          Object([("x", Integer(1L))]),
-          Undefined,
-          String("hello"),
-        ]),
+        content: LegacyJson(
+          ContentBuffer([
+            Object([("x", Integer(1L))]),
+            Undefined,
+            String("hello"),
+          ]),
+        ),
       },
       {
         id: { client: 1UL, clock: 3U, },
@@ -28,7 +30,7 @@ test "legacy JSON and opaque shared branches retain clocks and child content" {
         right_origin: None,
         parent: Some(Nested({ client: 1UL, clock: 3U, })),
         parent_sub: Some("key"),
-        content: Values([String("kept")]),
+        content: Values(ContentBuffer([String("kept")])),
       },
     ]
     let source = encode_raw_update(items, Map([]))

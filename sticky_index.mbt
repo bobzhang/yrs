@@ -142,7 +142,7 @@ fn Doc::sticky_index(
         (assoc == Before && remaining > 0 && remaining <= width) {
         let offset = if self.wire_encoding == 1 &&
           item.content is Characters(text) {
-          guard cursor_boundary(text, remaining, true) is Some(offset) else {
+          guard cursor_boundary(text.text(), remaining, true) is Some(offset) else {
             return None
           }
           offset
@@ -184,7 +184,7 @@ pub fn StickyIndex::get_offset(self : StickyIndex, doc : Doc) -> Offset? {
           let clock = (id.clock - item.id.clock).reinterpret_as_int() +
             (if self.assoc == Before { 1 } else { 0 })
           index = if doc.wire_encoding == 1 && item.content is Characters(text) {
-            guard cursor_boundary(text, clock, false) is Some(offset) else {
+            guard cursor_boundary(text.text(), clock, false) is Some(offset) else {
               return None
             }
             offset

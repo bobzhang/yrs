@@ -101,7 +101,7 @@ pub fn ArrayRef::insert_range(
     None,
     left,
     right,
-    Values(ReadOnlyArray::from_array(values[:])),
+    Values(ContentBuffer(values[:])),
   )
   |> ignore
 }
@@ -136,7 +136,7 @@ pub fn MapRef::insert(self : MapRef, key : String, value : Any) -> Unit {
     Some(key),
     self.doc.branch(self.name).values.get(key),
     None,
-    Values([value]),
+    Values(ContentBuffer([value])),
   )
   |> ignore
 }
