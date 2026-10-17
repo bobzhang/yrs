@@ -63,6 +63,12 @@ reuse the immutable view. This removes the growing-prefix append penalty; it doe
 not make splitting, rendering, or captured whole-block forks free. UTF-16 storage
 and cached rendered strings also differ from Rust's UTF-8 `String` memory layout.
 
+The scaling probe also exposed `ArrayRef::get` materializing every value in a
+packed block for a single lookup. It now indexes primitive/legacy content directly;
+other single-value content keeps its existing conversion. Reading all N values
+of one packed block therefore no longer performs N full-block copies. A 50,000
+value indexed-read regression covers shuffled indices, boundaries and deletion.
+
 Tests cover backing reuse across 10,000 appends, self-aliasing joins, old-view forks,
 Unicode slices including empty slices and every surrogate boundary, retained
 text/array transaction updates in both wire formats, and frozen-allocation lifetime.

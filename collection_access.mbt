@@ -10,7 +10,10 @@ pub fn ArrayRef::get(self : ArrayRef, index : Int32) -> Out? {
     if !item.deleted && !(item.content is Format(_, _)) {
       let length = item.content.length()
       if remaining < length {
-        return item.values(self.doc).get(remaining)
+        return match item.content {
+          Values(values) | LegacyJson(values) => Some(Value(values[remaining]))
+          _ => item.values(self.doc).get(remaining)
+        }
       }
       remaining -= length
     }

@@ -120,3 +120,21 @@ test "owned content snapshots do not pin future append allocations" {
   assert_eq(values.data.length(), 1)
   assert_eq(appended.length(), 2)
 }
+
+///|
+test "indexed reads address a packed array block without materializing its contents" {
+  let doc = Doc(client_id=1UL)
+  let array = doc.get_or_insert_array("array")
+  let size = 50000
+  array.insert_range(0, Array::makei(size, fn(i) { Integer(i.to_int64()) }))
+  assert_eq(doc.clients[1UL].length(), 1)
+  for i in 0..<size {
+    let index = i * 7919 % size
+    assert_true(array.get(index) == Some(Value(Integer(index.to_int64()))))
+  }
+  assert_true(array.get(-1) is None)
+  assert_true(array.get(size) is None)
+  array.remove_range(5, size - 10)
+  assert_true(array.get(4) == Some(Value(Integer(4L))))
+  assert_true(array.get(5) == Some(Value(Integer((size - 5).to_int64()))))
+}
