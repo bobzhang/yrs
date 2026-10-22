@@ -105,9 +105,7 @@ fn Transaction::map_events(self : Transaction) -> Array[MapEvent] {
       if self.document.find(id) is Some(owner) && owner.deleted {
         continue
       }
-      if self.added.any(fn(range) {
-          range.0 == id.client && range.1 <= id.clock && id.clock < range.2
-        }) {
+      if contains_id_range(self.added, id) {
         continue
       }
     }

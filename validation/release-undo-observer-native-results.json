@@ -1,7 +1,7 @@
 {
   "contract": "complete CRDT features with documented adaptations",
   "reference": "ac339600c712642e556895426113c3f9c117de39",
-  "source_sha256": "abfd338cebe43c59c0c5895c057806e0b66e78658852ab14fb5e407760fd9f98",
+  "source_sha256": "b648266cd5a85e55e6bb49b84556a66a36cb78c46a0935286630124119832679",
   "suite": "undo-observer-native",
   "commands": [
     {
@@ -12,7 +12,7 @@
         "native"
       ],
       "exit_code": 0,
-      "seconds": 75.88
+      "seconds": 69.414
     }
   ],
   "status": "passed"
