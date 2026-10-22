@@ -1,7 +1,7 @@
 {
   "contract": "complete CRDT features with documented adaptations",
   "reference": "ac339600c712642e556895426113c3f9c117de39",
-  "source_sha256": "abfd338cebe43c59c0c5895c057806e0b66e78658852ab14fb5e407760fd9f98",
+  "source_sha256": "b648266cd5a85e55e6bb49b84556a66a36cb78c46a0935286630124119832679",
   "suite": "undo",
   "commands": [
     {
@@ -10,7 +10,7 @@
         "validation/undo_gc.py"
       ],
       "exit_code": 0,
-      "seconds": 1.453
+      "seconds": 1.417
     },
     {
       "command": [
@@ -20,7 +20,7 @@
         "off"
       ],
       "exit_code": 0,
-      "seconds": 86.911
+      "seconds": 82.185
     },
     {
       "command": [
@@ -34,7 +34,7 @@
         "validation/undo-gc-port-results.json"
       ],
       "exit_code": 0,
-      "seconds": 77.646
+      "seconds": 71.058
     },
     {
       "command": [
@@ -42,7 +42,7 @@
         "validation/undo_persistence.py"
       ],
       "exit_code": 0,
-      "seconds": 64.757
+      "seconds": 59.801
     }
   ],
   "status": "passed"

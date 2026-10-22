@@ -69,3 +69,50 @@ test "linear range algebra agrees with independent point sets across clients and
     }
   }
 }
+
+///|
+test "transaction insertion ranges stay canonical and answer membership" {
+  let mut random = 5113U
+  for _ in 0..<50 {
+    let ranges : Array[(UInt64, UInt32, UInt32)] = []
+    let history : Array[(UInt64, UInt32, UInt32)] = []
+    for step in 0..<200 {
+      random = random * 1664525U + 1013904223U
+      let client = (random % 4U).to_uint64()
+      let start = if step % 4 == 0 {
+        (random >> 8) % 160U
+      } else {
+        ranges
+        .last()
+        .filter(fn(r) { r.0 == client })
+        .map(fn(r) { r.2 })
+        .unwrap_or((random >> 8) % 160U)
+      }
+      let end = start + (random >> 24) % 6U
+      insert_id_range(ranges, client, start, end)
+      history.push((client, start, end))
+      assert_eq(ranges, normalize_id_ranges(history))
+      for clock in [start, end, 0U, 165U] {
+        let id : Id = { client, clock, }
+        assert_eq(contains_id_range(ranges, id), contains_range(ranges, id))
+      }
+    }
+  }
+}
+
+///|
+test "many map entries in one transaction record one insertion range" {
+  let doc = Doc(client_id=1UL)
+  let map = doc.get_or_insert_map("m")
+  let mut ranges = 0
+  doc.transact(fn(txn) {
+    for i in 0..<5000 {
+      map.insert("k\{i}", Integer(i.to_int64()))
+    }
+    ranges = txn.added.length()
+  }) catch {
+    _ => fail("transaction failed")
+  }
+  assert_eq(ranges, 1)
+  assert_eq(map.length(), 5000)
+}

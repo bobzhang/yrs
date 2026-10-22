@@ -603,12 +603,11 @@ fn Doc::integrate_missing(self : Doc, raw : RawItem) -> Bool {
     if parent is Some(name) && parent_sub is None {
       transaction.sequences.add(name)
     }
-    transaction.added.push(
-      (
-        item.id.client,
-        item.id.clock,
-        item.id.clock + item.content.length().reinterpret_as_uint(),
-      ),
+    insert_id_range(
+      transaction.added,
+      item.id.client,
+      item.id.clock,
+      item.id.clock + item.content.length().reinterpret_as_uint(),
     )
     if item.deleted {
       transaction.removed.push(

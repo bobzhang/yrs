@@ -83,7 +83,7 @@ pub fn ArrayEvent::delta(self : ArrayEvent) -> ReadOnlyArray[Change] {
 
 ///|
 fn Transaction::has_added(self : Transaction, id : Id) -> Bool {
-  self.added.any(fn(r) { r.0 == id.client && r.1 <= id.clock && id.clock < r.2 })
+  contains_id_range(self.added, id)
 }
 
 ///|
