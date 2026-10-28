@@ -34,6 +34,22 @@ impl @yrs.Read for ChunkSource with fn read_exact(self, length) {
 }
 
 ///|
+test "fixed-width writes emit one correctly ordered chunk per value" {
+  let sink = ChunkSink::{ chunks: [], }
+  @yrs.Write::write_u16(sink, 0xcafe)
+  @yrs.Write::write_u32(sink, 0x89abcdefU)
+  @yrs.Write::write_u32_be(sink, 0x89abcdefU)
+  @yrs.Write::write_u64(sink, 0x0123456789abcdefUL)
+  @yrs.Write::write_i64(sink, -9223372036854775808L)
+  @yrs.Write::write_f32(sink, 1.5)
+  @yrs.Write::write_f64(sink, -0.0)
+  assert_eq(sink.chunks, [
+    b"\xfe\xca", b"\xef\xcd\xab\x89", b"\x89\xab\xcd\xef", b"\x01\x23\x45\x67\x89\xab\xcd\xef",
+    b"\x80\x00\x00\x00\x00\x00\x00\x00", b"\x3f\xc0\x00\x00", b"\x80\x00\x00\x00\x00\x00\x00\x00",
+  ])
+}
+
+///|
 test "application streams inherit lib0 defaults across chunk boundaries" {
   let sink = ChunkSink::{ chunks: [], }
   @yrs.Write::write_u16(sink, 0xcafe)

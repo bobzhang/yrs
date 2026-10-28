@@ -10,11 +10,11 @@ fn[W : Write] write_fixed(
   width : Int32,
   big_endian : Bool,
 ) -> Unit {
-  let bytes = Array::makei(width, fn(i) {
+  let bytes = Bytes::makei(width, fn(i) {
     let shift = if big_endian { width - i - 1 } else { i }
     ((value >> (shift * 8)) & 255UL).to_int().to_byte()
   })
-  writer.write_all(Bytes::from_array(bytes))
+  writer.write_all(bytes)
 }
 
 ///|
