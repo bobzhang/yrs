@@ -4,7 +4,9 @@ test "JSONPath yields live handles and preserves index union order" {
   let users = doc.get_or_insert_array("users")
   users.push_back(Map([("name", Value(String("Alice")))])) |> ignore
   users.push_back(Map([("name", Value(String("Bob")))])) |> ignore
-  let path = @yrs.JsonPath::parse("$.users[1,0,-1].name")
+  let path = @yrs.JsonPath::parse(
+    "$.users[1,-2,-1,2,-3,-2147483648,2147483647].name",
+  )
   assert_eq(doc.json_path(path).map(@yrs.Out::to_json).to_array(), [
     Json("Bob"),
     Json("Alice"),
@@ -19,6 +21,49 @@ test "JSONPath yields live handles and preserves index union order" {
     .map(@yrs.Out::to_json)
     .to_array(),
     [Json("Alicia")],
+  )
+}
+
+///|
+test "JSONPath index unions select immutable and XML sequences in requested order" {
+  let union = "[1,-2,1,2,-3,-2147483648,2147483647]"
+  let value = @yrs.Any::from_json([10, 20])
+  assert_eq(value.json_path(@yrs.JsonPath::parse("$" + union)).to_array(), [
+    @yrs.Any::Integer(20L),
+    Integer(10L),
+    Integer(20L),
+  ])
+  for value in [@yrs.Any::from_json([]), Integer(10L)] {
+    assert_eq(value.json_path(@yrs.JsonPath::parse("$" + union)).count(), 0)
+  }
+  let doc = @yrs.Doc(client_id=1UL)
+  let xml = doc.get_or_insert_xml_fragment("xml")
+  let element = xml.insert_element(0, "p")
+  let children = element.as_fragment()
+  let first = children.insert_element(0, "first")
+  children.insert_element(1, "removed") |> ignore
+  let second = children.insert_element(2, "second")
+  children.remove(1)
+  assert_eq(
+    doc
+    .json_path(@yrs.JsonPath::parse("$.xml[0]" + union))
+    .map(@yrs.Out::branch_id)
+    .to_array(),
+    [
+      @yrs.Out::XmlElement(second).branch_id(),
+      @yrs.Out::XmlElement(first).branch_id(),
+      @yrs.Out::XmlElement(second).branch_id(),
+    ],
+  )
+  assert_eq(
+    doc
+    .json_path(@yrs.JsonPath::parse("$.xml[0,0]"))
+    .map(@yrs.Out::branch_id)
+    .to_array(),
+    [
+      @yrs.Out::XmlElement(element).branch_id(),
+      @yrs.Out::XmlElement(element).branch_id(),
+    ],
   )
 }
 
