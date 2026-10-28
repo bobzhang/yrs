@@ -37,8 +37,8 @@ pub impl Eq for Any with fn equal(self, other) {
     (Buffer(a), Buffer(b)) => a == b
     (Array(a), Array(b)) => a == b
     (Object(a), Object(b)) => {
-      let left = Map::from_array(a.iter().to_array())
-      let right = Map::from_array(b.iter().to_array())
+      let left = Map::from_array(a[:])
+      let right = Map::from_array(b[:])
       left.length() == right.length() &&
       left.iter().all(fn(pair) { right.get(pair.0) == Some(pair.1) })
     }

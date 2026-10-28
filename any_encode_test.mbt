@@ -71,3 +71,22 @@ test "typed serialization distinguishes raw bytes and numeric arrays" {
     Array([String("hello"), Array([Integer(1L), Null])]),
   )
 }
+
+///|
+test "Any object serialization keeps key order and normalizes the last duplicate" {
+  let object : @yrs.Any = Object([
+    ("first", String("overwritten")),
+    ("second", Float(2.0)),
+    ("first", Undefined),
+  ])
+  guard @yrs.to_any(object) is Object(entries) else {
+    fail("expected an object")
+  }
+  assert_eq(entries, [("first", Null), ("second", Integer(2L))])
+  guard object is Object(original) else { fail("expected an object") }
+  assert_eq(original, [
+    ("first", String("overwritten")),
+    ("second", Float(2.0)),
+    ("first", Undefined),
+  ])
+}

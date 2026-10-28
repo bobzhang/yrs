@@ -138,7 +138,7 @@ pub impl ToAny for Any with fn to_any(self) {
       }
     }
     Array(values) => to_any(values)
-    Object(entries) => to_any(Map::from_array(entries.iter().to_array()))
+    Object(entries) => to_any(Map::from_array(entries[:]))
     _ => self
   }
 }
