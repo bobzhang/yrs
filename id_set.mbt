@@ -69,19 +69,7 @@ pub fn IdSet::ranges(self : IdSet) -> Array[(UInt64, UInt32, UInt32)] {
 
 ///|
 pub fn IdSet::contains(self : IdSet, id : Id) -> Bool {
-  for lo = 0, hi = self.ranges.length(); lo < hi; {
-    let mid = lo + (hi - lo) / 2
-    let (client, start, end) = self.ranges[mid]
-    if client < id.client || (client == id.client && end <= id.clock) {
-      continue mid + 1, hi
-    } else if client > id.client || start > id.clock {
-      continue lo, mid
-    } else {
-      return true
-    }
-  } nobreak {
-    false
-  }
+  contains_id_range(self.ranges, id)
 }
 
 ///|
@@ -112,52 +100,7 @@ pub fn IdSet::get(self : IdSet, client : UInt64) -> Array[(UInt32, UInt32)]? {
 pub fn IdSet::insert(self : IdSet, id : Id, length : UInt32) -> Unit {
   guard length <= 0xffff_ffffU - id.clock else { abort("clock range overflow") }
   self.clients.add(id.client)
-  guard length > 0U else { return }
-  let ranges = self.ranges
-  let end = id.clock + length
-  if ranges.last() is Some((client, start, stop)) {
-    if client < id.client || (client == id.client && stop < id.clock) {
-      ranges.push((id.client, id.clock, end))
-      return
-    }
-    if client == id.client && start <= id.clock {
-      ranges[ranges.length() - 1] = (client, start, stop.max(end))
-      return
-    }
-  }
-  let first = for lo = 0, hi = ranges.length(); lo < hi; {
-    let mid = lo + (hi - lo) / 2
-    let (client, _, stop) = ranges[mid]
-    if client < id.client || (client == id.client && stop < id.clock) {
-      continue mid + 1, hi
-    } else {
-      continue lo, mid
-    }
-  } nobreak {
-    lo
-  }
-  let mut last = first
-  let mut start = id.clock
-  let mut stop = end
-  while last < ranges.length() &&
-        ranges[last].0 == id.client &&
-        ranges[last].1 <= stop {
-    start = start.min(ranges[last].1)
-    stop = stop.max(ranges[last].2)
-    last += 1
-  }
-  if first == last {
-    ranges.insert(first, (id.client, start, stop))
-  } else {
-    ranges[first] = (id.client, start, stop)
-    let removed = last - first - 1
-    if removed > 0 {
-      for i in last..<ranges.length() {
-        ranges[i - removed] = ranges[i]
-      }
-      ranges.truncate(ranges.length() - removed)
-    }
-  }
+  insert_id_range(self.ranges, id.client, id.clock, id.clock + length)
 }
 
 ///|
