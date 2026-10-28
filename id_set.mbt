@@ -104,14 +104,8 @@ pub fn IdSet::length(self : IdSet) -> Int32 {
 
 ///|
 pub fn IdSet::get(self : IdSet, client : UInt64) -> Array[(UInt32, UInt32)]? {
-  let ranges = self.ranges
-    .filter(fn(r) { r.0 == client })
-    .map(fn(r) { (r.1, r.2) })
-  if !self.clients.contains(client) {
-    None
-  } else {
-    Some(ranges)
-  }
+  guard self.clients.contains(client) else { return None }
+  Some([ for (c, start, end) in self.ranges if c == client => (start, end) ])
 }
 
 ///|
