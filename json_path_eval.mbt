@@ -151,9 +151,16 @@ fn JsonPath::evaluate(self : JsonPath, root : Out?, doc : Doc?) -> Array[Out] {
           }
         Indices(indices) =>
           match path_sequence(frame.value) {
-            Some(_) => {
+            Some(values) => {
               schedule(
-                indices.filter_map(fn(index) { path_at(frame.value, index) }),
+                indices.filter_map(fn(index) {
+                  let index = if index < 0 {
+                    values.length() + index
+                  } else {
+                    index
+                  }
+                  values.get(index)
+                }),
                 frame.index,
                 frame.descending,
               )
