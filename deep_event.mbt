@@ -68,12 +68,12 @@ pub fn XmlTextEvent::delta(self : XmlTextEvent) -> ReadOnlyArray[Delta] {
 
 ///|
 pub fn XmlEvent::keys(self : XmlEvent) -> Map[String, EntryChange] {
-  Map::from_array(self.entries.iter().to_array())
+  Map::from_array(self.entries[:])
 }
 
 ///|
 pub fn XmlTextEvent::keys(self : XmlTextEvent) -> Map[String, EntryChange] {
-  Map::from_array(self.entries.iter().to_array())
+  Map::from_array(self.entries[:])
 }
 
 ///|
