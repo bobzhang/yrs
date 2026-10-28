@@ -1,4 +1,26 @@
 ///|
+test "client lookup distinguishes missing clients and returns owned normalized ranges" {
+  let ids = @yrs.IdSet(ranges=[
+    (3UL, 20U, 30U),
+    (1UL, 5U, 10U),
+    (3UL, 0U, 5U),
+    (2UL, 7U, 7U),
+    (3UL, 3U, 10U),
+  ])
+  assert_eq(ids.get(0UL), None)
+  assert_eq(ids.get(4UL), None)
+  assert_eq(ids.get(1UL), Some([(5U, 10U)]))
+  assert_eq(ids.get(2UL), Some([]))
+  let ranges = ids.get(3UL).unwrap()
+  assert_eq(ranges, [(0U, 10U), (20U, 30U)])
+  ranges[0] = (1U, 2U)
+  ranges.push((40U, 50U))
+  assert_eq(ids.get(3UL), Some([(0U, 10U), (20U, 30U)]))
+  ids.insert({ client: 3UL, clock: 30U, }, 5U)
+  assert_eq(ranges, [(1U, 2U), (20U, 30U), (40U, 50U)])
+}
+
+///|
 test "clock range algebra preserves holes and extreme clocks" {
   let a = @yrs.IdSet(ranges=[
     (1UL, 0U, 10U),
