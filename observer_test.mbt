@@ -1,4 +1,65 @@
 ///|
+priv struct ObserverCollisionKey(Int32) derive(Eq)
+
+///|
+impl Hash for ObserverCollisionKey with fn hash(_self) {
+  0
+}
+
+///|
+impl Hash for ObserverCollisionKey with fn hash_combine(_self, hasher) {
+  hasher.combine_int(0)
+}
+
+///|
+test "observer drains consecutive colliding keys and keeps survivors callable" {
+  let observers : @yrs.Observer[ObserverCollisionKey, Int32] = Observer()
+  for i in 0..<32 {
+    observers.subscribe(ObserverCollisionKey(i), i)
+  }
+  for i in 0..<32 {
+    if i != 7 && i != 23 {
+      assert_true(observers.unsubscribe(ObserverCollisionKey(i)))
+    }
+  }
+  let values = []
+  observers.trigger(fn(value) { values.push(value) })
+  values.sort()
+  assert_eq(values, [7, 23])
+  for i in 0..<32 {
+    assert_eq(observers.unsubscribe(ObserverCollisionKey(i)), i == 7 || i == 23)
+  }
+  assert_true(observers.has_subscribers())
+  observers.subscribe(ObserverCollisionKey(32), 32)
+  assert_false(observers.unsubscribe(ObserverCollisionKey(7)))
+  assert_false(observers.unsubscribe(ObserverCollisionKey(23)))
+  values.clear()
+  observers.trigger(fn(value) { values.push(value) })
+  assert_eq(values, [32])
+  assert_true(observers.unsubscribe(ObserverCollisionKey(32)))
+  observers.trigger(fn(value) { values.push(value) })
+  assert_false(observers.has_subscribers())
+  assert_eq(values, [32])
+}
+
+///|
+test "observer drains during reentrant dispatch without extending outer snapshot" {
+  let observers : @yrs.Observer[String, () -> Unit] = Observer()
+  let values = []
+  observers.subscribe("old", fn() {
+    values.push(1)
+    observers.unsubscribe("old") |> ignore
+    observers.subscribe("new", fn() { values.push(2) })
+    observers.trigger(fn(f) { f() })
+  })
+  observers.trigger(fn(f) { f() })
+  assert_eq(values, [1, 2])
+  assert_false(observers.unsubscribe("old"))
+  observers.trigger(fn(f) { f() })
+  assert_eq(values, [1, 2, 2])
+}
+
+///|
 test "unsubscribing another callback during dispatch cancels it immediately" {
   let doc = @yrs.Doc(client_id=1UL)
   let text = doc.get_or_insert_text("note")

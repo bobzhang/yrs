@@ -20,12 +20,8 @@ pub fn[K, F] Observer::has_subscribers(self : Observer[K, F]) -> Bool {
 }
 
 ///|
-fn[K : Hash + Eq, F] Observer::drain_pending(self : Observer[K, F]) -> Unit {
-  for (key, cell) in self.callbacks.to_array() {
-    if cell.val is None {
-      self.callbacks.remove(key)
-    }
-  }
+fn[K, F] Observer::drain_pending(self : Observer[K, F]) -> Unit {
+  self.callbacks.retain(fn(_, cell) { cell.val is Some(_) })
 }
 
 ///|
@@ -50,7 +46,7 @@ pub fn[K : Hash + Eq, F] Observer::unsubscribe(
 }
 
 ///|
-pub fn[K : Hash + Eq, F] Observer::trigger(
+pub fn[K, F] Observer::trigger(
   self : Observer[K, F],
   each : (F) -> Unit,
 ) -> Unit {
