@@ -105,18 +105,17 @@ fn insert_id_range(
 ///|
 // Membership in canonical ranges maintained by insert_id_range.
 fn contains_id_range(ranges : Array[(UInt64, UInt32, UInt32)], id : Id) -> Bool {
-  let index = for lo = 0, hi = ranges.length(); lo < hi; {
+  for lo = 0, hi = ranges.length(); lo < hi; {
     let mid = lo + (hi - lo) / 2
-    let (c, _, b) = ranges[mid]
-    if c < id.client || (c == id.client && b <= id.clock) {
+    let (client, start, end) = ranges[mid]
+    if client < id.client || (client == id.client && end <= id.clock) {
       continue mid + 1, hi
-    } else {
+    } else if client > id.client || start > id.clock {
       continue lo, mid
+    } else {
+      return true
     }
   } nobreak {
-    lo
+    false
   }
-  index < ranges.length() &&
-  ranges[index].0 == id.client &&
-  ranges[index].1 <= id.clock
 }

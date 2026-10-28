@@ -119,3 +119,58 @@ test "snapshot constructors and equality preserve owned empty-client metadata" {
   assert_false(snapshot == @yrs.Snapshot(deletions=snapshot.deletions()))
   assert_true(snapshot == @yrs.Snapshot::decode_v2(snapshot.encode_v2()))
 }
+
+///|
+test "incremental ranges preserve membership across insertion orders and clock limits" {
+  let inserts = [
+    (0UL, 5U, 2U),
+    (0UL, 1U, 2U),
+    (0UL, 3U, 2U),
+    (0UL, 2U, 4U),
+    (0xffff_ffff_ffff_ffffUL, 0xffff_fff8U, 2U),
+    (0xffff_ffff_ffff_ffffUL, 0xffff_fffcU, 3U),
+    (0xffff_ffff_ffff_ffffUL, 0xffff_fffaU, 2U),
+    (0xffff_ffff_ffff_fffeUL, 0xffff_ffffU, 0U),
+  ]
+  // Rotating either traversal direction exercises insertion before, inside,
+  // and after existing ranges, including bridges between adjacent intervals.
+  for offset in 0..<inserts.length() {
+    for direction in [1, -1] {
+      let ids = @yrs.IdSet()
+      let points : Set[@yrs.Id] = Set([])
+      let clients : Set[UInt64] = Set([])
+      for step in 0..<inserts.length() {
+        let index = (offset + direction * step + inserts.length()) %
+          inserts.length()
+        let (client, clock, length) = inserts[index]
+        ids.insert({ client, clock, }, length)
+        clients.add(client)
+        for i in 0..<length.reinterpret_as_int() {
+          points.add({ client, clock: clock + i.reinterpret_as_uint(), })
+        }
+        assert_eq(ids.length(), clients.length())
+        for c in [0UL, 1UL, 0xffff_ffff_ffff_fffeUL, 0xffff_ffff_ffff_ffffUL] {
+          for base in [0U, 0xffff_fff8U] {
+            for i in 0..<8 {
+              let id : @yrs.Id = {
+                client: c,
+                clock: base + i.reinterpret_as_uint(),
+              }
+              assert_eq(ids.contains(id), points.contains(id))
+            }
+          }
+        }
+      }
+      assert_eq(ids.ranges(), [
+        (0UL, 1U, 7U),
+        (0xffff_ffff_ffff_ffffUL, 0xffff_fff8U, 0xffff_ffffU),
+      ])
+      assert_eq(ids.get(0xffff_ffff_ffff_fffeUL), Some([]))
+    }
+  }
+}
+
+///|
+test "panic incremental clock range overflow" {
+  @yrs.IdSet().insert({ client: 0UL, clock: 0xffff_ffffU, }, 1U)
+}
