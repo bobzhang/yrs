@@ -33,7 +33,7 @@ pub fn MapEvent::target(self : MapEvent) -> MapRef {
 
 ///|
 pub fn MapEvent::keys(self : MapEvent) -> Map[String, EntryChange] {
-  Map::from_array(self.changes.iter().to_array())
+  Map::from_array(self.changes[:])
 }
 
 ///|
