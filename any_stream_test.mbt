@@ -82,7 +82,9 @@ test "Any casts retain the rejected input and collection iteration preserves key
     ("a", Integer(2L)),
     ("b", Null),
   ])
-  let entries = Map::from_array(object.try_iter().unwrap().to_array())
+  let iterated = object.try_iter().unwrap().to_array()
+  assert_eq(iterated, [(Some("a"), Integer(2L)), (Some("b"), Null)])
+  let entries = Map::from_array(iterated)
   assert_eq(entries[Some("a")], Integer(2L))
   assert_eq(entries[Some("b")], Null)
   let array : @yrs.Any = Array([Null, Undefined])

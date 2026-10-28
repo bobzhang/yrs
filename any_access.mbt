@@ -16,7 +16,7 @@ pub fn Any::try_iter(self : Any) -> Iter[(String?, Any)]? {
     Array(values) => Some(values.iter().map(fn(value) { (None, value) }))
     Object(entries) =>
       Some(
-        Map::from_array(entries.iter().to_array())
+        Map::from_array(entries[:])
         .iter()
         .map(fn(entry) { (Some(entry.0), entry.1) }),
       )
