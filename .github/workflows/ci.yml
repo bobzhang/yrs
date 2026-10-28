@@ -41,6 +41,7 @@ jobs:
       - run: moon check --target all --deny-warn
       - run: moon build --target all --release
       - run: moon test --target all
+      - run: moon test --target all --release
       - name: Verify generated public interfaces
         run: |
           moon info

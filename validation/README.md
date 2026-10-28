@@ -21,6 +21,7 @@ oracle pass.
 moon fmt --check
 moon check --target all --deny-warn
 moon test --target all
+moon test --target all --release
 moon info
 python3 validation/typed_v2.py
 python3 validation/compare.py
@@ -49,7 +50,8 @@ and `undo-observer-native`. After all suites finish,
 `python3 validation/release.py --verify` rejects missing/failed runs or library
 source hashes different from the current checkout. Per-command logs are saved
 under `_build/release-logs/`. CI retains these logs and the detailed JSON reports.
-Unit tests run on both Linux and macOS, across all four MoonBit targets.
+Unit tests run in debug and release modes on both Linux and macOS, across all
+four MoonBit targets.
 
 The core JavaScript bridge reads scenarios incrementally and writes results
 synchronously so pipe backpressure bounds queued output. The original buffered
