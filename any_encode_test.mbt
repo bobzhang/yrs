@@ -6,6 +6,55 @@ priv struct SavedRecord {
 } derive(Eq, Debug)
 
 ///|
+priv struct TrackedValue {
+  value : Int32
+  visits : Array[Int32]
+  reject : Bool
+}
+
+///|
+impl @yrs.ToAny for TrackedValue with fn to_any(self) {
+  self.visits.push(self.value)
+  if self.reject {
+    raise @yrs.Custom("rejected \{self.value}")
+  }
+  Integer(self.value.to_int64())
+}
+
+///|
+test "read-only array serialization visits each value once in order" {
+  let visits = []
+  let empty : ReadOnlyArray[TrackedValue] = []
+  assert_eq(@yrs.to_any(empty), Array([]))
+  let values : ReadOnlyArray[TrackedValue] = [
+    { value: 3, visits, reject: false, },
+    { value: 1, visits, reject: false, },
+    { value: 2, visits, reject: false, },
+  ]
+  assert_eq(@yrs.to_any(values), Array([Integer(3L), Integer(1L), Integer(2L)]))
+  assert_eq(visits, [3, 1, 2])
+}
+
+///|
+test "read-only array serialization stops at the first error" {
+  for rejected in [0, 1] {
+    let visits = []
+    let values = ReadOnlyArray::makei(3, value => {
+      value,
+      visits,
+      reject: value == rejected,
+    })
+    try @yrs.to_any(values) catch {
+      @yrs.Custom(message) => assert_eq(message, "rejected \{rejected}")
+      _ => fail("unexpected serialization error")
+    } noraise {
+      _ => fail("expected serialization error")
+    }
+    assert_eq(visits, Array::makei(rejected + 1, i => i))
+  }
+}
+
+///|
 impl @yrs.ToAny for SavedRecord with fn to_any(self) {
   Object([
     ("id", @yrs.to_any(self.id)),

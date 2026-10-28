@@ -102,11 +102,7 @@ pub impl[T : ToAny] ToAny for Array[T] with fn to_any(self) {
 
 ///|
 pub impl[T : ToAny] ToAny for ReadOnlyArray[T] with fn to_any(self) {
-  let values = []
-  for value in self {
-    values.push(value.to_any())
-  }
-  Array(ReadOnlyArray::from_array(values[:]))
+  Array(self.map(value => value.to_any()))
 }
 
 ///|
