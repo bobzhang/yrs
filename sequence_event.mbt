@@ -123,22 +123,24 @@ fn Transaction::array_delta(
   parent : Parent,
 ) -> ReadOnlyArray[Change] {
   let result : Array[Change] = []
+  let inserted : Array[Out] = []
+  // Positive-length wire content can still produce an empty Added change.
+  let mut has_inserted = false
+  fn flush_inserted() -> Unit {
+    if has_inserted {
+      result.push(Added(ReadOnlyArray::from_array(inserted[:])))
+      inserted.clear()
+      has_inserted = false
+    }
+  }
   let mut cursor = self.document.branch(parent).head
   fn push(change : Change) -> Unit {
+    flush_inserted()
     match (result.last(), change) {
       (Some(Retain(a)), Retain(b)) =>
         result[result.length() - 1] = Retain(a + b)
       (Some(Removed(a)), Removed(b)) =>
         result[result.length() - 1] = Removed(a + b)
-      (Some(Added(a)), Added(b)) => {
-        let values = a.iter().to_array()
-        for value in b {
-          values.push(value)
-        }
-        result[result.length() - 1] = Added(
-          ReadOnlyArray::from_array(values[:]),
-        )
-      }
       _ => result.push(change)
     }
   }
@@ -150,13 +152,17 @@ fn Transaction::array_delta(
           push(Removed(item.content.offset_length(self.document)))
         }
       } else if self.has_added(id) {
-        push(Added(ReadOnlyArray::from_array(item.values(self.document)[:])))
+        has_inserted = true
+        for value in item.values(self.document) {
+          inserted.push(value)
+        }
       } else {
         push(Retain(item.content.offset_length(self.document)))
       }
     }
     cursor = item.right
   }
+  flush_inserted()
   if result.last() is Some(Retain(_)) {
     result.pop() |> ignore
   }
