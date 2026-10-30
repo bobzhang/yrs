@@ -17,23 +17,28 @@ impl @yrs.ToAny for Record with fn to_any(self) {
 }
 
 ///|
+fn to_ints(bytes : Bytes) -> Array[Int32] {
+  bytes.to_array().map(fn(b) { b.to_int() })
+}
+
+///|
+fn to_bytes(numbers : Array[Int32]) -> Bytes {
+  Bytes::from_array(numbers.map(fn(v) { v.to_byte() }))
+}
+
+///|
 fn view(value : @yrs.Any) -> Json {
   match value {
     Undefined => ["undefined"]
     Null => ["null"]
-    Bool(v) => ["bool", Json(v)]
-    Integer(v) => ["int", Json(v.to_string())]
-    Float(v) => ["float", Json(v.reinterpret_as_uint64().to_string())]
-    String(v) => ["string", Json(v)]
-    Buffer(v) => ["buffer", Json(v.to_array().map(fn(b) { b.to_int() }))]
-    Array(v) => ["array", Json(v.iter().map(view).to_array())]
-    Object(v) => {
-      let entries : Map[String, Json] = Map([])
-      for (key, value) in v {
-        entries[key] = view(value)
-      }
-      ["object", Json(entries)]
-    }
+    Bool(v) => ["bool", v]
+    Integer(v) => ["int", v.to_string()]
+    Float(v) => ["float", v.reinterpret_as_uint64().to_string()]
+    String(v) => ["string", v]
+    Buffer(v) => ["buffer", to_ints(v)]
+    Array(v) => ["array", v.map(view)]
+    Object(v) =>
+      ["object", Map([ for (key, value) in v => (key, view(value)) ])]
   }
 }
 
@@ -84,7 +89,7 @@ fn convert(kind : String, value : Json) -> @yrs.Any raise {
     }
     "any" | "bytes" => {
       let values : Array[Int32] = @json.from_json(value)
-      let bytes = Bytes::from_array(values.map(fn(v) { v.to_byte() }))
+      let bytes = to_bytes(values)
       if kind == "any" {
         @yrs.to_any(@yrs.Any::decode(bytes))
       } else {
@@ -103,7 +108,7 @@ pub fn evaluate(input : String) -> String {
   }
   if kind == "stream" {
     let numbers : Array[Int32] = try! @json.from_json(value)
-    let bytes = Bytes::from_array(numbers.map(fn(n) { n.to_byte() }))
+    let bytes = to_bytes(numbers)
     let reader = @yrs.Cursor(bytes)
     let result : Json = try {
       let value = @yrs.Any::decode_from(reader)
@@ -111,21 +116,16 @@ pub fn evaluate(input : String) -> String {
       value.encode_to(writer)
       {
         "value": view(value),
-        "tail": Json(
-          reader
-          .read_exact(reader.remaining())
-          .to_array()
-          .map(fn(b) { b.to_int() }),
-        ),
-        "encoded": Json(writer.to_bytes().to_array().map(fn(b) { b.to_int() })),
+        "tail": to_ints(reader.read_exact(reader.remaining())),
+        "encoded": to_ints(writer.to_bytes()),
       }
     } catch {
-      _ => { "rejected": Json(true) }
+      _ => { "rejected": true }
     }
     return result.stringify()
   }
-  let result : Json = { "ok": Json(true), "value": view(convert(kind, value)) } catch {
-    _ => { "ok": Json(false) }
+  let result : Json = { "ok": true, "value": view(convert(kind, value)) } catch {
+    _ => { "ok": false }
   }
   result.stringify()
 }
