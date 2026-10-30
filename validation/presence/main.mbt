@@ -15,8 +15,9 @@ fn hex(bytes : Bytes) -> String {
   let out = StringBuilder()
   let digits = "0123456789abcdef"
   for b in bytes {
-    out.write_char(digits[b.to_int() / 16].to_int().unsafe_to_char())
-    out.write_char(digits[b.to_int() % 16].to_int().unsafe_to_char())
+    let n = b.to_int()
+    out.write_char(digits[n / 16].unsafe_to_char())
+    out.write_char(digits[n % 16].unsafe_to_char())
   }
   out.to_string()
 }
@@ -39,7 +40,7 @@ fn unhex(s : String) -> Bytes {
 
 ///|
 fn ids(values : ReadOnlyArray[UInt64]) -> Json {
-  Json(values.iter().map(fn(v) { Json(v.to_int()) }).to_array())
+  Json(values.map(fn(v) { Json(v.to_int()) }))
 }
 
 ///|
