@@ -20,17 +20,26 @@ fn[R : Read] read_fixed(
 
 ///|
 impl Read with fn read_u16(self) {
-  read_fixed(self, 2, false).to_uint().to_uint16()
+  let bytes = self.read_exact(2)
+  (bytes[0].to_uint() | (bytes[1].to_uint() << 8)).to_uint16()
 }
 
 ///|
 impl Read with fn read_u32(self) {
-  read_fixed(self, 4, false).to_uint()
+  let bytes = self.read_exact(4)
+  bytes[0].to_uint() |
+  (bytes[1].to_uint() << 8) |
+  (bytes[2].to_uint() << 16) |
+  (bytes[3].to_uint() << 24)
 }
 
 ///|
 impl Read with fn read_u32_be(self) {
-  read_fixed(self, 4, true).to_uint()
+  let bytes = self.read_exact(4)
+  (bytes[0].to_uint() << 24) |
+  (bytes[1].to_uint() << 16) |
+  (bytes[2].to_uint() << 8) |
+  bytes[3].to_uint()
 }
 
 ///|
