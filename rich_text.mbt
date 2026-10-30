@@ -59,15 +59,12 @@ fn Text::rich_position(self : Text, index : Int32) -> RichPosition {
 }
 
 ///|
-fn RichPosition::forward(self : RichPosition) -> Unit {
-  if self.right is Some(id) {
-    let item = self.doc.items[id]
-    if !item.deleted && item.content is Format(key, value) {
-      update_attribute(self.attrs, key, value)
-    }
-    self.left = Some(id)
-    self.right = item.right
+fn RichPosition::forward(self : RichPosition, item : Item) -> Unit {
+  if !item.deleted && item.content is Format(key, value) {
+    update_attribute(self.attrs, key, value)
   }
+  self.left = Some(item.id)
+  self.right = item.right
 }
 
 ///|
@@ -79,8 +76,7 @@ fn RichPosition::insert(self : RichPosition, content : Content) -> Unit {
     self.right,
     content,
   )
-  self.right = Some(id)
-  self.forward()
+  self.forward(self.doc.items[id])
 }
 
 ///|
@@ -92,7 +88,7 @@ fn RichPosition::minimize(
     let item = self.doc.items[id]
     if item.deleted ||
       (item.content is Format(key, value) && attrs.get(key) == Some(value)) {
-      self.forward()
+      self.forward(item)
     } else {
       break
     }
@@ -127,11 +123,11 @@ fn RichPosition::restore(self : RichPosition, attrs : Map[String, Any]) -> Unit 
   while self.right is Some(id) {
     let item = self.doc.items[id]
     if item.deleted {
-      self.forward()
+      self.forward(item)
     } else if item.content is Format(key, value) &&
       attrs.get(key) == Some(value) {
       attrs.remove(key)
-      self.forward()
+      self.forward(item)
     } else {
       break
     }
@@ -472,7 +468,7 @@ fn RichPosition::format(
         }
       }
     }
-    pos.forward()
+    pos.forward(item)
   }
   pos.restore(restore)
 }
@@ -498,7 +494,7 @@ fn RichPosition::remove(
       remaining -= item.content.offset_length(pos.doc)
       pos.doc.mark_deleted(item)
     }
-    pos.forward()
+    pos.forward(item)
   }
   if cleanup_empty || !start_attrs.is_empty() {
     text.clean_format_gap(start, pos.right, start_attrs, pos.attrs)

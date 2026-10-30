@@ -53,3 +53,35 @@ test "unrelated remote update does not clean local formatting gaps" {
   assert_eq(Json(text.to_delta().map(@yrs.TextChunk::to_json)), delta)
   assert_eq(doc.encode_state_as_update_v1(), update)
 }
+
+///|
+test "rich cursor follows splits and restores attributes past deleted markers" {
+  for skip_gc in [false, true] {
+    let doc = @yrs.Doc(client_id=1UL, skip_gc~)
+    let text = doc.get_or_insert_text("rich")
+    text.insert_with_attributes(0, "a🌙bc", [("bold", Bool(true))])
+    text.insert_with_attributes(5, "tail", [("italic", Bool(true))])
+    // Removal splits a character block twice. Advancing must follow the new
+    // right-hand fragment, including when deleted formatting marks remain.
+    text.remove_range(1, 2)
+    text.insert_with_attributes(1, "X", [("color", String("blue"))])
+    assert_eq(Json(text.to_delta().map(@yrs.TextChunk::to_json)), [
+      { "insert": "a", "attributes": { "bold": true } },
+      { "insert": "X", "attributes": { "color": "blue" } },
+      { "insert": "bc", "attributes": { "bold": true } },
+      { "insert": "tail", "attributes": { "italic": true } },
+    ])
+    text.format(0, 2, [("italic", Bool(true))])
+    assert_eq(Json(text.to_delta().map(@yrs.TextChunk::to_json)), [
+      { "insert": "a", "attributes": { "bold": true, "italic": true } },
+      { "insert": "X", "attributes": { "color": "blue", "italic": true } },
+      { "insert": "bc", "attributes": { "bold": true } },
+      { "insert": "tail", "attributes": { "italic": true } },
+    ])
+    text.remove_range(0, 2)
+    assert_eq(Json(text.to_delta().map(@yrs.TextChunk::to_json)), [
+      { "insert": "bc", "attributes": { "bold": true } },
+      { "insert": "tail", "attributes": { "italic": true } },
+    ])
+  }
+}
