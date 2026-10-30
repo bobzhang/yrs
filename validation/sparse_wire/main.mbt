@@ -31,15 +31,15 @@ fn run(input : String) -> String raise {
         doc.apply_update_v1(bytes(packet))
       }
     }
-    let value : Json = {
-      "text": Json(doc.get_or_insert_text("text").get_string()),
-      "array": @yrs.Out::Array(doc.get_or_insert_array("array")).to_json(),
-      "map": @yrs.Out::Map(doc.get_or_insert_map("map")).to_json(),
-      "state": array(doc.state_vector().encode_v1()),
-      "wire": array(doc.encode_state_as_update_v2()),
-      "pending": Json(doc.has_pending_updates()),
-    }
-    return value.stringify()
+    return (
+      {
+        "text": Json(doc.get_or_insert_text("text").get_string()),
+        "array": @yrs.Out::Array(doc.get_or_insert_array("array")).to_json(),
+        "map": @yrs.Out::Map(doc.get_or_insert_map("map")).to_json(),
+        "state": array(doc.state_vector().encode_v1()),
+        "wire": array(doc.encode_state_as_update_v2()),
+        "pending": Json(doc.has_pending_updates()),
+      } : Json).stringify()
   }
   let packets = packets.map(bytes)
   let remote = bytes(fields.get("remote").unwrap())
