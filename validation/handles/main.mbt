@@ -13,9 +13,10 @@ fn run(input : String) -> String raise {
   guard request is Array([Number(client, ..), String(name), gc]) else {
     abort("input")
   }
+  let client_id = client.to_uint64()
   let doc = @yrs.Doc(
-    client_id=client.to_uint64(),
-    guid="doc-\{client.to_uint64()}",
+    client_id~,
+    guid="doc-\{client_id}",
     skip_gc=gc != Json(true),
   )
   let root : @yrs.Root[@yrs.MapRef] = Root(name)
@@ -25,21 +26,20 @@ fn run(input : String) -> String raise {
   text.insert(0, "Moon🌙")
   let root_hook = map.hook()
   let nested_hook = text.hook()
-  let peer = @yrs.Doc(client_id=client.to_uint64() + 1UL, guid=doc.guid())
+  let peer = @yrs.Doc(client_id=client_id + 1UL, guid=doc.guid())
   peer.apply_update_v2(doc.encode_state_as_update_v2())
+  let peer_text = nested_hook.get(peer).unwrap()
   let equality : Json = {
     "document_guid": Json(doc == peer),
     "document_instance": Json(doc.ptr_eq(peer)),
     "root": Json(map == peer.get_or_insert_map(name)),
-    "nested": Json(text == nested_hook.get(peer).unwrap()),
-    "output": Json(
-      @yrs.Out::Text(text) == @yrs.Out::Text(nested_hook.get(peer).unwrap()),
-    ),
+    "nested": Json(text == peer_text),
+    "output": Json(@yrs.Out::Text(text) == @yrs.Out::Text(peer_text)),
     "different_types": Json(
       @yrs.Out::Map(map) == @yrs.Out::Text(peer.get_or_insert_text(name)),
     ),
   }
-  let remote = nested_hook.get(peer).unwrap().get_string()
+  let remote = peer_text.get_string()
   guard nested_hook.into_nested().unwrap().get(peer).unwrap().get_string() ==
     remote else {
     abort("nested")
@@ -47,6 +47,7 @@ fn run(input : String) -> String raise {
   map.remove("note")
   let replacement = map.insert_text("note")
   replacement.insert(0, "new")
+  let replacement_hook = replacement.hook()
   peer.apply_update_v1(doc.encode_state_as_update_v1())
   let encoded = nested_hook.to_json()
   let decoded : @yrs.Hook[@yrs.Text] = @yrs.Hook::from_json(encoded)
@@ -64,9 +65,9 @@ fn run(input : String) -> String raise {
       "equality": equality,
       "root": root_hook.to_json(),
       "nested": encoded,
-      "replacement": replacement.hook().to_json(),
+      "replacement": replacement_hook.to_json(),
       "before": Json(remote),
-      "after": Json(replacement.hook().get(peer).unwrap().get_string()),
+      "after": Json(replacement_hook.get(peer).unwrap().get_string()),
       "old_missing": Json(
         nested_hook.get(doc) is None && nested_hook.get(peer) is None,
       ),
