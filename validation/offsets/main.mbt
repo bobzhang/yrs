@@ -74,11 +74,11 @@ fn run(input : String, v2 : Bool) -> String raise {
   })
   let texts = docs.map(fn(d) { d.get_or_insert_text("text") })
   let events : Array[Json] = []
-  for i in 0..<3 {
-    texts[i].observe("event", fn(e, _) {
+  for i, text in texts {
+    text.observe("event", fn(e, _) {
       events.push({
         "doc": Json(i),
-        "delta": Json(e.delta().iter().map(@yrs.Delta::to_json).to_array()),
+        "delta": Json(e.delta().map(@yrs.Delta::to_json)),
       })
     })
   }
