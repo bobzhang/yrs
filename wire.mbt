@@ -55,16 +55,21 @@ fn Reader::count(self : Reader) -> Int32 raise DecodeError {
 }
 
 ///|
-fn Reader::buffer(self : Reader) -> Bytes raise DecodeError {
+fn Reader::buffer_view(self : Reader) -> BytesView raise DecodeError {
   let len = self.count()
-  let result = self.bytes[self.offset:self.offset + len].to_owned()
+  let result = self.bytes[self.offset:self.offset + len]
   self.offset += len
   result
 }
 
 ///|
+fn Reader::buffer(self : Reader) -> Bytes raise DecodeError {
+  self.buffer_view().to_owned()
+}
+
+///|
 fn Reader::string(self : Reader) -> String raise DecodeError {
-  @utf8.decode(self.buffer(), ignore_bom=false) catch {
+  @utf8.decode(self.buffer_view(), ignore_bom=false) catch {
     _ => raise InvalidData("invalid UTF-8")
   }
 }
