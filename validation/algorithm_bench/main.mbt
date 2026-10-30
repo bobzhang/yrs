@@ -1,10 +1,10 @@
 ///|
 fn main {
   let args = @env.args()
-  let kind = args[args.length() - 2]
-  let size : Int32 = try! @json.from_json(
-    try! @json.parse(args[args.length() - 1]),
-  )
+  guard args is [.., kind, size_arg] else {
+    abort("expected workload kind and size")
+  }
+  let size : Int32 = try! @json.from_json(try! @json.parse(size_arg))
   let doc = @yrs.Doc(client_id=1000000UL)
   let text = doc.get_or_insert_text("text")
   let array = doc.get_or_insert_array("array")
@@ -21,7 +21,7 @@ fn main {
       // Descending clients form the worst ordering for the old retry scans.
       let encoder = @yrs.EncoderV1()
       encoder.write_var_uint(size.to_uint64())
-      for i = size; i >= 1; i = i - 1 {
+      for i in size>=..1 {
         encoder.write_var_uint(1UL)
         encoder.write_client(i.to_uint64())
         encoder.write_var_uint(0UL)
