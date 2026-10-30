@@ -7,10 +7,8 @@ fn integer(value : Json) -> Int32 {
 ///|
 fn hex(bytes : Bytes) -> String {
   let out = StringBuilder()
-  let digits = "0123456789abcdef"
   for b in bytes {
-    out.write_char(digits[b.to_int() / 16].to_int().unsafe_to_char())
-    out.write_char(digits[b.to_int() % 16].to_int().unsafe_to_char())
+    out.write_string(b.to_hex())
   }
   out.to_string()
 }
@@ -32,34 +30,60 @@ fn unhex(s : String) -> Bytes {
 }
 
 ///|
+fn entries_json(entries : Array[(String, @yrs.Out)]) -> Json {
+  Json(Map(entries.map(fn(pair) { (pair.0, pair.1.to_json()) })))
+}
+
+///|
+fn any_attributes(fields : Map[String, Json]) -> Array[(String, @yrs.Any)] {
+  fields.to_array().map(fn(pair) { (pair.0, @yrs.Any::from_json(pair.1)) })
+}
+
+///|
 fn xml_snapshot(node : @yrs.XmlNode) -> Json {
   match node {
-    Element(node) => {
-      let attrs : Map[String, Json] = Map([])
-      for (key, value) in node.attributes() {
-        attrs[key] = value.to_json()
-      }
+    Element(node) =>
       {
         "tag": Json(node.tag()),
-        "attributes": Json(attrs),
+        "attributes": entries_json(node.attributes()),
         "children": Json(node.as_fragment().children().map(xml_snapshot)),
       }
-    }
     Fragment(node) => { "children": Json(node.children().map(xml_snapshot)) }
-    Text(node) => {
-      let attrs : Map[String, Json] = Map([])
-      for (key, value) in node.attributes() {
-        attrs[key] = value.to_json()
+    Text(node) =>
+      {
+        "text": Json(node.get_string()),
+        "attributes": entries_json(node.attributes()),
       }
-      { "text": Json(node.get_string()), "attributes": Json(attrs) }
-    }
+  }
+}
+
+///|
+fn encode_update(
+  doc : @yrs.Doc,
+  v2 : Bool,
+  remote? : @yrs.StateVector,
+) -> Bytes raise {
+  if v2 {
+    doc.encode_state_as_update_v2(remote?)
+  } else {
+    doc.encode_state_as_update_v1(remote?)
+  }
+}
+
+///|
+fn apply_update(doc : @yrs.Doc, bytes : Bytes, v2 : Bool) -> Unit raise {
+  if v2 {
+    doc.apply_update_v2(bytes)
+  } else {
+    doc.apply_update_v1(bytes)
   }
 }
 
 ///|
 fn evaluate_mode(input : String, v2 : Bool, gc~ : Bool = false) -> String raise {
-  let parsed = @json.parse(input)
-  guard parsed is Array(commands) else { abort("expected commands") }
+  guard @json.parse(input) is Array(commands) else {
+    abort("expected commands")
+  }
   let docs = [
     @yrs.Doc(client_id=1UL, skip_gc=!gc),
     Doc(client_id=2UL, skip_gc=!gc),
@@ -81,11 +105,7 @@ fn evaluate_mode(input : String, v2 : Bool, gc~ : Bool = false) -> String raise 
     }
     let x = integer(args[1])
     if trace && ["i", "d", "f", "t", "b", "embed"].contains(kind) {
-      let bytes = if v2 {
-        docs[x].encode_state_as_update_v2()
-      } else {
-        docs[x].encode_state_as_update_v1()
-      }
+      let bytes = encode_update(docs[x], v2)
       local_cases.push(([["a", Json(x), Json(hex(bytes))], command] : Json))
     }
     match kind {
@@ -104,9 +124,7 @@ fn evaluate_mode(input : String, v2 : Bool, gc~ : Bool = false) -> String raise 
       }
       "f" | "t" | "b" => {
         guard args[4] is Object(fields) else { abort("expected attributes") }
-        let attrs = fields
-          .to_array()
-          .map(fn(pair) { (pair.0, @yrs.Any::from_json(pair.1)) })
+        let attrs = any_attributes(fields)
         let n = texts[x].length()
         let pos = integer(args[2]) % (n + 1)
         if kind == "f" {
@@ -124,10 +142,7 @@ fn evaluate_mode(input : String, v2 : Bool, gc~ : Bool = false) -> String raise 
       }
       "embed" => {
         let attributes = match args[5] {
-          Object(fields) =>
-            Some(
-              fields.to_array().map(fn(p) { (p.0, @yrs.Any::from_json(p.1)) }),
-            )
+          Object(fields) => Some(any_attributes(fields))
           _ => None
         }
         let input : @yrs.In = match args[3] {
@@ -254,45 +269,27 @@ fn evaluate_mode(input : String, v2 : Bool, gc~ : Bool = false) -> String raise 
         } else {
           docs[y].state_vector()
         }
-        let bytes = if v2 {
-          docs[x].encode_state_as_update_v2(remote~)
-        } else {
-          docs[x].encode_state_as_update_v1(remote~)
-        }
+        let bytes = encode_update(docs[x], v2, remote~)
         if kind == "q" {
           queued.push((y, bytes))
-        } else if v2 {
-          docs[y].apply_update_v2(bytes)
         } else {
-          docs[y].apply_update_v1(bytes)
+          apply_update(docs[y], bytes, v2)
         }
       }
       "r" =>
         if !queued.is_empty() {
           let (y, bytes) = queued[x % queued.length()]
-          if v2 {
-            docs[y].apply_update_v2(bytes)
-          } else {
-            docs[y].apply_update_v1(bytes)
-          }
+          apply_update(docs[y], bytes, v2)
         }
       "a" => {
         guard args[2] is String(s) else { abort("expected hex") }
-        if v2 {
-          docs[x].apply_update_v2(unhex(s))
-        } else {
-          docs[x].apply_update_v1(unhex(s))
-        }
+        apply_update(docs[x], unhex(s), v2)
       }
       _ => abort("unknown command")
     }
     if trace {
       for i in 0..<3 {
-        let bytes = if v2 {
-          docs[i].encode_state_as_update_v2(remote=previous[i])
-        } else {
-          docs[i].encode_state_as_update_v1(remote=previous[i])
-        }
+        let bytes = encode_update(docs[i], v2, remote=previous[i])
         history.push((["a", Json(i), Json(hex(bytes))] : Json))
         previous[i] = docs[i].state_vector()
       }
@@ -300,31 +297,19 @@ fn evaluate_mode(input : String, v2 : Bool, gc~ : Bool = false) -> String raise 
     snapshots.push(
       Json(
         Array::makei(3, fn(i) {
-          let map : Map[String, Json] = Map([])
-          for (key, value) in maps[i].entries() {
-            map[key] = value.to_json()
-          }
           (
             {
               "text": Json(texts[i].get_string()),
               "delta": Json(texts[i].to_delta().map(@yrs.TextChunk::to_json)),
               "array": Json(arrays[i].to_array().map(@yrs.Out::to_json)),
-              "map": Json(map),
+              "map": entries_json(maps[i].entries()),
               "xml": Json(xmls[i].children().map(xml_snapshot)),
             } : Json)
         }),
       ),
     )
   }
-  let updates = docs.map(fn(d) raise {
-    hex(
-      if v2 {
-        d.encode_state_as_update_v2()
-      } else {
-        d.encode_state_as_update_v1()
-      },
-    )
-  })
+  let updates = docs.map(fn(d) raise { hex(encode_update(d, v2)) })
   let states = docs.map(fn(d) {
     Json(
       d
@@ -344,21 +329,30 @@ fn evaluate_mode(input : String, v2 : Bool, gc~ : Bool = false) -> String raise 
 }
 
 ///|
-#export_name("evaluate")
-pub fn evaluate(input : String) -> String {
-  evaluate_mode(input, false) catch {
+fn evaluate_report(input : String, v2 : Bool) -> String {
+  evaluate_mode(input, v2) catch {
     @yrs.InvalidData(message) => ({ "error": Json(message) } : Json).stringify()
     err => ({ "error": Json(err.to_string()) } : Json).stringify()
   }
 }
 
 ///|
-#export_name("evaluate_v2")
-pub fn evaluate_v2(input : String) -> String {
-  evaluate_mode(input, true) catch {
-    @yrs.InvalidData(message) => ({ "error": Json(message) } : Json).stringify()
+fn evaluate_report_gc(input : String, v2 : Bool) -> String {
+  evaluate_mode(input, v2, gc=true) catch {
     err => ({ "error": Json(err.to_string()) } : Json).stringify()
   }
+}
+
+///|
+#export_name("evaluate")
+pub fn evaluate(input : String) -> String {
+  evaluate_report(input, false)
+}
+
+///|
+#export_name("evaluate_v2")
+pub fn evaluate_v2(input : String) -> String {
+  evaluate_report(input, true)
 }
 
 ///|
@@ -399,35 +393,33 @@ fn utilities_mode(input : String, v2 : Bool) -> String raise {
 }
 
 ///|
-#export_name("utilities")
-pub fn utilities(input : String) -> String {
-  utilities_mode(input, false) catch {
+fn utilities_report(input : String, v2 : Bool) -> String {
+  utilities_mode(input, v2) catch {
     @yrs.InvalidData(message) => ({ "error": Json(message) } : Json).stringify()
     err => ({ "error": Json(err.to_string()) } : Json).stringify()
   }
+}
+
+///|
+#export_name("utilities")
+pub fn utilities(input : String) -> String {
+  utilities_report(input, false)
 }
 
 ///|
 #export_name("utilities_v2")
 pub fn utilities_v2(input : String) -> String {
-  utilities_mode(input, true) catch {
-    @yrs.InvalidData(message) => ({ "error": Json(message) } : Json).stringify()
-    err => ({ "error": Json(err.to_string()) } : Json).stringify()
-  }
+  utilities_report(input, true)
 }
 
 ///|
 #export_name("evaluate_gc")
 pub fn evaluate_gc(input : String) -> String {
-  evaluate_mode(input, false, gc=true) catch {
-    err => ({ "error": Json(err.to_string()) } : Json).stringify()
-  }
+  evaluate_report_gc(input, false)
 }
 
 ///|
 #export_name("evaluate_v2_gc")
 pub fn evaluate_v2_gc(input : String) -> String {
-  evaluate_mode(input, true, gc=true) catch {
-    err => ({ "error": Json(err.to_string()) } : Json).stringify()
-  }
+  evaluate_report_gc(input, true)
 }
