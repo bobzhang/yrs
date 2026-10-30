@@ -11,7 +11,7 @@ fn unhex(s : String) -> Bytes {
   for i = 0; i < s.length(); i = i + 2 {
     bytes.push((digit(s[i]) * 16 + digit(s[i + 1])).to_byte())
   }
-  Bytes::from_array(bytes[:])
+  Bytes::from_array(bytes)
 }
 
 ///|
