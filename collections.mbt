@@ -25,11 +25,7 @@ pub fn ArrayRef::to_array(self : ArrayRef) -> Array[Out] {
     let item = self.doc.items[id]
     if !item.deleted {
       match item.content {
-        Values(values) =>
-          for value in values {
-            result.push(Value(value))
-          }
-        LegacyJson(values) =>
+        Values(values) | LegacyJson(values) =>
           for value in values {
             result.push(Value(value))
           }
@@ -151,8 +147,8 @@ pub fn MapRef::get(self : MapRef, key : String) -> Out? {
     return None
   }
   match item.content {
-    Values(values) => Some(Value(values[values.length() - 1]))
-    LegacyJson(values) => Some(Value(values[values.length() - 1]))
+    Values(values) | LegacyJson(values) =>
+      Some(Value(values[values.length() - 1]))
     Binary(b) => Some(Value(Buffer(b)))
     Embed(value) => Some(Value(value))
     Shared(kind) => Some(self.doc.shared_output(item.id, kind))

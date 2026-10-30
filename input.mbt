@@ -102,8 +102,8 @@ fn In::populate(self : In, doc : Doc, id : Id) -> Out {
   }
   fn children(values : ReadOnlyArray[In]) -> Unit {
     let array : ArrayRef = { doc, name, }
-    for index in 0..<values.length() {
-      array.insert(index, values[index]) |> ignore
+    for index, value in values {
+      array.insert(index, value) |> ignore
     }
   }
   match self {

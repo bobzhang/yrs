@@ -124,12 +124,7 @@ fn Doc::event_path(
     }
     current = parent
   }
-  for i = 0; i < path.length() / 2; i = i + 1 {
-    let other = path.length() - i - 1
-    let value = path[i]
-    path[i] = path[other]
-    path[other] = value
-  }
+  path.rev_in_place()
   Some(ReadOnlyArray::from_array(path[:]))
 }
 
@@ -369,17 +364,9 @@ pub fn Text::observe_deep(
   key : String,
   callback : (ReadOnlyArray[Event], Transaction) -> Unit,
 ) -> Unit {
-  let observers = match self.doc.deep_observers.get(self.name) {
-    Some(observers) => observers
-    None => {
-      let observers : Observer[
-        String,
-        (ReadOnlyArray[Event], Transaction) -> Unit,
-      ] = Observer()
-      self.doc.deep_observers[self.name] = observers
-      observers
-    }
-  }
+  let observers = self.doc.deep_observers.get_or_init(self.name, fn() {
+    Observer()
+  })
   observers.subscribe(key, callback)
 }
 
@@ -401,17 +388,9 @@ pub fn ArrayRef::observe_deep(
   key : String,
   callback : (ReadOnlyArray[Event], Transaction) -> Unit,
 ) -> Unit {
-  let observers = match self.doc.deep_observers.get(self.name) {
-    Some(observers) => observers
-    None => {
-      let observers : Observer[
-        String,
-        (ReadOnlyArray[Event], Transaction) -> Unit,
-      ] = Observer()
-      self.doc.deep_observers[self.name] = observers
-      observers
-    }
-  }
+  let observers = self.doc.deep_observers.get_or_init(self.name, fn() {
+    Observer()
+  })
   observers.subscribe(key, callback)
 }
 
@@ -433,17 +412,9 @@ pub fn MapRef::observe_deep(
   key : String,
   callback : (ReadOnlyArray[Event], Transaction) -> Unit,
 ) -> Unit {
-  let observers = match self.doc.deep_observers.get(self.name) {
-    Some(observers) => observers
-    None => {
-      let observers : Observer[
-        String,
-        (ReadOnlyArray[Event], Transaction) -> Unit,
-      ] = Observer()
-      self.doc.deep_observers[self.name] = observers
-      observers
-    }
-  }
+  let observers = self.doc.deep_observers.get_or_init(self.name, fn() {
+    Observer()
+  })
   observers.subscribe(key, callback)
 }
 
@@ -465,17 +436,9 @@ pub fn XmlFragment::observe_deep(
   key : String,
   callback : (ReadOnlyArray[Event], Transaction) -> Unit,
 ) -> Unit {
-  let observers = match self.doc.deep_observers.get(self.name) {
-    Some(observers) => observers
-    None => {
-      let observers : Observer[
-        String,
-        (ReadOnlyArray[Event], Transaction) -> Unit,
-      ] = Observer()
-      self.doc.deep_observers[self.name] = observers
-      observers
-    }
-  }
+  let observers = self.doc.deep_observers.get_or_init(self.name, fn() {
+    Observer()
+  })
   observers.subscribe(key, callback)
 }
 
@@ -497,17 +460,9 @@ pub fn XmlElement::observe_deep(
   key : String,
   callback : (ReadOnlyArray[Event], Transaction) -> Unit,
 ) -> Unit {
-  let observers = match self.doc.deep_observers.get(self.name) {
-    Some(observers) => observers
-    None => {
-      let observers : Observer[
-        String,
-        (ReadOnlyArray[Event], Transaction) -> Unit,
-      ] = Observer()
-      self.doc.deep_observers[self.name] = observers
-      observers
-    }
-  }
+  let observers = self.doc.deep_observers.get_or_init(self.name, fn() {
+    Observer()
+  })
   observers.subscribe(key, callback)
 }
 
@@ -529,17 +484,9 @@ pub fn XmlText::observe_deep(
   key : String,
   callback : (ReadOnlyArray[Event], Transaction) -> Unit,
 ) -> Unit {
-  let observers = match self.doc.deep_observers.get(self.name) {
-    Some(observers) => observers
-    None => {
-      let observers : Observer[
-        String,
-        (ReadOnlyArray[Event], Transaction) -> Unit,
-      ] = Observer()
-      self.doc.deep_observers[self.name] = observers
-      observers
-    }
-  }
+  let observers = self.doc.deep_observers.get_or_init(self.name, fn() {
+    Observer()
+  })
   observers.subscribe(key, callback)
 }
 
@@ -561,14 +508,9 @@ pub fn XmlFragment::observe(
   key : String,
   callback : (XmlEvent, Transaction) -> Unit,
 ) -> Unit {
-  let observers = match self.doc.xml_observers.get(self.name) {
-    Some(observers) => observers
-    None => {
-      let observers : Observer[String, (XmlEvent, Transaction) -> Unit] = Observer()
-      self.doc.xml_observers[self.name] = observers
-      observers
-    }
-  }
+  let observers = self.doc.xml_observers.get_or_init(self.name, fn() {
+    Observer()
+  })
   observers.subscribe(key, callback)
 }
 
@@ -590,14 +532,9 @@ pub fn XmlElement::observe(
   key : String,
   callback : (XmlEvent, Transaction) -> Unit,
 ) -> Unit {
-  let observers = match self.doc.xml_observers.get(self.name) {
-    Some(observers) => observers
-    None => {
-      let observers : Observer[String, (XmlEvent, Transaction) -> Unit] = Observer()
-      self.doc.xml_observers[self.name] = observers
-      observers
-    }
-  }
+  let observers = self.doc.xml_observers.get_or_init(self.name, fn() {
+    Observer()
+  })
   observers.subscribe(key, callback)
 }
 
@@ -619,14 +556,9 @@ pub fn XmlText::observe(
   key : String,
   callback : (XmlTextEvent, Transaction) -> Unit,
 ) -> Unit {
-  let observers = match self.doc.xml_text_observers.get(self.name) {
-    Some(observers) => observers
-    None => {
-      let observers : Observer[String, (XmlTextEvent, Transaction) -> Unit] = Observer()
-      self.doc.xml_text_observers[self.name] = observers
-      observers
-    }
-  }
+  let observers = self.doc.xml_text_observers.get_or_init(self.name, fn() {
+    Observer()
+  })
   observers.subscribe(key, callback)
 }
 

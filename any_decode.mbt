@@ -123,11 +123,9 @@ pub impl[T : FromAny] FromAny for T? with fn from_any(value) {
 ///|
 pub impl[T : FromAny] FromAny for Array[T] with fn from_any(value) {
   guard value is Array(values) else { raise TypeMismatch("Array") }
-  let result = []
-  for value in values {
-    result.push(T::from_any(value))
-  }
-  result
+  [
+    for value in values => T::from_any(value)
+  ]
 }
 
 ///|
