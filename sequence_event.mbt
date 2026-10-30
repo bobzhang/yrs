@@ -106,9 +106,8 @@ fn Transaction::observable(self : Transaction, parent : Parent) -> Bool {
 ///|
 fn Item::values(self : Item, doc : Doc) -> Array[Out] {
   match self.content {
-    Values(values) => values.iter().map(fn(v) { Out::Value(v) }).to_array()
-    LegacyJson(values) =>
-      values.iter().map(fn(value) { Out::Value(value) }).to_array()
+    Values(values) | LegacyJson(values) =>
+      values.iter().map(fn(v) { Out::Value(v) }).to_array()
     Binary(bytes) => [Value(Buffer(bytes))]
     Embed(value) => [Value(value)]
     Shared(kind) => [doc.shared_output(self.id, kind)]
@@ -309,14 +308,9 @@ pub fn Text::observe(
   key : String,
   callback : (TextEvent, Transaction) -> Unit,
 ) -> Unit {
-  let observers = match self.doc.text_observers.get(self.name) {
-    Some(observers) => observers
-    None => {
-      let observers : Observer[String, (TextEvent, Transaction) -> Unit] = Observer()
-      self.doc.text_observers[self.name] = observers
-      observers
-    }
-  }
+  let observers = self.doc.text_observers.get_or_init(self.name, fn() {
+    Observer()
+  })
   observers.subscribe(key, callback)
 }
 
@@ -338,14 +332,9 @@ pub fn ArrayRef::observe(
   key : String,
   callback : (ArrayEvent, Transaction) -> Unit,
 ) -> Unit {
-  let observers = match self.doc.array_observers.get(self.name) {
-    Some(observers) => observers
-    None => {
-      let observers : Observer[String, (ArrayEvent, Transaction) -> Unit] = Observer()
-      self.doc.array_observers[self.name] = observers
-      observers
-    }
-  }
+  let observers = self.doc.array_observers.get_or_init(self.name, fn() {
+    Observer()
+  })
   observers.subscribe(key, callback)
 }
 

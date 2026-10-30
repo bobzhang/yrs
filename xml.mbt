@@ -128,13 +128,13 @@ pub fn XmlFragment::get_string(self : XmlFragment) -> String {
 /// Match upstream serialization: content and attribute values are not escaped.
 pub fn XmlElement::get_string(self : XmlElement) -> String {
   let out = StringBuilder()
-  out.write_string("<" + self.tag)
+  out.write_string("<\{self.tag}")
   for (key, value) in self.attributes() {
-    out.write_string(" " + key + "=\"" + value.to_string() + "\"")
+    out.write_string(" \{key}=\"\{value.to_string()}\"")
   }
   out.write_string(">")
   out.write_string(self.as_fragment().get_string())
-  out.write_string("</" + self.tag + ">")
+  out.write_string("</\{self.tag}>")
   out.to_string()
 }
 
@@ -148,12 +148,12 @@ fn xml_text_chunks(chunks : Array[TextChunk]) -> String {
   let out = StringBuilder()
   for chunk in chunks {
     for (tag, attrs) in chunk.attributes {
-      out.write_string("<" + tag)
+      out.write_string("<\{tag}")
       if attrs is Object(fields) {
         let fields = fields.iter().to_array()
         fields.sort_by(fn(a, b) { a.0.compare(b.0) })
         for (key, value) in fields {
-          out.write_string(" " + key + "=\"" + value.to_string() + "\"")
+          out.write_string(" \{key}=\"\{value.to_string()}\"")
         }
       }
       out.write_string(">")
@@ -161,8 +161,8 @@ fn xml_text_chunks(chunks : Array[TextChunk]) -> String {
     if chunk.insert is Value(value) {
       out.write_string(value.to_string())
     }
-    for (tag, _) in chunk.attributes.iter().to_array().rev() {
-      out.write_string("</" + tag + ">")
+    for (tag, _) in chunk.attributes.rev() {
+      out.write_string("</\{tag}>")
     }
   }
   out.to_string()
@@ -192,15 +192,10 @@ pub fn Any::to_string(self : Any) -> String {
     Integer(value) => value.to_string()
     Float(value) => value.to_string()
     String(value) => value
-    Array(values) =>
-      "[" + values.iter().to_array().map(Any::to_string).join(", ") + "]"
+    Array(values) => "[" + values.map(Any::to_string).join(", ") + "]"
     Object(fields) =>
       "{" +
-      fields
-      .iter()
-      .to_array()
-      .map(fn(pair) { pair.0 + ": " + pair.1.to_string() })
-      .join(", ") +
+      fields.map(fn(pair) { "\{pair.0}: \{pair.1.to_string()}" }).join(", ") +
       "}"
     Buffer(bytes) => {
       let out = StringBuilder()

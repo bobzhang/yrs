@@ -34,8 +34,7 @@ priv enum Content {
 fn Content::length(self : Content) -> Int32 {
   match self {
     Characters(s) => s.length()
-    Values(values) => values.length()
-    LegacyJson(values) => values.length()
+    Values(values) | LegacyJson(values) => values.length()
     Binary(_) | Shared(_) | Subdocument(_) | Format(_, _) | Embed(_) => 1
     Deleted(n) | Garbage(n) => n
   }
@@ -781,14 +780,7 @@ fn Doc::add_delete(
   if start == end {
     return
   }
-  let ranges = match self.deletes.get(client) {
-    Some(ranges) => ranges
-    None => {
-      let ranges = []
-      self.deletes[client] = ranges
-      ranges
-    }
-  }
+  let ranges = self.deletes.get_or_init(client, fn() { [] })
   insert_clock_range(ranges, start, end)
 }
 

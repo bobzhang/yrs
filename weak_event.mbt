@@ -20,14 +20,9 @@ pub fn WeakRef::observe(
   key : String,
   callback : (WeakEvent, Transaction) -> Unit,
 ) -> Unit {
-  let observers = match self.doc.weak_observers.get(self.name) {
-    Some(observers) => observers
-    None => {
-      let observers : Observer[String, (WeakEvent, Transaction) -> Unit] = Observer()
-      self.doc.weak_observers[self.name] = observers
-      observers
-    }
-  }
+  let observers = self.doc.weak_observers.get_or_init(self.name, fn() {
+    Observer()
+  })
   observers.subscribe(key, callback)
 }
 

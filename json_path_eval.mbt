@@ -86,7 +86,7 @@ fn JsonPath::evaluate(self : JsonPath, root : Out?, doc : Doc?) -> Array[Out] {
   let result = []
   let stack : Array[PathFrame] = [{ value: root, index: 0, descending: false, }]
   fn schedule(children : Array[Out], index : Int32, descending : Bool) -> Unit {
-    for i = children.length() - 1; i >= 0; i = i - 1 {
+    for i in (children.length() - 1)>=..0 {
       stack.push({ value: Some(children[i]), index, descending, })
     }
   }

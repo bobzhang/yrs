@@ -51,10 +51,7 @@ fn encode_raw_update(
 ) -> Bytes {
   let groups : Map[UInt64, Array[RawItem]] = Map([])
   for item in normalize_items(items) {
-    match groups.get(item.id.client) {
-      Some(items) => items.push(item)
-      None => groups[item.id.client] = [item]
-    }
+    groups.get_or_init(item.id.client, fn() { [] }).push(item)
   }
   let clients = groups.to_array()
   clients.sort_by(fn(a, b) { b.0.compare(a.0) })

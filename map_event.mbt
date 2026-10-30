@@ -51,14 +51,9 @@ pub fn MapRef::observe(
   key : String,
   callback : (MapEvent, Transaction) -> Unit,
 ) -> Unit {
-  let observers = match self.doc.map_observers.get(self.name) {
-    Some(observers) => observers
-    None => {
-      let observers : Observer[String, (MapEvent, Transaction) -> Unit] = Observer()
-      self.doc.map_observers[self.name] = observers
-      observers
-    }
-  }
+  let observers = self.doc.map_observers.get_or_init(self.name, fn() {
+    Observer()
+  })
   observers.subscribe(key, callback)
 }
 
@@ -77,14 +72,7 @@ pub fn MapRef::unobserve(self : MapRef, key : String) -> Bool {
 ///|
 fn Doc::touch_map(self : Doc, parent : Parent, key : String) -> Unit {
   guard self.active_transaction is Some(transaction) else { return }
-  let changes = match transaction.map_changes.get(parent) {
-    Some(changes) => changes
-    None => {
-      let changes : Map[String, (Id?, Out?)] = Map([])
-      transaction.map_changes[parent] = changes
-      changes
-    }
-  }
+  let changes = transaction.map_changes.get_or_init(parent, fn() { Map([]) })
   if !changes.contains(key) {
     let map : MapRef = { doc: self, name: parent, }
     let old = map.get(key)
