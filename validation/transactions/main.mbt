@@ -15,8 +15,9 @@ fn hex(bytes : Bytes) -> String {
   let out = StringBuilder()
   let digits = "0123456789abcdef"
   for b in bytes {
-    out.write_char(digits[b.to_int() / 16].to_int().unsafe_to_char())
-    out.write_char(digits[b.to_int() % 16].to_int().unsafe_to_char())
+    let n = b.to_int()
+    out.write_char(digits[n / 16].to_int().unsafe_to_char())
+    out.write_char(digits[n % 16].to_int().unsafe_to_char())
   }
   out.to_string()
 }
@@ -103,9 +104,7 @@ fn run(input : String, v2 : Bool) -> String raise {
           {
             "doc": Json(i),
             "phase": "text",
-            "delta": Json(
-              event.delta().iter().map(@yrs.Delta::to_json).to_array(),
-            ),
+            "delta": Json(event.delta().map(@yrs.Delta::to_json)),
           } : Json),
       )
     })
@@ -119,9 +118,7 @@ fn run(input : String, v2 : Bool) -> String raise {
             "phase": "array",
             "added": ids_json(event.inserts()),
             "removed": ids_json(event.removes()),
-            "delta": Json(
-              event.delta().iter().map(@yrs.Change::to_json).to_array(),
-            ),
+            "delta": Json(event.delta().map(@yrs.Change::to_json)),
           } : Json),
       )
     })
@@ -167,9 +164,7 @@ fn run(input : String, v2 : Bool) -> String raise {
                 if kind == "i" {
                   texts[x].insert(pos, string(args[2]))
                 } else {
-                  guard args[3] is True || args[3] is False else {
-                    abort("boolean")
-                  }
+                  guard args[3] is (True | False) else { abort("boolean") }
                   texts[x].insert_with_attributes(pos, string(args[2]), [
                     ("bold", Bool(args[3] is True)),
                   ])
