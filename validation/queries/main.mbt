@@ -1,11 +1,11 @@
 ///|
 fn shared(value : Json) -> @yrs.In {
   match value {
-    Array(values) => Array(ReadOnlyArray::from_array(values.map(shared)[:]))
+    Array(values) => Array(ReadOnlyArray::from_array(values.map(shared)))
     Object(values) =>
       Map(
         ReadOnlyArray::from_array(
-          values.to_array().map(fn(entry) { (entry.0, shared(entry.1)) })[:],
+          values.to_array().map(fn(entry) { (entry.0, shared(entry.1)) }),
         ),
       )
     _ => Value(@yrs.Any::from_json(value))
@@ -32,16 +32,12 @@ fn run(input : String) -> String raise {
         results.push({ "error": Json(true) })
     } noraise {
       parsed => {
-        let suffix = if path.has_prefix("$") {
-          path[1:].to_owned()
-        } else {
-          path
-        }
+        let suffix = path.strip_prefix("$").unwrap_or(path)
         let document_path = @yrs.JsonPath::parse(
           if path == "" {
             ""
           } else {
-            "$.root" + suffix
+            "$.root\{suffix}"
           },
         )
         results.push({
