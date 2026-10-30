@@ -25,7 +25,7 @@ fn attrs(value : Json) -> Array[@yrs.ContentAttribute[String]] {
 
 ///|
 fn bytes(value : Bytes) -> Json {
-  Json(value.iter().map(fn(b) { Json(b.to_int()) }).to_array())
+  Json([ for b in value => b.to_int() ])
 }
 
 ///|
@@ -39,29 +39,27 @@ fn decode(value : @yrs.Any) -> String raise @yrs.DecodeError {
 ///|
 fn unbytes(value : Json) -> Bytes {
   guard value is Array(values) else { abort("bytes") }
-  Bytes::from_array(values.map(fn(v) { n(v).to_byte() })[:])
+  Bytes::from_array(values.map(fn(v) { n(v).to_byte() }))
+}
+
+///|
+fn any_string(s : String) -> @yrs.Any {
+  @yrs.Any::String(s)
 }
 
 ///|
 fn rjson(r : @yrs.AttrRange[String]) -> Json {
-  Json([
-    Json(r.start),
-    Json(r.end),
-    Json(r.attrs.as_array().map(fn(a) { Json([Json(a.name), Json(a.value)]) })),
-  ])
+  Json(
+    (r.start, r.end, [ for a in r.attrs.as_array() => Json((a.name, a.value)) ]),
+  )
 }
 
 ///|
 fn report(m : @yrs.IdMap[String]) -> Json raise {
   {
-    "ranges": Json(
-      m
-      .iter()
-      .map(fn(p) { Json([Json(p.0.to_string()), rjson(p.1)]) })
-      .to_array(),
-    ),
-    "v1": bytes(m.encode_v1(fn(s) { @yrs.Any::String(s) })),
-    "v2": bytes(m.encode_v2(fn(s) { @yrs.Any::String(s) })),
+    "ranges": Json([ for p in m.iter() => Json((p.0.to_string(), rjson(p.1))) ]),
+    "v1": bytes(m.encode_v1(any_string)),
+    "v2": bytes(m.encode_v2(any_string)),
     "set": bytes(m.as_id_set().encode_v1()),
     "empty": Json(m.is_empty()),
     "query": Json(m.attributions(@yrs.BlockRange(1UL, 0U, 120U)).map(rjson)),
@@ -85,7 +83,7 @@ fn run(input : String) -> String raise {
     )
     let s = r.slice(@json.from_json(offset))
     fn id(value : @yrs.Id) -> Json {
-      [Json(value.client.to_string()), Json(value.clock)]
+      Json((value.client.to_string(), value.clock))
     }
     let contains = ids.map(v => {
       guard v is Array([client, clock]) else { abort("id") }
@@ -99,8 +97,8 @@ fn run(input : String) -> String raise {
         "id": id(r.id()),
         "last": id(r.last_id()),
         "end": Json(r.clock_end()),
-        "clocks": Json([r.clock_range().0, r.clock_range().1]),
-        "slice": Json([s.clock, s.length]),
+        "clocks": Json(r.clock_range()),
+        "slice": Json((s.clock, s.length)),
         "contains": Json(contains),
       } : Json).stringify()
   }
@@ -132,15 +130,9 @@ fn run(input : String) -> String raise {
         )
       }
       "reload1" =>
-        maps[x] = @yrs.IdMap::decode_v1(
-          maps[x].encode_v1(fn(s) { @yrs.Any::String(s) }),
-          decode,
-        )
+        maps[x] = @yrs.IdMap::decode_v1(maps[x].encode_v1(any_string), decode)
       "reload2" =>
-        maps[x] = @yrs.IdMap::decode_v2(
-          maps[x].encode_v2(fn(s) { @yrs.Any::String(s) }),
-          decode,
-        )
+        maps[x] = @yrs.IdMap::decode_v2(maps[x].encode_v2(any_string), decode)
       "load1" => maps[x] = @yrs.IdMap::decode_v1(unbytes(op[2]), decode)
       "load2" => maps[x] = @yrs.IdMap::decode_v2(unbytes(op[2]), decode)
       _ => abort("command")
