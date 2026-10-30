@@ -48,8 +48,8 @@ fn set_metadata(set : @yrs.IdSet) -> Json {
 ///|
 fn parse_set(value : Json) -> @yrs.IdSet {
   @yrs.IdSet(
-    ranges=array(value).map(fn(r) {
-      let r = array(r)
+    ranges=array(value).map(fn(entry) {
+      let r = array(entry)
       (
         integer(r[0]).to_uint64(),
         integer(r[1]).reinterpret_as_uint(),
@@ -105,9 +105,42 @@ fn subscribe(manager : @yrs.UndoManager[Int32], events : Array[Json]) -> Unit {
 }
 
 ///|
+fn stack_json(stack : ReadOnlyArray[@yrs.StackItem[Int32]]) -> Array[Json] {
+  stack.iter().map(fn(s) { s.to_json(fn(m) { Json(m) }) }).to_array()
+}
+
+///|
+fn stack_items(
+  items : Array[Json],
+  doc : @yrs.Doc,
+) -> Array[@yrs.StackItem[Int32]] raise {
+  items.map(fn(s) raise {
+    @yrs.StackItem::from_json(s, doc, fn(v) { integer(v) })
+  })
+}
+
+///|
+fn undo_manager(
+  doc : @yrs.Doc,
+  root : @yrs.MapRef,
+  undo : Array[Json],
+  redo : Array[Json],
+) -> @yrs.UndoManager[Int32] raise {
+  let manager = @yrs.UndoManager(
+    clock=fn() { 100UL },
+    capture_timeout_millis=0xffff_ffff_ffff_ffffUL,
+    init_undo_stack=stack_items(undo, doc),
+    init_redo_stack=stack_items(redo, doc),
+  )
+  manager.expand_scope(Map(root))
+  manager
+}
+
+///|
 fn run(input : String) -> String raise {
   let request = array(@json.parse(input))
-  let result : Json = match string(request[0]) {
+  let operation = string(request[0])
+  let result : Json = match operation {
     "sets" => {
       let a = parse_set(request[1])
       let b = parse_set(request[2])
@@ -151,36 +184,22 @@ fn run(input : String) -> String raise {
       }
     }
     "undo" | "restore" => {
-      let restoring = string(request[0]) == "restore"
+      let restoring = operation == "restore"
       let mut doc = @yrs.Doc(client_id=1UL, guid="A")
       let mut root = doc.get_or_insert_map("root")
       let mut text = root.insert_text("text")
-      let mut manager : @yrs.UndoManager[Int32] = UndoManager(
-        clock=fn() { 100UL },
-        capture_timeout_millis=0xffff_ffff_ffff_ffffUL,
-      )
-      manager.expand_scope(Map(root))
+      let mut manager = undo_manager(doc, root, [], [])
       if restoring {
         doc = @yrs.Doc(client_id=integer(request[1]).to_uint64(), guid="A")
         doc.apply_update_v1(
           Bytes::from_array(
-            array(request[2]).map(fn(v) { integer(v).to_byte() })[:],
+            array(request[2]).map(fn(v) { integer(v).to_byte() }),
           ),
         )
         root = doc.get_or_insert_map("root")
         guard root.get("text") is Some(Text(t)) else { abort("text") }
         text = t
-        manager = @yrs.UndoManager(
-          clock=fn() { 100UL },
-          capture_timeout_millis=0xffff_ffff_ffff_ffffUL,
-          init_undo_stack=array(request[3]).map(fn(s) raise {
-            @yrs.StackItem::from_json(s, doc, fn(v) { integer(v) })
-          }),
-          init_redo_stack=array(request[4]).map(fn(s) raise {
-            @yrs.StackItem::from_json(s, doc, fn(v) { integer(v) })
-          }),
-        )
-        manager.expand_scope(Map(root))
+        manager = undo_manager(doc, root, array(request[3]), array(request[4]))
       }
       let events = []
       subscribe(manager, events)
@@ -204,33 +223,15 @@ fn run(input : String) -> String raise {
           "redo" => changed = Json(manager.redo())
           "reload" => {
             let state = doc.encode_state_as_update_v1()
-            let undo = manager
-              .undo_stack()
-              .iter()
-              .map(fn(s) { s.to_json(fn(m) { Json(m) }) })
-              .to_array()
-            let redo = manager
-              .redo_stack()
-              .iter()
-              .map(fn(s) { s.to_json(fn(m) { Json(m) }) })
-              .to_array()
+            let undo = stack_json(manager.undo_stack())
+            let redo = stack_json(manager.redo_stack())
             manager.destroy()
             doc = @yrs.Doc(client_id=doc.client_id() + 1UL, guid="A")
             doc.apply_update_v1(state)
             root = doc.get_or_insert_map("root")
             guard root.get("text") is Some(Text(t)) else { abort("text") }
             text = t
-            manager = @yrs.UndoManager(
-              clock=fn() { 100UL },
-              capture_timeout_millis=0xffff_ffff_ffff_ffffUL,
-              init_undo_stack=undo.map(fn(s) raise {
-                @yrs.StackItem::from_json(s, doc, fn(v) { integer(v) })
-              }),
-              init_redo_stack=redo.map(fn(s) raise {
-                @yrs.StackItem::from_json(s, doc, fn(v) { integer(v) })
-              }),
-            )
-            manager.expand_scope(Map(root))
+            manager = undo_manager(doc, root, undo, redo)
             subscribe(manager, events)
           }
           _ => abort("unknown command")
@@ -238,20 +239,8 @@ fn run(input : String) -> String raise {
         rows.push({
           "text": Json(text.get_string()),
           "changed": changed,
-          "undo": Json(
-            manager
-            .undo_stack()
-            .iter()
-            .map(fn(s) { s.to_json(fn(m) { Json(m) }) })
-            .to_array(),
-          ),
-          "redo": Json(
-            manager
-            .redo_stack()
-            .iter()
-            .map(fn(s) { s.to_json(fn(m) { Json(m) }) })
-            .to_array(),
-          ),
+          "undo": Json(stack_json(manager.undo_stack())),
+          "redo": Json(stack_json(manager.redo_stack())),
           "events": Json(events.copy()),
         })
         events.clear()
