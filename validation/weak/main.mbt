@@ -24,16 +24,18 @@ fn bound(v : Json, len : Int32) -> @yrs.QuoteBound {
 }
 
 ///|
-fn report(d : @yrs.Doc, v2 : Bool) -> Json raise {
+fn id(value : @yrs.Id?) -> Json {
+  match value {
+    Some(id) => Json([Json(id.client.to_string()), Json(id.clock)])
+    None => Json::null()
+  }
+}
+
+///|
+fn report(d : @yrs.Doc, v2 : Bool) -> Map[String, Json] raise {
   let links : Map[String, Json] = Map([])
   for (key, value) in d.get_or_insert_map("links").entries() {
     if value is WeakLink(link) {
-      fn id(value : @yrs.Id?) -> Json {
-        match value {
-          Some(id) => Json([Json(id.client.to_string()), Json(id.clock)])
-          None => Json::null()
-        }
-      }
       let output = if key.has_prefix("t") {
         Json([Json(link.get_string()), Json(link.get_xml_string())])
       } else if key.has_prefix("a") {
@@ -68,9 +70,17 @@ fn report(d : @yrs.Doc, v2 : Bool) -> Json raise {
 }
 
 ///|
+fn pos(b : @yrs.QuoteBound) -> Int32 {
+  match b {
+    Included(i) | Excluded(i) => i
+    Unbounded => 0
+  }
+}
+
+///|
 fn run(input : String, v2 : Bool, gc : Bool, raw_bounds : Bool) -> String raise {
   guard @json.parse(input) is Array(ops) else { abort("ops") }
-  let client = if ops.get(0) is Some(Array([String("client"), value])) {
+  let client = if ops is [Array([String("client"), value]), ..] {
     n(value).to_uint64()
   } else {
     1UL
@@ -122,12 +132,6 @@ fn run(input : String, v2 : Bool, gc : Bool, raw_bounds : Bool) -> String raise 
         if len > 0 {
           let mut lo = bound(op[2], len)
           let mut hi = bound(op[3], len)
-          fn pos(b : @yrs.QuoteBound) -> Int32 {
-            match b {
-              Included(i) | Excluded(i) => i
-              Unbounded => 0
-            }
-          }
           if !(lo is Unbounded) && !(hi is Unbounded) && pos(lo) > pos(hi) {
             let tmp = lo
             lo = hi
@@ -151,7 +155,7 @@ fn run(input : String, v2 : Bool, gc : Bool, raw_bounds : Bool) -> String raise 
       "del" => links.remove(s(op[1]))
       "load" => {
         guard op[1] is Array(values) else { abort("bytes") }
-        let bytes = Bytes::from_array(values.map(fn(v) { n(v).to_byte() })[:])
+        let bytes = Bytes::from_array(values.map(fn(v) { n(v).to_byte() }))
         if v2 {
           d.apply_update_v2(bytes)
         } else {
@@ -160,8 +164,8 @@ fn run(input : String, v2 : Bool, gc : Bool, raw_bounds : Bool) -> String raise 
       }
       _ => abort("command")
     }
-    guard report(d, v2) is Object(row) else { abort("row") }
-    row["events"] = Json(events.map(fn(s) { Json(s) }))
+    let row = report(d, v2)
+    row["events"] = Json(events)
     events.clear()
     rows.push(Json(row))
     for (key, value) in links.entries() {
