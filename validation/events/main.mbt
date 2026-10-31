@@ -22,19 +22,17 @@ fn keys(values : Map[String, @yrs.EntryChange]) -> Json {
 ///|
 fn event_json(event : @yrs.Event) -> Json {
   let out : Map[String, Json] = Map([])
-  out["path"] = Json(
-    event.path().iter().map(@yrs.PathSegment::to_json).to_array(),
-  )
+  out["path"] = Json(event.path().map(@yrs.PathSegment::to_json))
   out["target"] = event.target().to_json()
   match event {
     Weak(_) => out["kind"] = "weak"
     Text(e) => {
       out["kind"] = "text"
-      out["delta"] = Json(e.delta().iter().map(@yrs.Delta::to_json).to_array())
+      out["delta"] = Json(e.delta().map(@yrs.Delta::to_json))
     }
     Array(e) => {
       out["kind"] = "array"
-      out["delta"] = Json(e.delta().iter().map(@yrs.Change::to_json).to_array())
+      out["delta"] = Json(e.delta().map(@yrs.Change::to_json))
     }
     Map(e) => {
       out["kind"] = "map"
@@ -42,7 +40,7 @@ fn event_json(event : @yrs.Event) -> Json {
     }
     XmlFragment(e) => {
       out["kind"] = "xml"
-      out["delta"] = Json(e.delta().iter().map(@yrs.Change::to_json).to_array())
+      out["delta"] = Json(e.delta().map(@yrs.Change::to_json))
       out["keys"] = keys(e.keys())
       out["children"] = Json(e.children_changed())
       fn ids(values : ReadOnlyArray[@yrs.Id]) -> Json {
@@ -57,7 +55,7 @@ fn event_json(event : @yrs.Event) -> Json {
     }
     XmlText(e) => {
       out["kind"] = "xmltext"
-      out["delta"] = Json(e.delta().iter().map(@yrs.Delta::to_json).to_array())
+      out["delta"] = Json(e.delta().map(@yrs.Delta::to_json))
       out["keys"] = keys(e.keys())
     }
   }
@@ -76,21 +74,21 @@ fn run(input : String, v2 : Bool) -> String raise {
       notifications.push({
         "doc": Json(i),
         "scope": "map",
-        "events": Json(events.iter().map(event_json).to_array()),
+        "events": Json(events.map(event_json)),
       })
     })
     xmls[i].observe_deep("deep", fn(events, _) {
       notifications.push({
         "doc": Json(i),
         "scope": "xml",
-        "events": Json(events.iter().map(event_json).to_array()),
+        "events": Json(events.map(event_json)),
       })
     })
     xmls[i].observe("shallow", fn(e, _) {
       notifications.push({
         "doc": Json(i),
         "scope": "shallow",
-        "delta": Json(e.delta().iter().map(@yrs.Change::to_json).to_array()),
+        "delta": Json(e.delta().map(@yrs.Change::to_json)),
         "keys": keys(e.keys()),
         "children": Json(e.children_changed()),
       })
