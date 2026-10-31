@@ -14,7 +14,7 @@ concurrency:
   cancel-in-progress: true
 
 env:
-  MOONBIT_INSTALL_VERSION: 0.10.15+943464bfa
+  MOONBIT_INSTALL_VERSION: latest
   RUST_REFERENCE: ac339600c712642e556895426113c3f9c117de39
 
 jobs:
