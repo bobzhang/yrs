@@ -39,7 +39,7 @@ fn report(d : @yrs.Doc, v2 : Bool) -> Map[String, Json] raise {
       let output = if key.has_prefix("t") {
         Json([Json(link.get_string()), Json(link.get_xml_string())])
       } else if key.has_prefix("a") {
-        Json(link.unquote().map(fn(v) { v.to_json() }))
+        Json(link.unquote().map(@yrs.Out::to_json))
       } else {
         match link.try_deref_value() {
           Some(v) => v.to_json()
