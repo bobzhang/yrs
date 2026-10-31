@@ -8,9 +8,9 @@ import {
 }
 
 // Values
-pub fn convert_update_v1_to_v2(Bytes, max_items? : Int) -> Bytes raise DecodeError
+pub fn convert_update_v1_to_v2(Bytes, max_items? : Int32) -> Bytes raise DecodeError
 
-pub fn convert_update_v2_to_v1(Bytes, max_items? : Int) -> Bytes raise DecodeError
+pub fn convert_update_v2_to_v1(Bytes, max_items? : Int32) -> Bytes raise DecodeError
 
 pub fn decode_messages(Bytes) -> Array[Message] raise DecodeError
 
@@ -89,7 +89,7 @@ pub(all) enum Any {
 } derive(@debug.Debug)
 pub fn[T : FromOut] Any::cast(Self) -> Result[T, Self]
 pub fn Any::decode(Bytes) -> Self raise DecodeError
-pub fn Any::decode_from(&Read, max_values? : Int) -> Self raise DecodeError
+pub fn Any::decode_from(&Read, max_values? : Int32) -> Self raise DecodeError
 pub fn Any::encode(Self) -> Bytes
 pub fn Any::encode_to(Self, &Write) -> Unit
 pub fn Any::equal(Self, Self) -> Bool
@@ -125,30 +125,30 @@ pub fn ArrayRef::default_prelim() -> In
 pub fn ArrayRef::equal(Self, Self) -> Bool
 pub fn ArrayRef::from_branch(Doc, BranchId) -> Self?
 pub fn ArrayRef::from_out(Out) -> Self?
-pub fn ArrayRef::get(Self, Int) -> Out?
-pub fn[T : FromAny] ArrayRef::get_as(Self, Int) -> T raise ValueDecodeError
-pub fn[T : @json.FromJson] ArrayRef::get_json_as(Self, Int) -> T raise @json.JsonDecodeError
+pub fn ArrayRef::get(Self, Int32) -> Out?
+pub fn[T : FromAny] ArrayRef::get_as(Self, Int32) -> T raise ValueDecodeError
+pub fn[T : @json.FromJson] ArrayRef::get_json_as(Self, Int32) -> T raise @json.JsonDecodeError
 pub fn ArrayRef::get_or_insert_root(Doc, String) -> Self
 pub fn ArrayRef::hook(Self) -> Hook[Self]
-pub fn ArrayRef::insert(Self, Int, In) -> Out
-pub fn ArrayRef::insert_array(Self, Int) -> Self
-pub fn ArrayRef::insert_doc(Self, Int, Doc) -> Doc
-pub fn ArrayRef::insert_map(Self, Int) -> MapRef
-pub fn ArrayRef::insert_range(Self, Int, Array[Any]) -> Unit
-pub fn ArrayRef::insert_text(Self, Int) -> Text
+pub fn ArrayRef::insert(Self, Int32, In) -> Out
+pub fn ArrayRef::insert_array(Self, Int32) -> Self
+pub fn ArrayRef::insert_doc(Self, Int32, Doc) -> Doc
+pub fn ArrayRef::insert_map(Self, Int32) -> MapRef
+pub fn ArrayRef::insert_range(Self, Int32, Array[Any]) -> Unit
+pub fn ArrayRef::insert_text(Self, Int32) -> Text
 pub fn ArrayRef::iter(Self) -> Iter[Out]
-pub fn ArrayRef::length(Self) -> Int
+pub fn ArrayRef::length(Self) -> Int32
 pub fn ArrayRef::not_equal(Self, Self) -> Bool
 pub fn ArrayRef::observe(Self, String, (ArrayEvent, Transaction) -> Unit) -> Unit
 pub fn ArrayRef::observe_deep(Self, String, (ReadOnlyArray[Event], Transaction) -> Unit) -> Unit
 pub fn ArrayRef::push_back(Self, In) -> Out
 pub fn ArrayRef::push_front(Self, In) -> Out
 pub fn ArrayRef::quote(Self, QuoteBound, QuoteBound) -> WeakPrelim raise QuoteError
-pub fn ArrayRef::remove(Self, Int) -> Unit
-pub fn ArrayRef::remove_range(Self, Int, Int) -> Unit
+pub fn ArrayRef::remove(Self, Int32) -> Unit
+pub fn ArrayRef::remove_range(Self, Int32, Int32) -> Unit
 pub fn ArrayRef::root(String) -> Root[Self]
 pub fn ArrayRef::sticky_boundary(Self, assoc? : Assoc) -> StickyIndex
-pub fn ArrayRef::sticky_index(Self, Int, assoc? : Assoc) -> StickyIndex?
+pub fn ArrayRef::sticky_index(Self, Int32, assoc? : Assoc) -> StickyIndex?
 pub fn ArrayRef::to_array(Self) -> Array[Out]
 pub fn ArrayRef::to_input(Self) -> In
 pub fn ArrayRef::to_json(Self) -> Json
@@ -180,11 +180,11 @@ pub impl Decode for Assoc
 pub impl Encode for Assoc
 
 pub(all) struct AttrRange[A] {
-  start : UInt
-  end : UInt
+  start : UInt32
+  end : UInt32
   attrs : ContentAttributes[A]
 } derive(Eq, @debug.Debug)
-pub fn[A] AttrRange::AttrRange(UInt, UInt, attrs? : ContentAttributes[A]) -> Self[A]
+pub fn[A] AttrRange::AttrRange(UInt32, UInt32, attrs? : ContentAttributes[A]) -> Self[A]
 pub fn[A : Eq] AttrRange::equal(Self[A], Self[A]) -> Bool
 pub fn[A : Eq] AttrRange::not_equal(Self[A], Self[A]) -> Bool
 pub fn[A : @debug.Debug] AttrRange::to_repr(Self[A]) -> @debug.Repr
@@ -202,7 +202,7 @@ pub fn Awareness::handle_message(Self, Message) -> Message? raise
 pub fn Awareness::handle_sync(Self, Bytes) -> Array[Message] raise
 pub fn Awareness::local_state(Self) -> Json?
 pub fn Awareness::local_state_raw(Self) -> String?
-pub fn Awareness::meta(Self, UInt64) -> (UInt, UInt64)?
+pub fn Awareness::meta(Self, UInt64) -> (UInt32, UInt64)?
 pub fn Awareness::on_change(Self, String, (Self, AwarenessSummary, Bytes?) -> Unit) -> Unit
 pub fn Awareness::on_update(Self, String, (Self, AwarenessSummary, Bytes?) -> Unit) -> Unit
 pub fn Awareness::remove_state(Self, UInt64) -> Unit
@@ -217,7 +217,7 @@ pub fn Awareness::update(Self) -> AwarenessUpdate
 pub fn Awareness::update_with_clients(Self, Array[UInt64]) -> AwarenessUpdate raise AwarenessError
 
 pub(all) struct AwarenessEntry {
-  clock : UInt
+  clock : UInt32
   json : String
 } derive(Eq, @debug.Debug)
 pub fn AwarenessEntry::equal(Self, Self) -> Bool
@@ -225,7 +225,7 @@ pub fn AwarenessEntry::not_equal(Self, Self) -> Bool
 pub fn AwarenessEntry::to_repr(Self) -> @debug.Repr
 
 pub(all) struct AwarenessState {
-  clock : UInt
+  clock : UInt32
   last_updated : UInt64
   data : String?
 } derive(Eq, @debug.Debug)
@@ -253,18 +253,18 @@ pub fn AwarenessUpdate::entries(Self) -> Array[(UInt64, AwarenessEntry)]
 
 pub(all) struct BlockRange {
   client : UInt64
-  clock : UInt
-  length : UInt
+  clock : UInt32
+  length : UInt32
 } derive(Eq, @debug.Debug)
-pub fn BlockRange::BlockRange(UInt64, UInt, UInt) -> Self
-pub fn BlockRange::clock_end(Self) -> UInt
-pub fn BlockRange::clock_range(Self) -> (UInt, UInt)
+pub fn BlockRange::BlockRange(UInt64, UInt32, UInt32) -> Self
+pub fn BlockRange::clock_end(Self) -> UInt32
+pub fn BlockRange::clock_range(Self) -> (UInt32, UInt32)
 pub fn BlockRange::contains(Self, Id) -> Bool
 pub fn BlockRange::equal(Self, Self) -> Bool
 pub fn BlockRange::id(Self) -> Id
 pub fn BlockRange::last_id(Self) -> Id
 pub fn BlockRange::not_equal(Self, Self) -> Bool
-pub fn BlockRange::slice(Self, UInt) -> Self
+pub fn BlockRange::slice(Self, UInt32) -> Self
 pub fn BlockRange::to_repr(Self) -> @debug.Repr
 
 pub(all) enum BranchId {
@@ -274,7 +274,7 @@ pub(all) enum BranchId {
 pub fn BranchId::equal(Self, Self) -> Bool
 pub fn BranchId::from_json(Json) -> Self raise DecodeError
 pub fn BranchId::get(Self, Doc) -> Out?
-pub fn BranchId::hash(Self) -> Int
+pub fn BranchId::hash(Self) -> Int32
 pub fn BranchId::hash_combine(Self, Hasher) -> Unit
 pub fn BranchId::not_equal(Self, Self) -> Bool
 pub fn BranchId::to_json(Self) -> Json
@@ -292,8 +292,8 @@ pub fn ByteWriter::write_f64(Self, Double) -> Unit
 pub fn ByteWriter::write_i64(Self, Int64) -> Unit
 pub fn ByteWriter::write_string(Self, String) -> Unit
 pub fn ByteWriter::write_u16(Self, UInt16) -> Unit
-pub fn ByteWriter::write_u32(Self, UInt) -> Unit
-pub fn ByteWriter::write_u32_be(Self, UInt) -> Unit
+pub fn ByteWriter::write_u32(Self, UInt32) -> Unit
+pub fn ByteWriter::write_u32_be(Self, UInt32) -> Unit
 pub fn ByteWriter::write_u64(Self, UInt64) -> Unit
 pub fn ByteWriter::write_u8(Self, Byte) -> Unit
 pub fn ByteWriter::write_var_int(Self, Int64) -> Unit
@@ -303,8 +303,8 @@ pub impl Write for ByteWriter
 
 pub(all) enum Change {
   Added(ReadOnlyArray[Out])
-  Removed(Int)
-  Retain(Int)
+  Removed(Int32)
+  Retain(Int32)
 }
 pub fn Change::to_json(Self) -> Json
 
@@ -331,7 +331,7 @@ pub struct ContentAttributes[A] {
 pub fn[A] ContentAttributes::ContentAttributes(values? : Array[ContentAttribute[A]]) -> Self[A]
 pub fn[A] ContentAttributes::as_array(Self[A]) -> Array[ContentAttribute[A]]
 pub fn[A : Eq] ContentAttributes::equal(Self[A], Self[A]) -> Bool
-pub fn[A] ContentAttributes::length(Self[A]) -> Int
+pub fn[A] ContentAttributes::length(Self[A]) -> Int32
 pub fn[A : Eq] ContentAttributes::merge(Self[A], Self[A]) -> Self[A]
 pub fn[A : Eq] ContentAttributes::not_equal(Self[A], Self[A]) -> Bool
 pub fn[A : @debug.Debug] ContentAttributes::to_repr(Self[A]) -> @debug.Repr
@@ -342,22 +342,22 @@ pub struct Cursor {
 }
 pub fn Cursor::Cursor(Bytes) -> Self
 pub fn Cursor::has_content(Self) -> Bool
-pub fn Cursor::position(Self) -> Int
+pub fn Cursor::position(Self) -> Int32
 pub fn Cursor::read_buf(Self) -> Bytes raise DecodeError
-pub fn Cursor::read_exact(Self, Int) -> Bytes raise DecodeError
+pub fn Cursor::read_exact(Self, Int32) -> Bytes raise DecodeError
 pub fn Cursor::read_f32(Self) -> Float raise DecodeError
 pub fn Cursor::read_f64(Self) -> Double raise DecodeError
 pub fn Cursor::read_i64(Self) -> Int64 raise DecodeError
 pub fn Cursor::read_string(Self) -> String raise DecodeError
 pub fn Cursor::read_u16(Self) -> UInt16 raise DecodeError
-pub fn Cursor::read_u32(Self) -> UInt raise DecodeError
-pub fn Cursor::read_u32_be(Self) -> UInt raise DecodeError
+pub fn Cursor::read_u32(Self) -> UInt32 raise DecodeError
+pub fn Cursor::read_u32_be(Self) -> UInt32 raise DecodeError
 pub fn Cursor::read_u64(Self) -> UInt64 raise DecodeError
 pub fn Cursor::read_u8(Self) -> Byte raise DecodeError
 pub fn Cursor::read_var_int(Self) -> Int64 raise DecodeError
 pub fn Cursor::read_var_signed(Self) -> (Int64, Bool) raise DecodeError
 pub fn Cursor::read_var_uint(Self) -> UInt64 raise DecodeError
-pub fn Cursor::remaining(Self) -> Int
+pub fn Cursor::remaining(Self) -> Int32
 pub impl Read for Cursor
 
 pub struct DecoderV1 {
@@ -367,9 +367,9 @@ pub fn DecoderV1::DecoderV1(Bytes) -> Self
 pub fn DecoderV1::read_any(Self) -> Any raise DecodeError
 pub fn DecoderV1::read_buf(Self) -> Bytes raise DecodeError
 pub fn DecoderV1::read_client(Self) -> UInt64 raise DecodeError
-pub fn DecoderV1::read_ds_clock(Self) -> UInt raise DecodeError
-pub fn DecoderV1::read_ds_len(Self) -> UInt raise DecodeError
-pub fn DecoderV1::read_exact(Self, Int) -> Bytes raise DecodeError
+pub fn DecoderV1::read_ds_clock(Self) -> UInt32 raise DecodeError
+pub fn DecoderV1::read_ds_len(Self) -> UInt32 raise DecodeError
+pub fn DecoderV1::read_exact(Self, Int32) -> Bytes raise DecodeError
 pub fn DecoderV1::read_f32(Self) -> Float raise DecodeError
 pub fn DecoderV1::read_f64(Self) -> Double raise DecodeError
 pub fn DecoderV1::read_i64(Self) -> Int64 raise DecodeError
@@ -377,15 +377,15 @@ pub fn DecoderV1::read_info(Self) -> Byte raise DecodeError
 pub fn DecoderV1::read_json(Self) -> Any raise DecodeError
 pub fn DecoderV1::read_key(Self) -> String raise DecodeError
 pub fn DecoderV1::read_left_id(Self) -> Id raise DecodeError
-pub fn DecoderV1::read_len(Self) -> UInt raise DecodeError
+pub fn DecoderV1::read_len(Self) -> UInt32 raise DecodeError
 pub fn DecoderV1::read_parent_info(Self) -> Bool raise DecodeError
 pub fn DecoderV1::read_right_id(Self) -> Id raise DecodeError
 pub fn DecoderV1::read_string(Self) -> String raise DecodeError
 pub fn DecoderV1::read_to_end(Self) -> Bytes
 pub fn DecoderV1::read_type_ref(Self) -> Byte raise DecodeError
 pub fn DecoderV1::read_u16(Self) -> UInt16 raise DecodeError
-pub fn DecoderV1::read_u32(Self) -> UInt raise DecodeError
-pub fn DecoderV1::read_u32_be(Self) -> UInt raise DecodeError
+pub fn DecoderV1::read_u32(Self) -> UInt32 raise DecodeError
+pub fn DecoderV1::read_u32_be(Self) -> UInt32 raise DecodeError
 pub fn DecoderV1::read_u64(Self) -> UInt64 raise DecodeError
 pub fn DecoderV1::read_u8(Self) -> Byte raise DecodeError
 pub fn DecoderV1::read_var_int(Self) -> Int64 raise DecodeError
@@ -402,9 +402,9 @@ pub fn DecoderV2::DecoderV2(Bytes) -> Self raise DecodeError
 pub fn DecoderV2::read_any(Self) -> Any raise DecodeError
 pub fn DecoderV2::read_buf(Self) -> Bytes raise DecodeError
 pub fn DecoderV2::read_client(Self) -> UInt64 raise DecodeError
-pub fn DecoderV2::read_ds_clock(Self) -> UInt raise DecodeError
-pub fn DecoderV2::read_ds_len(Self) -> UInt raise DecodeError
-pub fn DecoderV2::read_exact(Self, Int) -> Bytes raise DecodeError
+pub fn DecoderV2::read_ds_clock(Self) -> UInt32 raise DecodeError
+pub fn DecoderV2::read_ds_len(Self) -> UInt32 raise DecodeError
+pub fn DecoderV2::read_exact(Self, Int32) -> Bytes raise DecodeError
 pub fn DecoderV2::read_f32(Self) -> Float raise DecodeError
 pub fn DecoderV2::read_f64(Self) -> Double raise DecodeError
 pub fn DecoderV2::read_i64(Self) -> Int64 raise DecodeError
@@ -412,15 +412,15 @@ pub fn DecoderV2::read_info(Self) -> Byte raise DecodeError
 pub fn DecoderV2::read_json(Self) -> Any raise DecodeError
 pub fn DecoderV2::read_key(Self) -> String raise DecodeError
 pub fn DecoderV2::read_left_id(Self) -> Id raise DecodeError
-pub fn DecoderV2::read_len(Self) -> UInt raise DecodeError
+pub fn DecoderV2::read_len(Self) -> UInt32 raise DecodeError
 pub fn DecoderV2::read_parent_info(Self) -> Bool raise DecodeError
 pub fn DecoderV2::read_right_id(Self) -> Id raise DecodeError
 pub fn DecoderV2::read_string(Self) -> String raise DecodeError
 pub fn DecoderV2::read_to_end(Self) -> Bytes
 pub fn DecoderV2::read_type_ref(Self) -> Byte raise DecodeError
 pub fn DecoderV2::read_u16(Self) -> UInt16 raise DecodeError
-pub fn DecoderV2::read_u32(Self) -> UInt raise DecodeError
-pub fn DecoderV2::read_u32_be(Self) -> UInt raise DecodeError
+pub fn DecoderV2::read_u32(Self) -> UInt32 raise DecodeError
+pub fn DecoderV2::read_u32_be(Self) -> UInt32 raise DecodeError
 pub fn DecoderV2::read_u64(Self) -> UInt64 raise DecodeError
 pub fn DecoderV2::read_u8(Self) -> Byte raise DecodeError
 pub fn DecoderV2::read_var_int(Self) -> Int64 raise DecodeError
@@ -448,14 +448,14 @@ pub impl Protocol for DefaultProtocol
 
 pub(all) enum DeltaOf[T] {
   Inserted(T, ReadOnlyArray[(String, Any)])
-  Deleted(Int)
-  Retain(Int, ReadOnlyArray[(String, Any)])
+  Deleted(Int32)
+  Retain(Int32, ReadOnlyArray[(String, Any)])
 }
-pub fn DeltaOf::delete(Int) -> Self[In]
+pub fn DeltaOf::delete(Int32) -> Self[In]
 pub fn DeltaOf::insert(In) -> Self[In]
 pub fn DeltaOf::insert_with(In, ReadOnlyArray[(String, Any)]) -> Self[In]
 pub fn[A, B] DeltaOf::map(Self[A], (A) -> B raise?) -> Self[B] raise?
-pub fn DeltaOf::retain(Int) -> Self[In]
+pub fn DeltaOf::retain(Int32) -> Self[In]
 pub fn DeltaOf::to_input(Self[Out]) -> Self[In]
 pub fn DeltaOf::to_json(Self[Out]) -> Json
 
@@ -471,7 +471,7 @@ pub struct Doc {
 pub fn Doc::Doc(client_id~ : UInt64, guid? : String, collection_id? : String, auto_load? : Bool, should_load? : Bool, offset_kind? : OffsetKind, skip_gc? : Bool, cleanup_formatting? : Bool) -> Self
 pub fn Doc::apply_update(Self, Update) -> Unit raise DecodeError
 pub fn Doc::apply_update_v1(Self, Bytes) -> Unit raise DecodeError
-pub fn Doc::apply_update_v2(Self, Bytes, max_items? : Int) -> Unit raise DecodeError
+pub fn Doc::apply_update_v2(Self, Bytes, max_items? : Int32) -> Unit raise DecodeError
 pub fn Doc::auto_load(Self) -> Bool
 pub fn Doc::branch_id(Self) -> BranchId?
 pub fn Doc::cleanup_formatting_enabled(Self) -> Bool
@@ -515,7 +515,7 @@ pub fn Doc::observe_update_v2(Self, String, (Bytes, Transaction) -> Unit) -> Uni
 pub fn Doc::offset_kind(Self) -> OffsetKind
 pub fn Doc::parent_doc(Self) -> Self?
 pub fn Doc::pending_delete_set(Self) -> IdSet?
-pub fn Doc::pending_items(Self) -> Int
+pub fn Doc::pending_items(Self) -> Int32
 pub fn Doc::pending_update(Self) -> Update?
 pub fn Doc::prune_pending(Self) -> Update?
 pub fn Doc::ptr_eq(Self, Self) -> Bool
@@ -548,8 +548,8 @@ pub fn EncoderV1::write_all(Self, Bytes) -> Unit
 pub fn EncoderV1::write_any(Self, Any) -> Unit
 pub fn EncoderV1::write_buf(Self, Bytes) -> Unit
 pub fn EncoderV1::write_client(Self, UInt64) -> Unit
-pub fn EncoderV1::write_ds_clock(Self, UInt) -> Unit
-pub fn EncoderV1::write_ds_len(Self, UInt) -> Unit
+pub fn EncoderV1::write_ds_clock(Self, UInt32) -> Unit
+pub fn EncoderV1::write_ds_len(Self, UInt32) -> Unit
 pub fn EncoderV1::write_f32(Self, Float) -> Unit
 pub fn EncoderV1::write_f64(Self, Double) -> Unit
 pub fn EncoderV1::write_i64(Self, Int64) -> Unit
@@ -557,14 +557,14 @@ pub fn EncoderV1::write_info(Self, Byte) -> Unit
 pub fn EncoderV1::write_json(Self, Any) -> Unit
 pub fn EncoderV1::write_key(Self, String) -> Unit
 pub fn EncoderV1::write_left_id(Self, Id) -> Unit
-pub fn EncoderV1::write_len(Self, UInt) -> Unit
+pub fn EncoderV1::write_len(Self, UInt32) -> Unit
 pub fn EncoderV1::write_parent_info(Self, Bool) -> Unit
 pub fn EncoderV1::write_right_id(Self, Id) -> Unit
 pub fn EncoderV1::write_string(Self, String) -> Unit
 pub fn EncoderV1::write_type_ref(Self, Byte) -> Unit
 pub fn EncoderV1::write_u16(Self, UInt16) -> Unit
-pub fn EncoderV1::write_u32(Self, UInt) -> Unit
-pub fn EncoderV1::write_u32_be(Self, UInt) -> Unit
+pub fn EncoderV1::write_u32(Self, UInt32) -> Unit
+pub fn EncoderV1::write_u32_be(Self, UInt32) -> Unit
 pub fn EncoderV1::write_u64(Self, UInt64) -> Unit
 pub fn EncoderV1::write_u8(Self, Byte) -> Unit
 pub fn EncoderV1::write_var_int(Self, Int64) -> Unit
@@ -583,8 +583,8 @@ pub fn EncoderV2::write_all(Self, Bytes) -> Unit
 pub fn EncoderV2::write_any(Self, Any) -> Unit
 pub fn EncoderV2::write_buf(Self, Bytes) -> Unit
 pub fn EncoderV2::write_client(Self, UInt64) -> Unit
-pub fn EncoderV2::write_ds_clock(Self, UInt) -> Unit
-pub fn EncoderV2::write_ds_len(Self, UInt) -> Unit
+pub fn EncoderV2::write_ds_clock(Self, UInt32) -> Unit
+pub fn EncoderV2::write_ds_len(Self, UInt32) -> Unit
 pub fn EncoderV2::write_f32(Self, Float) -> Unit
 pub fn EncoderV2::write_f64(Self, Double) -> Unit
 pub fn EncoderV2::write_i64(Self, Int64) -> Unit
@@ -592,14 +592,14 @@ pub fn EncoderV2::write_info(Self, Byte) -> Unit
 pub fn EncoderV2::write_json(Self, Any) -> Unit
 pub fn EncoderV2::write_key(Self, String) -> Unit
 pub fn EncoderV2::write_left_id(Self, Id) -> Unit
-pub fn EncoderV2::write_len(Self, UInt) -> Unit
+pub fn EncoderV2::write_len(Self, UInt32) -> Unit
 pub fn EncoderV2::write_parent_info(Self, Bool) -> Unit
 pub fn EncoderV2::write_right_id(Self, Id) -> Unit
 pub fn EncoderV2::write_string(Self, String) -> Unit
 pub fn EncoderV2::write_type_ref(Self, Byte) -> Unit
 pub fn EncoderV2::write_u16(Self, UInt16) -> Unit
-pub fn EncoderV2::write_u32(Self, UInt) -> Unit
-pub fn EncoderV2::write_u32_be(Self, UInt) -> Unit
+pub fn EncoderV2::write_u32(Self, UInt32) -> Unit
+pub fn EncoderV2::write_u32_be(Self, UInt32) -> Unit
 pub fn EncoderV2::write_u64(Self, UInt64) -> Unit
 pub fn EncoderV2::write_u8(Self, Byte) -> Unit
 pub fn EncoderV2::write_var_int(Self, Int64) -> Unit
@@ -633,7 +633,7 @@ pub fn[S] Hook::Hook(BranchId) -> Self[S]
 pub fn[S] Hook::equal(Self[S], Self[S]) -> Bool
 pub fn[S] Hook::from_json(Json) -> Self[S] raise DecodeError
 pub fn[S : SharedRef] Hook::get(Self[S], Doc) -> S?
-pub fn[S] Hook::hash(Self[S]) -> Int
+pub fn[S] Hook::hash(Self[S]) -> Int32
 pub fn[S] Hook::hash_combine(Self[S], Hasher) -> Unit
 pub fn[S] Hook::id(Self[S]) -> BranchId
 pub fn[S] Hook::into_nested(Self[S]) -> Nested[S]?
@@ -647,12 +647,12 @@ pub impl[S] @debug.Debug for Hook[S]
 
 pub(all) struct Id {
   client : UInt64
-  clock : UInt
+  clock : UInt32
 } derive(Compare, Eq, Hash, @debug.Debug)
-pub fn Id::compare(Self, Self) -> Int
+pub fn Id::compare(Self, Self) -> Int32
 pub fn Id::equal(Self, Self) -> Bool
 pub fn Id::from_json(Json) -> Self raise DecodeError
-pub fn Id::hash(Self) -> Int
+pub fn Id::hash(Self) -> Int32
 pub fn Id::hash_combine(Self, Hasher) -> Unit
 pub fn Id::not_equal(Self, Self) -> Bool
 pub fn Id::op_ge(Self, Self) -> Bool
@@ -670,8 +670,8 @@ pub fn[A] IdMap::as_id_set(Self[A]) -> IdSet
 pub fn[A] IdMap::attributions(Self[A], BlockRange) -> Array[AttrRange[A]]
 pub fn[A] IdMap::contains(Self[A], Id) -> Bool
 pub fn[A] IdMap::copy(Self[A]) -> Self[A]
-pub fn[A] IdMap::decode_v1(Bytes, (Any) -> A raise DecodeError, max_items? : Int) -> Self[A] raise DecodeError
-pub fn[A] IdMap::decode_v2(Bytes, (Any) -> A raise DecodeError, max_items? : Int) -> Self[A] raise DecodeError
+pub fn[A] IdMap::decode_v1(Bytes, (Any) -> A raise DecodeError, max_items? : Int32) -> Self[A] raise DecodeError
+pub fn[A] IdMap::decode_v2(Bytes, (Any) -> A raise DecodeError, max_items? : Int32) -> Self[A] raise DecodeError
 pub fn[A : Eq, B] IdMap::diff_map_with(Self[A], Self[B]) -> Unit
 pub fn[A : Eq] IdMap::diff_with(Self[A], IdSet) -> Unit
 pub fn[A : Eq] IdMap::encode_v1(Self[A], (A) -> Any) -> Bytes
@@ -692,7 +692,7 @@ pub impl[A : Eq] Eq for IdMap[A]
 pub struct IdSet {
   // private fields
 }
-pub fn IdSet::IdSet(ranges? : Array[(UInt64, UInt, UInt)]) -> Self
+pub fn IdSet::IdSet(ranges? : Array[(UInt64, UInt32, UInt32)]) -> Self
 pub fn IdSet::client_ids(Self) -> Array[UInt64]
 pub fn IdSet::contains(Self, Id) -> Bool
 pub fn IdSet::decode(&Decoder) -> Self raise DecodeError
@@ -704,16 +704,16 @@ pub fn IdSet::encode(Self, &Encoder) -> Unit
 pub fn IdSet::encode_v1(Self) -> Bytes
 pub fn IdSet::encode_v2(Self) -> Bytes raise DecodeError
 pub fn IdSet::from_json(Json) -> Self raise DecodeError
-pub fn IdSet::get(Self, UInt64) -> Array[(UInt, UInt)]?
-pub fn IdSet::insert(Self, Id, UInt) -> Unit
+pub fn IdSet::get(Self, UInt64) -> Array[(UInt32, UInt32)]?
+pub fn IdSet::insert(Self, Id, UInt32) -> Unit
 pub fn IdSet::intersect(Self, Self) -> Self
 pub fn IdSet::intersect_with(Self, Self) -> Unit
 pub fn IdSet::is_empty(Self) -> Bool
-pub fn IdSet::length(Self) -> Int
+pub fn IdSet::length(Self) -> Int32
 pub fn IdSet::merge(Self, Self) -> Self
 pub fn IdSet::merge_with(Self, Self) -> Unit
-pub fn IdSet::ranges(Self) -> Array[(UInt64, UInt, UInt)]
-pub fn IdSet::remove_range(Self, Id, UInt) -> Unit
+pub fn IdSet::ranges(Self) -> Array[(UInt64, UInt32, UInt32)]
+pub fn IdSet::remove_range(Self, Id, UInt32) -> Unit
 pub fn IdSet::to_json(Self) -> Json
 pub impl Decode for IdSet
 pub impl Encode for IdSet
@@ -804,7 +804,7 @@ pub fn MapRef::insert_map(Self, String) -> Self
 pub fn MapRef::insert_text(Self, String) -> Text
 pub fn MapRef::iter(Self) -> Iter[(String, Out)]
 pub fn MapRef::keys(Self) -> Iter[String]
-pub fn MapRef::length(Self) -> Int
+pub fn MapRef::length(Self) -> Int32
 pub fn MapRef::link(Self, String) -> WeakPrelim?
 pub fn MapRef::not_equal(Self, Self) -> Bool
 pub fn MapRef::observe(Self, String, (MapEvent, Transaction) -> Unit) -> Unit
@@ -843,7 +843,7 @@ pub struct Nested[S] {
 pub fn[S] Nested::Nested(Id) -> Self[S]
 pub fn[S] Nested::equal(Self[S], Self[S]) -> Bool
 pub fn[S : SharedRef] Nested::get(Self[S], Doc) -> S?
-pub fn[S] Nested::hash(Self[S]) -> Int
+pub fn[S] Nested::hash(Self[S]) -> Int32
 pub fn[S] Nested::hash_combine(Self[S], Hasher) -> Unit
 pub fn[S] Nested::hook(Self[S]) -> Hook[S]
 pub fn[S] Nested::not_equal(Self[S], Self[S]) -> Bool
@@ -863,7 +863,7 @@ pub fn[K : Hash + Eq, F] Observer::unsubscribe(Self[K, F], K) -> Bool
 
 pub(all) struct Offset {
   branch : BranchId
-  index : Int
+  index : Int32
   assoc : Assoc
 } derive(Eq, @debug.Debug)
 pub fn Offset::equal(Self, Self) -> Bool
@@ -904,7 +904,7 @@ pub impl AsPrelim for Out
 
 pub(all) enum PathSegment {
   Key(String)
-  Index(UInt)
+  Index(UInt32)
 } derive(Eq, @debug.Debug)
 pub fn PathSegment::equal(Self, Self) -> Bool
 pub fn PathSegment::not_equal(Self, Self) -> Bool
@@ -912,8 +912,8 @@ pub fn PathSegment::to_json(Self) -> Json
 pub fn PathSegment::to_repr(Self) -> @debug.Repr
 
 pub(all) enum QuoteBound {
-  Included(Int)
-  Excluded(Int)
+  Included(Int32)
+  Excluded(Int32)
   Unbounded
 } derive(Eq, @debug.Debug)
 pub fn QuoteBound::equal(Self, Self) -> Bool
@@ -927,7 +927,7 @@ pub fn[S : RootRef] Root::Root(String) -> Self[S]
 pub fn[S] Root::equal(Self[S], Self[S]) -> Bool
 pub fn[S : SharedRef] Root::get(Self[S], Doc) -> S?
 pub fn[S : RootRef] Root::get_or_create(Self[S], Doc) -> S
-pub fn[S] Root::hash(Self[S]) -> Int
+pub fn[S] Root::hash(Self[S]) -> Int32
 pub fn[S] Root::hash_combine(Self[S], Hasher) -> Unit
 pub fn[S] Root::hook(Self[S]) -> Hook[S]
 pub fn[S] Root::not_equal(Self[S], Self[S]) -> Bool
@@ -939,12 +939,12 @@ pub impl[S] @debug.Debug for Root[S]
 pub struct Snapshot {
   // private fields
 } derive(@debug.Debug)
-pub fn Snapshot::Snapshot(state? : StateVector, deletions? : Array[(UInt64, UInt, UInt)], delete_set? : IdSet) -> Self
+pub fn Snapshot::Snapshot(state? : StateVector, deletions? : Array[(UInt64, UInt32, UInt32)], delete_set? : IdSet) -> Self
 pub fn Snapshot::decode(&Decoder) -> Self raise DecodeError
 pub fn Snapshot::decode_v1(Bytes) -> Self raise DecodeError
 pub fn Snapshot::decode_v2(Bytes) -> Self raise DecodeError
 pub fn Snapshot::delete_set(Self) -> IdSet
-pub fn Snapshot::deletions(Self) -> Array[(UInt64, UInt, UInt)]
+pub fn Snapshot::deletions(Self) -> Array[(UInt64, UInt32, UInt32)]
 pub fn Snapshot::encode(Self, &Encoder) -> Unit
 pub fn Snapshot::encode_v1(Self) -> Bytes
 pub fn Snapshot::encode_v2(Self) -> Bytes raise DecodeError
@@ -962,10 +962,10 @@ pub struct StackItem[M] {
   // private fields
 }
 pub fn[M] StackItem::StackItem(Doc, insertions? : IdSet, deletions? : IdSet, meta~ : M) -> Self[M]
-pub fn[M] StackItem::deletions(Self[M]) -> Array[(UInt64, UInt, UInt)]
+pub fn[M] StackItem::deletions(Self[M]) -> Array[(UInt64, UInt32, UInt32)]
 pub fn[M] StackItem::doc(Self[M]) -> Doc
 pub fn[M] StackItem::from_json(Json, Doc, (Json) -> M raise DecodeError) -> Self[M] raise DecodeError
-pub fn[M] StackItem::insertions(Self[M]) -> Array[(UInt64, UInt, UInt)]
+pub fn[M] StackItem::insertions(Self[M]) -> Array[(UInt64, UInt32, UInt32)]
 pub fn[M] StackItem::merge(Self[M], Self[M], (M, M) -> M) -> Unit
 pub fn[M] StackItem::set_meta(Self[M], M) -> Unit
 pub fn[M] StackItem::to_json(Self[M], (M) -> Json) -> Json
@@ -973,7 +973,7 @@ pub fn[M] StackItem::to_json(Self[M], (M) -> Json) -> Json
 pub struct StateVector {
   // private fields
 } derive(@debug.Debug)
-pub fn StateVector::StateVector(entries? : Array[(UInt64, UInt)]) -> Self
+pub fn StateVector::StateVector(entries? : Array[(UInt64, UInt32)]) -> Self
 pub fn StateVector::contains(Self, Id) -> Bool
 pub fn StateVector::contains_client(Self, UInt64) -> Bool
 pub fn StateVector::decode(&Decoder) -> Self raise DecodeError
@@ -982,18 +982,18 @@ pub fn StateVector::decode_v2(Bytes) -> Self raise DecodeError
 pub fn StateVector::encode(Self, &Encoder) -> Unit
 pub fn StateVector::encode_v1(Self) -> Bytes
 pub fn StateVector::encode_v2(Self) -> Bytes raise DecodeError
-pub fn StateVector::entries(Self) -> Array[(UInt64, UInt)]
+pub fn StateVector::entries(Self) -> Array[(UInt64, UInt32)]
 pub fn StateVector::equal(Self, Self) -> Bool
-pub fn StateVector::get(Self, UInt64) -> UInt
-pub fn StateVector::inc_by(Self, UInt64, UInt) -> Unit
+pub fn StateVector::get(Self, UInt64) -> UInt32
+pub fn StateVector::inc_by(Self, UInt64, UInt32) -> Unit
 pub fn StateVector::is_empty(Self) -> Bool
-pub fn StateVector::iter(Self) -> Iter[(UInt64, UInt)]
-pub fn StateVector::length(Self) -> Int
+pub fn StateVector::iter(Self) -> Iter[(UInt64, UInt32)]
+pub fn StateVector::length(Self) -> Int32
 pub fn StateVector::merge(Self, Self) -> Unit
 pub fn StateVector::not_equal(Self, Self) -> Bool
-pub fn StateVector::partial_compare(Self, Self) -> Int?
-pub fn StateVector::set_max(Self, UInt64, UInt) -> Unit
-pub fn StateVector::set_min(Self, UInt64, UInt) -> Unit
+pub fn StateVector::partial_compare(Self, Self) -> Int32?
+pub fn StateVector::set_max(Self, UInt64, UInt32) -> Unit
+pub fn StateVector::set_min(Self, UInt64, UInt32) -> Unit
 pub fn StateVector::to_repr(Self) -> @debug.Repr
 pub impl Decode for StateVector
 pub impl Encode for StateVector
@@ -1044,26 +1044,26 @@ pub fn Text::default_prelim() -> In
 pub fn[M] Text::diff(Self, (YChange) -> M) -> Array[Diff[M]]
 pub fn[M] Text::diff_range(Self, (YChange) -> M, hi? : Snapshot, lo? : Snapshot) -> Array[Diff[M]]
 pub fn Text::equal(Self, Self) -> Bool
-pub fn Text::format(Self, Int, Int, Array[(String, Any)]) -> Unit
+pub fn Text::format(Self, Int32, Int32, Array[(String, Any)]) -> Unit
 pub fn Text::from_branch(Doc, BranchId) -> Self?
 pub fn Text::from_out(Out) -> Self?
 pub fn Text::get_or_insert_root(Doc, String) -> Self
 pub fn Text::get_string(Self) -> String
 pub fn Text::hook(Self) -> Hook[Self]
-pub fn Text::insert(Self, Int, String) -> Unit
-pub fn Text::insert_embed(Self, Int, Any, attributes? : Array[(String, Any)]) -> Unit
-pub fn Text::insert_embed_input(Self, Int, In, attributes? : Array[(String, Any)]) -> Out
-pub fn Text::insert_with_attributes(Self, Int, String, Array[(String, Any)]) -> Unit
-pub fn Text::length(Self) -> Int
+pub fn Text::insert(Self, Int32, String) -> Unit
+pub fn Text::insert_embed(Self, Int32, Any, attributes? : Array[(String, Any)]) -> Unit
+pub fn Text::insert_embed_input(Self, Int32, In, attributes? : Array[(String, Any)]) -> Out
+pub fn Text::insert_with_attributes(Self, Int32, String, Array[(String, Any)]) -> Unit
+pub fn Text::length(Self) -> Int32
 pub fn Text::not_equal(Self, Self) -> Bool
 pub fn Text::observe(Self, String, (TextEvent, Transaction) -> Unit) -> Unit
 pub fn Text::observe_deep(Self, String, (ReadOnlyArray[Event], Transaction) -> Unit) -> Unit
 pub fn Text::push(Self, String) -> Unit
 pub fn Text::quote(Self, QuoteBound, QuoteBound) -> WeakPrelim raise QuoteError
-pub fn Text::remove_range(Self, Int, Int) -> Unit
+pub fn Text::remove_range(Self, Int32, Int32) -> Unit
 pub fn Text::root(String) -> Root[Self]
 pub fn Text::sticky_boundary(Self, assoc? : Assoc) -> StickyIndex
-pub fn Text::sticky_index(Self, Int, assoc? : Assoc) -> StickyIndex?
+pub fn Text::sticky_index(Self, Int32, assoc? : Assoc) -> StickyIndex?
 pub fn Text::to_delta(Self) -> Array[TextChunk]
 pub fn Text::to_input(Self) -> In
 pub fn Text::try_from_out(Out) -> Result[Self, Out]
@@ -1098,7 +1098,7 @@ pub fn Transaction::before_state(Self) -> StateVector
 pub fn Transaction::changed_parent_types(Self) -> ReadOnlyArray[Out]
 pub fn Transaction::cleanups(Self) -> IdSet
 pub fn Transaction::delete_set(Self) -> IdSet
-pub fn Transaction::deletions(Self) -> Array[(UInt64, UInt, UInt)]
+pub fn Transaction::deletions(Self) -> Array[(UInt64, UInt32, UInt32)]
 pub fn Transaction::doc(Self) -> Doc
 pub fn Transaction::encode_update(Self, &Encoder) -> Unit
 pub fn Transaction::encode_update_v1(Self) -> Bytes
@@ -1106,7 +1106,7 @@ pub fn Transaction::encode_update_v2(Self) -> Bytes raise DecodeError
 pub fn Transaction::gc(Self, delete_set? : IdSet) -> Unit
 pub fn Transaction::has_changes(Self) -> Bool
 pub fn Transaction::insert_set(Self) -> IdSet
-pub fn Transaction::insertions(Self) -> Array[(UInt64, UInt, UInt)]
+pub fn Transaction::insertions(Self) -> Array[(UInt64, UInt32, UInt32)]
 pub fn Transaction::is_local(Self) -> Bool
 pub fn Transaction::origin(Self) -> Bytes?
 
@@ -1144,7 +1144,7 @@ pub fn UndefinedRef::as_text(Self) -> Text
 pub fn UndefinedRef::equal(Self, Self) -> Bool
 pub fn UndefinedRef::not_equal(Self, Self) -> Bool
 pub fn UndefinedRef::to_input(Self) -> In
-pub fn UndefinedRef::type_ref(Self) -> Int
+pub fn UndefinedRef::type_ref(Self) -> Int32
 pub impl AsPrelim for UndefinedRef
 pub impl Eq for UndefinedRef
 
@@ -1201,7 +1201,7 @@ pub struct Update {
 pub fn Update::Update() -> Self
 pub fn Update::decode(&Decoder) -> Self raise DecodeError
 pub fn Update::decode_v1(Bytes) -> Self raise DecodeError
-pub fn Update::decode_v2(Bytes, max_items? : Int) -> Self raise DecodeError
+pub fn Update::decode_v2(Bytes, max_items? : Int32) -> Self raise DecodeError
 pub fn Update::delete_set(Self) -> IdSet
 pub fn Update::encode(Self, &Encoder) -> Unit
 pub fn Update::encode_diff_v1(Self, StateVector) -> Bytes
@@ -1282,7 +1282,7 @@ pub fn XmlElement::parent(Self) -> XmlNode?
 pub fn XmlElement::quote(Self, QuoteBound, QuoteBound) -> WeakPrelim raise QuoteError
 pub fn XmlElement::remove_attribute(Self, String) -> Unit
 pub fn XmlElement::sticky_boundary(Self, assoc? : Assoc) -> StickyIndex
-pub fn XmlElement::sticky_index(Self, Int, assoc? : Assoc) -> StickyIndex?
+pub fn XmlElement::sticky_index(Self, Int32, assoc? : Assoc) -> StickyIndex?
 pub fn XmlElement::tag(Self) -> String
 pub fn XmlElement::to_input(Self) -> In
 pub fn XmlElement::try_from_out(Out) -> Result[Self, Out]
@@ -1315,17 +1315,17 @@ pub fn XmlFragment::equal(Self, Self) -> Bool
 pub fn XmlFragment::first_child(Self) -> XmlNode?
 pub fn XmlFragment::from_branch(Doc, BranchId) -> Self?
 pub fn XmlFragment::from_out(Out) -> Self?
-pub fn XmlFragment::get(Self, Int) -> XmlNode?
+pub fn XmlFragment::get(Self, Int32) -> XmlNode?
 pub fn XmlFragment::get_attribute(Self, String) -> Out?
 pub fn XmlFragment::get_or_insert_root(Doc, String) -> Self
 pub fn XmlFragment::get_string(Self) -> String
 pub fn XmlFragment::hook(Self) -> Hook[Self]
-pub fn XmlFragment::insert(Self, Int, In) -> XmlNode
+pub fn XmlFragment::insert(Self, Int32, In) -> XmlNode
 pub fn XmlFragment::insert_attribute(Self, String, Any) -> Unit
-pub fn XmlFragment::insert_element(Self, Int, String) -> XmlElement
-pub fn XmlFragment::insert_fragment(Self, Int) -> Self
-pub fn XmlFragment::insert_text(Self, Int) -> XmlText
-pub fn XmlFragment::length(Self) -> Int
+pub fn XmlFragment::insert_element(Self, Int32, String) -> XmlElement
+pub fn XmlFragment::insert_fragment(Self, Int32) -> Self
+pub fn XmlFragment::insert_text(Self, Int32) -> XmlText
+pub fn XmlFragment::length(Self) -> Int32
 pub fn XmlFragment::not_equal(Self, Self) -> Bool
 pub fn XmlFragment::observe(Self, String, (XmlEvent, Transaction) -> Unit) -> Unit
 pub fn XmlFragment::observe_deep(Self, String, (ReadOnlyArray[Event], Transaction) -> Unit) -> Unit
@@ -1333,12 +1333,12 @@ pub fn XmlFragment::parent(Self) -> XmlNode?
 pub fn XmlFragment::push_back(Self, In) -> XmlNode
 pub fn XmlFragment::push_front(Self, In) -> XmlNode
 pub fn XmlFragment::quote(Self, QuoteBound, QuoteBound) -> WeakPrelim raise QuoteError
-pub fn XmlFragment::remove(Self, Int) -> Unit
+pub fn XmlFragment::remove(Self, Int32) -> Unit
 pub fn XmlFragment::remove_attribute(Self, String) -> Unit
-pub fn XmlFragment::remove_range(Self, Int, Int) -> Unit
+pub fn XmlFragment::remove_range(Self, Int32, Int32) -> Unit
 pub fn XmlFragment::root(String) -> Root[Self]
 pub fn XmlFragment::sticky_boundary(Self, assoc? : Assoc) -> StickyIndex
-pub fn XmlFragment::sticky_index(Self, Int, assoc? : Assoc) -> StickyIndex?
+pub fn XmlFragment::sticky_index(Self, Int32, assoc? : Assoc) -> StickyIndex?
 pub fn XmlFragment::successors(Self) -> Iter[XmlNode]
 pub fn XmlFragment::to_input(Self) -> In
 pub fn XmlFragment::try_from_out(Out) -> Result[Self, Out]
@@ -1395,7 +1395,7 @@ pub fn XmlText::parent(Self) -> XmlNode?
 pub fn XmlText::quote(Self, QuoteBound, QuoteBound) -> WeakPrelim raise QuoteError
 pub fn XmlText::remove_attribute(Self, String) -> Unit
 pub fn XmlText::sticky_boundary(Self, assoc? : Assoc) -> StickyIndex
-pub fn XmlText::sticky_index(Self, Int, assoc? : Assoc) -> StickyIndex?
+pub fn XmlText::sticky_index(Self, Int32, assoc? : Assoc) -> StickyIndex?
 pub fn XmlText::to_input(Self) -> In
 pub fn XmlText::try_from_out(Out) -> Result[Self, Out]
 pub fn XmlText::unobserve(Self, String) -> Bool
@@ -1455,15 +1455,15 @@ pub(open) trait Decode {
 pub(open) trait Decoder : Read {
   fn reset_ds_cur_val(Self) -> Unit
   fn read_to_end(Self) -> Bytes
-  fn read_ds_clock(Self) -> UInt raise DecodeError
-  fn read_ds_len(Self) -> UInt raise DecodeError
+  fn read_ds_clock(Self) -> UInt32 raise DecodeError
+  fn read_ds_len(Self) -> UInt32 raise DecodeError
   fn read_left_id(Self) -> Id raise DecodeError
   fn read_right_id(Self) -> Id raise DecodeError
   fn read_client(Self) -> UInt64 raise DecodeError
   fn read_info(Self) -> Byte raise DecodeError
   fn read_parent_info(Self) -> Bool raise DecodeError
   fn read_type_ref(Self) -> Byte raise DecodeError
-  fn read_len(Self) -> UInt raise DecodeError
+  fn read_len(Self) -> UInt32 raise DecodeError
   fn read_any(Self) -> Any raise DecodeError
   fn read_json(Self) -> Any raise DecodeError
   fn read_key(Self) -> String raise DecodeError
@@ -1483,15 +1483,15 @@ pub(open) trait Encode {
 pub(open) trait Encoder : Write {
   fn to_bytes(Self) -> Bytes raise DecodeError
   fn reset_ds_cur_val(Self) -> Unit
-  fn write_ds_clock(Self, UInt) -> Unit
-  fn write_ds_len(Self, UInt) -> Unit
+  fn write_ds_clock(Self, UInt32) -> Unit
+  fn write_ds_len(Self, UInt32) -> Unit
   fn write_left_id(Self, Id) -> Unit
   fn write_right_id(Self, Id) -> Unit
   fn write_client(Self, UInt64) -> Unit
   fn write_info(Self, Byte) -> Unit
   fn write_parent_info(Self, Bool) -> Unit
   fn write_type_ref(Self, Byte) -> Unit
-  fn write_len(Self, UInt) -> Unit
+  fn write_len(Self, UInt32) -> Unit
   fn write_any(Self, Any) -> Unit
   fn write_json(Self, Any) -> Unit
   fn write_key(Self, String) -> Unit
@@ -1502,9 +1502,9 @@ pub(open) trait FromAny {
 }
 pub impl FromAny for Unit
 pub impl FromAny for Bool
-pub impl FromAny for Int
+pub impl FromAny for Int32
 pub impl FromAny for Int64
-pub impl FromAny for UInt
+pub impl FromAny for UInt32
 pub impl FromAny for UInt64
 pub impl FromAny for Float
 pub impl FromAny for Double
@@ -1519,9 +1519,9 @@ pub(open) trait FromOut {
   fn try_from_out(Out) -> Result[Self, Out]
 }
 pub impl FromOut for Bool
-pub impl FromOut for Int
+pub impl FromOut for Int32
 pub impl FromOut for Int64
-pub impl FromOut for UInt
+pub impl FromOut for UInt32
 pub impl FromOut for Float
 pub impl FromOut for Double
 pub impl FromOut for String
@@ -1541,11 +1541,11 @@ pub(open) trait Protocol {
 }
 
 pub(open) trait Read {
-  fn read_exact(Self, Int) -> Bytes raise DecodeError
+  fn read_exact(Self, Int32) -> Bytes raise DecodeError
   fn read_u8(Self) -> Byte raise DecodeError = _
   fn read_u16(Self) -> UInt16 raise DecodeError = _
-  fn read_u32(Self) -> UInt raise DecodeError = _
-  fn read_u32_be(Self) -> UInt raise DecodeError = _
+  fn read_u32(Self) -> UInt32 raise DecodeError = _
+  fn read_u32_be(Self) -> UInt32 raise DecodeError = _
   fn read_u64(Self) -> UInt64 raise DecodeError = _
   fn read_i64(Self) -> Int64 raise DecodeError = _
   fn read_f32(Self) -> Float raise DecodeError = _
@@ -1575,9 +1575,9 @@ pub impl ToAny for Unit
 pub impl ToAny for Bool
 pub impl ToAny for Byte
 pub impl ToAny for Char
-pub impl ToAny for Int
+pub impl ToAny for Int32
 pub impl ToAny for Int64
-pub impl ToAny for UInt
+pub impl ToAny for UInt32
 pub impl ToAny for UInt16
 pub impl ToAny for UInt64
 pub impl ToAny for Float
@@ -1594,8 +1594,8 @@ pub(open) trait Write {
   fn write_all(Self, Bytes) -> Unit
   fn write_u8(Self, Byte) -> Unit = _
   fn write_u16(Self, UInt16) -> Unit = _
-  fn write_u32(Self, UInt) -> Unit = _
-  fn write_u32_be(Self, UInt) -> Unit = _
+  fn write_u32(Self, UInt32) -> Unit = _
+  fn write_u32_be(Self, UInt32) -> Unit = _
   fn write_u64(Self, UInt64) -> Unit = _
   fn write_i64(Self, Int64) -> Unit = _
   fn write_f32(Self, Float) -> Unit = _
