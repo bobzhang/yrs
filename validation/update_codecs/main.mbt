@@ -5,6 +5,11 @@ fn bytes(value : Json) -> Bytes raise {
 }
 
 ///|
+fn int_array(value : Bytes) -> Json {
+  Json(value.to_array().map(fn(b) { b.to_int() }))
+}
+
+///|
 fn type_ref(value : Json) -> @yrs.TypeRef raise {
   guard value is { "kind": kind, .. } else { abort("type reference") }
   let kind : Int32 = @json.from_json(kind)
@@ -134,10 +139,7 @@ fn decode(ops : Array[Json], decoder : &@yrs.Decoder) -> Json raise {
     }
     values.push(value)
   }
-  {
-    "values": Json(values),
-    "tail": Json(decoder.read_to_end().to_array().map(fn(b) { b.to_int() })),
-  }
+  { "values": Json(values), "tail": int_array(decoder.read_to_end()) }
 }
 
 ///|
@@ -152,11 +154,7 @@ fn run(input : String) -> String raise {
     }
     let v1 = @yrs.Encode::encode_v1(update)
     let v2 = @yrs.Encode::encode_v2(update)
-    return (
-      {
-        "v1": Json(v1.to_array().map(fn(b) { b.to_int() })),
-        "v2": Json(v2.to_array().map(fn(b) { b.to_int() })),
-      } : Json).stringify()
+    return ({ "v1": int_array(v1), "v2": int_array(v2) } : Json).stringify()
   }
   guard request is { "ops": Array(ops), "v2": version, .. } else {
     abort("input")
@@ -169,9 +167,10 @@ fn run(input : String) -> String raise {
   }
   encode(ops, encoder)
   let packet = encoder.to_bytes()
-  let raw = match request {
-    { "bytes": value, .. } => bytes(value)
-    _ => packet
+  let raw = if request is { "bytes": value, .. } {
+    bytes(value)
+  } else {
+    packet
   }
   let decoded = try {
     let decoder : &@yrs.Decoder = if v2 {
@@ -180,18 +179,14 @@ fn run(input : String) -> String raise {
       (@yrs.DecoderV1(raw) : &@yrs.Decoder)
     }
     if request is { "raw": raw_only, .. } && raw_only == Json(true) {
-      Json(decoder.read_to_end().to_array().map(fn(b) { b.to_int() }))
+      int_array(decoder.read_to_end())
     } else {
       decode(ops, decoder)
     }
   } catch {
     _ => Json("error")
   }
-  (
-    {
-      "encoded": Json(packet.to_array().map(fn(b) { b.to_int() })),
-      "decoded": decoded,
-    } : Json).stringify()
+  ({ "encoded": int_array(packet), "decoded": decoded } : Json).stringify()
 }
 
 ///|
