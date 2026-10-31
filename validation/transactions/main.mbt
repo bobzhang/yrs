@@ -16,8 +16,8 @@ fn hex(bytes : Bytes) -> String {
   let digits = "0123456789abcdef"
   for b in bytes {
     let n = b.to_int()
-    out.write_char(digits[n / 16].to_int().unsafe_to_char())
-    out.write_char(digits[n % 16].to_int().unsafe_to_char())
+    out.write_char(digits[n / 16].unsafe_to_char())
+    out.write_char(digits[n % 16].unsafe_to_char())
   }
   out.to_string()
 }
@@ -233,7 +233,7 @@ fn run(input : String, v2 : Bool) -> String raise {
       (
         {
           "docs": Json(current),
-          "events": Json(events[:].to_owned()),
+          "events": Json(events.copy()),
           "replayed": Json(replay),
         } : Json),
     )
