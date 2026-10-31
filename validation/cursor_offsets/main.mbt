@@ -1,4 +1,12 @@
 ///|
+fn offset(index : @yrs.StickyIndex?, doc : @yrs.Doc) -> Json {
+  index
+  .bind(fn(s) { s.get_offset(doc) })
+  .map(fn(o) { Json(o.index) })
+  .unwrap_or(Json::null())
+}
+
+///|
 fn run(input : String) -> String raise {
   guard @json.parse(input)
     is Array([String(value), Number(u, ..), Number(b, ..), before]) else {
@@ -10,7 +18,7 @@ fn run(input : String) -> String raise {
   let c = bytes.get_or_insert_text("text")
   a.insert(0, value)
   bytes.apply_update_v1(utf.encode_state_as_update_v1())
-  let assoc = if before == Json(true) { @yrs.Assoc::Before } else { After }
+  let assoc = if before is True { @yrs.Assoc::Before } else { After }
   let left = a.sticky_index(u.to_int(), assoc~)
   let right = c.sticky_index(b.to_int(), assoc~)
   let rows = []
@@ -21,18 +29,9 @@ fn run(input : String) -> String raise {
           "text": Json(a.get_string()),
           "utf": left.map(fn(s) { s.to_json() }).unwrap_or(Json::null()),
           "bytes": right.map(fn(s) { s.to_json() }).unwrap_or(Json::null()),
-          "utf_offset": left
-          .bind(fn(s) { s.get_offset(utf) })
-          .map(fn(o) { Json(o.index) })
-          .unwrap_or(Json::null()),
-          "byte_offset": left
-          .bind(fn(s) { s.get_offset(bytes) })
-          .map(fn(o) { Json(o.index) })
-          .unwrap_or(Json::null()),
-          "byte_own_offset": right
-          .bind(fn(s) { s.get_offset(bytes) })
-          .map(fn(o) { Json(o.index) })
-          .unwrap_or(Json::null()),
+          "utf_offset": offset(left, utf),
+          "byte_offset": offset(left, bytes),
+          "byte_own_offset": offset(right, bytes),
         } : Json),
     )
     a.insert(0, "é🦀")
