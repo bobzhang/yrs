@@ -22,7 +22,7 @@ fn unhex(s : String) -> Bytes {
   for i = 0; i < s.length(); i = i + 2 {
     bytes.push((digit(s[i]) * 16 + digit(s[i + 1])).to_byte())
   }
-  Bytes::from_array(bytes[:])
+  Bytes::from_array(bytes)
 }
 
 ///|
@@ -54,10 +54,10 @@ fn description(doc : @yrs.Doc) -> Json {
 }
 
 ///|
-fn guids(docs : ReadOnlyArray[@yrs.Doc]) -> Json {
+fn guids(docs : ArrayView[@yrs.Doc]) -> Json {
   let result = docs.iter().map(@yrs.Doc::guid).to_array()
   result.sort()
-  Json(result.map(fn(s) { Json(s) }))
+  Json(result)
 }
 
 ///|
@@ -68,8 +68,8 @@ fn run(input : String, v2 : Bool) -> String raise {
   })
   let roots = docs.map(fn(d) { d.get_or_insert_map("files") })
   let notifications : Array[Json] = []
-  for i in 0..<3 {
-    docs[i].observe_subdocs("events", fn(e, _) {
+  for i, doc in docs {
+    doc.observe_subdocs("events", fn(e, _) {
       notifications.push({
         "doc": Json(i),
         "added": guids(e.added()),
@@ -149,13 +149,7 @@ fn run(input : String, v2 : Bool) -> String raise {
               children[key] = description(d)
             }
           }
-          (
-            {
-              "files": Json(children),
-              "registered": guids(
-                ReadOnlyArray::from_array(docs[i].subdocs()[:]),
-              ),
-            } : Json)
+          { "files": Json(children), "registered": guids(docs[i].subdocs()) }
         }),
       ),
       "events": Json(notifications.copy()),
