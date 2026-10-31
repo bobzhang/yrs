@@ -8,7 +8,7 @@ fn integer(value : Json) -> Int32 {
 fn hex(bytes : Bytes) -> String {
   let out = StringBuilder()
   for b in bytes {
-    out.write_string(b.to_hex())
+    out <+ "\{b.to_hex()}"
   }
   out.to_string()
 }
