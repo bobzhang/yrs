@@ -1,7 +1,12 @@
 ///|
-fn number(value : Json) -> Int32 {
+fn wire_byte(value : Json) -> Byte {
   guard value is Number(n, ..) else { abort("number") }
-  n.to_int()
+  n.to_int().to_byte()
+}
+
+///|
+fn bytes_of(values : ArrayView[Json]) -> Bytes {
+  Bytes::from_array(values.map(wire_byte))
 }
 
 ///|
@@ -12,17 +17,10 @@ fn run(input : String) -> String raise {
   }
   let doc = @yrs.Doc(client_id=1UL, cleanup_formatting=cleanup == Json(true))
   let text = doc.get_or_insert_text("text")
-  doc.apply_update_v1(
-    Bytes::from_array(packet.map(fn(v) { number(v).to_byte() })[:]),
-  )
+  doc.apply_update_v1(bytes_of(packet))
   fn snapshot(value : Json) -> @yrs.Snapshot? raise @yrs.DecodeError {
     match value {
-      Array(bytes) =>
-        Some(
-          @yrs.Snapshot::decode_v1(
-            Bytes::from_array(bytes.map(fn(v) { number(v).to_byte() })[:]),
-          ),
-        )
+      Array(bytes) => Some(@yrs.Snapshot::decode_v1(bytes_of(bytes)))
       _ => None
     }
   }
@@ -34,7 +32,7 @@ fn run(input : String) -> String raise {
   Json(
     chunks.map(fn(d) {
       let attrs = Map::from_array(
-        d.attributes.iter().map(fn(a) { (a.0, a.1.to_json()) }).to_array(),
+        d.attributes.map(fn(a) { (a.0, a.1.to_json()) }),
       )
       {
         "insert": d.insert.to_json(),
