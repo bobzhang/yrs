@@ -5,7 +5,7 @@ fn bytes(value : Json) -> Bytes {
     values.map(fn(v) {
       guard v is Number(n, ..) else { abort("byte") }
       n.to_int().to_byte()
-    })[:],
+    }),
   )
 }
 
@@ -54,7 +54,7 @@ fn view(doc : @yrs.Doc, check_retained : Bool) -> Json raise {
     .unwrap_or(Json::null()),
     "full": info(@yrs.Update::decode_v1(doc.encode_state_as_update_v1())),
     "diff": info(@yrs.Update::decode_v1(wire)),
-    "wire": Json(wire.iter().map(fn(b) { Json(b.to_int()) }).to_array()),
+    "wire": Json(wire.to_array().map(fn(b) { Json(b.to_int()) })),
   }
 }
 
@@ -103,20 +103,21 @@ fn run(input : String) -> String raise {
       { "replayed_original": view(replay, false), "rounds": Json(rounds) } :
       Json).stringify()
   }
-  let before = view(doc, fields.contains("gc"))
+  let check_retained = fields.contains("gc")
+  let before = view(doc, check_retained)
   let saved = doc.prune_pending()
   let pending = saved.map(info).unwrap_or(Json::null())
-  let after = view(doc, fields.contains("gc"))
+  let after = view(doc, check_retained)
   if saved is Some(update) {
     doc.apply_update(update)
   }
-  let restored = view(doc, fields.contains("gc"))
+  let restored = view(doc, check_retained)
   if fields.get("complete") is Some(Array(packets)) {
     for packet in packets {
       doc.apply_update_v1(bytes(packet))
     }
   }
-  let completed = view(doc, fields.contains("gc"))
+  let completed = view(doc, check_retained)
   (
     {
       "before": before,
