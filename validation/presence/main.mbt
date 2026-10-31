@@ -148,7 +148,7 @@ fn run(input : String) -> String raise {
         } : Json)
     })
     snapshots.push(
-      ({ "docs": Json(states), "events": Json(events[:].to_owned()) } : Json),
+      ({ "docs": Json(states), "events": Json(events.copy()) } : Json),
     )
   }
   (
