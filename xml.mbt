@@ -132,9 +132,7 @@ pub fn XmlElement::get_string(self : XmlElement) -> String {
   for (key, value) in self.attributes() {
     out.write_string(" \{key}=\"\{value.to_string()}\"")
   }
-  out.write_string(">")
-  out.write_string(self.as_fragment().get_string())
-  out.write_string("</\{self.tag}>")
+  out <+ ">\{self.as_fragment().get_string()}</\{self.tag}>"
   out.to_string()
 }
 
