@@ -43,7 +43,7 @@ fn run(input : String) -> String raise {
       (number(client).to_uint64(), number(clock).reinterpret_as_uint()),
     ])
     fn bytes(value : Bytes) -> Json {
-      Json(value.iter().map(fn(b) { Json(b.to_int()) }).to_array())
+      Json([ for b in value.iter() => Json(b.to_int()) ])
     }
     let encoded = sticky.encode_v2()
     guard @yrs.StickyIndex::decode_v2(encoded) == sticky else {
