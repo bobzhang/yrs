@@ -18,11 +18,9 @@ fn unhex(s : String) -> Bytes {
       c.to_int() - 87
     }
   }
-  Bytes::from_array(
-    Array::makei(s.length() / 2, fn(i) {
-      (digit(s[i * 2]) * 16 + digit(s[i * 2 + 1])).to_byte()
-    })[:],
-  )
+  Bytes::makei(s.length() / 2, fn(i) {
+    (digit(s[i * 2]) * 16 + digit(s[i * 2 + 1])).to_byte()
+  })
 }
 
 ///|
