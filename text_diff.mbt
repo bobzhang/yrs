@@ -1,8 +1,9 @@
 ///|
+#derive(Eq, Debug)
 pub(all) enum ChangeKind {
   Added
   Removed
-} derive(Eq, Debug)
+}
 
 ///|
 pub extend ChangeKind with Eq::{equal, not_equal}
@@ -11,10 +12,11 @@ pub extend ChangeKind with Eq::{equal, not_equal}
 pub extend ChangeKind with Debug::{to_repr}
 
 ///|
+#derive(Eq, Debug)
 pub(all) struct YChange {
   kind : ChangeKind
   id : Id
-} derive(Eq, Debug)
+}
 
 ///|
 pub extend YChange with Eq::{equal, not_equal}

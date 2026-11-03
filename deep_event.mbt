@@ -1,8 +1,9 @@
 ///|
+#derive(Eq, Debug)
 pub(all) enum PathSegment {
   Key(String)
   Index(UInt32)
-} derive(Eq, Debug)
+}
 
 ///|
 pub fn PathSegment::to_json(self : PathSegment) -> Json {

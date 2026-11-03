@@ -1,27 +1,31 @@
 ///|
+#derive(Debug, Eq)
 pub(all) enum Assoc {
   Before
   After
-} derive(Debug, Eq)
+}
 
 ///|
+#derive(Debug, Eq)
 pub(all) enum IndexScope {
   Relative(Id)
   Nested(Id)
   Root(String)
-} derive(Debug, Eq)
+}
 
 ///|
+#derive(Debug, Eq, Hash)
 pub(all) enum BranchId {
   Nested(Id)
   Root(String)
-} derive(Debug, Eq, Hash)
+}
 
 ///|
+#derive(Debug, Eq)
 pub(all) struct StickyIndex {
   scope : IndexScope
   assoc : Assoc
-} derive(Debug, Eq)
+}
 
 ///|
 pub fn StickyIndex::StickyIndex(
@@ -32,11 +36,12 @@ pub fn StickyIndex::StickyIndex(
 }
 
 ///|
+#derive(Debug, Eq)
 pub(all) struct Offset {
   branch : BranchId
   index : Int32
   assoc : Assoc
-} derive(Debug, Eq)
+}
 
 ///|
 pub fn StickyIndex::id(self : StickyIndex) -> Id? {

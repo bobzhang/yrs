@@ -1,6 +1,7 @@
 ///|
 /// Shared-type metadata used by update codecs. XmlHook and Undefined preserve
 /// legacy/untyped descriptors even when no concrete collection handle exists.
+#derive(Eq, Debug)
 pub(all) enum TypeRef {
   Array
   Map
@@ -12,7 +13,7 @@ pub(all) enum TypeRef {
   WeakLink(LinkSource)
   SubDoc
   Undefined
-} derive(Eq, Debug)
+}
 
 ///|
 pub fn TypeRef::kind(self : TypeRef) -> Byte {

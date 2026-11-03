@@ -1,10 +1,11 @@
 ///|
 /// A logical document version: observed insert clocks and deletion ranges.
 /// The snapshot owns its metadata; later edits do not mutate it.
+#derive(Debug)
 pub struct Snapshot {
   priv state : StateVector
   priv deletes : Map[UInt64, Array[(UInt32, UInt32)]]
-} derive(Debug)
+}
 
 ///|
 /// Deletion tuples contain client ID, inclusive start and exclusive end.

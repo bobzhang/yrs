@@ -77,10 +77,11 @@ pub fn[M] StackItem::doc(self : StackItem[M]) -> Doc {
 }
 
 ///|
+#derive(Eq, Debug)
 pub(all) enum UndoEventKind {
   Undo
   Redo
-} derive(Eq, Debug)
+}
 
 ///|
 pub extend UndoEventKind with Eq::{equal, not_equal}

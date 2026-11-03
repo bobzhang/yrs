@@ -1,8 +1,9 @@
 ///|
+#derive(Debug, Eq)
 pub(all) struct AwarenessEntry {
   clock : UInt32
   json : String
-} derive(Debug, Eq)
+}
 
 ///|
 pub struct AwarenessUpdate {
@@ -53,18 +54,20 @@ pub fn AwarenessUpdate::decode_v1(
 }
 
 ///|
+#derive(Debug, Eq)
 pub(all) struct AwarenessState {
   clock : UInt32
   last_updated : UInt64
   data : String?
-} derive(Debug, Eq)
+}
 
 ///|
+#derive(Debug, Eq)
 pub(all) struct AwarenessSummary {
   added : ReadOnlyArray[UInt64]
   updated : ReadOnlyArray[UInt64]
   removed : ReadOnlyArray[UInt64]
-} derive(Debug, Eq)
+}
 
 ///|
 pub fn AwarenessSummary::all_changes(self : AwarenessSummary) -> Array[UInt64] {
@@ -84,9 +87,10 @@ fn AwarenessSummary::is_empty(self : AwarenessSummary) -> Bool {
 }
 
 ///|
+#derive(Debug)
 pub suberror AwarenessError {
   ClientNotFound(UInt64)
-} derive(Debug)
+}
 
 ///|
 pub extend AwarenessError with Debug::{to_repr}

@@ -1,9 +1,10 @@
 ///|
 /// User-facing text offsets. CRDT item clocks always count UTF-16 code units.
+#derive(Eq, Debug)
 pub(all) enum OffsetKind {
   Utf16
   Bytes
-} derive(Eq, Debug)
+}
 
 ///|
 pub extend OffsetKind with Eq::{equal, not_equal}

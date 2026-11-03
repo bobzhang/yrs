@@ -1,9 +1,10 @@
 ///|
 /// A named attribution value attached to CRDT identities.
+#derive(Eq, Debug)
 pub(all) struct ContentAttribute[A] {
   name : String
   value : A
-} derive(Eq, Debug)
+}
 
 ///|
 pub fn[A] ContentAttribute::ContentAttribute(
@@ -15,9 +16,10 @@ pub fn[A] ContentAttribute::ContentAttribute(
 
 ///|
 /// Attribute equality is independent of order, as in Yrs.
+#derive(Debug)
 pub struct ContentAttributes[A] {
   priv values : ReadOnlyArray[ContentAttribute[A]]
-} derive(Debug)
+}
 
 ///|
 pub fn[A] ContentAttributes::ContentAttributes(
@@ -60,11 +62,12 @@ pub fn[A : Eq] ContentAttributes::merge(
 
 ///|
 /// An attributed half-open clock interval. The client is carried by IdMap.
+#derive(Eq, Debug)
 pub(all) struct AttrRange[A] {
   start : UInt32
   end : UInt32
   attrs : ContentAttributes[A]
-} derive(Eq, Debug)
+}
 
 ///|
 pub fn[A] AttrRange::AttrRange(
@@ -78,11 +81,12 @@ pub fn[A] AttrRange::AttrRange(
 
 ///|
 /// A contiguous interval of identities from one client.
+#derive(Eq, Debug)
 pub(all) struct BlockRange {
   client : UInt64
   clock : UInt32
   length : UInt32
-} derive(Eq, Debug)
+}
 
 ///|
 pub fn BlockRange::BlockRange(

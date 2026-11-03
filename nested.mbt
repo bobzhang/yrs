@@ -1,5 +1,6 @@
 ///|
 /// A CRDT value is either an immutable lib0 value or a live shared-type handle.
+#derive(Eq)
 pub(all) enum Out {
   Value(Any)
   Subdoc(Doc)
@@ -11,7 +12,7 @@ pub(all) enum Out {
   XmlFragment(XmlFragment)
   XmlText(XmlText)
   WeakLink(WeakRef)
-} derive(Eq)
+}
 
 ///|
 fn Doc::shared_output(self : Doc, id : Id, kind : SharedKind) -> Out {

@@ -37,45 +37,53 @@ pub fn uuid_v4(() -> Bytes) -> String
 pub fn uuid_v4_from(Bytes) -> String
 
 // Errors
+#derive(@debug.Debug)
 pub suberror AwarenessError {
   ClientNotFound(UInt64)
-} derive(@debug.Debug)
+}
 pub fn AwarenessError::to_repr(Self) -> @debug.Repr
 
+#derive(@debug.Debug)
 pub(all) suberror DecodeError {
   InvalidData(String)
-} derive(@debug.Debug)
+}
 pub fn DecodeError::to_repr(Self) -> @debug.Repr
 
+#derive(@debug.Debug)
 pub suberror JsonPathError {
   InvalidJsonPath(String)
-} derive(@debug.Debug)
+}
 pub fn JsonPathError::to_repr(Self) -> @debug.Repr
 
+#derive(@debug.Debug)
 pub(all) suberror ProtocolError {
   PermissionDenied(String)
   UnsupportedMessage(Byte)
-} derive(@debug.Debug)
+}
 pub fn ProtocolError::to_repr(Self) -> @debug.Repr
 
+#derive(@debug.Debug)
 pub(all) suberror QuoteError {
   OutOfBounds
-} derive(@debug.Debug)
+}
 pub fn QuoteError::to_repr(Self) -> @debug.Repr
 
+#derive(@debug.Debug)
 pub(all) suberror ValueDecodeError {
   TypeMismatch(String)
   OutOfRange(String)
-} derive(@debug.Debug)
+}
 pub fn ValueDecodeError::to_repr(Self) -> @debug.Repr
 
+#derive(@debug.Debug)
 pub(all) suberror ValueEncodeError {
   UnrepresentableInt
   Custom(String)
-} derive(@debug.Debug)
+}
 pub fn ValueEncodeError::to_repr(Self) -> @debug.Repr
 
 // Types and methods
+#derive(@debug.Debug)
 pub(all) enum Any {
   Undefined
   Null
@@ -86,7 +94,7 @@ pub(all) enum Any {
   Array(ReadOnlyArray[Any])
   Object(ReadOnlyArray[(String, Any)])
   Buffer(Bytes)
-} derive(@debug.Debug)
+}
 pub fn[T : FromOut] Any::cast(Self) -> Result[T, Self]
 pub fn Any::decode(Bytes) -> Self raise DecodeError
 pub fn Any::decode_from(&Read, max_values? : Int32) -> Self raise DecodeError
@@ -94,12 +102,12 @@ pub fn Any::encode(Self) -> Bytes
 pub fn Any::encode_to(Self, &Write) -> Unit
 pub fn Any::equal(Self, Self) -> Bool
 pub fn Any::from_any(Self) -> Self raise ValueDecodeError
-pub fn Any::from_json(Json) -> Self
+pub fn Any::from_json(@json.Json) -> Self
 pub fn Any::json_path(Self, JsonPath) -> Iter[Self]
 pub fn Any::not_equal(Self, Self) -> Bool
 pub fn Any::to_any(Self) -> Self raise ValueEncodeError
 pub fn Any::to_input(Self) -> In
-pub fn Any::to_json(Self) -> Json
+pub fn Any::to_json(Self) -> @json.Json
 pub fn Any::to_repr(Self) -> @debug.Repr
 pub fn Any::to_string(Self) -> String
 pub fn Any::try_into_iter(Self) -> Iter[(String?, Self)]?
@@ -151,7 +159,7 @@ pub fn ArrayRef::sticky_boundary(Self, assoc? : Assoc) -> StickyIndex
 pub fn ArrayRef::sticky_index(Self, Int32, assoc? : Assoc) -> StickyIndex?
 pub fn ArrayRef::to_array(Self) -> Array[Out]
 pub fn ArrayRef::to_input(Self) -> In
-pub fn ArrayRef::to_json(Self) -> Json
+pub fn ArrayRef::to_json(Self) -> @json.Json
 pub fn ArrayRef::try_from_out(Out) -> Result[Self, Out]
 pub fn ArrayRef::type_ref() -> TypeRef
 pub fn ArrayRef::unobserve(Self, String) -> Bool
@@ -163,10 +171,11 @@ pub impl RootRef for ArrayRef
 pub impl SharedRef for ArrayRef
 pub impl Eq for ArrayRef
 
+#derive(Eq, @debug.Debug)
 pub(all) enum Assoc {
   Before
   After
-} derive(Eq, @debug.Debug)
+}
 pub fn Assoc::decode(&Decoder) -> Self raise DecodeError
 pub fn Assoc::decode_v1(Bytes) -> Self raise DecodeError
 pub fn Assoc::decode_v2(Bytes) -> Self raise DecodeError
@@ -179,11 +188,12 @@ pub fn Assoc::to_repr(Self) -> @debug.Repr
 pub impl Decode for Assoc
 pub impl Encode for Assoc
 
+#derive(Eq, @debug.Debug)
 pub(all) struct AttrRange[A] {
   start : UInt32
   end : UInt32
   attrs : ContentAttributes[A]
-} derive(Eq, @debug.Debug)
+}
 pub fn[A] AttrRange::AttrRange(UInt32, UInt32, attrs? : ContentAttributes[A]) -> Self[A]
 pub fn[A : Eq] AttrRange::equal(Self[A], Self[A]) -> Bool
 pub fn[A : Eq] AttrRange::not_equal(Self[A], Self[A]) -> Bool
@@ -200,44 +210,47 @@ pub fn Awareness::doc(Self) -> Doc
 pub fn Awareness::entries(Self) -> Array[(UInt64, AwarenessState)]
 pub fn Awareness::handle_message(Self, Message) -> Message? raise
 pub fn Awareness::handle_sync(Self, Bytes) -> Array[Message] raise
-pub fn Awareness::local_state(Self) -> Json?
+pub fn Awareness::local_state(Self) -> @json.Json?
 pub fn Awareness::local_state_raw(Self) -> String?
 pub fn Awareness::meta(Self, UInt64) -> (UInt32, UInt64)?
 pub fn Awareness::on_change(Self, String, (Self, AwarenessSummary, Bytes?) -> Unit) -> Unit
 pub fn Awareness::on_update(Self, String, (Self, AwarenessSummary, Bytes?) -> Unit) -> Unit
 pub fn Awareness::remove_state(Self, UInt64) -> Unit
-pub fn Awareness::set_local_state(Self, Json) -> Unit
+pub fn Awareness::set_local_state(Self, @json.Json) -> Unit
 pub fn Awareness::set_local_state_raw(Self, String) -> Unit
 pub fn Awareness::start_sync(Self) -> Bytes
-pub fn Awareness::state(Self, UInt64) -> Json?
+pub fn Awareness::state(Self, UInt64) -> @json.Json?
 pub fn Awareness::state_raw(Self, UInt64) -> String?
 pub fn Awareness::unobserve_change(Self, String) -> Bool
 pub fn Awareness::unobserve_update(Self, String) -> Bool
 pub fn Awareness::update(Self) -> AwarenessUpdate
 pub fn Awareness::update_with_clients(Self, Array[UInt64]) -> AwarenessUpdate raise AwarenessError
 
+#derive(Eq, @debug.Debug)
 pub(all) struct AwarenessEntry {
   clock : UInt32
   json : String
-} derive(Eq, @debug.Debug)
+}
 pub fn AwarenessEntry::equal(Self, Self) -> Bool
 pub fn AwarenessEntry::not_equal(Self, Self) -> Bool
 pub fn AwarenessEntry::to_repr(Self) -> @debug.Repr
 
+#derive(Eq, @debug.Debug)
 pub(all) struct AwarenessState {
   clock : UInt32
   last_updated : UInt64
   data : String?
-} derive(Eq, @debug.Debug)
+}
 pub fn AwarenessState::equal(Self, Self) -> Bool
 pub fn AwarenessState::not_equal(Self, Self) -> Bool
 pub fn AwarenessState::to_repr(Self) -> @debug.Repr
 
+#derive(Eq, @debug.Debug)
 pub(all) struct AwarenessSummary {
   added : ReadOnlyArray[UInt64]
   updated : ReadOnlyArray[UInt64]
   removed : ReadOnlyArray[UInt64]
-} derive(Eq, @debug.Debug)
+}
 pub fn AwarenessSummary::all_changes(Self) -> Array[UInt64]
 pub fn AwarenessSummary::equal(Self, Self) -> Bool
 pub fn AwarenessSummary::not_equal(Self, Self) -> Bool
@@ -251,11 +264,12 @@ pub fn AwarenessUpdate::decode_v1(Bytes) -> Self raise DecodeError
 pub fn AwarenessUpdate::encode_v1(Self) -> Bytes
 pub fn AwarenessUpdate::entries(Self) -> Array[(UInt64, AwarenessEntry)]
 
+#derive(Eq, @debug.Debug)
 pub(all) struct BlockRange {
   client : UInt64
   clock : UInt32
   length : UInt32
-} derive(Eq, @debug.Debug)
+}
 pub fn BlockRange::BlockRange(UInt64, UInt32, UInt32) -> Self
 pub fn BlockRange::clock_end(Self) -> UInt32
 pub fn BlockRange::clock_range(Self) -> (UInt32, UInt32)
@@ -267,17 +281,18 @@ pub fn BlockRange::not_equal(Self, Self) -> Bool
 pub fn BlockRange::slice(Self, UInt32) -> Self
 pub fn BlockRange::to_repr(Self) -> @debug.Repr
 
+#derive(Eq, Hash, @debug.Debug)
 pub(all) enum BranchId {
   Nested(Id)
   Root(String)
-} derive(Eq, Hash, @debug.Debug)
+}
 pub fn BranchId::equal(Self, Self) -> Bool
-pub fn BranchId::from_json(Json) -> Self raise DecodeError
+pub fn BranchId::from_json(@json.Json) -> Self raise DecodeError
 pub fn BranchId::get(Self, Doc) -> Out?
 pub fn BranchId::hash(Self) -> Int32
 pub fn BranchId::hash_combine(Self, Hasher) -> Unit
 pub fn BranchId::not_equal(Self, Self) -> Bool
-pub fn BranchId::to_json(Self) -> Json
+pub fn BranchId::to_json(Self) -> @json.Json
 pub fn BranchId::to_repr(Self) -> @debug.Repr
 
 pub struct ByteWriter {
@@ -306,28 +321,31 @@ pub(all) enum Change {
   Removed(Int32)
   Retain(Int32)
 }
-pub fn Change::to_json(Self) -> Json
+pub fn Change::to_json(Self) -> @json.Json
 
+#derive(Eq, @debug.Debug)
 pub(all) enum ChangeKind {
   Added
   Removed
-} derive(Eq, @debug.Debug)
+}
 pub fn ChangeKind::equal(Self, Self) -> Bool
 pub fn ChangeKind::not_equal(Self, Self) -> Bool
 pub fn ChangeKind::to_repr(Self) -> @debug.Repr
 
+#derive(Eq, @debug.Debug)
 pub(all) struct ContentAttribute[A] {
   name : String
   value : A
-} derive(Eq, @debug.Debug)
+}
 pub fn[A] ContentAttribute::ContentAttribute(String, A) -> Self[A]
 pub fn[A : Eq] ContentAttribute::equal(Self[A], Self[A]) -> Bool
 pub fn[A : Eq] ContentAttribute::not_equal(Self[A], Self[A]) -> Bool
 pub fn[A : @debug.Debug] ContentAttribute::to_repr(Self[A]) -> @debug.Repr
 
+#derive(@debug.Debug)
 pub struct ContentAttributes[A] {
   // private fields
-} derive(@debug.Debug)
+}
 pub fn[A] ContentAttributes::ContentAttributes(values? : Array[ContentAttribute[A]]) -> Self[A]
 pub fn[A] ContentAttributes::as_array(Self[A]) -> Array[ContentAttribute[A]]
 pub fn[A : Eq] ContentAttributes::equal(Self[A], Self[A]) -> Bool
@@ -457,7 +475,7 @@ pub fn DeltaOf::insert_with(In, ReadOnlyArray[(String, Any)]) -> Self[In]
 pub fn[A, B] DeltaOf::map(Self[A], (A) -> B raise?) -> Self[B] raise?
 pub fn DeltaOf::retain(Int32) -> Self[In]
 pub fn DeltaOf::to_input(Self[Out]) -> Self[In]
-pub fn DeltaOf::to_json(Self[Out]) -> Json
+pub fn DeltaOf::to_json(Self[Out]) -> @json.Json
 
 pub(all) struct Diff[M] {
   insert : Out
@@ -613,7 +631,7 @@ pub(all) enum EntryChange {
   Updated(Out, Out)
   Removed(Out)
 }
-pub fn EntryChange::to_json(Self) -> Json
+pub fn EntryChange::to_json(Self) -> @json.Json
 
 pub(all) enum Event {
   Text(TextEvent)
@@ -631,7 +649,7 @@ pub struct Hook[S] {
 }
 pub fn[S] Hook::Hook(BranchId) -> Self[S]
 pub fn[S] Hook::equal(Self[S], Self[S]) -> Bool
-pub fn[S] Hook::from_json(Json) -> Self[S] raise DecodeError
+pub fn[S] Hook::from_json(@json.Json) -> Self[S] raise DecodeError
 pub fn[S : SharedRef] Hook::get(Self[S], Doc) -> S?
 pub fn[S] Hook::hash(Self[S]) -> Int32
 pub fn[S] Hook::hash_combine(Self[S], Hasher) -> Unit
@@ -639,19 +657,20 @@ pub fn[S] Hook::id(Self[S]) -> BranchId
 pub fn[S] Hook::into_nested(Self[S]) -> Nested[S]?
 pub fn[S : RootRef] Hook::into_root(Self[S]) -> Root[S]?
 pub fn[S] Hook::not_equal(Self[S], Self[S]) -> Bool
-pub fn[S] Hook::to_json(Self[S]) -> Json
+pub fn[S] Hook::to_json(Self[S]) -> @json.Json
 pub fn[S] Hook::to_repr(Self[S]) -> @debug.Repr
 pub impl[S] Eq for Hook[S]
 pub impl[S] Hash for Hook[S]
 pub impl[S] @debug.Debug for Hook[S]
 
+#derive(Compare, Eq, Hash, @debug.Debug)
 pub(all) struct Id {
   client : UInt64
   clock : UInt32
-} derive(Compare, Eq, Hash, @debug.Debug)
+}
 pub fn Id::compare(Self, Self) -> Int32
 pub fn Id::equal(Self, Self) -> Bool
-pub fn Id::from_json(Json) -> Self raise DecodeError
+pub fn Id::from_json(@json.Json) -> Self raise DecodeError
 pub fn Id::hash(Self) -> Int32
 pub fn Id::hash_combine(Self, Hasher) -> Unit
 pub fn Id::not_equal(Self, Self) -> Bool
@@ -659,7 +678,7 @@ pub fn Id::op_ge(Self, Self) -> Bool
 pub fn Id::op_gt(Self, Self) -> Bool
 pub fn Id::op_le(Self, Self) -> Bool
 pub fn Id::op_lt(Self, Self) -> Bool
-pub fn Id::to_json(Self) -> Json
+pub fn Id::to_json(Self) -> @json.Json
 pub fn Id::to_repr(Self) -> @debug.Repr
 
 pub struct IdMap[A] {
@@ -703,7 +722,7 @@ pub fn IdSet::diff_with(Self, Self) -> Unit
 pub fn IdSet::encode(Self, &Encoder) -> Unit
 pub fn IdSet::encode_v1(Self) -> Bytes
 pub fn IdSet::encode_v2(Self) -> Bytes raise DecodeError
-pub fn IdSet::from_json(Json) -> Self raise DecodeError
+pub fn IdSet::from_json(@json.Json) -> Self raise DecodeError
 pub fn IdSet::get(Self, UInt64) -> Array[(UInt32, UInt32)]?
 pub fn IdSet::insert(Self, Id, UInt32) -> Unit
 pub fn IdSet::intersect(Self, Self) -> Self
@@ -714,7 +733,7 @@ pub fn IdSet::merge(Self, Self) -> Self
 pub fn IdSet::merge_with(Self, Self) -> Unit
 pub fn IdSet::ranges(Self) -> Array[(UInt64, UInt32, UInt32)]
 pub fn IdSet::remove_range(Self, Id, UInt32) -> Unit
-pub fn IdSet::to_json(Self) -> Json
+pub fn IdSet::to_json(Self) -> @json.Json
 pub impl Decode for IdSet
 pub impl Encode for IdSet
 
@@ -730,11 +749,12 @@ pub(all) enum In {
   WeakLink(WeakPrelim)
 }
 
+#derive(Eq, @debug.Debug)
 pub(all) enum IndexScope {
   Relative(Id)
   Nested(Id)
   Root(String)
-} derive(Eq, @debug.Debug)
+}
 pub fn IndexScope::decode(&Decoder) -> Self raise DecodeError
 pub fn IndexScope::decode_v1(Bytes) -> Self raise DecodeError
 pub fn IndexScope::decode_v2(Bytes) -> Self raise DecodeError
@@ -752,10 +772,11 @@ pub struct JsonPath {
 }
 pub fn JsonPath::parse(String) -> Self raise JsonPathError
 
+#derive(Eq, @debug.Debug)
 pub(all) struct LinkSource {
   start : StickyIndex
   end : StickyIndex
-} derive(Eq, @debug.Debug)
+}
 pub fn LinkSource::LinkSource(StickyIndex, StickyIndex) -> Self
 pub fn LinkSource::equal(Self, Self) -> Bool
 pub fn LinkSource::get_string(Self, Doc) -> String
@@ -773,7 +794,7 @@ pub struct MapEvent {
 pub fn MapEvent::keys(Self) -> Map[String, EntryChange]
 pub fn MapEvent::path(Self) -> ReadOnlyArray[PathSegment]
 pub fn MapEvent::target(Self) -> MapRef
-pub fn MapEvent::to_json(Self) -> Json
+pub fn MapEvent::to_json(Self) -> @json.Json
 
 pub struct MapRef {
   // private fields
@@ -813,7 +834,7 @@ pub fn MapRef::remove(Self, String) -> Unit
 pub fn MapRef::remove_entry(Self, String) -> Out?
 pub fn MapRef::root(String) -> Root[Self]
 pub fn MapRef::to_input(Self) -> In
-pub fn MapRef::to_json(Self) -> Json
+pub fn MapRef::to_json(Self) -> @json.Json
 pub fn MapRef::try_from_out(Out) -> Result[Self, Out]
 pub fn MapRef::try_update(Self, String, Any) -> Bool
 pub fn MapRef::type_ref() -> TypeRef
@@ -861,23 +882,26 @@ pub fn[K : Hash + Eq, F] Observer::subscribe(Self[K, F], K, F) -> Unit
 pub fn[K, F] Observer::trigger(Self[K, F], (F) -> Unit) -> Unit
 pub fn[K : Hash + Eq, F] Observer::unsubscribe(Self[K, F], K) -> Bool
 
+#derive(Eq, @debug.Debug)
 pub(all) struct Offset {
   branch : BranchId
   index : Int32
   assoc : Assoc
-} derive(Eq, @debug.Debug)
+}
 pub fn Offset::equal(Self, Self) -> Bool
 pub fn Offset::not_equal(Self, Self) -> Bool
 pub fn Offset::to_repr(Self) -> @debug.Repr
 
+#derive(Eq, @debug.Debug)
 pub(all) enum OffsetKind {
   Utf16
   Bytes
-} derive(Eq, @debug.Debug)
+}
 pub fn OffsetKind::equal(Self, Self) -> Bool
 pub fn OffsetKind::not_equal(Self, Self) -> Bool
 pub fn OffsetKind::to_repr(Self) -> @debug.Repr
 
+#derive(Eq)
 pub(all) enum Out {
   Value(Any)
   Subdoc(Doc)
@@ -889,7 +913,7 @@ pub(all) enum Out {
   XmlFragment(XmlFragment)
   XmlText(XmlText)
   WeakLink(WeakRef)
-} derive(Eq)
+}
 pub fn Out::branch_id(Self) -> BranchId?
 pub fn[T : FromOut] Out::cast(Self) -> Result[T, Self]
 pub fn Out::equal(Self, Self) -> Bool
@@ -897,25 +921,27 @@ pub fn Out::is_deleted(Self) -> Bool
 pub fn Out::not_equal(Self, Self) -> Bool
 pub fn Out::to_any(Self) -> Any
 pub fn Out::to_input(Self) -> In
-pub fn Out::to_json(Self) -> Json
+pub fn Out::to_json(Self) -> @json.Json
 pub fn Out::to_string(Self) -> String
 pub fn Out::type_ref(Self) -> TypeRef?
 pub impl AsPrelim for Out
 
+#derive(Eq, @debug.Debug)
 pub(all) enum PathSegment {
   Key(String)
   Index(UInt32)
-} derive(Eq, @debug.Debug)
+}
 pub fn PathSegment::equal(Self, Self) -> Bool
 pub fn PathSegment::not_equal(Self, Self) -> Bool
-pub fn PathSegment::to_json(Self) -> Json
+pub fn PathSegment::to_json(Self) -> @json.Json
 pub fn PathSegment::to_repr(Self) -> @debug.Repr
 
+#derive(Eq, @debug.Debug)
 pub(all) enum QuoteBound {
   Included(Int32)
   Excluded(Int32)
   Unbounded
-} derive(Eq, @debug.Debug)
+}
 pub fn QuoteBound::equal(Self, Self) -> Bool
 pub fn QuoteBound::not_equal(Self, Self) -> Bool
 pub fn QuoteBound::to_repr(Self) -> @debug.Repr
@@ -936,9 +962,10 @@ pub impl[S] Eq for Root[S]
 pub impl[S] Hash for Root[S]
 pub impl[S] @debug.Debug for Root[S]
 
+#derive(@debug.Debug)
 pub struct Snapshot {
   // private fields
-} derive(@debug.Debug)
+}
 pub fn Snapshot::Snapshot(state? : StateVector, deletions? : Array[(UInt64, UInt32, UInt32)], delete_set? : IdSet) -> Self
 pub fn Snapshot::decode(&Decoder) -> Self raise DecodeError
 pub fn Snapshot::decode_v1(Bytes) -> Self raise DecodeError
@@ -964,15 +991,16 @@ pub struct StackItem[M] {
 pub fn[M] StackItem::StackItem(Doc, insertions? : IdSet, deletions? : IdSet, meta~ : M) -> Self[M]
 pub fn[M] StackItem::deletions(Self[M]) -> Array[(UInt64, UInt32, UInt32)]
 pub fn[M] StackItem::doc(Self[M]) -> Doc
-pub fn[M] StackItem::from_json(Json, Doc, (Json) -> M raise DecodeError) -> Self[M] raise DecodeError
+pub fn[M] StackItem::from_json(@json.Json, Doc, (@json.Json) -> M raise DecodeError) -> Self[M] raise DecodeError
 pub fn[M] StackItem::insertions(Self[M]) -> Array[(UInt64, UInt32, UInt32)]
 pub fn[M] StackItem::merge(Self[M], Self[M], (M, M) -> M) -> Unit
 pub fn[M] StackItem::set_meta(Self[M], M) -> Unit
-pub fn[M] StackItem::to_json(Self[M], (M) -> Json) -> Json
+pub fn[M] StackItem::to_json(Self[M], (M) -> @json.Json) -> @json.Json
 
+#derive(@debug.Debug)
 pub struct StateVector {
   // private fields
-} derive(@debug.Debug)
+}
 pub fn StateVector::StateVector(entries? : Array[(UInt64, UInt32)]) -> Self
 pub fn StateVector::contains(Self, Id) -> Bool
 pub fn StateVector::contains_client(Self, UInt64) -> Bool
@@ -999,10 +1027,11 @@ pub impl Decode for StateVector
 pub impl Encode for StateVector
 pub impl Eq for StateVector
 
+#derive(Eq, @debug.Debug)
 pub(all) struct StickyIndex {
   scope : IndexScope
   assoc : Assoc
-} derive(Eq, @debug.Debug)
+}
 pub fn StickyIndex::StickyIndex(scope~ : IndexScope, assoc? : Assoc) -> Self
 pub fn StickyIndex::decode(&Decoder) -> Self raise DecodeError
 pub fn StickyIndex::decode_v1(Bytes) -> Self raise DecodeError
@@ -1011,14 +1040,14 @@ pub fn StickyIndex::encode(Self, &Encoder) -> Unit
 pub fn StickyIndex::encode_v1(Self) -> Bytes
 pub fn StickyIndex::encode_v2(Self) -> Bytes raise DecodeError
 pub fn StickyIndex::equal(Self, Self) -> Bool
-pub fn StickyIndex::from_json(Json) -> Self raise DecodeError
+pub fn StickyIndex::from_json(@json.Json) -> Self raise DecodeError
 pub fn StickyIndex::get_offset(Self, Doc) -> Offset?
 pub fn StickyIndex::id(Self) -> Id?
 pub fn StickyIndex::is_nested(Self) -> Bool
 pub fn StickyIndex::is_relative(Self) -> Bool
 pub fn StickyIndex::is_root(Self) -> Bool
 pub fn StickyIndex::not_equal(Self, Self) -> Bool
-pub fn StickyIndex::to_json(Self) -> Json
+pub fn StickyIndex::to_json(Self) -> @json.Json
 pub fn StickyIndex::to_repr(Self) -> @debug.Repr
 pub impl Decode for StickyIndex
 pub impl Encode for StickyIndex
@@ -1081,7 +1110,7 @@ pub(all) struct TextChunk {
   insert : Out
   attributes : ReadOnlyArray[(String, Any)]
 }
-pub fn TextChunk::to_json(Self) -> Json
+pub fn TextChunk::to_json(Self) -> @json.Json
 
 pub struct TextEvent {
   // private fields
@@ -1110,6 +1139,7 @@ pub fn Transaction::insertions(Self) -> Array[(UInt64, UInt32, UInt32)]
 pub fn Transaction::is_local(Self) -> Bool
 pub fn Transaction::origin(Self) -> Bytes?
 
+#derive(Eq, @debug.Debug)
 pub(all) enum TypeRef {
   Array
   Map
@@ -1121,7 +1151,7 @@ pub(all) enum TypeRef {
   WeakLink(LinkSource)
   SubDoc
   Undefined
-} derive(Eq, @debug.Debug)
+}
 pub fn TypeRef::decode(&Decoder) -> Self raise DecodeError
 pub fn TypeRef::decode_v1(Bytes) -> Self raise DecodeError
 pub fn TypeRef::decode_v2(Bytes) -> Self raise DecodeError
@@ -1158,10 +1188,11 @@ pub fn[M] UndoEvent::kind(Self[M]) -> UndoEventKind
 pub fn[M] UndoEvent::origin(Self[M]) -> Bytes?
 pub fn[M] UndoEvent::set_meta(Self[M], M) -> Unit
 
+#derive(Eq, @debug.Debug)
 pub(all) enum UndoEventKind {
   Undo
   Redo
-} derive(Eq, @debug.Debug)
+}
 pub fn UndoEventKind::equal(Self, Self) -> Bool
 pub fn UndoEventKind::not_equal(Self, Self) -> Bool
 pub fn UndoEventKind::to_repr(Self) -> @debug.Repr
@@ -1352,11 +1383,12 @@ pub impl RootRef for XmlFragment
 pub impl SharedRef for XmlFragment
 pub impl Eq for XmlFragment
 
+#derive(Eq)
 pub(all) enum XmlNode {
   Element(XmlElement)
   Fragment(XmlFragment)
   Text(XmlText)
-} derive(Eq)
+}
 pub fn XmlNode::as_out(Self) -> Out
 pub fn XmlNode::branch_id(Self) -> BranchId
 pub fn XmlNode::equal(Self, Self) -> Bool
@@ -1414,10 +1446,11 @@ pub fn XmlTextEvent::keys(Self) -> Map[String, EntryChange]
 pub fn XmlTextEvent::path(Self) -> ReadOnlyArray[PathSegment]
 pub fn XmlTextEvent::target(Self) -> XmlText
 
+#derive(Eq, @debug.Debug)
 pub(all) struct YChange {
   kind : ChangeKind
   id : Id
-} derive(Eq, @debug.Debug)
+}
 pub fn YChange::equal(Self, Self) -> Bool
 pub fn YChange::identity(Self) -> Self
 pub fn YChange::not_equal(Self, Self) -> Bool

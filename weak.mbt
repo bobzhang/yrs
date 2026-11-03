@@ -1,10 +1,11 @@
 ///|
 /// A weak reference's two identity boundaries. Before includes a start identity
 /// and excludes an end identity; After excludes the start and includes the end.
+#derive(Eq, Debug)
 pub(all) struct LinkSource {
   start : StickyIndex
   end : StickyIndex
-} derive(Eq, Debug)
+}
 
 ///|
 pub fn LinkSource::LinkSource(
@@ -75,16 +76,18 @@ pub fn WeakRef::is_deleted(self : WeakRef) -> Bool {
 }
 
 ///|
+#derive(Debug)
 pub(all) suberror QuoteError {
   OutOfBounds
-} derive(Debug)
+}
 
 ///|
+#derive(Eq, Debug)
 pub(all) enum QuoteBound {
   Included(Int32)
   Excluded(Int32)
   Unbounded
-} derive(Eq, Debug)
+}
 
 ///|
 fn Doc::quote(
