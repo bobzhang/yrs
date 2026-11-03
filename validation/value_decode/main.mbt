@@ -6,14 +6,6 @@ fn[T : @yrs.FromAny] convert(value : @yrs.Any, encode : (T) -> Json) -> Json {
 }
 
 ///|
-fn[T : @yrs.FromOut] cast(value : @yrs.Any, encode : (T) -> Json) -> Json {
-  match @yrs.Out::Value(value).cast() {
-    Ok(result) => { "ok": Json(true), "value": encode(result) }
-    Err(_) => { "ok": Json(false) }
-  }
-}
-
-///|
 fn[T : @yrs.FromOut] anycast(value : @yrs.Any, encode : (T) -> Json) -> Json {
   match value.cast() {
     Ok(result) => { "ok": Json(true), "value": encode(result) }
@@ -55,31 +47,22 @@ pub fn evaluate(input : String) -> String {
       convert(value, fn(n : Array[Int64]) {
         Json(n.map(fn(n) { Json(n.to_string()) }))
       })
-    "cast/i64" => cast(value, fn(n : Int64) { Json(n.to_string()) })
-    "cast/i32" => cast(value, fn(n : Int32) { Json(n.to_string()) })
-    "cast/u32" => cast(value, fn(n : UInt32) { Json(n.to_string()) })
-    "cast/f64" =>
-      cast(value, fn(n : Double) { Json(n.reinterpret_as_uint64().to_string()) })
-    "cast/f32" =>
-      cast(value, fn(n : Float) { Json(n.reinterpret_as_uint().to_string()) })
-    "cast/bool" => cast(value, fn(n : Bool) { Json(n) })
-    "cast/string" => cast(value, fn(n : String) { Json(n) })
-    "cast/bytes" =>
-      cast(value, fn(n : Bytes) {
-        Json(n.to_array().map(fn(b) { Json(b.to_int()) }))
-      })
-    "anycast/i64" => anycast(value, fn(n : Int64) { Json(n.to_string()) })
-    "anycast/i32" => anycast(value, fn(n : Int32) { Json(n.to_string()) })
-    "anycast/u32" => anycast(value, fn(n : UInt32) { Json(n.to_string()) })
-    "anycast/f64" =>
+    "cast/i64" | "anycast/i64" =>
+      anycast(value, fn(n : Int64) { Json(n.to_string()) })
+    "cast/i32" | "anycast/i32" =>
+      anycast(value, fn(n : Int32) { Json(n.to_string()) })
+    "cast/u32" | "anycast/u32" =>
+      anycast(value, fn(n : UInt32) { Json(n.to_string()) })
+    "cast/f64" | "anycast/f64" =>
       anycast(value, fn(n : Double) {
         Json(n.reinterpret_as_uint64().to_string())
       })
-    "anycast/f32" =>
+    "cast/f32" | "anycast/f32" =>
       anycast(value, fn(n : Float) { Json(n.reinterpret_as_uint().to_string()) })
-    "anycast/bool" => anycast(value, fn(n : Bool) { Json(n) })
-    "anycast/string" => anycast(value, fn(n : String) { Json(n) })
-    "anycast/bytes" =>
+    "cast/bool" | "anycast/bool" => anycast(value, fn(n : Bool) { Json(n) })
+    "cast/string" | "anycast/string" =>
+      anycast(value, fn(n : String) { Json(n) })
+    "cast/bytes" | "anycast/bytes" =>
       anycast(value, fn(n : Bytes) {
         Json(n.to_array().map(fn(b) { Json(b.to_int()) }))
       })
