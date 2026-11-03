@@ -1,8 +1,9 @@
 ///|
+#derive(Eq, Hash)
 priv enum Parent {
   Root(String)
   Nested(Id)
-} derive(Eq, Hash)
+}
 
 ///|
 priv enum SharedKind {

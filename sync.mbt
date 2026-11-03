@@ -116,10 +116,11 @@ pub fn decode_messages(bytes : Bytes) -> Array[Message] raise DecodeError {
 }
 
 ///|
+#derive(Debug)
 pub(all) suberror ProtocolError {
   PermissionDenied(String)
   UnsupportedMessage(Byte)
-} derive(Debug)
+}
 
 ///|
 pub extend ProtocolError with Debug::{to_repr}

@@ -1,6 +1,7 @@
 ///|
 /// Immutable lib0 values. Arrays and objects use read-only storage so values
 /// cannot be changed behind the CRDT's back after insertion.
+#derive(Debug)
 pub(all) enum Any {
   Undefined
   Null
@@ -11,7 +12,7 @@ pub(all) enum Any {
   Array(ReadOnlyArray[Any])
   Object(ReadOnlyArray[(String, Any)])
   Buffer(Bytes)
-} derive(Debug)
+}
 
 ///|
 pub impl Eq for Any with fn equal(self, other) {

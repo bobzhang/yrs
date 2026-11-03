@@ -1,9 +1,10 @@
 ///|
 /// Type conversion failures for the lossless CRDT value decoder.
+#derive(Debug)
 pub(all) suberror ValueDecodeError {
   TypeMismatch(String)
   OutOfRange(String)
-} derive(Debug)
+}
 
 ///|
 pub extend ValueDecodeError with Debug::{to_repr}

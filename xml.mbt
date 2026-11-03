@@ -18,11 +18,12 @@ pub struct XmlText {
 }
 
 ///|
+#derive(Eq)
 pub(all) enum XmlNode {
   Element(XmlElement)
   Fragment(XmlFragment)
   Text(XmlText)
-} derive(Eq)
+}
 
 ///|
 fn Out::as_xml(self : Out) -> XmlNode? {

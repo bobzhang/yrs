@@ -14,7 +14,6 @@ concurrency:
   cancel-in-progress: true
 
 env:
-  MOONBIT_INSTALL_VERSION: latest
   RUST_REFERENCE: ac339600c712642e556895426113c3f9c117de39
 
 jobs:
@@ -22,6 +21,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
+        moonbit: [latest, pre-release]
         os: [ubuntu-latest, macos-latest]
     runs-on: ${{ matrix.os }}
     timeout-minutes: 15
@@ -30,10 +30,10 @@ jobs:
       - uses: actions/setup-node@a0853c24544627f65ddf259abe73b1d18a591444 # v5
         with:
           node-version: 24
-      - name: Install pinned MoonBit
+      - name: Install MoonBit
         run: |
           curl -fsSL https://cli.moonbitlang.com/install/unix.sh -o "$RUNNER_TEMP/install-moon.sh"
-          bash "$RUNNER_TEMP/install-moon.sh"
+          bash "$RUNNER_TEMP/install-moon.sh" "${{ matrix.moonbit }}"
           echo "$HOME/.moon/bin" >> "$GITHUB_PATH"
       - run: moon version --all
       - run: python3 validation/api_contract.py
@@ -55,6 +55,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
+        moonbit: [latest, pre-release]
         suite: [core, values, contracts, wire, history, lifecycle, weak, undo, undo-yjs, undo-yjs-native, undo-high-clocks, undo-observer, undo-observer-native]
     steps:
       - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5
@@ -67,10 +68,10 @@ jobs:
       - uses: actions/setup-node@a0853c24544627f65ddf259abe73b1d18a591444 # v5
         with:
           node-version: 24
-      - name: Install pinned toolchains and Yjs
+      - name: Install toolchains and Yjs
         run: |
           curl -fsSL https://cli.moonbitlang.com/install/unix.sh -o "$RUNNER_TEMP/install-moon.sh"
-          bash "$RUNNER_TEMP/install-moon.sh"
+          bash "$RUNNER_TEMP/install-moon.sh" "${{ matrix.moonbit }}"
           echo "$HOME/.moon/bin" >> "$GITHUB_PATH"
           rustup toolchain install 1.97.1 --profile minimal
           npm ci --ignore-scripts --prefix validation/yjs
@@ -82,7 +83,7 @@ jobs:
         if: always()
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
         with:
-          name: interoperability-${{ matrix.suite }}
+          name: interoperability-${{ matrix.suite }}-${{ matrix.moonbit }}
           path: |
             validation/*results.json
             validation/fixtures/

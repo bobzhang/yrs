@@ -1,7 +1,8 @@
 ///|
+#derive(Debug)
 pub suberror JsonPathError {
   InvalidJsonPath(String)
-} derive(Debug)
+}
 
 ///|
 pub extend JsonPathError with Debug::{to_repr}

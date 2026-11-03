@@ -1,5 +1,6 @@
 ///|
-priv struct ObserverCollisionKey(Int32) derive(Eq)
+#derive(Eq)
+priv struct ObserverCollisionKey(Int32)
 
 ///|
 impl Hash for ObserverCollisionKey with fn hash(_self) {

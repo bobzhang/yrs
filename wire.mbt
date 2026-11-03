@@ -1,7 +1,8 @@
 ///|
+#derive(Debug)
 pub(all) suberror DecodeError {
   InvalidData(String)
-} derive(Debug)
+}
 
 ///|
 pub extend DecodeError with Debug::{to_repr}

@@ -1,10 +1,11 @@
 ///|
+#derive(@json.FromJson, Eq, Debug)
 struct SavedOrder {
   name : String
   quantities : Array[Int32]
   invoice : Int64
   note : String?
-} derive(@json.FromJson, Eq, Debug)
+}
 
 ///|
 impl @yrs.FromAny for SavedOrder with fn from_any(value) {

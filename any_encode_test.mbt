@@ -1,9 +1,10 @@
 ///|
+#derive(Eq, Debug)
 priv struct SavedRecord {
   id : UInt64
   name : String
   payload : Bytes
-} derive(Eq, Debug)
+}
 
 ///|
 priv struct TrackedValue {

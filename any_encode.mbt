@@ -1,8 +1,9 @@
 ///|
+#derive(Debug)
 pub(all) suberror ValueEncodeError {
   UnrepresentableInt
   Custom(String)
-} derive(Debug)
+}
 
 ///|
 pub extend ValueEncodeError with Debug::{to_repr}
