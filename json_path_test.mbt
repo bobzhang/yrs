@@ -162,3 +162,33 @@ test "JSONPath rejects unsafe slice steps and malformed expressions" {
     0,
   )
 }
+
+///|
+test "JSONPath immutable members preserve last duplicate keys and union order" {
+  let value : @yrs.Any = Object([
+    ("name", String("old")),
+    ("nested", Object([("name", String("shadowed"))])),
+    ("name", String("new")),
+    ("nested", Object([("name", String("first")), ("name", String("last"))])),
+    ("𐐀名字", Integer(42L)),
+    ("", Null),
+  ])
+  for
+    case in [
+      ("$.name", [@yrs.Any::String("new")]),
+      (
+        "$['name','missing','name','𐐀名字','']",
+        [String("new"), String("new"), Integer(42L), Null],
+      ),
+      ("$.nested.name", [String("last")]),
+      ("$.nested..name", []),
+      ("$..name", [String("last")]),
+      ("$.missing", []),
+    ] {
+    let (path, expected) = case
+    assert_eq(value.json_path(@yrs.JsonPath::parse(path)).to_array(), expected)
+  }
+  for value in [@yrs.Any::Object([]), Integer(1L)] {
+    assert_eq(value.json_path(@yrs.JsonPath::parse("$.name")).count(), 0)
+  }
+}
