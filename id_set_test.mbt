@@ -144,9 +144,9 @@ test "incremental ranges preserve membership across insertion orders and clock l
           inserts.length()
         let (client, clock, length) = inserts[index]
         ids.insert({ client, clock, }, length)
-        clients.add(client)
+        clients.insert(client)
         for i in 0..<length.reinterpret_as_int() {
-          points.add({ client, clock: clock + i.reinterpret_as_uint(), })
+          points.insert({ client, clock: clock + i.reinterpret_as_uint(), })
         }
         assert_eq(ids.length(), clients.length())
         for c in [0UL, 1UL, 0xffff_ffff_ffff_fffeUL, 0xffff_ffff_ffff_ffffUL] {

@@ -197,7 +197,7 @@ fn Doc::encode_snapshot(
         if snapshot.is_visible(id) {
           visible_winner = true
         } else if visible_winner {
-          excluded_versions.add(id)
+          excluded_versions.insert(id)
         }
         current = item.right
       }

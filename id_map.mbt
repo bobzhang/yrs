@@ -267,7 +267,7 @@ pub fn[A] IdMap::as_id_set(self : IdMap[A]) -> IdSet {
     ranges=self.iter().map(fn(p) { (p.0, p.1.start, p.1.end) }).to_array(),
   )
   for client in self.clients.keys() {
-    result.clients.add(client)
+    result.clients.insert(client)
   }
   result
 }

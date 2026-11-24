@@ -226,7 +226,7 @@ fn Doc::cleanup_formatting(self : Doc) -> Unit {
     if !item.deleted &&
       item.content is Format(_, _) &&
       item.parent is Some(parent) {
-      full.add(parent)
+      full.insert(parent)
     }
   }
   let deleted = self.deleted_items[:].to_owned()
@@ -237,7 +237,7 @@ fn Doc::cleanup_formatting(self : Doc) -> Unit {
       self.branch(parent).formatted &&
       !full.contains(parent) {
       if item.content is Format(_, _) {
-        full.add(parent)
+        full.insert(parent)
       } else {
         contextless.push(item)
       }
@@ -288,7 +288,7 @@ fn Doc::cleanup_contextless(self : Doc, from : Item) -> Unit {
       if seen.contains(key) {
         self.mark_deleted(item)
       } else {
-        seen.add(key)
+        seen.insert(key)
       }
     }
     cursor = item.left

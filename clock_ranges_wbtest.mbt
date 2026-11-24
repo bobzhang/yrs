@@ -47,7 +47,7 @@ test "linear range algebra agrees with independent point sets across clients and
       let points = if i % 2 == 0 { a } else { b }
       ids.insert({ client, clock: start, }, size)
       for j in 0..<size.reinterpret_as_int() {
-        points.add({ client, clock: start + j.reinterpret_as_uint(), })
+        points.insert({ client, clock: start + j.reinterpret_as_uint(), })
       }
     }
     let union = left.merge(right)
