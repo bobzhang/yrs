@@ -134,14 +134,14 @@ fn Doc::notify_collections(self : Doc, transaction : Transaction) -> Unit {
   let parents : Set[Parent] = Set([])
   let maps : Map[Parent, MapEvent] = Map([])
   for parent in transaction.weak_changes {
-    parents.add(parent)
+    parents.insert(parent)
   }
   for parent in transaction.sequences {
-    parents.add(parent) |> ignore
+    parents.insert(parent) |> ignore
   }
   for event in transaction.map_events() {
     maps[event.map.name] = event
-    parents.add(event.map.name) |> ignore
+    parents.insert(event.map.name) |> ignore
   }
   // Transaction metadata and undo still need changed ancestors without type
   // observers. Event deltas, however, can scan the whole sequence and nobody

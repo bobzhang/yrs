@@ -2,18 +2,18 @@
 fn Doc::materialize_weak(self : Doc, link : Id, source : LinkSource) -> Unit {
   for boundary in [source.start, source.end] {
     if boundary.id() is Some(id) && self.find(id) is None {
-      self.pending_weak.add(link)
+      self.pending_weak.insert(link)
       return
     }
   }
   if self.pending_weak.contains(link) {
     self.pending_weak.remove(link)
     if self.active_transaction is Some(tx) {
-      tx.weak_changes.add(Nested(link))
+      tx.weak_changes.insert(Nested(link))
     }
   }
   if source.parent(self) is Some(parent) {
-    self.branch(parent).weak_quotes.add(link)
+    self.branch(parent).weak_quotes.insert(link)
   }
   if source.start.scope is Relative(id) &&
     self.find(id) is Some(item) &&
@@ -22,7 +22,7 @@ fn Doc::materialize_weak(self : Doc, link : Id, source : LinkSource) -> Unit {
     while last.right is Some(id) {
       last = self.items[id]
     }
-    last.links.add(link)
+    last.links.insert(link)
     last.linked = true
     return
   }
@@ -39,7 +39,7 @@ fn Doc::materialize_weak(self : Doc, link : Id, source : LinkSource) -> Unit {
       self.split(item, end - start) |> ignore
     }
     item.linked = true
-    item.links.add(link)
+    item.links.insert(link)
   }
 }
 
@@ -78,7 +78,7 @@ fn Doc::join_weak_links(self : Doc, item : Item) -> Unit {
           self.find(anchor) is Some({ parent_sub: Some(linked_key), .. }) &&
           key == linked_key {
           item.linked = true
-          item.links.add(link)
+          item.links.insert(link)
         }
         continue
       }
@@ -90,7 +90,7 @@ fn Doc::join_weak_links(self : Doc, item : Item) -> Unit {
       for (quoted, start, end) in source.segments(self) {
         if quoted.id == item.id && start < end {
           item.linked = true
-          item.links.add(link)
+          item.links.insert(link)
           break
         }
       }
@@ -109,11 +109,11 @@ fn Doc::join_weak_neighbor_links(self : Doc, item : Item) -> Unit {
   item.linked = true
   for link in left.links {
     if right.links.contains(link) {
-      item.links.add(link)
+      item.links.insert(link)
     } else if self.find(link)
       is Some({ content: Shared(SharedWeak(source)), .. }) &&
       source.end.assoc == Before {
-      item.links.add(link)
+      item.links.insert(link)
     }
   }
   for link in right.links {
@@ -125,7 +125,7 @@ fn Doc::join_weak_neighbor_links(self : Doc, item : Item) -> Unit {
         client: left.id.client,
         clock: left.id.clock + left.content.length().reinterpret_as_uint() - 1U,
       }) {
-      item.links.add(link)
+      item.links.insert(link)
     }
   }
 }
@@ -139,7 +139,7 @@ fn Doc::event_ancestors(self : Doc, parent : Parent) -> Array[Parent] {
     if seen.contains(current) {
       continue
     }
-    seen.add(current)
+    seen.insert(current)
     result.push(current)
     if current is Nested(id) && self.find(id) is Some(item) {
       if item.parent is Some(parent) {

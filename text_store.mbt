@@ -546,8 +546,8 @@ fn Doc::integrate_missing(self : Doc, raw : RawItem) -> Bool {
       let mut cursor = start
       while cursor is Some(id) && cursor != right {
         let other = self.items[id]
-        before.add(id)
-        conflicting.add(id)
+        before.insert(id)
+        conflicting.insert(id)
         if raw.origin == other.origin {
           if id.client < raw.id.client {
             left = Some(id)
@@ -601,7 +601,7 @@ fn Doc::integrate_missing(self : Doc, raw : RawItem) -> Bool {
   }
   if self.active_transaction is Some(transaction) {
     if parent is Some(name) && parent_sub is None {
-      transaction.sequences.add(name)
+      transaction.sequences.insert(name)
     }
     insert_id_range(
       transaction.added,
@@ -648,7 +648,7 @@ fn Doc::integrate_missing(self : Doc, raw : RawItem) -> Bool {
         if previous.linked {
           item.linked = true
           for link in previous.links {
-            item.links.add(link)
+            item.links.insert(link)
           }
           previous.links.clear()
           previous.linked = false
@@ -667,7 +667,7 @@ fn Doc::integrate_missing(self : Doc, raw : RawItem) -> Bool {
   }
   if self.active_transaction is Some(txn) {
     for link in item.links {
-      txn.weak_changes.add(Nested(link))
+      txn.weak_changes.insert(Nested(link))
     }
   }
   if parent is Some(Nested(id)) && self.find(id).unwrap().deleted {
@@ -929,7 +929,7 @@ fn Doc::mark_deleted(self : Doc, item : Item) -> Unit {
     if item.parent is Some(parent) &&
       item.parent_sub is None &&
       self.active_transaction is Some(transaction) {
-      transaction.sequences.add(parent)
+      transaction.sequences.insert(parent)
     }
     if item.content is Subdocument(child) &&
       self.active_transaction is Some(txn) {
@@ -944,7 +944,7 @@ fn Doc::mark_deleted(self : Doc, item : Item) -> Unit {
     }
     if self.active_transaction is Some(txn) {
       for link in item.links {
-        txn.weak_changes.add(Nested(link))
+        txn.weak_changes.insert(Nested(link))
       }
     }
     item.links.clear()

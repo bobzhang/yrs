@@ -78,7 +78,7 @@ fn Doc::collect_garbage(
       let seen : Set[Id] = Set([])
       let mut cursor = branch.head
       while cursor is Some(id) && !seen.contains(id) {
-        seen.add(id)
+        seen.insert(id)
         let child = self.items[id]
         pending.push((child, true))
         cursor = child.right
@@ -86,7 +86,7 @@ fn Doc::collect_garbage(
       for id in branch.values.values() {
         let mut cursor = Some(id)
         while cursor is Some(id) && !seen.contains(id) {
-          seen.add(id)
+          seen.insert(id)
           let child = self.items[id]
           pending.push((child, true))
           cursor = child.left

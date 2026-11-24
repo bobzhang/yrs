@@ -141,7 +141,7 @@ pub fn[M : Default] UndoManager::UndoManager(
   let key = "yrs.undo.\{allocate_identity()}"
   let origin = @utf8.encode(key)
   let tracked = Set::from_array(tracked_origins)
-  tracked.add(origin) |> ignore
+  tracked.insert(origin) |> ignore
   {
     key,
     origin,
@@ -171,7 +171,7 @@ pub fn[M] UndoManager::expand_scope(
     abort("undo scope must be a shared collection")
   }
   if self.scopes.get(doc.identity) is Some((_, scope)) {
-    scope.add(parent) |> ignore
+    scope.insert(parent) |> ignore
   } else {
     self.scopes[doc.identity] = (doc, Set::from_array([parent]))
     doc.observe_destroy(self.key, fn(document) {
@@ -199,7 +199,7 @@ pub fn[M] UndoManager::include_origin(
   self : UndoManager[M],
   origin : Bytes,
 ) -> Unit {
-  self.tracked.add(origin) |> ignore
+  self.tracked.insert(origin) |> ignore
 }
 
 ///|
@@ -277,10 +277,10 @@ fn[M] UndoManager::capture(
   let doc = transaction.document
   let parents : Set[Parent] = Set([])
   for parent in transaction.sequences {
-    parents.add(parent) |> ignore
+    parents.insert(parent) |> ignore
   }
   for parent in transaction.map_changes.keys() {
-    parents.add(parent) |> ignore
+    parents.insert(parent) |> ignore
   }
   if !parents
     .iter()
@@ -496,7 +496,7 @@ fn[M] UndoManager::pop(self : UndoManager[M], undoing : Bool) -> Bool {
           if item.parent is Some(parent) &&
             self.in_scope(doc, parent) &&
             !contains_range(entry.inserted, item.id) {
-            redo.add(item.id) |> ignore
+            redo.insert(item.id) |> ignore
           }
         }
         for id in redo {

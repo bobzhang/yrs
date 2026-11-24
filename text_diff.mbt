@@ -70,14 +70,14 @@ fn Snapshot::cuts(
 ) -> Unit {
   let clock = self.state.get(id.client)
   if id.clock < clock && clock < end {
-    cuts.add(clock)
+    cuts.insert(clock)
   }
   for (start, stop) in self.deletes.get(id.client).unwrap_or([]) {
     if id.clock < start && start < end {
-      cuts.add(start)
+      cuts.insert(start)
     }
     if id.clock < stop && stop < end {
-      cuts.add(stop)
+      cuts.insert(stop)
     }
   }
 }

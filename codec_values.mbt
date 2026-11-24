@@ -41,7 +41,7 @@ pub impl Decode for IdSet with fn decode(decoder) {
   for _ in 0..<count {
     decoder.reset_ds_cur_val()
     let client = Read::read_var_uint(decoder)
-    result.clients.add(client)
+    result.clients.insert(client)
     let count = codec_count(decoder)
     for _ in 0..<count {
       let start = decoder.read_ds_clock()

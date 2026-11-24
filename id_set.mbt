@@ -99,7 +99,7 @@ pub fn IdSet::get(self : IdSet, client : UInt64) -> Array[(UInt32, UInt32)]? {
 ///|
 pub fn IdSet::insert(self : IdSet, id : Id, length : UInt32) -> Unit {
   guard length <= 0xffff_ffffU - id.clock else { abort("clock range overflow") }
-  self.clients.add(id.client)
+  self.clients.insert(id.client)
   insert_id_range(self.ranges, id.client, id.clock, id.clock + length)
 }
 
@@ -265,7 +265,7 @@ fn IdSet::read(reader : Reader, v2 : Bool) -> IdSet raise DecodeError {
   let clients = reader.count()
   for _ in 0..<clients {
     let client = reader.uint()
-    seen.add(client)
+    seen.insert(client)
     let count = reader.count()
     let mut previous = 0UL
     for _ in 0..<count {

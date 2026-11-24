@@ -109,7 +109,7 @@ fn TextContent::iter(self : TextContent) -> Iter[Char] {
     Buffered(units) => units
   }
   let mut index = 0
-  Iter::new(fn() {
+  Iter::Iter(fn() {
     guard index < units.count else { return None }
     let first = units[index].to_int()
     index += 1
