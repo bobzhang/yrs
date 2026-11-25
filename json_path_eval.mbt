@@ -7,9 +7,10 @@ fn path_member(value : Out?, doc : Doc?, key : String) -> Out? {
         None => None
       }
     Some(Value(Object(fields))) =>
-      Map::from_array(fields.iter().to_array())
-      .get(key)
-      .map(fn(value) { Out::Value(value) })
+      fields
+      .rev_iter()
+      .find_first(fn(entry) { entry.0 == key })
+      .map(fn(entry) { Out::Value(entry.1) })
     Some(Map(map)) => map.get(key)
     Some(XmlElement(xml)) => xml.get_attribute(key)
     Some(XmlText(xml)) => xml.get_attribute(key)
